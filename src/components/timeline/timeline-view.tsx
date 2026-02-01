@@ -72,40 +72,64 @@ export function TimelineView({ tasks }: { tasks: any[] }) {
                         <div
                             key={day.toISOString()}
                             className={cn(
-                                "sticky top-0 z-10 bg-background border-b border-l flex flex-col items-center justify-center text-xs h-[50px]",
-                                isSameDay(day, new Date()) && "bg-primary/5 font-bold text-primary"
+                                "min-w-[60px] w-[60px] p-2 text-center text-xs border-r flex flex-col justify-center",
+                                isSameDay(day, new Date()) && "bg-blue-50/50 dark:bg-blue-950/20"
                             )}
                         >
-                            <span className="opacity-50">{format(day, "EEE")}</span>
-                            <span>{format(day, "d")}</span>
+                            <span className="font-medium">{format(day, "EEE")}</span>
+                            <span className="text-muted-foreground">{format(day, "d")}</span>
                         </div>
                     ))}
+                </div>
 
-                    {/* Rows */}
-                    {mockTasks.map((task, index) => {
-                        // Calculate Position
-                        const startDiff = Math.floor((task.startDate.getTime() - startOfCurrentWeek.getTime()) / (1000 * 60 * 60 * 24))
-                        const duration = Math.floor((task.endDate.getTime() - task.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                {/* Task Rows */}
+                <div className="relative min-w-fit">
+                    {displayTasks.map((task, index) => {
+                        const taskStart = task.start_date ? new Date(task.start_date) : new Date()
+                        const taskEnd = task.due_date ? new Date(task.due_date) : addDays(taskStart, 1)
 
-                        // Ensure bar is within view logic (simplified)
-                        // We need to map grid columns. first column is index 1.
-                        // Task Name is col 1. Days start at col 2.
-
-                        const gridColumnStart = Math.max(2, 2 + startDiff)
-                        const gridColumnEnd = 2 + startDiff + duration
-
-                        const isVisible = gridColumnEnd > 2 && (2 + startDiff) < (2 + daysToShow)
+                        const startDiff = (taskStart.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+                        const duration = Math.max(1, (taskEnd.getTime() - taskStart.getTime()) / (1000 * 60 * 60 * 24))
+                        const isVisible = (startDiff + duration) > 0 && startDiff < 7
 
                         return (
-                            <React.Fragment key={task.id}>
-                                <div className="border-b px-4 flex items-center text-sm font-medium bg-background z-20 sticky left-0 border-r h-[50px]">
+                            <div key={task.id} className="group flex relative border-b hover:bg-muted/50 transition-colors">
+                                {/* Task Title Column */}
+                                <div className="min-w-[200px] w-[200px] p-2 text-sm font-medium border-r sticky left-0 bg-background z-10 truncate h-[50px] flex items-center">
+                                    {task.title}
                                 </div>
+
+                                {/* Grid Cells Background */}
+                                {days.map((_, dayIndex) => (
+                                    <div key={dayIndex} className="min-w-[60px] h-[50px] border-r" />
+                                ))}
+
+                                {/* Task Bar */}
+                                {isVisible && (
+                                    <div
+                                        className={cn(
+                                            "absolute h-8 rounded-md shadow-sm opacity-90 hover:opacity-100 cursor-pointer flex items-center px-2 text-xs text-white bg-primary truncate"
+                                        )}
+                                        style={{
+                                            top: "9px", // (50 - 32) / 2
+                                            left: `${200 + (Math.max(0, startDiff) * dayWidth)}px`,
+                                            width: `${Math.min(duration, 7 - Math.max(0, startDiff)) * dayWidth}px`,
+                                            zIndex: 5
+                                        }}
+                                        title={`${task.title} (${duration} days)`}
+                                    >
+                                        {task.title}
+                                    </div>
                                 )}
-                            </React.Fragment>
+                            </div>
                         )
                     })}
 
-                    {/* Helper lines/grid background is done by map above */}
+                    {displayTasks.length === 0 && (
+                        <div className="p-8 text-center text-muted-foreground w-full">
+                            No tasks found in this period.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
