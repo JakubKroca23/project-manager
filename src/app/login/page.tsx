@@ -1,4 +1,3 @@
-```typescript
 "use client"
 
 import { useState } from "react"
@@ -29,11 +28,10 @@ export default function LoginPage() {
             })
 
             if (error) {
-                 // Check for "Invalid login credentials" specifically to guide user
-                 if (error.message.includes("Invalid login credentials")) {
+                if (error.message.includes("Invalid login credentials")) {
                     throw new Error("Invalid credentials. If you are the admin, please try signing up first if the seed script failed.")
-                 }
-                 throw error
+                }
+                throw error
             }
 
             toast.success("Successfully logged in")
@@ -52,7 +50,7 @@ export default function LoginPage() {
                 <div className="mx-auto grid w-[350px] gap-6">
                     <div className="grid gap-2 text-center">
                         <Link href="/" className="mx-auto mb-4 flex items-center justify-center rounded-full bg-primary/10 p-3 text-primary">
-                             <Building2 className="h-6 w-6" />
+                            <Building2 className="h-6 w-6" />
                         </Link>
                         <h1 className="text-3xl font-bold">Welcome back</h1>
                         <p className="text-balance text-muted-foreground">
@@ -78,30 +76,60 @@ export default function LoginPage() {
                         <div className="grid gap-2">
                             <div className="flex items-center">
                                 <Label htmlFor="password">Password</Label>
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        {error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                                {error}
+                                <Link
+                                    href="/forgot-password"
+                                    className="ml-auto inline-block text-sm underline"
+                                >
+                                    Forgot your password?
+                                </Link>
                             </div>
-                        )}
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    className="pl-9"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
                         <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? "Signing in..." : "Sign In"}
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Login
+                        </Button>
+                        <Button variant="outline" className="w-full" asChild>
+                            <Link href="/">
+                                Return Home
+                            </Link>
                         </Button>
                     </form>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-2 text-center text-sm text-muted-foreground">
-                    <div>
+                    <div className="mt-4 text-center text-sm">
                         Don&apos;t have an account?{" "}
-                        <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
+                        <Link href="/signup" className="underline font-medium text-primary hover:text-primary/80">
                             Request access
                         </Link>
                     </div>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
+            <div className="hidden bg-muted lg:block relative overflow-hidden bg-zinc-900">
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-rose-950/20" />
+                <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
+                <div className="absolute bottom-0 left-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
+
+                <div className="relative h-full flex flex-col items-center justify-center p-8 text-white z-10">
+                    <div className="max-w-md space-y-4 text-center">
+                        <h2 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+                            PM System
+                        </h2>
+                        <p className="text-lg text-zinc-400">
+                            Manage projects, track tasks, and collaborate with your team efficiently.
+                            Powered by Contsystem.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
