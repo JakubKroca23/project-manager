@@ -1,68 +1,61 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/server"
+import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
-import {
-    LayoutDashboard,
-    FolderKanban,
-    CheckSquare,
-    CalendarDays,
-    Users,
-    Settings,
-    LogOut,
-    Menu
-} from "lucide-react"
+import { Building2, Home, FolderKanban, Calendar, LogOut, LayoutDashboard } from "lucide-react"
 
-const navItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/dashboard/projects", icon: FolderKanban, label: "Projects" },
-    { href: "/dashboard/tasks", icon: CheckSquare, label: "My Tasks" },
-    { href: "/dashboard/timeline", icon: CalendarDays, label: "Timeline" },
-    { href: "/dashboard/team", icon: Users, label: "Team" },
-]
-
-export function Navbar() {
-    const pathname = usePathname()
+export async function Navbar() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center px-4 md:px-6">
-                <Link href="/" className="mr-6 flex items-center gap-2 font-bold">
-                    <span className="text-xl tracking-tight text-primary">PM</span>
-                    <span className="hidden sm:inline-block">Contsystem</span>
-                </Link>
-                <nav className="flex items-center gap-4 text-sm font-medium lg:gap-6">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "transition-colors hover:text-primary",
-                                    isActive ? "text-foreground" : "text-muted-foreground"
-                                )}
-                            >
-                                {item.label}
-                            </Link>
-                        )
-                    })}
-                </nav>
-                <div className="ml-auto flex items-center gap-2">
-                    <Link href="/dashboard/settings">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Settings className="h-4 w-4" />
-                            <span className="sr-only">Settings</span>
+        <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="container max-w-screen-2xl flex h-14 items-center gap-4 px-4 mx-auto">
+                <div className="flex items-center gap-2 font-bold text-lg mr-4">
+                    <div className="p-1.5 rounded-md bg-primary text-primary-foreground">
+                        <Building2 className="h-5 w-5" />
+                    </div>
+                    <span className="hidden md:inline-block">Contsystem PM</span>
+                </div>
+
+                <div className="flex items-center gap-1 md:gap-2 text-sm font-medium text-muted-foreground">
+                    <Link href="/dashboard">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span className="hidden sm:inline">Přehled</span>
                         </Button>
                     </Link>
-                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-destructive">
-                        <LogOut className="h-4 w-4" />
-                        <span className="hidden sm:inline">Sign Out</span>
-                    </Button>
+                    <Link href="/dashboard/projects">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <FolderKanban className="h-4 w-4" />
+                            <span className="hidden sm:inline">Projekty</span>
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard/tasks">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <Home className="h-4 w-4" />
+                            <span className="hidden sm:inline">Moje Úkoly</span>
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard/timeline">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span className="hidden sm:inline">Časová osa</span>
+                        </Button>
+                    </Link>
+                </div>
+
+                <div className="ml-auto flex items-center gap-2">
+                    <ModeToggle />
+                    {user && (
+                        <form action="/auth/signout" method="post">
+                            <Button variant="ghost" size="icon" title="Odhlásit se">
+                                <LogOut className="h-4 w-4" />
+                            </Button>
+                        </form>
+                    )}
                 </div>
             </div>
-        </header>
+        </nav>
     )
 }

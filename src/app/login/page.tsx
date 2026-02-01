@@ -29,12 +29,12 @@ export default function LoginPage() {
 
             if (error) {
                 if (error.message.includes("Invalid login credentials")) {
-                    throw new Error("Invalid credentials. If you are the admin, please try signing up first if the seed script failed.")
+                    throw new Error("Neplatné přihlašovací údaje. Pokud jste admin, zkuste se nejprve zaregistrovat.")
                 }
                 throw error
             }
 
-            toast.success("Successfully logged in")
+            toast.success("Úspěšně přihlášen")
             router.push("/dashboard")
             router.refresh()
         } catch (error: any) {
@@ -52,9 +52,9 @@ export default function LoginPage() {
                         <Link href="/" className="mx-auto mb-4 flex items-center justify-center rounded-full bg-primary/10 p-3 text-primary">
                             <Building2 className="h-6 w-6" />
                         </Link>
-                        <h1 className="text-3xl font-bold">Welcome back</h1>
+                        <h1 className="text-3xl font-bold">Vítejte zpět</h1>
                         <p className="text-balance text-muted-foreground">
-                            Login to your <span className="font-semibold text-foreground">Contsystem</span> workspace
+                            Přihlaste se do svého <span className="font-semibold text-foreground">Contsystem</span> účtu
                         </p>
                     </div>
                     <form onSubmit={handleLogin} className="grid gap-4">
@@ -75,12 +75,12 @@ export default function LoginPage() {
                         </div>
                         <div className="grid gap-2">
                             <div className="flex items-center">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">Heslo</Label>
                                 <Link
                                     href="/forgot-password"
                                     className="ml-auto inline-block text-sm underline"
                                 >
-                                    Forgot your password?
+                                    Zapomenuté heslo?
                                 </Link>
                             </div>
                             <div className="relative">
@@ -97,18 +97,18 @@ export default function LoginPage() {
                         </div>
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Login
+                            Přihlásit se
                         </Button>
                         <Button variant="outline" className="w-full" asChild>
                             <Link href="/">
-                                Return Home
+                                Zpět domů
                             </Link>
                         </Button>
                     </form>
                     <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{" "}
+                        Nemáte účet?{" "}
                         <Link href="/signup" className="underline font-medium text-primary hover:text-primary/80">
-                            Request access
+                            Požádat o přístup
                         </Link>
                     </div>
                 </div>
@@ -124,8 +124,8 @@ export default function LoginPage() {
                             PM System
                         </h2>
                         <p className="text-lg text-zinc-400">
-                            Manage projects, track tasks, and collaborate with your team efficiently.
-                            Powered by Contsystem.
+                            Spravujte projekty, sledujte úkoly a spolupracujte s týmem efektivně.
+                            Poháněno Contsystem.
                         </p>
                     </div>
                 </div>
