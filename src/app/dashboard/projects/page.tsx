@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus } from "lucide-react"
+import { CreateProjectDialog } from "@/components/projects/create-project-dialog"
 
 export default async function ProjectsPage() {
     const supabase = await createClient()
-    const { data: projects, error } = await supabase.from('projects').select('*')
+    const { data: projects } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
 
     // If error (e.g. no connection), show empty state or error
     // For demo purposes, if no connection, we might show a message
@@ -15,9 +16,7 @@ export default async function ProjectsPage() {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-                <Button className="gap-2">
-                    <Plus className="h-4 w-4" /> New Project
-                </Button>
+                <CreateProjectDialog />
             </div>
 
             {!projects || projects.length === 0 ? (

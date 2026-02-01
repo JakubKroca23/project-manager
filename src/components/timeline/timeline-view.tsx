@@ -1,91 +1,71 @@
 "use client"
 
 import * as React from "react"
-import { addDays, format, startOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
-import { cn } from "@/lib/utils"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { addDays, format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-// Mock Data Type
 type Task = {
     id: string
     title: string
-    startDate: Date
-    endDate: Date
-    color?: string
-    assignee?: string
+    start_date: string | null
+    due_date: string | null
+    status: string
 }
 
-const mockTasks: Task[] = [
-    {
-        id: "1",
-        title: "Design System Implementation",
-        startDate: new Date(),
-        endDate: addDays(new Date(), 5),
-        color: "bg-blue-500",
-    },
-    {
-        id: "2",
-        title: "Database Migration",
-        startDate: addDays(new Date(), 2),
-        endDate: addDays(new Date(), 4),
-        color: "bg-red-500",
-    },
-    {
-        id: "3",
-        title: "Frontend Development",
-        startDate: addDays(new Date(), 5),
-        endDate: addDays(new Date(), 10),
-        color: "bg-green-500",
-    },
-]
-
-export function TimelineView() {
+export function TimelineView({ tasks }: { tasks: any[] }) {
     const [currentDate, setCurrentDate] = React.useState(new Date())
-    const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 }) // Monday start
-    const daysToShow = 14
-    const days = eachDayOfInterval({
-        start: startOfCurrentWeek,
-        end: addDays(startOfCurrentWeek, daysToShow - 1),
-    })
+
+    // Use real tasks or fallback mock
+    const displayTasks = tasks && tasks.length > 0 ? tasks : [
+        { id: '1', title: 'Start your first project', start_date: new Date().toISOString(), due_date: addDays(new Date(), 3).toISOString(), status: 'todo' }
+    ]
+
+    const startDate = startOfWeek(currentDate, { weekStartsOn: 1 })
+    const endDate = endOfWeek(currentDate, { weekStartsOn: 1 })
+    const days = eachDayOfInterval({ start: startDate, end: endDate })
 
     // Calculate grid columns
     const dayWidth = 60 // px per day
-    const headerHeight = 50
-    const rowHeight = 48
 
-    const handlePrev = () => setCurrentDate(addDays(currentDate, -7))
-    const handleNext = () => setCurrentDate(addDays(currentDate, 7))
+    const handlePrevWeek = () => {
+        setCurrentDate(addDays(currentDate, -7))
+    }
+
+    const handleNextWeek = () => {
+        setCurrentDate(addDays(currentDate, 7))
+    }
+
+    const handleToday = () => {
+        setCurrentDate(new Date())
+    }
 
     return (
-        <div className="flex flex-col h-full border rounded-lg bg-background overflow-hidden relative">
-            {/* Controls */}
-            <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="font-semibold text-lg">Timeline</h3>
+        <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>Today</Button>
-                    <div className="flex items-center rounded-md border">
-                        <Button variant="ghost" size="icon" onClick={handlePrev}><ChevronLeft className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={handleNext}><ChevronRight className="h-4 w-4" /></Button>
-                    </div>
-                    <span className="text-sm font-medium w-32 text-center">
-                        {format(currentDate, "MMMM yyyy")}
-                    </span>
+                    <h3 className="text-lg font-semibold">
+                        {format(startDate, "MMM d")} - {format(endDate, "MMM d, yyyy")}
+                    </h3>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" onClick={handleToday}>
+                        Today
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={handleNextWeek}>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                 </div>
             </div>
 
-            {/* Gantt Area */}
-            <div className="flex-1 overflow-auto relative">
-                <div
-                    className="grid relative"
-                    style={{
-                        gridTemplateColumns: `200px repeat(${daysToShow}, ${dayWidth}px)`,
-                        minWidth: 200 + (daysToShow * dayWidth)
-                    }}
-                >
-                    {/* Header Row */}
-                    <div className="sticky top-0 z-10 bg-muted/90 backdrop-blur border-b flex items-center px-4 font-semibold text-sm h-[50px]">
+            <div className="flex-1 overflow-auto border rounded-md relative bg-muted/20">
+                {/* Header Row */}
+                <div className="flex sticky top-0 z-30 bg-background border-b shadow-sm">
+                    <div className="min-w-[200px] w-[200px] p-2 font-medium border-r sticky left-0 bg-background z-20">
                         Task Name
                     </div>
                     {days.map((day) => (
@@ -119,28 +99,7 @@ export function TimelineView() {
                         return (
                             <React.Fragment key={task.id}>
                                 <div className="border-b px-4 flex items-center text-sm font-medium bg-background z-20 sticky left-0 border-r h-[50px]">
-                                    {task.title}
                                 </div>
-                                {days.map((_, dayIndex) => (
-                                    <div key={dayIndex} className="border-b border-l h-[50px]" />
-                                ))}
-
-                                {/* Task Bar */}
-                                {isVisible && (
-                                    <div
-                                        className={cn(
-                                            "absolute h-8 rounded-md shadow-sm opacity-90 hover:opacity-100 cursor-pointer flex items-center px-2 text-xs text-white",
-                                            task.color || "bg-primary"
-                                        )}
-                                        style={{
-                                            top: 50 + (index * 50) + 6, // Header + (Row * Height) + Padding
-                                            left: 200 + (Math.max(0, startDiff) * dayWidth),
-                                            width: duration * dayWidth,
-                                            zIndex: 5
-                                        }}
-                                    >
-                                        {task.title}
-                                    </div>
                                 )}
                             </React.Fragment>
                         )
