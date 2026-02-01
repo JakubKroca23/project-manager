@@ -1,3 +1,4 @@
+```typescript
 "use client"
 
 import { useState } from "react"
@@ -7,72 +8,76 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users } from "lucide-react"
+import { toast } from "sonner"
+import { Loader2, Mail, Lock, Building2 } from "lucide-react"
 
 export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     const router = useRouter()
     const supabase = createClient()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        setError(null)
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            })
 
-        if (error) {
-            setError(error.message)
-            setLoading(false)
-        } else {
+            if (error) {
+                 // Check for "Invalid login credentials" specifically to guide user
+                 if (error.message.includes("Invalid login credentials")) {
+                    throw new Error("Invalid credentials. If you are the admin, please try signing up first if the seed script failed.")
+                 }
+                 throw error
+            }
+
+            toast.success("Successfully logged in")
             router.push("/dashboard")
             router.refresh()
+        } catch (error: any) {
+            toast.error(error.message)
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
-            <Card className="w-full max-w-md border-border/50 shadow-xl">
-                <CardHeader className="space-y-1 text-center">
-                    <div className="flex justify-center mb-4">
-                        <div className="rounded-full bg-primary/10 p-3">
-                            <Users className="h-6 w-6 text-primary" />
-                        </div>
+        <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
+            <div className="flex items-center justify-center py-12">
+                <div className="mx-auto grid w-[350px] gap-6">
+                    <div className="grid gap-2 text-center">
+                        <Link href="/" className="mx-auto mb-4 flex items-center justify-center rounded-full bg-primary/10 p-3 text-primary">
+                             <Building2 className="h-6 w-6" />
+                        </Link>
+                        <h1 className="text-3xl font-bold">Welcome back</h1>
+                        <p className="text-balance text-muted-foreground">
+                            Login to your <span className="font-semibold text-foreground">Contsystem</span> workspace
+                        </p>
                     </div>
-                    <CardTitle className="text-2xl font-bold tracking-tight">
-                        Contsystem PM
-                    </CardTitle>
-                    <CardDescription>
-                        Enter your credentials to access the workspace
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div className="space-y-2">
+                    <form onSubmit={handleLogin} className="grid gap-4">
+                        <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="name@contsystem.cz"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="password">Password</Label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="m@example.com"
+                                    className="pl-9"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
                             </div>
-                            <Input
-                                id="password"
-                                type="password"
+                        </div>
+                        <div className="grid gap-2">
+                            <div className="flex items-center">
+                                <Label htmlFor="password">Password</Label>
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
