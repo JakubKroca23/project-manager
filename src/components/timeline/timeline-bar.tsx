@@ -137,6 +137,7 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
                 dragListener={!isResizing}
                 onDragEnd={handleDragEnd}
                 whileDrag={{ cursor: "grabbing", zIndex: 50, opacity: 0.9 }}
+                animate={{ x: 0 }} // Reset transform after drag
                 className={`absolute h-8 top-1 shadow-sm ${color} cursor-grab active:cursor-grabbing border border-primary/20 bg-opacity-90 hover:bg-opacity-100 transition-colors z-10 flex items-center select-none`}
                 style={{
                     left,
