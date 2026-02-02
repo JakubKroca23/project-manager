@@ -11,11 +11,24 @@ export const metadata: Metadata = {
     description: "Profesionální správa projektů",
 };
 
-export default function RootLayout({
+import { createClient } from "@/lib/supabase/server";
+
+// ...
+
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let role = null;
+    if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        role = (data as any)?.role;
+    }
+
     return (
         <html lang="cs" suppressHydrationWarning>
             <body className={`${inter.variable} antialiased min-h-screen bg-background text-foreground`}>
@@ -26,7 +39,7 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <div className="relative min-h-screen flex flex-col bg-muted/30">
-                        <TopBar />
+                        <TopBar role={role} />
                         <main className="flex-1 w-full max-w-7xl mx-auto pt-28 px-6 pb-12">
                             {children}
                         </main>

@@ -56,11 +56,21 @@ export async function middleware(request: NextRequest) {
 
         // If not approved and not on pending page, redirect to pending
         if (!isApproved && !isPendingPath) {
-            // Allow logout action even if not approved (logout action is usually a POST to an API or Action)
-            // If we are on a page, redirect.
-            // Note: Actions are usually POST requests. We should allow them or handle them carefully.
-            // For simplicity, we just check the path.
             return NextResponse.redirect(new URL("/pending-approval", request.url));
+        }
+
+        // Check for admin routes
+        const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
+        if (isAdminPath) {
+            const { data: adminProfile } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("id", user.id)
+                .single();
+
+            if (adminProfile?.role !== "admin") {
+                return NextResponse.redirect(new URL("/", request.url));
+            }
         }
 
         // If approved and on pending page or login/signup, redirect to home

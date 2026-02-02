@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LayoutGrid, Briefcase, Factory, Wrench, Calendar, Search, Bell } from "lucide-react"
+import { LayoutGrid, Briefcase, Factory, Wrench, Calendar, Search, Bell, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "@/components/mode-toggle"
 
@@ -15,14 +15,25 @@ const navItems = [
     { name: "Timeline", href: "/timeline", icon: Calendar },
 ]
 
-export function TopBar() {
+interface TopBarProps {
+    role?: string | null;
+}
+
+export function TopBar({ role }: TopBarProps) {
     const pathname = usePathname()
+
+    // Create a copy of navItems
+    const items = [...navItems];
+
+    if (role === 'admin') {
+        items.push({ name: "Admin", href: "/admin/users", icon: Users });
+    }
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 px-6 py-3">
             <div className="mx-auto max-w-7xl">
                 <div className="glass-heavy rounded-2xl flex items-center justify-between px-4 py-2 ring-1 ring-white/20 dark:ring-white/5">
-                    {/* Logo */}
+                    {/* ... Logo ... */}
                     <div className="flex items-center gap-2 mr-8">
                         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold shadow-lg shadow-primary/20">
                             PM
@@ -34,7 +45,7 @@ export function TopBar() {
 
                     {/* Navigation */}
                     <nav className="hidden md:flex items-center gap-1">
-                        {navItems.map((item) => {
+                        {items.map((item) => {
                             const isActive = pathname === item.href
                             const Icon = item.icon
 
@@ -64,6 +75,9 @@ export function TopBar() {
                             )
                         })}
                     </nav>
+
+                    {/* ... Rest of the component (Right Actions) ... */}
+
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-2">
