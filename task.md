@@ -38,3 +38,4 @@
 - [x] Implement 3-state Zoom controls (Day/Week/Month)
 - [x] Visual Enhancements: Weekends, Current Day, Month Separators
 - [x] Final Polish: Start from Jan 1st, Smaller text, Show days in Week view
+- [x] Implement Drag & Drop (Change dates via UI)

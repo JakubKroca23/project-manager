@@ -16,6 +16,7 @@ export type TimelineItemType = {
 
 interface TimelineContextType {
     items: TimelineItemType[]
+    updateItemDates: (id: string, newStart: string, newEnd: string) => void
     // State
     startDate: Date
     setStartDate: (date: Date) => void
@@ -31,7 +32,23 @@ interface TimelineContextType {
 
 const TimelineContext = createContext<TimelineContextType | undefined>(undefined)
 
-export function TimelineProvider({ children, items }: { children: ReactNode, items: any[] }) {
+export function TimelineProvider({ children, items: initialItems }: { children: ReactNode, items: any[] }) {
+    const [items, setItems] = useState<TimelineItemType[]>(initialItems)
+
+    // Update local state optimistic logic
+    const updateItemDates = useCallback((id: string, newStart: string, newEnd: string) => {
+        setItems(prev => prev.map(item =>
+            item.id === id
+                ? { ...item, start_date: newStart, end_date: newEnd }
+                : item
+        ))
+    }, [])
+
+    // Ensure state syncs if props change (revalidation)
+    React.useEffect(() => {
+        setItems(initialItems)
+    }, [initialItems])
+
     // Start from beginning of year to show past
     const [startDate, setStartDate] = useState(startOfYear(new Date()))
     const [pixelsPerDay, setPixelsPerDay] = useState(40) // Default zoom
@@ -76,6 +93,7 @@ export function TimelineProvider({ children, items }: { children: ReactNode, ite
     return (
         <TimelineContext.Provider value={{
             items,
+            updateItemDates,
             startDate, setStartDate,
             pixelsPerDay, setPixelsPerDay,
             scrollX, setScrollX,

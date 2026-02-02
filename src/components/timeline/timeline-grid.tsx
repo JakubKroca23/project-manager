@@ -6,8 +6,10 @@ import { ROW_HEIGHT } from "./timeline-sidebar"
 import { differenceInDays, addDays, eachDayOfInterval } from "date-fns"
 import { motion } from "framer-motion"
 
+import { updateTimelineItemDate } from "@/app/timeline/actions"
+
 export function TimelineGrid() {
-    const { visibleItems, startDate, pixelsPerDay, setScrollX } = useTimeline()
+    const { visibleItems, startDate, pixelsPerDay, setScrollX, updateItemDates } = useTimeline()
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Sync X and Y scroll
@@ -25,6 +27,34 @@ export function TimelineGrid() {
     const END_DATE = addDays(startDate, 365)
     const totalDays = differenceInDays(END_DATE, startDate)
     const totalWidth = totalDays * pixelsPerDay
+
+    // Drag Handler
+    const handleDragEnd = async (item: any, info: any) => {
+        const movePixels = info.offset.x
+        const daysDelta = Math.round(movePixels / pixelsPerDay)
+
+        if (daysDelta === 0) return
+
+        const currentStart = new Date(item.start_date)
+        const currentEnd = new Date(item.end_date)
+
+        const newStart = addDays(currentStart, daysDelta)
+        const newEnd = addDays(currentEnd, daysDelta)
+
+        const newStartStr = newStart.toISOString()
+        const newEndStr = newEnd.toISOString()
+
+        // 1. Optimistic Update
+        updateItemDates(item.id, newStartStr, newEndStr)
+
+        // 2. Server Update
+        const res = await updateTimelineItemDate(item.id, item.type, newStartStr, newEndStr)
+        if (!res.success) {
+            console.error("Failed to persist timeline drag", res.error)
+            // Revert (could be implemented by reloading data or undo logic)
+            alert("Chyba při ukládání změny termínu.")
+        }
+    }
 
     return (
         <div
@@ -82,9 +112,14 @@ export function TimelineGrid() {
                         >
                             {/* Bar */}
                             <motion.div
+                                drag="x"
+                                dragMomentum={false}
+                                dragElastic={0}
+                                onDragEnd={(_, info) => handleDragEnd(item, info)}
+                                whileDrag={{ cursor: "grabbing", scale: 1.02, zIndex: 50, opacity: 0.8 }}
                                 initial={{ opacity: 0, scaleX: 0 }}
-                                animate={{ opacity: 1, scaleX: 1 }}
-                                className={`absolute h-6 top-2 rounded-md shadow-sm ${color} border border-white/20 cursor-pointer hover:brightness-110 active:scale-95 transition-all z-10`}
+                                animate={{ opacity: 1, scaleX: 1, x: 0 }} // x: 0 ensures it resets visually after drag (since we update left/width via state)
+                                className={`absolute h-6 top-2 rounded-md shadow-sm ${color} border border-white/20 cursor-grab hover:brightness-110 active:scale-95 transition-all z-10`}
                                 style={{ left, width, minWidth: 4 }}
                                 onClick={() => alert(`Edit ${item.title} (ID: ${item.id})`)} // Placeholder for interaction
                             >
