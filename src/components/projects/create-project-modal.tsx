@@ -8,7 +8,7 @@ import { useAccessoryCatalog } from "@/hooks/use-accessory-catalog"
 import { useCRMCatalog } from "@/hooks/use-crm-catalog"
 import {
     Loader2, Layout, Settings, Factory, CheckCircle2, Octagon,
-    Plus, Trash2, Search, User, Truck, MapPin, Building
+    Plus, Trash2, Search, User, Truck, MapPin, Building, Package, ShoppingCart, Hash
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -27,10 +27,6 @@ const statusOptions = [
 
 export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [step, setStep] = useState(1) // 1: General+CRM, 2: Technical (Chassis+Super)
-    // We can keep it single page or tabs. Let's do Scroll sections or Tabs.
-    // User asked for logic similar to accessories for Clients/Superstructures.
-
     const { catalog: accessoryCatalog, addToCatalog } = useAccessoryCatalog()
     const { clients: clientCatalog, superstructures: superstructureCatalog, addClient, addSuperstructureType } = useCRMCatalog()
 
@@ -47,7 +43,7 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         status: "planning",
         manufacturer: "",
         chassis_type: "",
-        quantity: 1, // Global quantity
+        quantity: 1,
         requested_action: "",
         assembly_company: "",
         op_opv_sro: "",
@@ -56,27 +52,43 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         zakazka_sro: ""
     })
 
-    // --- Complex States ---
-    const [superstructures, setSuperstructures] = useState<{ type: string, supplier: string, order_status: string }[]>([])
+    // --- Complex Lists ---
+    const [superstructures, setSuperstructures] = useState<{ type: string, supplier: string, order_status: string, details: string }[]>([])
     const [projectAccessories, setProjectAccessories] = useState<{
         name: string,
         action_type: "manufacture" | "purchase" | "stock",
         supplier: string,
         order_status: string,
-        quantity: number
+        quantity: number,
+        notes: string
     }[]>([])
 
     // --- Search States ---
     const [clientSearch, setClientSearch] = useState("")
     const [showClientSuggestions, setShowClientSuggestions] = useState(false)
 
-    // Superstructure add Logic
-    const [newSuperstructure, setNewSuperstructure] = useState({ type: "", supplier: "", order_status: "pending" })
+    // --- Add States (New Logic: Open detailed mini-form) ---
+    const [isAddingSuper, setIsAddingSuper] = useState(false)
+    const [newSuperstructure, setNewSuperstructure] = useState({ type: "", supplier: "", order_status: "pending", details: "" })
     const [superSearch, setSuperSearch] = useState("")
     const [showSuperSuggestions, setShowSuperSuggestions] = useState(false)
 
-    // Accessory add Logic
-    const [newAccessory, setNewAccessory] = useState({ name: "", action_type: "purchase", supplier: "", quantity: 1 })
+    const [isAddingAcc, setIsAddingAcc] = useState(false)
+    const [newAccessory, setNewAccessory] = useState<{
+        name: string,
+        action_type: "manufacture" | "purchase" | "stock",
+        supplier: string,
+        quantity: number,
+        order_status: string,
+        notes: string
+    }>({
+        name: "",
+        action_type: "purchase",
+        supplier: "",
+        quantity: 1,
+        order_status: "pending",
+        notes: ""
+    })
     const [accSearch, setAccSearch] = useState("")
     const [showAccSuggestions, setShowAccSuggestions] = useState(false)
 
@@ -94,7 +106,8 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         setSuperstructures([])
         setProjectAccessories([])
         setClientSearch("")
-        setStep(1)
+        setIsAddingSuper(false)
+        setIsAddingAcc(false)
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -115,36 +128,37 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         if (!clientSearch.trim()) return
         const newC = await addClient(clientSearch)
         if (newC) handleSelectClient((newC as any).name)
-        else handleSelectClient(clientSearch) // Fallback if insert fails or just local
+        else handleSelectClient(clientSearch)
     }
 
     // --- Superstructure Logic ---
     const filteredSupers = superstructureCatalog.filter(s => s.type.toLowerCase().includes(superSearch.toLowerCase()))
 
-    const handleAddSuperstructure = async () => {
+    const confirmAddSuperstructure = async () => {
         const type = superSearch.trim() || newSuperstructure.type
         if (!type) return
 
-        // Check if exists in catalog, if not add
         if (!superstructureCatalog.find(s => s.type.toLowerCase() === type.toLowerCase())) {
             await addSuperstructureType(type)
         }
 
         setSuperstructures([...superstructures, { ...newSuperstructure, type }])
-        setNewSuperstructure({ type: "", supplier: "", order_status: "pending" })
+        setNewSuperstructure({ type: "", supplier: "", order_status: "pending", details: "" })
         setSuperSearch("")
+        setIsAddingSuper(false)
     }
 
     // --- Accessory Logic ---
     const filteredAcc = accessoryCatalog.filter(a => a.name.toLowerCase().includes(accSearch.toLowerCase()))
 
-    const handleAddAccessory = async () => {
+    const confirmAddAccessory = async () => {
         const name = accSearch.trim()
         if (!name) return
 
-        setProjectAccessories([...projectAccessories, { ...newAccessory, name, action_type: newAccessory.action_type as any, order_status: "pending" }])
-        setNewAccessory({ name: "", action_type: "purchase", supplier: "", quantity: 1 })
+        setProjectAccessories([...projectAccessories, { ...newAccessory, name }])
+        setNewAccessory({ name: "", action_type: "purchase", supplier: "", quantity: 1, order_status: "pending", notes: "" })
         setAccSearch("")
+        setIsAddingAcc(false)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -160,12 +174,11 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
         if (result.error) {
             console.error(result.error)
-            alert("Chyba při vytváření: " + result.error) // Simple alert for now
+            alert("Chyba při vytváření: " + result.error)
             setIsLoading(false)
             return
         }
 
-        // Sync Catalog
         if (projectAccessories.length > 0) {
             for (const acc of projectAccessories) {
                 if (!accessoryCatalog.find(c => c.name.toLowerCase() === acc.name.toLowerCase())) {
@@ -345,61 +358,80 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
                             {/* SUPERSTRUCTURE */}
                             <div className="space-y-4">
-                                <h4 className="flex items-center gap-2 text-sm font-bold uppercase text-muted-foreground">
-                                    <Factory className="w-4 h-4" /> Nástavba
-                                </h4>
+                                <div className="flex items-center justify-between">
+                                    <h4 className="flex items-center gap-2 text-sm font-bold uppercase text-muted-foreground">
+                                        <Factory className="w-4 h-4" /> Nástavby
+                                    </h4>
+                                    {!isAddingSuper && (
+                                        <button type="button" onClick={() => setIsAddingSuper(true)} className="text-[10px] font-bold uppercase bg-secondary px-2 py-1 rounded hover:bg-secondary/80">
+                                            + Přidat
+                                        </button>
+                                    )}
+                                </div>
 
-                                {/* List of added superstructures */}
-                                {superstructures.length > 0 && (
-                                    <div className="space-y-2 mb-4">
-                                        {superstructures.map((s, i) => (
-                                            <div key={i} className="flex justify-between items-center p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                                                <span className="text-sm font-bold">{s.type}</span>
-                                                <button type="button" onClick={() => setSuperstructures(prev => prev.filter((_, idx) => idx !== i))}>
-                                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                                                </button>
-                                            </div>
-                                        ))}
+                                {superstructures.map((s, i) => (
+                                    <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                                        <div>
+                                            <p className="text-sm font-bold">{s.type}</p>
+                                            <p className="text-xs text-muted-foreground">{s.supplier} • {s.order_status}</p>
+                                        </div>
+                                        <button type="button" onClick={() => setSuperstructures(prev => prev.filter((_, idx) => idx !== i))}>
+                                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                        </button>
                                     </div>
-                                )}
+                                ))}
 
-                                {/* Add New Superstructure Form */}
-                                <div className="bg-secondary/20 p-3 rounded-xl space-y-3">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
-                                        <input
-                                            type="text"
-                                            value={superSearch}
-                                            onChange={(e) => { setSuperSearch(e.target.value); setShowSuperSuggestions(true) }}
-                                            onFocus={() => setShowSuperSuggestions(true)}
-                                            placeholder="Typ nástavby (např. CAS 20)..."
-                                            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-background border border-border text-sm"
-                                        />
-                                        {showSuperSuggestions && superSearch && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
-                                                {filteredSupers.map(s => (
-                                                    <button key={s.id} type="button" onClick={() => { setSuperSearch(s.type); setShowSuperSuggestions(false); }}
-                                                        className="w-full text-left px-3 py-1.5 hover:bg-secondary text-xs">
-                                                        {s.type}
-                                                    </button>
-                                                ))}
-                                                {filteredSupers.length === 0 && (
-                                                    <div className="px-3 py-1.5 text-xs text-muted-foreground italic">
-                                                        Nebude nalezeno - bude vytvořeno nové
+                                {isAddingSuper && (
+                                    <div className="bg-secondary/20 p-4 rounded-xl space-y-3 border border-border">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Typ Nástavby</label>
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
+                                                <input
+                                                    type="text"
+                                                    value={superSearch}
+                                                    onChange={(e) => { setSuperSearch(e.target.value); setShowSuperSuggestions(true) }}
+                                                    onFocus={() => setShowSuperSuggestions(true)}
+                                                    placeholder="např. CAS 20"
+                                                    className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-background border border-border text-sm"
+                                                />
+                                                {showSuperSuggestions && superSearch && (
+                                                    <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
+                                                        {filteredSupers.map(s => (
+                                                            <button key={s.id} type="button" onClick={() => { setSuperSearch(s.type); setShowSuperSuggestions(false); }}
+                                                                className="w-full text-left px-3 py-1.5 hover:bg-secondary text-xs">
+                                                                {s.type}
+                                                            </button>
+                                                        ))}
+                                                        {filteredSupers.length === 0 && (
+                                                            <div className="px-3 py-1.5 text-xs text-muted-foreground italic">Nový typ</div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
-                                    </div>
-                                    <input type="text" placeholder="Dodavatel (volitelné)" value={newSuperstructure.supplier}
-                                        onChange={e => setNewSuperstructure(prev => ({ ...prev, supplier: e.target.value }))}
-                                        className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <input type="text" placeholder="Dodavatel" value={newSuperstructure.supplier}
+                                                onChange={e => setNewSuperstructure(prev => ({ ...prev, supplier: e.target.value }))}
+                                                className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm" />
+                                            <select value={newSuperstructure.order_status}
+                                                onChange={e => setNewSuperstructure(prev => ({ ...prev, order_status: e.target.value }))}
+                                                className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm">
+                                                <option value="pending">Čeká</option>
+                                                <option value="ordered">Objednáno</option>
+                                                <option value="delivered">Dodáno</option>
+                                            </select>
+                                        </div>
+                                        <textarea placeholder="Poznámky..." rows={2} value={newSuperstructure.details}
+                                            onChange={e => setNewSuperstructure(prev => ({ ...prev, details: e.target.value }))}
+                                            className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm resize-none" />
 
-                                    <button type="button" onClick={handleAddSuperstructure}
-                                        className="w-full py-1.5 bg-foreground text-background rounded-lg text-xs font-bold uppercase tracking-wide hover:opacity-90">
-                                        Přidat Nástavbu
-                                    </button>
-                                </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <button type="button" onClick={() => setIsAddingSuper(false)} className="px-3 py-1 text-xs font-bold text-muted-foreground hover:bg-secondary rounded">Zrušit</button>
+                                            <button type="button" onClick={confirmAddSuperstructure} className="px-3 py-1 bg-foreground text-background rounded text-xs font-bold uppercase">Přidat</button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -408,67 +440,104 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
                     {/* SECTION 3: ACCESSORIES & NOTES */}
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="h-8 w-1 bg-blue-500 rounded-full" />
-                            <h3 className="text-lg font-bold tracking-tight">Příslušenství</h3>
-                        </div>
-
-                        {/* Similar Accessory Logic as before but simplified for brevity of file */}
-                        <div className="bg-secondary/10 p-4 rounded-xl space-y-4">
-                            {/* Added Accessories List */}
-                            <div className="flex flex-wrap gap-2">
-                                {projectAccessories.map((acc, i) => (
-                                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-lg shadow-sm">
-                                        <span className="text-sm font-semibold">{acc.name}</span>
-                                        <span className="text-xs text-muted-foreground">x{acc.quantity}</span>
-                                        <button type="button" onClick={() => setProjectAccessories(prev => prev.filter((_, idx) => idx !== i))}>
-                                            <Trash2 className="w-3 h-3 text-red-500" />
-                                        </button>
-                                    </div>
-                                ))}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 w-1 bg-blue-500 rounded-full" />
+                                <h3 className="text-lg font-bold tracking-tight">Příslušenství</h3>
                             </div>
-
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
-                                    <input
-                                        type="text"
-                                        value={accSearch}
-                                        onChange={(e) => { setAccSearch(e.target.value); setShowAccSuggestions(true) }}
-                                        onFocus={() => setShowAccSuggestions(true)}
-                                        placeholder="Přidat příslušenství..."
-                                        className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm"
-                                    />
-                                    {showAccSuggestions && accSearch && (
-                                        <div className="absolute bottom-full left-0 right-0 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
-                                            {filteredAcc.map(a => (
-                                                <button key={a.id} type="button" onClick={() => { setAccSearch(a.name); setShowAccSuggestions(false); }}
-                                                    className="w-full text-left px-3 py-1.5 hover:bg-secondary text-xs">
-                                                    {a.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                <select
-                                    value={newAccessory.action_type}
-                                    onChange={e => setNewAccessory(prev => ({ ...prev, action_type: e.target.value }))}
-                                    className="px-2 py-2 rounded-lg bg-background border border-border text-sm max-w-[100px]"
-                                >
-                                    <option value="purchase">Koupit</option>
-                                    <option value="manufacture">Vyrobit</option>
-                                    <option value="stock">Sklad</option>
-                                </select>
-                                <input type="number" min="1" value={newAccessory.quantity}
-                                    onChange={e => setNewAccessory(prev => ({ ...prev, quantity: Number(e.target.value) }))}
-                                    className="w-16 px-2 py-2 rounded-lg bg-background border border-border text-center text-sm" />
-                                <button type="button" onClick={handleAddAccessory} className="px-4 bg-primary text-primary-foreground rounded-lg font-bold">
-                                    +
+                            {!isAddingAcc && (
+                                <button type="button" onClick={() => setIsAddingAcc(true)} className="text-[10px] font-bold uppercase bg-secondary px-2 py-1 rounded hover:bg-secondary/80">
+                                    + Přidat
                                 </button>
-                            </div>
+                            )}
                         </div>
 
-                        <div className="group space-y-1 mt-4">
-                            <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Detailní popis / Poznámky</label>
+                        <div className="space-y-3">
+                            {projectAccessories.map((acc, i) => (
+                                <div key={i} className="flex justify-between items-start p-3 bg-secondary/10 border border-border rounded-xl">
+                                    <div>
+                                        <p className="text-sm font-bold flex items-center gap-2">
+                                            {acc.name}
+                                            <span className="text-[10px] bg-secondary px-1.5 rounded text-foreground font-normal">x{acc.quantity}</span>
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {acc.action_type === 'purchase' ? 'Nákup' : acc.action_type === 'manufacture' ? 'Výroba' : 'Sklad'} • {acc.supplier || "Bez dodavatele"}
+                                        </p>
+                                    </div>
+                                    <button type="button" onClick={() => setProjectAccessories(prev => prev.filter((_, idx) => idx !== i))}>
+                                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {isAddingAcc && (
+                                <div className="bg-secondary/20 p-4 rounded-xl space-y-3 border border-border">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Položka</label>
+                                        <div className="relative">
+                                            <Package className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
+                                            <input
+                                                type="text"
+                                                value={accSearch}
+                                                onChange={(e) => { setAccSearch(e.target.value); setShowAccSuggestions(true) }}
+                                                onFocus={() => setShowAccSuggestions(true)}
+                                                placeholder="Vyhledat..."
+                                                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-background border border-border text-sm"
+                                            />
+                                            {showAccSuggestions && accSearch && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
+                                                    {filteredAcc.map(a => (
+                                                        <button key={a.id} type="button" onClick={() => { setAccSearch(a.name); setShowAccSuggestions(false); }}
+                                                            className="w-full text-left px-3 py-1.5 hover:bg-secondary text-xs">
+                                                            {a.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <select value={newAccessory.action_type}
+                                            onChange={e => setNewAccessory(prev => ({ ...prev, action_type: e.target.value as any }))}
+                                            className="w-full px-2 py-1.5 rounded-lg bg-background border border-border text-xs">
+                                            <option value="purchase">Nákup</option>
+                                            <option value="manufacture">Výroba</option>
+                                            <option value="stock">Sklad</option>
+                                        </select>
+                                        <select value={newAccessory.order_status}
+                                            onChange={e => setNewAccessory(prev => ({ ...prev, order_status: e.target.value }))}
+                                            className="w-full px-2 py-1.5 rounded-lg bg-background border border-border text-xs">
+                                            <option value="pending">Čeká</option>
+                                            <option value="ordered">Objednáno</option>
+                                            <option value="delivered">Skladem</option>
+                                        </select>
+                                        <div className="relative">
+                                            <Hash className="absolute left-2 top-2 w-3 h-3 text-muted-foreground" />
+                                            <input type="number" min="1" value={newAccessory.quantity}
+                                                onChange={e => setNewAccessory(prev => ({ ...prev, quantity: Number(e.target.value) }))}
+                                                className="w-full pl-6 pr-2 py-1.5 rounded-lg bg-background border border-border text-xs" />
+                                        </div>
+                                    </div>
+
+                                    <input type="text" placeholder="Dodavatel" value={newAccessory.supplier}
+                                        onChange={e => setNewAccessory(prev => ({ ...prev, supplier: e.target.value }))}
+                                        className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm" />
+
+                                    <textarea placeholder="Poznámky..." rows={2} value={newAccessory.notes}
+                                        onChange={e => setNewAccessory(prev => ({ ...prev, notes: e.target.value }))}
+                                        className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-sm resize-none" />
+
+                                    <div className="flex gap-2 justify-end">
+                                        <button type="button" onClick={() => setIsAddingAcc(false)} className="px-3 py-1 text-xs font-bold text-muted-foreground hover:bg-secondary rounded">Zrušit</button>
+                                        <button type="button" onClick={confirmAddAccessory} className="px-3 py-1 bg-foreground text-background rounded text-xs font-bold uppercase">Přidat</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="group space-y-1 mt-6">
+                            <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Detailní popis / Poznámky k projektu</label>
                             <textarea name="description" value={formData.description} onChange={handleChange} rows={3}
                                 className="w-full px-4 py-3 rounded-xl bg-secondary/30 border border-border focus:border-primary/50 outline-none text-sm resize-none" />
                         </div>
