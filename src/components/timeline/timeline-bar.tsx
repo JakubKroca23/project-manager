@@ -156,11 +156,6 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
                     minWidth: 4,
                     borderRadius: 0 // Square corners
                 }}
-                onClick={() => {
-                    if (!isResizing && item.type === 'project') {
-                        router.push(`/projects/${item.id}`)
-                    }
-                }}
             >
                 {/* Left Resize Handle */}
                 <div

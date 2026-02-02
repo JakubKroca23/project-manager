@@ -2,11 +2,13 @@
 
 import { useTimeline } from "./timeline-context"
 import { ChevronRight, ChevronDown, Folder, Briefcase, Wrench } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export const ROW_HEIGHT = 42 // Matches the grid row height
 
 export function TimelineSidebar() {
     const { visibleItems, toggleExpand, expandedIds, headerHeight } = useTimeline()
+    const router = useRouter()
 
     return (
         <div className="w-[250px] flex-shrink-0 border-r border-border/50 bg-background/95 backdrop-blur z-20 flex flex-col">
@@ -29,9 +31,14 @@ export function TimelineSidebar() {
                         return (
                             <div
                                 key={item.id}
-                                className={`flex items-center px-3 border-b border-border/10 hover:bg-secondary/20 transition-colors truncate
+                                className={`flex items-center px-3 border-b border-border/10 hover:bg-secondary/20 transition-colors truncate cursor-pointer
                                     ${item.parent_id ? 'bg-secondary/5' : ''}
                                 `}
+                                onClick={() => {
+                                    if (item.type === 'project') {
+                                        router.push(`/projects/${item.id}`)
+                                    }
+                                }}
                                 style={{ height: ROW_HEIGHT, paddingLeft: item.parent_id ? '2rem' : '0.75rem' }}
                             >
                                 {isParent && item.type === 'project' && (

@@ -46,3 +46,5 @@
 - [x] Timeline Interactions: Resize (Handles), Square Corners, Smoother Drag
 - [x] Fix: Resize/Drag interaction conflict (ghost transform)
 - [x] Controls: Add +/- Zoom Buttons and fix "jumping" behavior
+- [x] Interaction: Enforce strict "Snap-to-Day" logic for drag/resize
+- [x] Navigation: Move detail click to Sidebar (Name) instead of Bar
