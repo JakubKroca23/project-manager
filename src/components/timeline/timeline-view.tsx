@@ -9,25 +9,27 @@ function TimelineControls() {
     const { pixelsPerDay, setPixelsPerDay, setStartDate, startDate } = useTimeline()
 
     return (
-        <div className="flex items-center gap-4 bg-background/50 p-2 rounded-xl border border-border/50">
-            {/* Zoom Slider */}
-            <div className="flex items-center gap-2">
-                <ZoomIn className="w-4 h-4 text-muted-foreground" />
-                <input
-                    type="range"
-                    min="10"
-                    max="150"
-                    value={pixelsPerDay}
-                    onChange={(e) => setPixelsPerDay(Number(e.target.value))}
-                    className="w-32 h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                />
-                <span className="text-xs font-mono text-muted-foreground w-8 text-right">{pixelsPerDay}px</span>
+        <div className="flex items-center gap-2 bg-background/50 p-1 rounded-xl border border-border/50">
+            <div className="flex bg-secondary/50 rounded-lg p-1 text-xs font-medium">
+                <button
+                    onClick={() => setPixelsPerDay(50)}
+                    className={`px-3 py-1.5 rounded-md transition-all ${pixelsPerDay >= 40 ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                    Den
+                </button>
+                <button
+                    onClick={() => setPixelsPerDay(12)}
+                    className={`px-3 py-1.5 rounded-md transition-all ${pixelsPerDay >= 10 && pixelsPerDay < 40 ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                    Týden
+                </button>
+                <button
+                    onClick={() => setPixelsPerDay(4)}
+                    className={`px-3 py-1.5 rounded-md transition-all ${pixelsPerDay < 10 ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                    Měsíc
+                </button>
             </div>
-
-            <div className="h-4 w-px bg-border" />
-
-            {/* Quick Actions (Future) */}
-            <button className="text-xs font-bold text-primary hover:underline" onClick={() => setPixelsPerDay(40)}>Reset</button>
         </div>
     )
 }

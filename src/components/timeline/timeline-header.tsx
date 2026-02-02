@@ -14,8 +14,10 @@ export function TimelineHeader() {
     const totalWidth = totalDays * pixelsPerDay
 
     // 3. Logic: What to show?
-    const showDays = pixelsPerDay >= 20
-    const showWeeks = pixelsPerDay < 20
+    const showDays = pixelsPerDay >= 40
+    const showWeeks = pixelsPerDay >= 10 && pixelsPerDay < 40
+    // If < 10 (Month view), we might hide bottom row or show very simplified weeks
+    const showTimelineBottom = pixelsPerDay >= 4
 
     // Rows Data
     const months = eachMonthOfInterval({ start: startDate, end: END_DATE })
@@ -52,39 +54,42 @@ export function TimelineHeader() {
                 </div>
 
                 {/* BOTTOM ROW: DAYS or WEEKS */}
-                <div className="flex h-1/2">
-                    {showDays ? (
-                        days.map(day => (
-                            <div
-                                key={day.toISOString()}
-                                className="flex items-center justify-center border-r border-border/5 text-[10px] text-muted-foreground select-none overflow-hidden"
-                                style={{ width: pixelsPerDay }}
-                            >
-                                {pixelsPerDay > 45 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
-                            </div>
-                        ))
-                    ) : (
-                        weeks.map(week => {
-                            const start = week < startDate ? startDate : week
-                            const end = endOfWeek(week, { weekStartsOn: 1 }) > END_DATE ? END_DATE : endOfWeek(week, { weekStartsOn: 1 })
-                            const daysInWeek = eachDayOfInterval({ start, end })
-
-                            if (daysInWeek.length === 0) return null
-
-                            const width = daysInWeek.length * pixelsPerDay
-
-                            return (
+                {showTimelineBottom && (
+                    <div className="flex h-1/2">
+                        {showDays ? (
+                            days.map(day => (
                                 <div
-                                    key={week.toISOString()}
-                                    className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none bg-black/5"
-                                    style={{ width }}
+                                    key={day.toISOString()}
+                                    className="flex items-center justify-center border-r border-border/5 text-[10px] text-muted-foreground select-none overflow-hidden"
+                                    style={{ width: pixelsPerDay }}
                                 >
-                                    T{format(week, 'w')}
+                                    {pixelsPerDay > 45 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
                                 </div>
-                            )
-                        })
-                    )}
-                </div>
+                            ))
+                        ) : (
+                            weeks.map(week => {
+                                const start = week < startDate ? startDate : week
+                                const end = endOfWeek(week, { weekStartsOn: 1 }) > END_DATE ? END_DATE : endOfWeek(week, { weekStartsOn: 1 })
+                                const daysInWeek = eachDayOfInterval({ start, end })
+
+                                if (daysInWeek.length === 0) return null
+
+                                const width = daysInWeek.length * pixelsPerDay
+
+                                return (
+                                    <div
+                                        key={week.toISOString()}
+                                        className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none bg-black/5"
+                                        style={{ width }}
+                                    >
+                                        {/* Only show label if wide enough */}
+                                        {width > 20 && `T${format(week, 'w')}`}
+                                    </div>
+                                )
+                            })
+                        )}
+                    </div>
+                )}
             </motion.div>
         </div>
     )
