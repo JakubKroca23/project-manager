@@ -78,3 +78,5 @@
 - [x] Remove container styling (borders, rounded corners) in `timeline-layout.tsx`
 - [x] Adjust Sidebar/Grid proportions for fullscreen view
 - [x] Verification on different resolutions
+- [x] Refine zoom controls (horizontal, smaller)
+- [x] Implement mouse panning (drag & drop interaction)

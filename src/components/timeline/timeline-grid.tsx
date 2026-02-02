@@ -14,16 +14,47 @@ export function TimelineGrid() {
     const containerRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
 
+    // Pan state
+    const isDragging = useRef(false)
+    const startX = useRef(0)
+    const scrollLeft = useRef(0)
+
     // Sync X and Y scroll
     const handleScroll = () => {
         if (!containerRef.current) return
         setScrollX(containerRef.current.scrollLeft)
 
-        // Sync Sidebar Y scroll manually for performance
         const sidebar = document.getElementById("sidebar-scroll")
         if (sidebar) {
             sidebar.scrollTop = containerRef.current.scrollTop
         }
+    }
+
+    // Pan Event Handlers
+    const onMouseDown = (e: React.MouseEvent) => {
+        if (!containerRef.current) return
+        isDragging.current = true
+        containerRef.current.style.cursor = 'grabbing'
+        startX.current = e.pageX - containerRef.current.offsetLeft
+        scrollLeft.current = containerRef.current.scrollLeft
+    }
+
+    const onMouseLeave = () => {
+        isDragging.current = false
+        if (containerRef.current) containerRef.current.style.cursor = 'auto'
+    }
+
+    const onMouseUp = () => {
+        isDragging.current = false
+        if (containerRef.current) containerRef.current.style.cursor = 'auto'
+    }
+
+    const onMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging.current || !containerRef.current) return
+        e.preventDefault()
+        const x = e.pageX - containerRef.current.offsetLeft
+        const walk = (x - startX.current) * 1.5 // Scroll speed
+        containerRef.current.scrollLeft = scrollLeft.current - walk
     }
 
     const END_DATE = addDays(startDate, 365)
@@ -34,7 +65,11 @@ export function TimelineGrid() {
         <div
             ref={containerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-auto relative custom-scrollbar bg-transparent" // Transparent BG
+            onMouseDown={onMouseDown}
+            onMouseLeave={onMouseLeave}
+            onMouseUp={onMouseUp}
+            onMouseMove={onMouseMove}
+            className="flex-1 overflow-auto relative custom-scrollbar bg-transparent select-none cursor-grab"
         >
             <div className="relative min-h-full" style={{ width: totalWidth, height: visibleItems.length * ROW_HEIGHT }}>
 

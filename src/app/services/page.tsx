@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { ServicesClient } from "./services-client"
+import { PageContainer } from "@/components/layout/PageContainer"
 
 export default async function ServicesPage() {
     const supabase = await createClient()
@@ -9,5 +10,9 @@ export default async function ServicesPage() {
         .select("*")
         .order('service_date', { ascending: true })
 
-    return <ServicesClient initialData={services || []} />
+    return (
+        <PageContainer>
+            <ServicesClient initialData={services || []} />
+        </PageContainer>
+    )
 }

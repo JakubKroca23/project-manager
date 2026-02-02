@@ -9,23 +9,23 @@ function TimelineControls() {
     const { pixelsPerDay, setPixelsPerDay } = useTimeline()
 
     return (
-        <div className="flex flex-col gap-2 bg-background/40 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-xl">
+        <div className="flex items-center gap-1 bg-background/40 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-xl">
             <button
                 onClick={() => setPixelsPerDay(Math.min(100, pixelsPerDay + 5))}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-foreground"
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-foreground"
                 title="Zoom In"
             >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
             </button>
 
-            <div className="h-px bg-white/10 mx-1" />
+            <div className="w-px h-4 bg-white/10 mx-0.5" />
 
             <button
                 onClick={() => setPixelsPerDay(Math.max(2, pixelsPerDay - 5))}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-foreground"
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-foreground"
                 title="Zoom Out"
             >
-                <Minus className="w-5 h-5" />
+                <Minus className="w-4 h-4" />
             </button>
         </div>
     )
