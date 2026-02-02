@@ -16,6 +16,7 @@ export interface Database {
                     full_name: string | null
                     avatar_url: string | null
                     role: string
+                    is_approved: boolean | null
                     created_at: string
                 }
                 Insert: {
@@ -24,6 +25,7 @@ export interface Database {
                     full_name?: string | null
                     avatar_url?: string | null
                     role?: string
+                    is_approved?: boolean | null
                     created_at?: string
                 }
                 Update: {
@@ -32,6 +34,7 @@ export interface Database {
                     full_name?: string | null
                     avatar_url?: string | null
                     role?: string
+                    is_approved?: boolean | null
                     created_at?: string
                 }
             }
