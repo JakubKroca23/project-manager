@@ -1,10 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Modal } from "@/components/ui/modal"
 import { useCreateProject } from "@/hooks/use-create-project"
-import { Loader2, Layout, Settings, Factory, CheckCircle2, Octagon } from "lucide-react"
-import { motion } from "framer-motion"
+import { useAccessoryCatalog } from "@/hooks/use-accessory-catalog"
+import {
+    Loader2, Layout, Settings, Factory, CheckCircle2,
+    Octagon, Plus, Trash2, Package, ShoppingCart,
+    Truck, Search, Info, ChevronDown
+} from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { createClient } from "@/lib/supabase/client"
 
 interface CreateProjectModalProps {
     isOpen: boolean
@@ -20,7 +26,10 @@ const statusOptions = [
 ]
 
 export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
-    const { createProject, isLoading, error } = useCreateProject()
+    const { isLoading: isCreating, error: createError } = useCreateProject()
+    const { catalog, addToCatalog } = useAccessoryCatalog()
+    const supabase = createClient()
+    const [isLoading, setIsLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         title: "",
@@ -31,41 +40,84 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         status: "planning",
         manufacturer: "",
         chassis_type: "",
-        superstructure_type: "",
-        accessories: ""
+        quantity: 1
     })
+
+    const [superstructures, setSuperstructures] = useState<{ type: string, details: string, supplier: string, order_status: string }[]>([
+        { type: "", details: "", supplier: "", order_status: "pending" }
+    ])
+
+    const [projectAccessories, setProjectAccessories] = useState<{
+        name: string,
+        action_type: 'manufacture' | 'purchase' | 'stock',
+        supplier: string,
+        order_status: string,
+        quantity: number
+    }[]>([])
+
+    const [accSearch, setAccSearch] = useState("")
+    const [showCatalog, setShowCatalog] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setIsLoading(true)
 
-        const success = await createProject({
-            title: formData.title,
-            client_name: formData.client_name,
-            description: formData.description,
-            start_date: formData.start_date,
-            end_date: formData.end_date || null,
-            status: formData.status,
-            manufacturer: formData.manufacturer || null,
-            chassis_type: formData.chassis_type || null,
-            superstructure_type: formData.superstructure_type || null,
-            accessories: formData.accessories || null,
-        })
+        // 1. Create Project
+        const { data: projectData, error: projError } = await supabase
+            .from("projects")
+            .insert({
+                title: formData.title,
+                client_name: formData.client_name,
+                description: formData.description,
+                start_date: formData.start_date,
+                end_date: formData.end_date || null,
+                status: formData.status,
+                manufacturer: formData.manufacturer || null,
+                chassis_type: formData.chassis_type || null,
+                quantity: Number(formData.quantity)
+            } as any)
+            .select()
+            .single()
 
-        if (success) {
-            onClose()
-            setFormData({
-                title: "",
-                client_name: "",
-                description: "",
-                start_date: new Date().toISOString().split('T')[0],
-                end_date: "",
-                status: "planning",
-                manufacturer: "",
-                chassis_type: "",
-                superstructure_type: "",
-                accessories: ""
-            })
+        if (projError || !projectData) {
+            setIsLoading(false)
+            return
         }
+
+        // 2. Add Superstructures
+        const validSupers = superstructures.filter(s => s.type.trim())
+        if (validSupers.length > 0) {
+            await supabase.from("superstructures").insert(
+                validSupers.map(s => ({ ...s, project_id: projectData.id }))
+            )
+        }
+
+        if (projectAccessories.length > 0) {
+            const { error: accError } = await supabase.from("project_accessories").insert(
+                projectAccessories.map(a => ({ ...a, project_id: projectData.id }))
+            )
+
+            if (!accError) {
+                // Sync new accessories to master catalog
+                for (const acc of projectAccessories) {
+                    if (!catalog.find(c => c.name.toLowerCase() === acc.name.toLowerCase())) {
+                        await addToCatalog(acc.name)
+                    }
+                }
+            }
+        }
+
+        setIsLoading(false)
+        onClose()
+        // Reset state
+        setFormData({
+            title: "", client_name: "", description: "",
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: "", status: "planning", manufacturer: "",
+            chassis_type: "", quantity: 1
+        })
+        setSuperstructures([{ type: "", details: "", supplier: "", order_status: "pending" }])
+        setProjectAccessories([])
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -75,13 +127,13 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
     return (
         <Modal title="Vytvořit nový projekt" isOpen={isOpen} onClose={onClose} className="max-w-3xl">
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
+                {createError && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 text-sm font-medium"
                     >
-                        {error}
+                        {createError}
                     </motion.div>
                 )}
 
@@ -150,8 +202,8 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, status: opt.value }))}
                                         className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all ${formData.status === opt.value
-                                                ? `border-primary bg-primary/5 shadow-sm`
-                                                : "border-transparent bg-secondary/30 hover:bg-secondary/50 text-muted-foreground"
+                                            ? `border-primary bg-primary/5 shadow-sm`
+                                            : "border-transparent bg-secondary/30 hover:bg-secondary/50 text-muted-foreground"
                                             }`}
                                     >
                                         <opt.icon className={`w-3.5 h-3.5 ${formData.status === opt.value ? opt.color : "text-current"}`} />
@@ -168,8 +220,8 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
                         <div className="space-y-4">
                             <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce / Podvozek</label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce / Podvozek / Počet</label>
+                                <div className="grid grid-cols-3 gap-3">
                                     <input
                                         type="text"
                                         name="manufacturer"
@@ -186,31 +238,215 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
                                         className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
                                         placeholder="Typ podvozku"
                                     />
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={formData.quantity}
+                                        onChange={handleChange}
+                                        min="1"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
+                                        placeholder="Počet"
+                                    />
                                 </div>
                             </div>
 
-                            <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Typ nástavby</label>
-                                <input
-                                    type="text"
-                                    name="superstructure_type"
-                                    value={formData.superstructure_type}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                    placeholder="např. CAS 20"
-                                />
+                            {/* Nástavby Section */}
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Typy Nástaveb</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSuperstructures([...superstructures, { type: "", details: "", supplier: "", order_status: "pending" }])}
+                                        className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
+                                    >
+                                        <Plus className="w-3 h-3" /> Přidat nástavbu
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {superstructures.map((s, i) => (
+                                        <div key={i} className="p-3 rounded-xl bg-secondary/20 border border-border/50 space-y-3">
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={s.type}
+                                                    onChange={(e) => {
+                                                        const newS = [...superstructures];
+                                                        newS[i].type = e.target.value;
+                                                        setSuperstructures(newS);
+                                                    }}
+                                                    className="flex-1 px-3 py-1.5 rounded-lg bg-background border border-border outline-none text-sm font-bold"
+                                                    placeholder="Typ nástavby (např. CAS 20)"
+                                                />
+                                                {superstructures.length > 1 && (
+                                                    <button type="button" onClick={() => setSuperstructures(superstructures.filter((_, idx) => idx !== i))} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Dodavatel"
+                                                    value={s.supplier}
+                                                    onChange={(e) => {
+                                                        const newS = [...superstructures];
+                                                        newS[i].supplier = e.target.value;
+                                                        setSuperstructures(newS);
+                                                    }}
+                                                    className="px-3 py-1.5 rounded-lg bg-background border border-border outline-none text-[11px]"
+                                                />
+                                                <select
+                                                    value={s.order_status}
+                                                    onChange={(e) => {
+                                                        const newS = [...superstructures];
+                                                        newS[i].order_status = e.target.value;
+                                                        setSuperstructures(newS);
+                                                    }}
+                                                    className="px-3 py-1.5 rounded-lg bg-background border border-border outline-none text-[11px]"
+                                                >
+                                                    <option value="pending">Čeká na objednání</option>
+                                                    <option value="ordered">Objednáno</option>
+                                                    <option value="delivered">Dodáno</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Příslušenství / Výbava</label>
-                                <textarea
-                                    name="accessories"
-                                    value={formData.accessories}
-                                    onChange={handleChange}
-                                    rows={4}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all resize-none text-sm"
-                                    placeholder="Vyjmenujte hlavní prvky výbavy..."
-                                />
+                            {/* Příslušenství Section */}
+                            <div className="space-y-3 pt-2">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Příslušenství & Výbava</label>
+
+                                <div className="relative">
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <input
+                                                type="text"
+                                                value={accSearch}
+                                                onChange={(e) => {
+                                                    setAccSearch(e.target.value);
+                                                    setShowCatalog(true);
+                                                }}
+                                                onFocus={() => setShowCatalog(true)}
+                                                placeholder="Hledat nebo přidat nové příslušenství..."
+                                                className="w-full pl-10 pr-4 py-2 rounded-xl bg-background border-2 border-border focus:border-primary/50 outline-none text-sm transition-all"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (accSearch.trim()) {
+                                                    setProjectAccessories([...projectAccessories, {
+                                                        name: accSearch,
+                                                        action_type: 'purchase',
+                                                        supplier: "",
+                                                        order_status: "pending",
+                                                        quantity: 1
+                                                    }]);
+                                                    setAccSearch("");
+                                                    setShowCatalog(false);
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-xl text-xs font-bold transition-colors"
+                                        >
+                                            Přidat
+                                        </button>
+                                    </div>
+
+                                    <AnimatePresence>
+                                        {showCatalog && accSearch && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 5 }}
+                                                className="absolute z-50 top-full left-0 right-0 mt-2 p-1 bg-background border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto"
+                                            >
+                                                {catalog
+                                                    .filter(item => item.name.toLowerCase().includes(accSearch.toLowerCase()))
+                                                    .map(item => (
+                                                        <button
+                                                            key={item.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setProjectAccessories([...projectAccessories, {
+                                                                    name: item.name,
+                                                                    action_type: 'purchase',
+                                                                    supplier: "",
+                                                                    order_status: "pending",
+                                                                    quantity: 1
+                                                                }]);
+                                                                setAccSearch("");
+                                                                setShowCatalog(false);
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 hover:bg-secondary rounded-lg text-sm transition-colors"
+                                                        >
+                                                            {item.name}
+                                                        </button>
+                                                    ))
+                                                }
+                                                {accSearch && !catalog.find(c => c.name.toLowerCase() === accSearch.toLowerCase()) && (
+                                                    <div className="px-3 py-2 text-xs text-muted-foreground italic border-t border-border mt-1">
+                                                        Zatím neznámé - bude uloženo do katalogu
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                                    {projectAccessories.map((acc, i) => (
+                                        <div key={i} className="flex flex-col gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-bold">{acc.name}</span>
+                                                <button type="button" onClick={() => setProjectAccessories(projectAccessories.filter((_, idx) => idx !== i))} className="p-1 hover:text-red-500 transition-colors">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <select
+                                                    value={acc.action_type}
+                                                    onChange={(e) => {
+                                                        const newA = [...projectAccessories];
+                                                        newA[i].action_type = e.target.value as any;
+                                                        setProjectAccessories(newA);
+                                                    }}
+                                                    className="px-2 py-1 rounded-lg bg-background border border-border outline-none text-[10px]"
+                                                >
+                                                    <option value="manufacture">Vyrobit</option>
+                                                    <option value="purchase">Nakoupit</option>
+                                                    <option value="stock">Skladem</option>
+                                                </select>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Dodavatel"
+                                                    value={acc.supplier}
+                                                    onChange={(e) => {
+                                                        const newA = [...projectAccessories];
+                                                        newA[i].supplier = e.target.value;
+                                                        setProjectAccessories(newA);
+                                                    }}
+                                                    className="px-2 py-1 rounded-lg bg-background border border-border outline-none text-[10px]"
+                                                />
+                                                <select
+                                                    value={acc.order_status}
+                                                    onChange={(e) => {
+                                                        const newA = [...projectAccessories];
+                                                        newA[i].order_status = e.target.value;
+                                                        setProjectAccessories(newA);
+                                                    }}
+                                                    className="px-2 py-1 rounded-lg bg-background border border-border outline-none text-[10px]"
+                                                >
+                                                    <option value="pending">Čeká</option>
+                                                    <option value="ordered">Objednáno</option>
+                                                    <option value="delivered">Dodáno</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>

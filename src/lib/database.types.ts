@@ -54,6 +54,7 @@ export interface Database {
                     manufacturer: string | null
                     superstructure_type: string | null
                     accessories: string | null
+                    quantity: number | null
                 }
                 Insert: {
                     id?: string
@@ -70,6 +71,7 @@ export interface Database {
                     manufacturer?: string | null
                     superstructure_type?: string | null
                     accessories?: string | null
+                    quantity?: number | null
                 }
                 Update: {
                     id?: string
@@ -86,6 +88,88 @@ export interface Database {
                     manufacturer?: string | null
                     superstructure_type?: string | null
                     accessories?: string | null
+                    quantity?: number | null
+                }
+            }
+            superstructures: {
+                Row: {
+                    id: string
+                    project_id: string | null
+                    type: string
+                    details: string | null
+                    supplier: string | null
+                    order_status: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    project_id?: string | null
+                    type: string
+                    details?: string | null
+                    supplier?: string | null
+                    order_status?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    project_id?: string | null
+                    type?: string
+                    details?: string | null
+                    supplier?: string | null
+                    order_status?: string | null
+                    created_at?: string
+                }
+            }
+            accessory_catalog: {
+                Row: {
+                    id: string
+                    name: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    created_at?: string
+                }
+            }
+            project_accessories: {
+                Row: {
+                    id: string
+                    project_id: string | null
+                    name: string
+                    action_type: "manufacture" | "purchase" | "stock" | null
+                    supplier: string | null
+                    order_status: string | null
+                    quantity: number | null
+                    notes: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    project_id?: string | null
+                    name: string
+                    action_type?: "manufacture" | "purchase" | "stock" | null
+                    supplier?: string | null
+                    order_status?: string | null
+                    quantity?: number | null
+                    notes?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    project_id?: string | null
+                    name?: string
+                    action_type?: "manufacture" | "purchase" | "stock" | null
+                    supplier?: string | null
+                    order_status?: string | null
+                    quantity?: number | null
+                    notes?: string | null
+                    created_at?: string
                 }
             }
             production_orders: {

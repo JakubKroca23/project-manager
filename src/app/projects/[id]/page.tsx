@@ -14,7 +14,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         .from("projects")
         .select(`
             *,
-            manager:profiles!projects_created_by_fkey(full_name)
+            manager:profiles!projects_created_by_fkey(full_name),
+            superstructures(*),
+            project_accessories(*)
         `)
         .eq("id", id)
         .single()

@@ -14,6 +14,7 @@ export async function updateProject(projectId: string, data: {
     manufacturer?: string | null;
     superstructure_type?: string | null;
     accessories?: string | null;
+    quantity?: number | null;
 }) {
     const supabase = await createClient();
 

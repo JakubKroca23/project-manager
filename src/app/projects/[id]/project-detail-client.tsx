@@ -2,7 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft, Layout, Settings, Factory, CheckCircle2, Octagon, MoreVertical, ExternalLink } from "lucide-react"
+import {
+    Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft,
+    Layout, Settings, Factory, CheckCircle2, Octagon,
+    MoreVertical, ExternalLink, Package, ShoppingCart
+} from "lucide-react"
 import { UpdateProjectModal } from "@/components/projects/update-project-modal"
 import { deleteProject } from "@/app/projects/actions"
 import { motion } from "framer-motion"
@@ -78,7 +82,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
                         animate={{ opacity: 1, y: 0 }}
                         className="glass-panel p-8 space-y-6"
                     >
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusData.color} ${statusData.bg} border-current/20`}>
                                     <statusData.icon className="w-3.5 h-3.5" />
@@ -91,10 +95,118 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                     </span>
                                 )}
                             </div>
-                            <h1 className="text-4xl font-black tracking-tight leading-none">{project.title}</h1>
-                            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
-                                {project.description || "Projekt zatím nemá podrobný popis."}
-                            </p>
+                            <div className="space-y-1">
+                                <h1 className="text-4xl font-black tracking-tight leading-none">{project.title}</h1>
+                                {project.quantity > 1 && (
+                                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                                        Zakázka na {project.quantity} {project.quantity < 5 ? 'kusy' : 'kusů'}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Popis Zakázky Card */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 rounded-[2rem] bg-secondary/20 border border-border/50 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.02] -mr-8 -mt-8 group-hover:scale-110 transition-transform duration-1000">
+                                <Briefcase className="w-48 h-48" />
+                            </div>
+
+                            <div className="space-y-6 relative z-10">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Technická Specifikace</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-background/50 border border-border/50">
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <Factory className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Výrobce</p>
+                                            <p className="text-sm font-bold">{project.manufacturer || "Neuvedeno"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-background/50 border border-border/50">
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <Settings className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Typ Podvozku</p>
+                                            <p className="text-sm font-bold">{project.chassis_type || "Neuvedeno"}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Multiple Superstructures */}
+                                    <div className="space-y-3 pt-2">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase px-1">Nástavby</p>
+                                        <div className="space-y-2">
+                                            {project.superstructures?.length > 0 ? project.superstructures.map((s: any, i: number) => (
+                                                <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 flex justify-between items-center">
+                                                    <div>
+                                                        <p className="text-sm font-bold">{s.type}</p>
+                                                        {s.supplier && <p className="text-[10px] text-muted-foreground italic">{s.supplier}</p>}
+                                                    </div>
+                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${s.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                            s.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                                'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                                                        }`}>
+                                                        {s.order_status === 'delivered' ? 'Dodáno' : s.order_status === 'ordered' ? 'Objednáno' : 'Čeká'}
+                                                    </span>
+                                                </div>
+                                            )) : (
+                                                <p className="text-xs text-muted-foreground px-1 italic">Žádná nástavba není definována.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 relative z-10 font-medium">
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Příslušenství a Výbava</h3>
+                                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {project.project_accessories?.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
+                                        <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 group/item">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-1.5 rounded-lg ${acc.action_type === 'manufacture' ? 'bg-orange-500/10 text-orange-500' :
+                                                            acc.action_type === 'purchase' ? 'bg-blue-500/10 text-blue-500' :
+                                                                'bg-green-500/10 text-green-500'
+                                                        }`}>
+                                                        {acc.action_type === 'manufacture' ? <Settings className="w-3 h-3" /> :
+                                                            acc.action_type === 'purchase' ? <ShoppingCart className="w-3 h-3" /> :
+                                                                <Package className="w-3 h-3" />}
+                                                    </div>
+                                                    <span className="text-sm font-bold">{acc.name}</span>
+                                                </div>
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${acc.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                        acc.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                            'bg-secondary text-muted-foreground border-border'
+                                                    }`}>
+                                                    {acc.order_status === 'delivered' ? 'Skladem' : acc.order_status === 'ordered' ? 'Cestě' : 'K objednání'}
+                                                </span>
+                                            </div>
+                                            {(acc.supplier || acc.notes) && (
+                                                <div className="pl-8 text-[10px] text-muted-foreground flex justify-between">
+                                                    <span className="italic">{acc.supplier || "Interní"}</span>
+                                                    {acc.quantity > 1 && <span className="font-bold">x{acc.quantity}</span>}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )) : (
+                                        <div className="text-center py-8 bg-background/20 rounded-2xl border border-dashed border-border">
+                                            <p className="text-xs text-muted-foreground italic">Zatím nebylo přidáno žádné příslušenství.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="pt-4 border-t border-border/50">
+                                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Poznámky k zakázce</h4>
+                                    <p className="text-sm text-muted-foreground leading-relaxed italic">
+                                        {project.description || "Žádné další poznámky."}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Status Timeline Indicator */}

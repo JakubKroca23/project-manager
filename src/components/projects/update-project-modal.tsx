@@ -33,7 +33,8 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
         manufacturer: project.manufacturer || "",
         chassis_type: project.chassis_type || "",
         superstructure_type: project.superstructure_type || "",
-        accessories: project.accessories || ""
+        accessories: project.accessories || "",
+        quantity: project.quantity || 1
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +44,8 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
 
         const result = await updateProject(project.id, {
             ...formData,
-            end_date: formData.end_date || null
+            end_date: formData.end_date || null,
+            quantity: Number(formData.quantity)
         })
 
         if (result.success) {
@@ -134,8 +136,8 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, status: opt.value }))}
                                         className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all ${formData.status === opt.value
-                                                ? `border-primary bg-primary/5 shadow-sm`
-                                                : "border-transparent bg-secondary/30 hover:bg-secondary/50 text-muted-foreground"
+                                            ? `border-primary bg-primary/5 shadow-sm`
+                                            : "border-transparent bg-secondary/30 hover:bg-secondary/50 text-muted-foreground"
                                             }`}
                                     >
                                         <opt.icon className={`w-3.5 h-3.5 ${formData.status === opt.value ? opt.color : "text-current"}`} />
@@ -152,8 +154,8 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
 
                         <div className="space-y-4">
                             <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce / Podvozek</label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce / Podvozek / Počet</label>
+                                <div className="grid grid-cols-3 gap-3">
                                     <input
                                         type="text"
                                         name="manufacturer"
@@ -169,6 +171,15 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
                                         onChange={handleChange}
                                         className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
                                         placeholder="Typ podvozku"
+                                    />
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={formData.quantity}
+                                        onChange={handleChange}
+                                        min="1"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
+                                        placeholder="Počet"
                                     />
                                 </div>
                             </div>
