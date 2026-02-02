@@ -27,9 +27,9 @@ export function useAccessoryCatalog() {
         // Try to insert (will fail if exists due to UNIQUE constraint)
         const { data, error } = await supabase
             .from("accessory_catalog")
-            .insert({ name: name.trim() })
+            .insert({ name: name.trim() } as any)
             .select()
-            .single()
+            .single() as any
 
         if (!error && data) {
             setCatalog(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
