@@ -76,7 +76,9 @@ export function TimelineGrid() {
                 style={{
                     width: totalWidth,
                     minHeight: '100%',
-                    height: visibleItems.length * ROW_HEIGHT > 0 ? visibleItems.length * ROW_HEIGHT : '100%'
+                    height: visibleItems.length * ROW_HEIGHT > 0 ? visibleItems.length * ROW_HEIGHT : '100%',
+                    backgroundImage: 'linear-gradient(to bottom, transparent 41px, hsl(var(--border) / 0.1) 41px)',
+                    backgroundSize: `100% ${ROW_HEIGHT}px`
                 }}
             >
                 {/* Background Grid - Subtler */}

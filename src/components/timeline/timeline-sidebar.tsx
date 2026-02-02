@@ -22,7 +22,14 @@ export function TimelineSidebar() {
 
             {/* List */}
             <div className="flex-1 overflow-hidden relative">
-                <div className="absolute inset-0 overflow-y-auto no-scrollbar" id="sidebar-scroll">
+                <div
+                    className="absolute inset-0 overflow-y-auto no-scrollbar"
+                    id="sidebar-scroll"
+                    style={{
+                        backgroundImage: 'linear-gradient(to bottom, transparent 41px, hsl(var(--border) / 0.1) 41px)',
+                        backgroundSize: `100% ${ROW_HEIGHT}px`
+                    }}
+                >
                     {visibleItems.map(item => {
                         const isParent = !item.parent_id
                         const isExpanded = expandedIds.has(item.id)

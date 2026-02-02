@@ -83,14 +83,14 @@
 
 # Timeline Fullscreen Toggle
 
-- [/] Requirements & Planning (Shared state for Navbar/Timeline)
-- [ ] Implement `isFullscreen` state in `TimelineProvider`
-- [ ] Re-introduce header and container styling for standard mode
-- [ ] Implement Fullscreen button (Toggle Navbar + Viewport expansion)
+- [x] Requirements & Planning (Shared state for Navbar/Timeline)
+- [x] Implement `isFullscreen` state in `TimelineProvider`
+- [x] Re-introduce header and container styling for standard mode
+- [x] Implement Fullscreen button (Toggle Navbar + Viewport expansion)
 - [x] Ensure persistence or clean transition between modes
 
 # Timeline Fullscreen & Vertical Height Fixes
-- [/] Fix `TimelineGrid` height to fill vertical space even with few items
-- [ ] Ensure `isFullscreen` correctly bypasses all parent constraints (RootLayout paddings etc.)
-- [ ] Verify sidebar border-r extends to the bottom
-- [ ] Final verification of "az dolu" requirement
+- [x] Fix `TimelineGrid` height to fill vertical space even with few items
+- [x] Ensure `isFullscreen` correctly bypasses all parent constraints (RootLayout paddings etc.)
+- [x] Verify sidebar border-r extends to the bottom
+- [x] Final verification of "az dolu" requirement
