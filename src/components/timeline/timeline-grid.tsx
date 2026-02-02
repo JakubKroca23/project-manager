@@ -89,8 +89,8 @@ export function TimelineGrid() {
                                 onClick={() => alert(`Edit ${item.title} (ID: ${item.id})`)} // Placeholder for interaction
                             >
                                 {/* Label inside bar */}
-                                {width > 60 && (
-                                    <span className="absolute inset-0 flex items-center px-2 text-[10px] font-bold text-white truncate drop-shadow-md pointer-events-none">
+                                {width > 20 && (
+                                    <span className="absolute inset-0 flex items-center px-2 text-[9px] text-white truncate drop-shadow-md pointer-events-none">
                                         {item.title}
                                     </span>
                                 )}

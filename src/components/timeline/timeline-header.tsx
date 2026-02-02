@@ -14,9 +14,14 @@ export function TimelineHeader() {
     const totalWidth = totalDays * pixelsPerDay
 
     // 3. Logic: What to show?
-    const showDays = pixelsPerDay >= 40
-    const showWeeks = pixelsPerDay >= 10 && pixelsPerDay < 40
-    // If < 10 (Month view), we might hide bottom row or show very simplified weeks
+    const showDays = pixelsPerDay >= 10 // Show days even in week view (12px)
+    const showWeeks = pixelsPerDay >= 4 && pixelsPerDay < 40 // Weeks visible in Month view or Week view as overlay?
+    // In Week view (12px), we want Days on bottom. Weeks on top? No, Top is months. 
+    // User wants: "in week view [12px] days can be visible".
+    // Current layout: Top=Months, Bottom=Days/Weeks.
+
+    // If we show days at 12px, they are quite small. But user wants it.
+
     const showTimelineBottom = pixelsPerDay >= 4
 
     // Rows Data

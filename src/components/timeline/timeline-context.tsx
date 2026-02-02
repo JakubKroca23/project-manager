@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useMemo, ReactNode, useCallback } from "react"
-import { addDays, startOfWeek, differenceInDays } from "date-fns"
+import { addDays, startOfWeek, differenceInDays, startOfYear } from "date-fns"
 
 export type TimelineItemType = {
     id: string
@@ -32,7 +32,8 @@ interface TimelineContextType {
 const TimelineContext = createContext<TimelineContextType | undefined>(undefined)
 
 export function TimelineProvider({ children, items }: { children: ReactNode, items: any[] }) {
-    const [startDate, setStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }))
+    // Start from beginning of year to show past
+    const [startDate, setStartDate] = useState(startOfYear(new Date()))
     const [pixelsPerDay, setPixelsPerDay] = useState(40) // Default zoom
     const [scrollX, setScrollX] = useState(0)
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
