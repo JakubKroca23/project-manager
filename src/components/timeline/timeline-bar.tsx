@@ -53,7 +53,9 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
 
         const onPointerMove = (e: PointerEvent) => {
             const deltaX = e.clientX - startX
-            setLeft(startLeft + deltaX)
+            // Snap to grid
+            const daysDelta = Math.round(deltaX / pixelsPerDay)
+            setLeft(startLeft + (daysDelta * pixelsPerDay))
         }
 
         const onPointerUp = (e: PointerEvent) => {
@@ -64,10 +66,12 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
             const daysDelta = Math.round(totalDeltaX / pixelsPerDay)
 
             if (daysDelta === 0) {
-                // Revert visual position if no day change
-                setLeft(initialLeft)
+                setLeft(startLeft)
                 return
             }
+
+            // Force visual snap
+            setLeft(startLeft + (daysDelta * pixelsPerDay))
 
             const newStart = addDays(start, daysDelta).toISOString()
             const newEnd = addDays(end, daysDelta).toISOString()
@@ -88,33 +92,48 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
         const startLeft = left
         const startWidth = width
 
+        const startDayOffset = Math.round(startLeft / pixelsPerDay)
+        const startDuration = Math.round(startWidth / pixelsPerDay)
+
         const onPointerMove = (e: PointerEvent) => {
             const deltaX = e.clientX - startX
+            const daysDelta = Math.round(deltaX / pixelsPerDay)
 
             if (direction === 'right') {
-                const newWidth = Math.max(startWidth + deltaX, pixelsPerDay) // Min 1 day
-                setWidth(newWidth)
+                const newDuration = Math.max(1, startDuration + daysDelta)
+                setWidth(newDuration * pixelsPerDay)
             } else {
-                const newWidth = Math.max(startWidth - deltaX, pixelsPerDay)
-                const newLeft = startLeft + deltaX
-                if (newWidth > pixelsPerDay) {
-                    setLeft(newLeft)
-                    setWidth(newWidth)
-                }
+                const maxLeftDrag = startDuration - 1
+                const validDaysDelta = Math.min(daysDelta, maxLeftDrag)
+
+                setLeft((startDayOffset + validDaysDelta) * pixelsPerDay)
+                setWidth((startDuration - validDaysDelta) * pixelsPerDay)
             }
         }
 
-        const onPointerUp = () => {
+        const onPointerUp = (e: PointerEvent) => {
             setIsResizing(false)
             window.removeEventListener('pointermove', onPointerMove)
             window.removeEventListener('pointerup', onPointerUp)
 
-            // Finalize
-            const newStartDays = Math.round(left / pixelsPerDay)
-            const newDurationDays = Math.round(width / pixelsPerDay)
+            const deltaX = e.clientX - startX
+            const daysDelta = Math.round(deltaX / pixelsPerDay)
 
-            const finalStart = addDays(startDate, newStartDays)
-            const finalEnd = addDays(finalStart, Math.max(newDurationDays - 1, 0))
+            let finalStartDays = startDayOffset
+            let finalDurationDays = startDuration
+
+            if (direction === 'right') {
+                finalDurationDays = Math.max(1, startDuration + daysDelta)
+            } else {
+                const maxLeftDrag = startDuration - 1
+                const validDaysDelta = Math.min(daysDelta, maxLeftDrag)
+
+                finalStartDays = startDayOffset + validDaysDelta
+                finalDurationDays = startDuration - validDaysDelta
+            }
+
+            const finalStart = addDays(startDate, finalStartDays)
+            const finalEnd = addDays(finalStart, Math.max(finalDurationDays - 1, 0))
 
             onUpdate(item.id, finalStart.toISOString(), finalEnd.toISOString())
         }
