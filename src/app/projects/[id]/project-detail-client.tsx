@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation"
 import {
     Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft,
     Layout, Settings, Factory, CheckCircle2, Octagon,
-    MoreVertical, ExternalLink, Package, ShoppingCart
+    MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X
 } from "lucide-react"
 import { UpdateProjectModal } from "@/components/projects/update-project-modal"
-import { deleteProject } from "@/app/projects/actions"
+import { AddSuperstructureModal } from "@/components/projects/add-superstructure-modal"
+import { AddAccessoryModal } from "@/components/projects/add-accessory-modal"
+import { deleteProject, deleteSuperstructure, deleteProjectAccessory } from "@/app/projects/actions"
 import { motion } from "framer-motion"
 
 const statusMap: Record<string, { label: string; color: string; icon: any; bg: string }> = {
@@ -25,6 +27,8 @@ export function ProjectDetailClient({ project }: { project: any }) {
     const router = useRouter()
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isAddSuperstructureOpen, setIsAddSuperstructureOpen] = useState(false)
+    const [isAddAccessoryOpen, setIsAddAccessoryOpen] = useState(false)
 
     const handleDelete = async () => {
         if (!confirm("Opravdu chcete tento projekt smazat?")) return
@@ -37,6 +41,16 @@ export function ProjectDetailClient({ project }: { project: any }) {
             alert(result.error || "Chyba při mazání")
             setIsDeleting(false)
         }
+    }
+
+    const handleDeleteSuperstructure = async (id: string) => {
+        if (!confirm("Opravdu smazat tuto nástavbu?")) return
+        await deleteSuperstructure(id, project.id)
+    }
+
+    const handleDeleteAccessory = async (id: string) => {
+        if (!confirm("Opravdu smazat toto příslušenství?")) return
+        await deleteProjectAccessory(id, project.id)
     }
 
     const currentStatusIdx = statusOrder.indexOf(project.status)
@@ -139,7 +153,15 @@ export function ProjectDetailClient({ project }: { project: any }) {
 
                                     {/* Multiple Superstructures */}
                                     <div className="space-y-3 pt-2">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase px-1">Nástavby</p>
+                                        <div className="flex items-center justify-between px-1">
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase">Nástavby</p>
+                                            <button
+                                                onClick={() => setIsAddSuperstructureOpen(true)}
+                                                className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase flex items-center gap-1"
+                                            >
+                                                <Plus className="w-3 h-3" /> Přidat
+                                            </button>
+                                        </div>
                                         <div className="space-y-2">
                                             {project.superstructures?.length > 0 ? project.superstructures.map((s: any, i: number) => (
                                                 <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 flex justify-between items-center">
@@ -148,11 +170,17 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                                         {s.supplier && <p className="text-[10px] text-muted-foreground italic">{s.supplier}</p>}
                                                     </div>
                                                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${s.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                            s.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                                'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                                                        s.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                            'bg-orange-500/10 text-orange-500 border-orange-500/20'
                                                         }`}>
                                                         {s.order_status === 'delivered' ? 'Dodáno' : s.order_status === 'ordered' ? 'Objednáno' : 'Čeká'}
                                                     </span>
+                                                    <button
+                                                        onClick={() => handleDeleteSuperstructure(s.id)}
+                                                        className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
+                                                    >
+                                                        <X className="w-3.5 h-3.5" />
+                                                    </button>
                                                 </div>
                                             )) : (
                                                 <p className="text-xs text-muted-foreground px-1 italic">Žádná nástavba není definována.</p>
@@ -163,15 +191,24 @@ export function ProjectDetailClient({ project }: { project: any }) {
                             </div>
 
                             <div className="space-y-6 relative z-10 font-medium">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Příslušenství a Výbava</h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Příslušenství a Výbava</h3>
+                                    <button
+                                        onClick={() => setIsAddAccessoryOpen(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                    >
+                                        <Plus className="w-3.5 h-3.5" />
+                                        Přidat
+                                    </button>
+                                </div>
                                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                                     {project.project_accessories?.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
                                         <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 group/item">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <div className={`p-1.5 rounded-lg ${acc.action_type === 'manufacture' ? 'bg-orange-500/10 text-orange-500' :
-                                                            acc.action_type === 'purchase' ? 'bg-blue-500/10 text-blue-500' :
-                                                                'bg-green-500/10 text-green-500'
+                                                        acc.action_type === 'purchase' ? 'bg-blue-500/10 text-blue-500' :
+                                                            'bg-green-500/10 text-green-500'
                                                         }`}>
                                                         {acc.action_type === 'manufacture' ? <Settings className="w-3 h-3" /> :
                                                             acc.action_type === 'purchase' ? <ShoppingCart className="w-3 h-3" /> :
@@ -180,8 +217,8 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                                     <span className="text-sm font-bold">{acc.name}</span>
                                                 </div>
                                                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${acc.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                        acc.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                            'bg-secondary text-muted-foreground border-border'
+                                                    acc.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                        'bg-secondary text-muted-foreground border-border'
                                                     }`}>
                                                     {acc.order_status === 'delivered' ? 'Skladem' : acc.order_status === 'ordered' ? 'Cestě' : 'K objednání'}
                                                 </span>
@@ -363,6 +400,18 @@ export function ProjectDetailClient({ project }: { project: any }) {
                 isOpen={isEditOpen}
                 onClose={() => setIsEditOpen(false)}
                 project={project}
+            />
+
+            <AddSuperstructureModal
+                isOpen={isAddSuperstructureOpen}
+                onClose={() => setIsAddSuperstructureOpen(false)}
+                projectId={project.id}
+            />
+
+            <AddAccessoryModal
+                isOpen={isAddAccessoryOpen}
+                onClose={() => setIsAddAccessoryOpen(false)}
+                projectId={project.id}
             />
         </div>
     )

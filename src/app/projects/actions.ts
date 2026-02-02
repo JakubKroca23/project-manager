@@ -48,3 +48,87 @@ export async function deleteProject(projectId: string) {
     revalidatePath("/projects");
     return { success: true };
 }
+
+export async function createSuperstructure(projectId: string, data: {
+    type: string;
+    supplier?: string;
+    description?: string;
+    order_status?: string;
+}) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("superstructures")
+        // @ts-ignore
+        .insert({
+            project_id: projectId,
+            ...data
+        } as any);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
+
+export async function deleteSuperstructure(id: string, projectId: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("superstructures")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
+
+export async function createProjectAccessory(projectId: string, data: {
+    name: string;
+    action_type: string;
+    supplier?: string;
+    quantity?: number;
+    order_status?: string;
+    notes?: string;
+}) {
+    const supabase = await createClient();
+
+    // Check if it exists in catalog, if not add it (simple version)
+    // For now we just insert into project_accessories
+    const { error } = await supabase
+        .from("project_accessories")
+        // @ts-ignore
+        .insert({
+            project_id: projectId,
+            ...data
+        } as any);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
+
+export async function deleteProjectAccessory(id: string, projectId: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("project_accessories")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
