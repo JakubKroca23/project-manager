@@ -1,67 +1,46 @@
-# Manufacturing System Implementation Plan
+# Production Order PDF Generation
 
 ## Goal
-Implement a complete manufacturing system allowing the creation of Production Orders from Projects, tracking manufacturing tasks, and managing Bill of Materials (BOM).
+Implement functionality to generate and download PDF documents for Production Orders. These PDFs will serve as "Job Cards" for the shop floor, containing project details, manufacturing tasks, and bill of materials (BOM).
 
 ## User Review Required
 > [!IMPORTANT]
-> **Data Model Decisions:**
-> 1. **Multiple Orders per Project**: If a Project has `quantity: 3`, we will generate 3 separate `production_orders` (e.g., "Project X - #1", "Project X - #2").
-> 2. **BOM Scope**: Bill of Materials will be linked to the **Project**. This acts as the "Purchase List" for the whole batch.
-> 3. **Tasks**: Manufacturing Tasks can be standardized (e.g., "Mounting", "Hydraulics", "Testing") and generated for each Order.
+> **Library Choice:** I propose using `@react-pdf/renderer` for robust, React-based PDF generation.
+> **PDF Content:** The PDF will include:
+> - Order Header (ID, Dates, Status)
+> - Project Details (Client, Name, Description)
+> - Manufacturing Tasks Checklist
+> - Bill of Materials (BOM) List
+> - Space for signatures/notes
 
 ## Proposed Changes
 
-### Database Schema (`supabase/manufacturing_schema.sql`)
-#### [NEW] `accessories_catalog`
-- `id`, `name`, `category`, `description`
-
-#### [NEW] `manufacturing_tasks`
-- `id`, `order_id` (FK to production_orders), `title`, `status` (queue, in_progress, done, check), `assigned_to` (for workers)
-
-#### [NEW] `bom_items`
-- `id`, `project_id` (FK to projects), `name`, `quantity`, `unit`, `status` (to_order, ordered, in_stock), `is_custom` (boolean)
-
-#### [MODIFY] `production_orders`
-- Ensure it has `status`, `start_date`, `end_date`, `assigned_to`.
-- (Already exists in `schema.sql`, will check if updates are needed).
+### Dependencies
+#### [MODIFY] `package.json`
+- Add `@react-pdf/renderer`
 
 ### UI Implementation
 
-#### [NEW] Catalogs Page (`/dashboard/catalogs`)
-- Tabs for "Clients", "Superstructures", "Accessories".
-- CRUD operations for each.
+#### [NEW] `src/components/production/pdf-document.tsx`
+- Define the PDF layout using `react-pdf` components (`Document`, `Page`, `View`, `Text`, `StyleSheet`).
+- Styling to match the professional look (clean, readable, simple for printing).
 
-#### [MODIFY] Project Detail Page (`/dashboard/projects/[id]`)
-- **Action**: "Generate Manufacturing Orders"
-    - Visible if `status` is approved/signed.
-    - Creates N records in `production_orders`.
-- **Tab**: "BOM / Material"
-    - Add/Edit items to purchase.
-    - "Generate from Superstructure" (future intelligent feature).
+#### [NEW] `src/components/production/pdf-download-button.tsx`
+- Client component to handle the PDF generation and download trigger using `PDFDownloadLink`.
 
-#### [NEW] Production Dashboard (`/dashboard/production`)
-- **Kanban Board** for `production_orders` (Overview).
-- **Task View** for Workers:
-    - List of tasks assigned to me or in "Queue".
-    - Click to change status (Queue -> In Progress -> Done).
+#### [MODIFY] `src/app/dashboard/production/[orderId]/page.tsx`
+- Add the `PdfDownloadButton` to the action bar.
+- Pass necessary data (Order, Tasks, BOM) to the PDF component.
 
 ## Verification Plan
 
-### Automated Tests
-- None currently set up. Will verify via Manual Verification.
-
 ### Manual Verification
-1.  **Catalog Management**:
-    - Go to `/dashboard/catalogs`.
-    - Create a new Accessory "Hydraulic Pump".
-    - Verify it appears in the list.
-2.  **Order Generation**:
-    - Create a Project with `quantity: 2`.
-    - Click "Generate Orders".
-    - Verify 2 new Orders appear in the Production Dashboard.
-3.  **Task Flow**:
-    - Open an Order.
-    - Add a Task "Assembly".
-    - Move it to "In Progress".
-    - Verify status update.
+1.  **Generate PDF**:
+    - Go to a Production Order detail page.
+    - Click "Download Job Card".
+    - Open the downloaded PDF.
+2.  **Verify Content**:
+    - Check if Project Name and Order ID match.
+    - Verify all tasks are listed with checkboxes.
+    - Verify BOM items are listed with quantities.
+    - Check formatting (margins, fonts).
