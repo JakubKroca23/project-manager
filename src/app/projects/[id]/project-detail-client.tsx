@@ -201,6 +201,35 @@ export function ProjectDetailClient({ project }: { project: any }) {
                             </div>
                         </div>
 
+                        {/* Technická specifikace Sidebar */}
+                        <div className="space-y-6 pt-6 border-t border-border/50">
+                            <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                                Technická Specifikace
+                            </h4>
+                            <div className="space-y-3">
+                                {[
+                                    { label: "Výrobce", value: project.manufacturer },
+                                    { label: "Podvozek", value: project.chassis_type },
+                                    { label: "Nástavba", value: project.superstructure_type },
+                                ].map((spec, i) => spec.value && (
+                                    <div key={i} className="flex justify-between items-center p-2 rounded-lg bg-secondary/20 border border-border/10">
+                                        <span className="text-[10px] uppercase font-bold text-muted-foreground">{spec.label}</span>
+                                        <span className="text-sm font-bold">{spec.value}</span>
+                                    </div>
+                                ))}
+
+                                {project.accessories && (
+                                    <div className="space-y-2 p-3 rounded-xl bg-secondary/30 border border-border/50">
+                                        <p className="text-[10px] font-black uppercase text-muted-foreground leading-none">Příslušenství a výbava</p>
+                                        <p className="text-xs leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                                            {project.accessories}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="pt-4 border-t border-border/50 space-y-4">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rychlé Odkazy</h4>
                             <div className="flex flex-col gap-2">

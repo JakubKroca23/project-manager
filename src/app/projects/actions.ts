@@ -10,6 +10,10 @@ export async function updateProject(projectId: string, data: {
     status?: string;
     start_date?: string;
     end_date?: string | null;
+    chassis_type?: string | null;
+    manufacturer?: string | null;
+    superstructure_type?: string | null;
+    accessories?: string | null;
 }) {
     const supabase = await createClient();
 

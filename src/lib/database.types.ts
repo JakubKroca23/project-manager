@@ -50,6 +50,10 @@ export interface Database {
                     created_by: string | null
                     created_at: string
                     updated_at: string
+                    chassis_type: string | null
+                    manufacturer: string | null
+                    superstructure_type: string | null
+                    accessories: string | null
                 }
                 Insert: {
                     id?: string
@@ -62,6 +66,10 @@ export interface Database {
                     created_by?: string | null
                     created_at?: string
                     updated_at?: string
+                    chassis_type?: string | null
+                    manufacturer?: string | null
+                    superstructure_type?: string | null
+                    accessories?: string | null
                 }
                 Update: {
                     id?: string
@@ -74,6 +82,10 @@ export interface Database {
                     created_by?: string | null
                     created_at?: string
                     updated_at?: string
+                    chassis_type?: string | null
+                    manufacturer?: string | null
+                    superstructure_type?: string | null
+                    accessories?: string | null
                 }
             }
             production_orders: {
