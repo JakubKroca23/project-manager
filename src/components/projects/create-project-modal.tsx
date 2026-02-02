@@ -88,13 +88,13 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         const validSupers = superstructures.filter(s => s.type.trim())
         if (validSupers.length > 0) {
             await supabase.from("superstructures").insert(
-                validSupers.map(s => ({ ...s, project_id: projectData.id }))
+                validSupers.map(s => ({ ...s, project_id: projectData.id })) as any
             )
         }
 
         if (projectAccessories.length > 0) {
             const { error: accError } = await supabase.from("project_accessories").insert(
-                projectAccessories.map(a => ({ ...a, project_id: projectData.id }))
+                projectAccessories.map(a => ({ ...a, project_id: projectData.id })) as any
             )
 
             if (!accError) {
