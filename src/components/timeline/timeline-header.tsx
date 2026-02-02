@@ -1,37 +1,59 @@
 "use client"
 
 import { useTimeline } from "./timeline-context"
-import { getDaysInRange, formatDateCS, HEADER_HEIGHT } from "@/lib/timeline-utils"
-import { addDays } from "date-fns"
+import { addDays, eachDayOfInterval, eachMonthOfInterval, endOfMonth, format, isSameDay, startOfMonth } from "date-fns"
+import { cs } from "date-fns/locale"
 import { motion } from "framer-motion"
 
 export function TimelineHeader() {
-    const { startDate, scrollX, columnWidth } = useTimeline()
+    const { startDate, pixelsPerDay, scrollX } = useTimeline()
 
-    // Render 30 days for now
-    const days = getDaysInRange(startDate, addDays(startDate, 30))
+    // Generate range (e.g. 60 days buffer)
+    const END_DATE = addDays(startDate, 60)
+    const months = eachMonthOfInterval({ start: startDate, end: END_DATE })
+
+    // Calculate total width based on render range
+    const totalDays = eachDayOfInterval({ start: startDate, end: END_DATE }).length
+    const totalWidth = totalDays * pixelsPerDay
 
     return (
-        <div
-            className="glass-heavy sticky top-0 z-20 overflow-hidden border-b border-white/10"
-            style={{ height: HEADER_HEIGHT }}
-        >
+        <div className="h-[50px] bg-background/95 backdrop-blur border-b border-border/50 sticky top-0 z-10 overflow-hidden">
             <motion.div
-                className="flex h-full"
-                style={{ x: -scrollX }}
+                className="h-full relative"
+                style={{ x: -scrollX, width: totalWidth }}
             >
-                {days.map((day, i) => (
-                    <div
-                        key={i}
-                        className="flex-shrink-0 flex items-center justify-center border-r border-border/20 text-xs font-medium text-muted-foreground select-none hover:bg-white/5 transition-colors"
-                        style={{ width: columnWidth }}
-                    >
-                        <div className="text-center">
-                            <div className="opacity-50 text-[10px] uppercase">{formatDateCS(day, "EEE")}</div>
-                            <div className="font-bold text-foreground">{formatDateCS(day, "d")}</div>
+                {/* Month Row */}
+                <div className="flex h-1/2 border-b border-border/10">
+                    {months.map(month => {
+                        const start = month < startDate ? startDate : month
+                        const end = endOfMonth(month) > END_DATE ? END_DATE : endOfMonth(month)
+                        const daysInMonth = eachDayOfInterval({ start, end })
+                        const width = daysInMonth.length * pixelsPerDay
+
+                        return (
+                            <div
+                                key={month.toISOString()}
+                                className="flex items-center px-2 border-r border-border/20 text-xs font-bold uppercase text-muted-foreground whitespace-nowrap overflow-hidden bg-secondary/5"
+                                style={{ width }}
+                            >
+                                {format(month, 'MMMM yyyy', { locale: cs })}
+                            </div>
+                        )
+                    })}
+                </div>
+
+                {/* Days Row */}
+                <div className="flex h-1/2">
+                    {eachDayOfInterval({ start: startDate, end: END_DATE }).map(day => (
+                        <div
+                            key={day.toISOString()}
+                            className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none"
+                            style={{ width: pixelsPerDay }}
+                        >
+                            {pixelsPerDay > 30 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </motion.div>
         </div>
     )

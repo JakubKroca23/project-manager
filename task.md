@@ -9,6 +9,7 @@
 - [x] Enhance `UpdateProjectModal` (better UI, interactivity)
 - [x] Add "History" view to Project Detail page
 - [x] Verify deletion and history logging
+- [x] [Verify] Timeline fixes (previous task)
 
 # CRM Field Expansion & Refactoring
 
@@ -24,7 +25,12 @@
 - [x] Refactor `UpdateProjectModal` with new fields
 - [x] Update `ProjectDetailClient` to display new fields
 
-# Timeline Improvements
+# Timeline 2.0 (Interactive Gantt)
 
-- [x] Fix zooming functionality (Day/Week/Month support)
-- [x] Improve project name visibility on timeline bars
+- [x] Clarify requirements with User
+- [x] Design Component Architecture (Sidebar + Scrollable Area)
+- [x] Implement `useTimelineZoom` (numeric zoom level)
+- [x] Create `TimelineHeader` (Months -> Weeks -> Days based on zoom)
+- [x] Create `TimelineSidebar` (Project/Service list)
+- [x] Create `TimelineGrid` (The rendered bars)
+- [x] Implement smooth interaction (Wheel zoom, Drag scroll)

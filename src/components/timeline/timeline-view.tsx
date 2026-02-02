@@ -1,55 +1,79 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { TimelineProvider, useTimeline } from "@/components/timeline/timeline-context"
 import { TimelineLayout } from "@/components/timeline/timeline-layout"
-import { Plus } from "lucide-react"
+import { Plus, Minus, Search, ZoomIn } from "lucide-react"
 
 function TimelineControls() {
-    const { zoom, setZoom } = useTimeline()
+    const { pixelsPerDay, setPixelsPerDay, setStartDate, startDate } = useTimeline()
 
     return (
-        <div className="flex items-center gap-2">
-            <div className="bg-background/50 p-1 rounded-lg border border-border/50 flex text-xs font-semibold">
-                <button
-                    onClick={() => setZoom("day")}
-                    className={`px-3 py-1.5 rounded-md transition-all ${zoom === 'day' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
-                >
-                    Den
-                </button>
-                <button
-                    onClick={() => setZoom("week")}
-                    className={`px-3 py-1.5 rounded-md transition-all ${zoom === 'week' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
-                >
-                    Týden
-                </button>
-                <button
-                    onClick={() => setZoom("month")}
-                    className={`px-3 py-1.5 rounded-md transition-all ${zoom === 'month' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
-                >
-                    Měsíc
-                </button>
+        <div className="flex items-center gap-4 bg-background/50 p-2 rounded-xl border border-border/50">
+            {/* Zoom Slider */}
+            <div className="flex items-center gap-2">
+                <ZoomIn className="w-4 h-4 text-muted-foreground" />
+                <input
+                    type="range"
+                    min="10"
+                    max="150"
+                    value={pixelsPerDay}
+                    onChange={(e) => setPixelsPerDay(Number(e.target.value))}
+                    className="w-32 h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+                <span className="text-xs font-mono text-muted-foreground w-8 text-right">{pixelsPerDay}px</span>
             </div>
-            <button className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                <Plus className="w-4 h-4" />
-                Naplánovat
-            </button>
+
+            <div className="h-4 w-px bg-border" />
+
+            {/* Quick Actions (Future) */}
+            <button className="text-xs font-bold text-primary hover:underline" onClick={() => setPixelsPerDay(40)}>Reset</button>
+        </div>
+    )
+}
+
+function TimelineWrapper({ items }: { items: any[] }) {
+    const { setPixelsPerDay, pixelsPerDay } = useTimeline()
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    // Wheel Zoom Handler
+    useEffect(() => {
+        const el = containerRef.current
+        if (!el) return
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault()
+                const delta = e.deltaY > 0 ? -5 : 5
+                setPixelsPerDay(Math.max(10, Math.min(200, pixelsPerDay + delta)))
+            }
+        }
+
+        el.addEventListener("wheel", handleWheel, { passive: false })
+        return () => el.removeEventListener("wheel", handleWheel)
+    }, [pixelsPerDay, setPixelsPerDay])
+
+    return (
+        <div ref={containerRef} className="h-full flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
+                        Timeline 2.0 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">Beta</span>
+                    </h1>
+                    <p className="text-sm text-muted-foreground">Podržte CTRL + Kolečko pro zoom, nebo použijte slider.</p>
+                </div>
+                <TimelineControls />
+            </div>
+
+            <TimelineLayout items={items} />
         </div>
     )
 }
 
 export function TimelineView({ items }: { items: any[] }) {
     return (
-        <TimelineProvider>
-            <div className="h-full flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Timeline</h1>
-                        <p className="text-muted-foreground">Interaktivní plánování projektů a kapacity.</p>
-                    </div>
-                    <TimelineControls />
-                </div>
-                <TimelineLayout items={items} />
-            </div>
+        <TimelineProvider items={items}>
+            <TimelineWrapper items={items} />
         </TimelineProvider>
     )
 }
