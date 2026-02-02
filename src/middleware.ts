@@ -45,13 +45,18 @@ export async function middleware(request: NextRequest) {
 
     if (user) {
         // If user is logged in, check if they are approved
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from("profiles")
-            .select("is_approved")
+            .select("is_approved, role")
             .eq("id", user.id)
             .single();
 
-        const isApproved = profile?.is_approved ?? false;
+        if (profileError) {
+            console.error("Middleware profile error:", profileError);
+        }
+
+        const isApproved = profile?.is_approved === true || profile?.role === 'admin';
+        const role = profile?.role;
         const isPendingPath = request.nextUrl.pathname === "/pending-approval";
 
         // If not approved and not on pending page, redirect to pending
@@ -62,13 +67,7 @@ export async function middleware(request: NextRequest) {
         // Check for admin routes
         const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
         if (isAdminPath) {
-            const { data: adminProfile } = await supabase
-                .from("profiles")
-                .select("role")
-                .eq("id", user.id)
-                .single();
-
-            if (adminProfile?.role !== "admin") {
+            if (role !== "admin") {
                 return NextResponse.redirect(new URL("/", request.url));
             }
         }
