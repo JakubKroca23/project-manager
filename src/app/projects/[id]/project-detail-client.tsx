@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation"
 import {
     Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft,
     Layout, Settings, Factory, CheckCircle2, Octagon,
-    MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X
+    MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X, Truck
 } from "lucide-react"
 import { UpdateProjectModal } from "@/components/projects/update-project-modal"
 import { AddSuperstructureModal } from "@/components/projects/add-superstructure-modal"
 import { AddAccessoryModal } from "@/components/projects/add-accessory-modal"
+import { ProjectHistoryModal } from "@/components/projects/project-history-modal"
 import { deleteProject, deleteSuperstructure, deleteProjectAccessory } from "@/app/projects/actions"
 import { motion } from "framer-motion"
 
@@ -29,6 +30,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
     const [isDeleting, setIsDeleting] = useState(false)
     const [isAddSuperstructureOpen, setIsAddSuperstructureOpen] = useState(false)
     const [isAddAccessoryOpen, setIsAddAccessoryOpen] = useState(false)
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
     const handleDelete = async () => {
         if (!confirm("Opravdu chcete tento projekt smazat?")) return
@@ -119,130 +121,148 @@ export function ProjectDetailClient({ project }: { project: any }) {
                             </div>
                         </div>
 
-                        {/* Popis Zakázky Card */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 rounded-[2rem] bg-secondary/20 border border-border/50 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-12 opacity-[0.02] -mr-8 -mt-8 group-hover:scale-110 transition-transform duration-1000">
-                                <Briefcase className="w-48 h-48" />
+                        {/* 1. Podvozek a Základ */}
+                        <div className="glass-panel p-6 space-y-4">
+                            <div className="flex items-center gap-3 pb-2 border-b border-border/50">
+                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Truck className="w-5 h-5" />
+                                </div>
+                                <h3 className="text-lg font-bold tracking-tight">Podvozek a Základ</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-1">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Výrobce</p>
+                                    <p className="font-bold text-lg">{project.manufacturer || "Neuvedeno"}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-1">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Typ Podvozku</p>
+                                    <p className="font-bold text-lg">{project.chassis_type || "Neuvedeno"}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 2. Nástavby */}
+                        <div className="glass-panel p-6 space-y-6">
+                            <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+                                        <Factory className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="text-lg font-bold tracking-tight">Nástavby</h3>
+                                </div>
+                                <button
+                                    onClick={() => setIsAddSuperstructureOpen(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm"
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Přidat
+                                </button>
                             </div>
 
-                            <div className="space-y-6 relative z-10">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Technická Specifikace</h3>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-background/50 border border-border/50">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                            <Factory className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Výrobce</p>
-                                            <p className="text-sm font-bold">{project.manufacturer || "Neuvedeno"}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-background/50 border border-border/50">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                            <Settings className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Typ Podvozku</p>
-                                            <p className="text-sm font-bold">{project.chassis_type || "Neuvedeno"}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Multiple Superstructures */}
-                                    <div className="space-y-3 pt-2">
-                                        <div className="flex items-center justify-between px-1">
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase">Nástavby</p>
-                                            <button
-                                                onClick={() => setIsAddSuperstructureOpen(true)}
-                                                className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase flex items-center gap-1"
-                                            >
-                                                <Plus className="w-3 h-3" /> Přidat
-                                            </button>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {project.superstructures?.length > 0 ? project.superstructures.map((s: any, i: number) => (
-                                                <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 flex justify-between items-center">
-                                                    <div>
-                                                        <p className="text-sm font-bold">{s.type}</p>
-                                                        {s.supplier && <p className="text-[10px] text-muted-foreground italic">{s.supplier}</p>}
-                                                    </div>
-                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${s.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                        s.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                            'bg-orange-500/10 text-orange-500 border-orange-500/20'
-                                                        }`}>
-                                                        {s.order_status === 'delivered' ? 'Dodáno' : s.order_status === 'ordered' ? 'Objednáno' : 'Čeká'}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleDeleteSuperstructure(s.id)}
-                                                        className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
-                                                    >
-                                                        <X className="w-3.5 h-3.5" />
-                                                    </button>
+                            <div className="space-y-3">
+                                {project.superstructures?.length > 0 ? project.superstructures.map((s: any, i: number) => (
+                                    <div key={i} className="p-4 rounded-xl bg-secondary/20 border border-border/50 flex justify-between items-center group hover:bg-secondary/40 transition-colors">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-base">{s.type}</span>
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${s.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                    s.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                        'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                                                    }`}>
+                                                    {s.order_status === 'delivered' ? 'Dodáno' : s.order_status === 'ordered' ? 'Objednáno' : 'Čeká'}
+                                                </span>
+                                            </div>
+                                            {s.supplier && (
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    <User className="w-3 h-3" />
+                                                    {s.supplier}
                                                 </div>
-                                            )) : (
-                                                <p className="text-xs text-muted-foreground px-1 italic">Žádná nástavba není definována.</p>
                                             )}
                                         </div>
+                                        <button
+                                            onClick={() => handleDeleteSuperstructure(s.id)}
+                                            className="p-2 rounded-lg bg-background/50 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
                                     </div>
+                                )) : (
+                                    <div className="text-center py-8 border-2 border-dashed border-border/50 rounded-xl bg-secondary/10">
+                                        <p className="text-sm font-medium text-muted-foreground">Zatím žádná nástavba</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 3. Příslušenství */}
+                        <div className="glass-panel p-6 space-y-6">
+                            <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                                        <Package className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="text-lg font-bold tracking-tight">Příslušenství</h3>
                                 </div>
+                                <button
+                                    onClick={() => setIsAddAccessoryOpen(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm"
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Přidat
+                                </button>
                             </div>
 
-                            <div className="space-y-6 relative z-10 font-medium">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Příslušenství a Výbava</h3>
-                                    <button
-                                        onClick={() => setIsAddAccessoryOpen(true)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                    >
-                                        <Plus className="w-3.5 h-3.5" />
-                                        Přidat
-                                    </button>
-                                </div>
-                                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {project.project_accessories?.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
-                                        <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 group/item">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`p-1.5 rounded-lg ${acc.action_type === 'manufacture' ? 'bg-orange-500/10 text-orange-500' :
-                                                        acc.action_type === 'purchase' ? 'bg-blue-500/10 text-blue-500' :
-                                                            'bg-green-500/10 text-green-500'
-                                                        }`}>
-                                                        {acc.action_type === 'manufacture' ? <Settings className="w-3 h-3" /> :
-                                                            acc.action_type === 'purchase' ? <ShoppingCart className="w-3 h-3" /> :
-                                                                <Package className="w-3 h-3" />}
-                                                    </div>
-                                                    <span className="text-sm font-bold">{acc.name}</span>
+                            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                {project.project_accessories?.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
+                                    <div key={i} className="p-3 rounded-xl bg-background/50 border border-border/50 group hover:bg-secondary/40 transition-colors">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg ${acc.action_type === 'manufacture' ? 'bg-orange-500/10 text-orange-500' :
+                                                    acc.action_type === 'purchase' ? 'bg-blue-500/10 text-blue-500' :
+                                                        'bg-green-500/10 text-green-500'
+                                                    }`}>
+                                                    {acc.action_type === 'manufacture' ? <Settings className="w-4 h-4" /> :
+                                                        acc.action_type === 'purchase' ? <ShoppingCart className="w-4 h-4" /> :
+                                                            <Package className="w-4 h-4" />}
                                                 </div>
+                                                <div>
+                                                    <span className="text-sm font-bold block">{acc.name}</span>
+                                                    {(acc.supplier || acc.notes) && (
+                                                        <div className="text-[10px] text-muted-foreground flex gap-2 mt-0.5">
+                                                            {acc.supplier && <span>{acc.supplier}</span>}
+                                                            {acc.quantity > 1 && <span className="font-bold bg-secondary px-1.5 rounded-full text-foreground">x{acc.quantity}</span>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
                                                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${acc.order_status === 'delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
                                                     acc.order_status === 'ordered' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
                                                         'bg-secondary text-muted-foreground border-border'
                                                     }`}>
                                                     {acc.order_status === 'delivered' ? 'Skladem' : acc.order_status === 'ordered' ? 'Cestě' : 'K objednání'}
                                                 </span>
+                                                <button
+                                                    onClick={() => handleDeleteAccessory(acc.id)}
+                                                    className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
                                             </div>
-                                            {(acc.supplier || acc.notes) && (
-                                                <div className="pl-8 text-[10px] text-muted-foreground flex justify-between">
-                                                    <span className="italic">{acc.supplier || "Interní"}</span>
-                                                    {acc.quantity > 1 && <span className="font-bold">x{acc.quantity}</span>}
-                                                </div>
-                                            )}
                                         </div>
-                                    )) : (
-                                        <div className="text-center py-8 bg-background/20 rounded-2xl border border-dashed border-border">
-                                            <p className="text-xs text-muted-foreground italic">Zatím nebylo přidáno žádné příslušenství.</p>
-                                        </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )) : (
+                                    <div className="text-center py-8 border-2 border-dashed border-border/50 rounded-xl bg-secondary/10">
+                                        <p className="text-sm font-medium text-muted-foreground">Zatím žádné příslušenství</p>
+                                    </div>
+                                )}
+                            </div>
 
-                                <div className="pt-4 border-t border-border/50">
-                                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Poznámky k zakázce</h4>
-                                    <p className="text-sm text-muted-foreground leading-relaxed italic">
-                                        {project.description || "Žádné další poznámky."}
-                                    </p>
-                                </div>
+                            <div className="pt-4 border-t border-border/50">
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Poznámky k zakázce</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed italic">
+                                    {project.description || "Žádné další poznámky."}
+                                </p>
                             </div>
                         </div>
 
@@ -382,7 +402,10 @@ export function ProjectDetailClient({ project }: { project: any }) {
                         <div className="pt-4 border-t border-border/50 space-y-4">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rychlé Odkazy</h4>
                             <div className="flex flex-col gap-2">
-                                <button className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors text-xs font-semibold text-muted-foreground group">
+                                <button
+                                    onClick={() => setIsHistoryOpen(true)}
+                                    className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors text-xs font-semibold text-muted-foreground group"
+                                >
                                     Historie změn
                                     <MoreVertical className="w-3.5 h-3.5 group-hover:text-foreground transition-colors" />
                                 </button>
@@ -411,6 +434,12 @@ export function ProjectDetailClient({ project }: { project: any }) {
             <AddAccessoryModal
                 isOpen={isAddAccessoryOpen}
                 onClose={() => setIsAddAccessoryOpen(false)}
+                projectId={project.id}
+            />
+
+            <ProjectHistoryModal
+                isOpen={isHistoryOpen}
+                onClose={() => setIsHistoryOpen(false)}
                 projectId={project.id}
             />
         </div>

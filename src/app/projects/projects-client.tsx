@@ -73,6 +73,21 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         cell: (p: Project) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
+                        header: "Zahájení",
+                        accessorKey: "start_date",
+                        cell: (p: Project) => p.start_date ? new Date(p.start_date).toLocaleDateString('cs-CZ') : '-'
+                    },
+                    {
+                        header: "Počet",
+                        accessorKey: "quantity",
+                        cell: (p: Project) => p.quantity ? `${p.quantity} ks` : '1 ks'
+                    },
+                    {
+                        header: "Poslední úprava",
+                        accessorKey: "updated_at",
+                        cell: (p: Project) => p.updated_at ? new Date(p.updated_at).toLocaleDateString('cs-CZ') : '-'
+                    },
+                    {
                         header: "Progres",
                         accessorKey: "progress",
                         cell: (p: Project) => (

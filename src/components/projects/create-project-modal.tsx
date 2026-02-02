@@ -3,6 +3,7 @@
 import { useState, useRef } from "react"
 import { Modal } from "@/components/ui/modal"
 import { useCreateProject } from "@/hooks/use-create-project"
+import { createProject } from "@/app/projects/actions"
 import { useAccessoryCatalog } from "@/hooks/use-accessory-catalog"
 import {
     Loader2, Layout, Settings, Factory, CheckCircle2,
@@ -62,47 +63,32 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
         e.preventDefault()
         setIsLoading(true)
 
-        // 1. Create Project
-        const { data: projectData, error: projError } = await supabase
-            .from("projects")
-            .insert({
-                title: formData.title,
-                client_name: formData.client_name,
-                description: formData.description,
-                start_date: formData.start_date,
-                end_date: formData.end_date || null,
-                status: formData.status,
-                manufacturer: formData.manufacturer || null,
-                chassis_type: formData.chassis_type || null,
-                quantity: Number(formData.quantity)
-            } as any)
-            .select()
-            .single() as any
+        // 1. Create Project via Server Action
+        const result = await createProject({
+            title: formData.title,
+            client_name: formData.client_name,
+            description: formData.description,
+            start_date: formData.start_date,
+            end_date: formData.end_date || null,
+            status: formData.status,
+            manufacturer: formData.manufacturer || null,
+            chassis_type: formData.chassis_type || null,
+            quantity: Number(formData.quantity),
+            superstructures: superstructures,
+            accessories: projectAccessories
+        })
 
-        if (projError || !projectData) {
+        if (result.error) {
+            console.error(result.error)
             setIsLoading(false)
             return
         }
 
-        // 2. Add Superstructures
-        const validSupers = superstructures.filter(s => s.type.trim())
-        if (validSupers.length > 0) {
-            await supabase.from("superstructures").insert(
-                validSupers.map(s => ({ ...s, project_id: (projectData as any).id })) as any
-            )
-        }
-
+        // 3. Sync Catalog (Client Side for now)
         if (projectAccessories.length > 0) {
-            const { error: accError } = await supabase.from("project_accessories").insert(
-                projectAccessories.map(a => ({ ...a, project_id: (projectData as any).id })) as any
-            )
-
-            if (!accError) {
-                // Sync new accessories to master catalog
-                for (const acc of projectAccessories) {
-                    if (!catalog.find(c => c.name.toLowerCase() === acc.name.toLowerCase())) {
-                        await addToCatalog(acc.name)
-                    }
+            for (const acc of projectAccessories) {
+                if (!catalog.find(c => c.name.toLowerCase() === acc.name.toLowerCase())) {
+                    await addToCatalog(acc.name)
                 }
             }
         }
