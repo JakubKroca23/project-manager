@@ -30,7 +30,7 @@ export function ProductionOrderDetailClient({ order, tasks: initialTasks }: { or
 
         const { error } = await supabase
             .from("manufacturing_tasks")
-            .update({ status: newStatus })
+            .update({ status: newStatus } as any)
             .eq("id", taskId)
 
         if (error) {
