@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Layout, Settings, Factory, CheckCircle2, Octagon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
@@ -12,11 +12,12 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
     manager_name?: string
 }
 
-const statusMap: Record<string, { label: string; color: string }> = {
-    planning: { label: "Plánování", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-    in_progress: { label: "V řešení", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
-    completed: { label: "Dokončeno", color: "bg-green-500/10 text-green-600 dark:text-green-400" },
-    paused: { label: "Pozastaveno", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
+const statusMap: Record<string, { label: string; color: string; icon: any }> = {
+    planning: { label: "Plánování", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20", icon: Layout },
+    development: { label: "Vývoj", color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20", icon: Settings },
+    production: { label: "Výroba", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20", icon: Factory },
+    completed: { label: "Dokončeno", color: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20", icon: CheckCircle2 },
+    stopped: { label: "Zastaveno", color: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20", icon: Octagon },
 }
 
 export function ProjectsClient({ initialData }: { initialData: Project[] }) {
@@ -56,9 +57,11 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         header: "Stav",
                         accessorKey: "status",
                         cell: (p: Project) => {
-                            const status = statusMap[p.status] || { label: p.status, color: "bg-secondary text-secondary-foreground" }
+                            const status = statusMap[p.status] || { label: p.status, color: "bg-secondary text-secondary-foreground", icon: Layout }
+                            const Icon = status.icon
                             return (
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${status.color}`}>
+                                    <Icon className="w-3.5 h-3.5" />
                                     {status.label}
                                 </span>
                             )
