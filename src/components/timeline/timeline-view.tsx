@@ -12,7 +12,15 @@ function TimelineControls() {
         <div className="flex items-center gap-4 bg-background/50 p-2 rounded-xl border border-border/50">
             {/* Zoom Slider */}
             <div className="flex items-center gap-2">
-                <ZoomIn className="w-4 h-4 text-muted-foreground" />
+                <ZoomIn className="w-4 h-4 text-muted-foreground mr-2" />
+
+                <button
+                    onClick={() => setPixelsPerDay(Math.max(2, pixelsPerDay - 5))}
+                    className="p-1 hover:bg-secondary rounded-md"
+                >
+                    <Minus className="w-3 h-3" />
+                </button>
+
                 <input
                     type="range"
                     min="2"
@@ -21,6 +29,14 @@ function TimelineControls() {
                     onChange={(e) => setPixelsPerDay(Number(e.target.value))}
                     className="w-32 h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                 />
+
+                <button
+                    onClick={() => setPixelsPerDay(Math.min(100, pixelsPerDay + 5))}
+                    className="p-1 hover:bg-secondary rounded-md"
+                >
+                    <Plus className="w-3 h-3" />
+                </button>
+
                 <span className="text-xs font-mono text-muted-foreground w-8 text-right">{pixelsPerDay}px</span>
             </div>
 

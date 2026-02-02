@@ -44,15 +44,39 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
             : 'bg-orange-500'
 
     // Handlers
-    const handleDragEnd = (_: any, info: any) => {
-        const movePixels = info.offset.x
-        const daysDelta = Math.round(movePixels / pixelsPerDay)
-        if (daysDelta === 0) return
+    const handleDragStart = (e: React.PointerEvent) => {
+        if (isResizing) return
+        e.preventDefault()
 
-        const newStart = addDays(start, daysDelta).toISOString()
-        const newEnd = addDays(end, daysDelta).toISOString()
+        const startX = e.clientX
+        const startLeft = left
 
-        onUpdate(item.id, newStart, newEnd)
+        const onPointerMove = (e: PointerEvent) => {
+            const deltaX = e.clientX - startX
+            setLeft(startLeft + deltaX)
+        }
+
+        const onPointerUp = (e: PointerEvent) => {
+            window.removeEventListener('pointermove', onPointerMove)
+            window.removeEventListener('pointerup', onPointerUp)
+
+            const totalDeltaX = e.clientX - startX
+            const daysDelta = Math.round(totalDeltaX / pixelsPerDay)
+
+            if (daysDelta === 0) {
+                // Revert visual position if no day change
+                setLeft(initialLeft)
+                return
+            }
+
+            const newStart = addDays(start, daysDelta).toISOString()
+            const newEnd = addDays(end, daysDelta).toISOString()
+
+            onUpdate(item.id, newStart, newEnd)
+        }
+
+        window.addEventListener('pointermove', onPointerMove)
+        window.addEventListener('pointerup', onPointerUp)
     }
 
     const handleResizeStart = (e: React.PointerEvent, direction: 'left' | 'right') => {
@@ -85,37 +109,12 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
             window.removeEventListener('pointermove', onPointerMove)
             window.removeEventListener('pointerup', onPointerUp)
 
-            // Calculate final dates
-            // Delta from initial state
-            const finalLeftDelta = left - initialLeft
-            const startDeltaDays = Math.round(finalLeftDelta / pixelsPerDay)
-
-            const finalWidthDelta = width - initialWidth
-            const durationDeltaDays = Math.round(finalWidthDelta / pixelsPerDay)
-
-            // New Dates
-            // Left resize: start changes, end stays same (mostly)
-            // Right resize: start stays same, end changes
-
-            let newStart = start
-            let newEnd = end
-
-            if (direction === 'left') {
-                newStart = addDays(start, startDeltaDays)
-                // End date should ideally stay same if we just moved start? 
-                // logic: newWidth = oldWidth - deltaX
-                // Duration changed.
-            }
-
-            // Simpler Logic: 
-            // Calculate new Start based on new Left
-            // Calculate new End based on new Left + new Width
-
+            // Finalize
             const newStartDays = Math.round(left / pixelsPerDay)
             const newDurationDays = Math.round(width / pixelsPerDay)
 
             const finalStart = addDays(startDate, newStartDays)
-            const finalEnd = addDays(finalStart, Math.max(newDurationDays - 1, 0)) // duration 1 day = start==end
+            const finalEnd = addDays(finalStart, Math.max(newDurationDays - 1, 0))
 
             onUpdate(item.id, finalStart.toISOString(), finalEnd.toISOString())
         }
@@ -130,14 +129,7 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
             style={{ height, top }}
         >
             <motion.div
-                drag={isResizing ? false : "x"} // Disable drag when resizing
-                dragMomentum={false}
-                dragElastic={0}
-                dragControls={controls}
-                dragListener={!isResizing}
-                onDragEnd={handleDragEnd}
-                whileDrag={{ cursor: "grabbing", zIndex: 50, opacity: 0.9 }}
-                animate={{ x: 0 }} // Reset transform after drag
+                onPointerDown={handleDragStart}
                 className={`absolute h-8 top-1 shadow-sm ${color} cursor-grab active:cursor-grabbing border border-primary/20 bg-opacity-90 hover:bg-opacity-100 transition-colors z-10 flex items-center select-none`}
                 style={{
                     left,

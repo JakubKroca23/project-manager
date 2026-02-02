@@ -45,3 +45,4 @@
 - [x] Visual Contrast: Enhance Month/Week/Day headers and Grid lines
 - [x] Timeline Interactions: Resize (Handles), Square Corners, Smoother Drag
 - [x] Fix: Resize/Drag interaction conflict (ghost transform)
+- [x] Controls: Add +/- Zoom Buttons and fix "jumping" behavior
