@@ -449,6 +449,15 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
                                         </div>
                                     )}
                                 </div>
+                                <select
+                                    value={newAccessory.action_type}
+                                    onChange={e => setNewAccessory(prev => ({ ...prev, action_type: e.target.value }))}
+                                    className="px-2 py-2 rounded-lg bg-background border border-border text-sm max-w-[100px]"
+                                >
+                                    <option value="purchase">Koupit</option>
+                                    <option value="manufacture">Vyrobit</option>
+                                    <option value="stock">Sklad</option>
+                                </select>
                                 <input type="number" min="1" value={newAccessory.quantity}
                                     onChange={e => setNewAccessory(prev => ({ ...prev, quantity: Number(e.target.value) }))}
                                     className="w-16 px-2 py-2 rounded-lg bg-background border border-border text-center text-sm" />
