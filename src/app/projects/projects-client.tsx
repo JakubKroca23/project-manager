@@ -45,15 +45,28 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
             <DataTable<Project>
                 data={initialData}
                 onRowClick={(p: Project) => router.push(`/projects/${p.id}`)}
+                storageKey="projects-list-columns"
+                searchPlaceholder="Hledat projekty..."
                 columns={[
                     {
+                        id: "title",
                         header: "Název Projektu",
                         accessorKey: "title",
-                        cell: (p: Project) => <span className="font-medium text-foreground">{p.title}</span>
+                        cell: (p: Project) => <span className="font-medium text-foreground">{p.title}</span>,
+                        enableHiding: false
                     },
-                    { header: "Klient", accessorKey: "client_name" },
-                    { header: "Vedoucí", accessorKey: "manager_name" },
                     {
+                        id: "client",
+                        header: "Klient",
+                        accessorKey: "client_name"
+                    },
+                    {
+                        id: "manager",
+                        header: "Vedoucí",
+                        accessorKey: "manager_name"
+                    },
+                    {
+                        id: "status",
                         header: "Stav",
                         accessorKey: "status",
                         cell: (p: Project) => {
@@ -68,26 +81,31 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         }
                     },
                     {
+                        id: "end_date",
                         header: "Termín",
                         accessorKey: "end_date",
                         cell: (p: Project) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
+                        id: "start_date",
                         header: "Zahájení",
                         accessorKey: "start_date",
                         cell: (p: Project) => p.start_date ? new Date(p.start_date).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
+                        id: "quantity",
                         header: "Počet",
                         accessorKey: "quantity",
                         cell: (p: Project) => p.quantity ? `${p.quantity} ks` : '1 ks'
                     },
                     {
+                        id: "updated_at",
                         header: "Poslední úprava",
                         accessorKey: "updated_at",
                         cell: (p: Project) => p.updated_at ? new Date(p.updated_at).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
+                        id: "progress",
                         header: "Progres",
                         accessorKey: "progress",
                         cell: (p: Project) => (

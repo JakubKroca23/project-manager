@@ -279,3 +279,100 @@ export async function deleteProjectAccessory(id: string, projectId: string) {
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
+
+export async function updateProjectProductionDescription(projectId: string, description: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("projects")
+        // @ts-ignore
+        .update({ production_description: description } as any)
+        .eq("id", projectId);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    await logProjectHistory(projectId, "production_description_updated", {});
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
+
+export async function generateProductionOrders(projectId: string, durationWeeks: number) {
+    const supabase = await createClient();
+
+    // 1. Get Project Data
+    const { data: project, error: projError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+    if (projError || !project) {
+        return { error: "Projekt nenalezen." };
+    }
+
+    // @ts-ignore
+    if (!project.production_description) {
+        return { error: "Chybí 'Popis zakázky'. Před generováním je nutné jej vyplnit." };
+    }
+
+    if (!project.start_date) {
+        return { error: "Projekt nemá nastavené datum zahájení." };
+    }
+
+    const quantity = project.quantity || 1;
+    const startDate = new Date(project.start_date);
+    const durationMs = durationWeeks * 7 * 24 * 60 * 60 * 1000;
+    const overlapMs = 1 * 7 * 24 * 60 * 60 * 1000; // 1 week overlap
+
+    const ordersToCreate = [];
+
+    // 2. Calculate Timeline
+    // Job 1: Start = Project Start
+    // Job 2: Start = Job 1 End - Overlap
+    // ...
+
+    let previousEndDate = startDate.getTime(); // Initialize for logic mainly, but specifically for first item:
+
+    for (let i = 0; i < quantity; i++) {
+        let currentStartDateMs;
+
+        if (i === 0) {
+            currentStartDateMs = startDate.getTime();
+        } else {
+            // Start = Previous End - Overlap
+            currentStartDateMs = previousEndDate - overlapMs;
+        }
+
+        const currentEndDateMs = currentStartDateMs + durationMs;
+        const startIso = new Date(currentStartDateMs).toISOString();
+        const endIso = new Date(currentEndDateMs).toISOString();
+
+        previousEndDate = currentEndDateMs;
+
+        ordersToCreate.push({
+            project_id: projectId,
+            title: `Výrobní zakázka #${i + 1} - ${project.title}`,
+            quantity: 1, // 1 vehicle per job? implied by logic
+            status: "planned",
+            priority: "medium",
+            start_date: startIso,
+            end_date: endIso,
+            notes: "Automaticky vygenerováno z projektu"
+        });
+    }
+
+    // 3. Insert Orders
+    const { error: insertError } = await supabase
+        .from("production_orders")
+        .insert(ordersToCreate as any);
+
+    if (insertError) {
+        return { error: `Chyba při vytváření zakázek: ${insertError.message}` };
+    }
+
+    await logProjectHistory(projectId, "production_orders_generated", { count: quantity, durationWeeks });
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+}
