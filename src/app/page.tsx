@@ -4,20 +4,38 @@ import { StatCard } from "@/components/dashboard/stat-card"
 import { ActivityStream } from "@/components/dashboard/activity-stream"
 
 export default async function Home() {
-    const supabase = await createClient()
+    let activeProjects = 0
+    let activeOrders = 0
+    let scheduledServices = 0
+    let criticalOrders = 0
 
-    // Parallel fetching of counts
-    const [
-        { count: activeProjects },
-        { count: activeOrders },
-        { count: scheduledServices },
-        { count: criticalOrders }
-    ] = await Promise.all([
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
-        supabase.from('production_orders').select('*', { count: 'exact', head: true }).neq('status', 'done'),
-        supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'scheduled'),
-        supabase.from('production_orders').select('*', { count: 'exact', head: true }).eq('priority', 'critical').neq('status', 'done')
-    ])
+    try {
+        const supabase = await createClient()
+
+        // Parallel fetching of counts
+        const results = await Promise.all([
+            supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
+            supabase.from('production_orders').select('*', { count: 'exact', head: true }).neq('status', 'done'),
+            supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'scheduled'),
+            supabase.from('production_orders').select('*', { count: 'exact', head: true }).eq('priority', 'critical').neq('status', 'done')
+        ])
+
+        // Check for errors in individual results
+        results.forEach((res, index) => {
+            if (res.error) {
+                console.error(`Error fetching data for index ${index}:`, res.error)
+            }
+        })
+
+        activeProjects = results[0].count || 0
+        activeOrders = results[1].count || 0
+        scheduledServices = results[2].count || 0
+        criticalOrders = results[3].count || 0
+
+    } catch (err) {
+        console.error("Critical error loading dashboard data:", err)
+        // We process gracefully with 0 values
+    }
 
     return (
         <div className="space-y-8">
