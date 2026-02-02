@@ -71,8 +71,14 @@ export function TimelineGrid() {
             onMouseMove={onMouseMove}
             className="flex-1 overflow-auto relative custom-scrollbar bg-transparent select-none cursor-grab"
         >
-            <div className="relative min-h-full" style={{ width: totalWidth, height: visibleItems.length * ROW_HEIGHT }}>
-
+            <div
+                className="relative min-h-full"
+                style={{
+                    width: totalWidth,
+                    minHeight: '100%',
+                    height: visibleItems.length * ROW_HEIGHT > 0 ? visibleItems.length * ROW_HEIGHT : '100%'
+                }}
+            >
                 {/* Background Grid - Subtler */}
                 <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none flex">
                     {eachDayOfInterval({ start: startDate, end: END_DATE }).map((day, i) => {

@@ -87,4 +87,10 @@
 - [ ] Implement `isFullscreen` state in `TimelineProvider`
 - [ ] Re-introduce header and container styling for standard mode
 - [ ] Implement Fullscreen button (Toggle Navbar + Viewport expansion)
-- [ ] Ensure persistence or clean transition between modes
+- [x] Ensure persistence or clean transition between modes
+
+# Timeline Fullscreen & Vertical Height Fixes
+- [/] Fix `TimelineGrid` height to fill vertical space even with few items
+- [ ] Ensure `isFullscreen` correctly bypasses all parent constraints (RootLayout paddings etc.)
+- [ ] Verify sidebar border-r extends to the bottom
+- [ ] Final verification of "az dolu" requirement

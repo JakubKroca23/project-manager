@@ -67,12 +67,20 @@ function TimelineWrapper({ items }: { items: any[] }) {
             ref={containerRef}
             className={`
                 ${isFullscreen
-                    ? 'fixed inset-0 z-[9999] bg-background p-0'
+                    ? 'fixed inset-0 z-[100001] bg-background p-0'
                     : 'flex-1 flex flex-col gap-4'
                 }
                 relative overflow-hidden
             `}
         >
+            {isFullscreen && (
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    header { display: none !important; }
+                    main { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+                ` }} />
+            )}
+
             {!isFullscreen && (
                 <div className="flex items-center justify-between">
                     <div>
@@ -89,7 +97,7 @@ function TimelineWrapper({ items }: { items: any[] }) {
             </div>
 
             {/* Zoom Controls Overlay */}
-            <div className={`absolute ${isFullscreen ? 'bottom-8 right-8' : 'bottom-6 right-6'} z-[10000]`}>
+            <div className={`absolute ${isFullscreen ? 'bottom-8 right-8' : 'bottom-6 right-6'} z-[100002]`}>
                 <TimelineControls />
             </div>
         </div>
