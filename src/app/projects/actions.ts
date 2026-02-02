@@ -302,21 +302,24 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
     const supabase = await createClient();
 
     // 1. Get Project Data
-    const { data: project, error: projError } = await supabase
+    const { data: projectRaw, error: projError } = await supabase
         .from("projects")
         .select("*")
         .eq("id", projectId)
         .single();
 
-    if (projError || !project) {
+    if (projError || !projectRaw) {
         return { error: "Projekt nenalezen." };
     }
+
+    const project = projectRaw as any;
 
     // @ts-ignore
     if (!project.production_description) {
         return { error: "Chybí 'Popis zakázky'. Před generováním je nutné jej vyplnit." };
     }
 
+    // @ts-ignore
     if (!project.start_date) {
         return { error: "Projekt nemá nastavené datum zahájení." };
     }
