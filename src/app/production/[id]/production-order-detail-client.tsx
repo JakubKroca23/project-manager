@@ -28,9 +28,9 @@ export function ProductionOrderDetailClient({ order, tasks: initialTasks }: { or
         // Optimistic update
         setTasks(current => current.map(t => t.id === taskId ? { ...t, status: newStatus } : t))
 
-        const { error } = await supabase
+        const { error } = await (supabase as any)
             .from("manufacturing_tasks")
-            .update({ status: newStatus } as any)
+            .update({ status: newStatus })
             .eq("id", taskId)
 
         if (error) {
