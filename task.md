@@ -49,6 +49,8 @@
 - [x] Interaction: Enforce strict "Snap-to-Day" logic for drag/resize
 - [x] Navigation: Move detail click to Sidebar (Name) instead of Bar
 
+- [x] [Verify] Timeline full-height grid lines
+
 # Manufacturing System Implementation
 
 - [x] Requirements & Planning
@@ -65,7 +67,7 @@
 - [x] UI Implementation - Production Orders
     - [x] "Generate Order from Project" Action  (split by quantity)
     - [x] Order Detail View (Status, Deadlines, BOM)
-    - [ ] PDF Generation for Order
+    - [x] PDF Generation for Order (Job Cards)
 - [x] UI Implementation - Shop Floor (Tasks)
     - [x] Task Dashboard (Kanban/List) for workers (Implemented via Detail/Dashboard)
     - [x] Task Status Transitions
@@ -94,3 +96,10 @@
 - [x] Ensure `isFullscreen` correctly bypasses all parent constraints (RootLayout paddings etc.)
 - [x] Verify sidebar border-r extends to the bottom
 - [x] Final verification of "az dolu" requirement
+
+# Job Card PDF Generation
+- [x] Install `@react-pdf/renderer`
+- [x] Create `PdfDocument` component (Layout, Styles)
+- [x] Create `PdfDownloadButton` component
+- [x] Integrate into Production Order Detail Page
+- [x] Verify PDF content (Tasks, BOM, No Prices)

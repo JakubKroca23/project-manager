@@ -7,8 +7,10 @@ import { Database } from "@/lib/database.types"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, Calendar, FileText, CheckCircle2, Clock, PlayCircle, AlertCircle } from "lucide-react"
 
+import { PdfDownloadButton } from "@/components/production/pdf-download-button"
+
 type Order = Database['public']['Tables']['production_orders']['Row'] & {
-    project?: { id: string, title: string } | null
+    project?: { id: string, title: string, client?: { name: string }, description?: string } | null
 }
 type Task = Database['public']['Tables']['manufacturing_tasks']['Row']
 
@@ -19,7 +21,7 @@ const statusMap: Record<string, { label: string; color: string; icon: any }> = {
     check: { label: "Kontrola", color: "text-orange-500", icon: AlertCircle },
 }
 
-export function ProductionOrderDetailClient({ order, tasks: initialTasks }: { order: Order, tasks: Task[] }) {
+export function ProductionOrderDetailClient({ order, tasks: initialTasks, bomItems = [] }: { order: Order, tasks: Task[], bomItems?: any[] }) {
     const [tasks, setTasks] = useState<Task[]>(initialTasks)
     const router = useRouter()
     const supabase = createClient()
@@ -60,6 +62,9 @@ export function ProductionOrderDetailClient({ order, tasks: initialTasks }: { or
                             {order.end_date ? new Date(order.end_date).toLocaleDateString() : "-"}
                         </span>
                     </div>
+                </div>
+                <div className="ml-auto">
+                    <PdfDownloadButton order={order} tasks={tasks} bomItems={bomItems} />
                 </div>
             </div>
 

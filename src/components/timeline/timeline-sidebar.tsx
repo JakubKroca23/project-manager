@@ -21,48 +21,54 @@ export function TimelineSidebar() {
             </div>
 
             {/* List */}
+            {/* List */}
             <div className="flex-1 overflow-hidden relative">
                 <div
                     className="absolute inset-0 overflow-y-auto no-scrollbar"
                     id="sidebar-scroll"
-                    style={{
-                        backgroundImage: 'linear-gradient(to bottom, transparent 41px, hsl(var(--border) / 0.1) 41px)',
-                        backgroundSize: `100% ${ROW_HEIGHT}px`
-                    }}
                 >
-                    {visibleItems.map(item => {
-                        const isParent = !item.parent_id
-                        const isExpanded = expandedIds.has(item.id)
-                        const Icon = item.type === 'project' ? Folder : item.type === 'service' ? Wrench : Briefcase
+                    <div
+                        style={{
+                            minHeight: '100%',
+                            height: visibleItems.length * ROW_HEIGHT > 0 ? visibleItems.length * ROW_HEIGHT : '100%',
+                            backgroundImage: 'linear-gradient(to bottom, transparent 41px, hsl(var(--border) / 0.1) 41px)',
+                            backgroundSize: `100% ${ROW_HEIGHT}px`
+                        }}
+                    >
+                        {visibleItems.map(item => {
+                            const isParent = !item.parent_id
+                            const isExpanded = expandedIds.has(item.id)
+                            const Icon = item.type === 'project' ? Folder : item.type === 'service' ? Wrench : Briefcase
 
-                        return (
-                            <div
-                                key={item.id}
-                                className={`flex items-center px-3 border-b border-border/10 hover:bg-secondary/20 transition-colors truncate cursor-pointer
-                                    ${item.parent_id ? 'bg-secondary/5' : ''}
-                                `}
-                                onClick={() => {
-                                    if (item.type === 'project') {
-                                        router.push(`/projects/${item.id}`)
-                                    }
-                                }}
-                                style={{ height: ROW_HEIGHT, paddingLeft: item.parent_id ? '2rem' : '0.75rem' }}
-                            >
-                                {isParent && item.type === 'project' && (
-                                    <button
-                                        onClick={() => toggleExpand(item.id)}
-                                        className="p-1 mr-1 hover:bg-secondary rounded text-muted-foreground"
-                                    >
-                                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                                    </button>
-                                )}
-                                {!isParent && <div className="w-5 mr-1" />} {/* Indent spacer for children */}
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`flex items-center px-3 border-b border-border/10 hover:bg-secondary/20 transition-colors truncate cursor-pointer
+                                        ${item.parent_id ? 'bg-secondary/5' : ''}
+                                    `}
+                                    onClick={() => {
+                                        if (item.type === 'project') {
+                                            router.push(`/projects/${item.id}`)
+                                        }
+                                    }}
+                                    style={{ height: ROW_HEIGHT, paddingLeft: item.parent_id ? '2rem' : '0.75rem' }}
+                                >
+                                    {isParent && item.type === 'project' && (
+                                        <button
+                                            onClick={() => toggleExpand(item.id)}
+                                            className="p-1 mr-1 hover:bg-secondary rounded text-muted-foreground"
+                                        >
+                                            {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                        </button>
+                                    )}
+                                    {!isParent && <div className="w-5 mr-1" />} {/* Indent spacer for children */}
 
-                                <Icon className={`w-3.5 h-3.5 mr-2 ${item.type === 'project' ? 'text-blue-500' : item.type === 'service' ? 'text-purple-500' : 'text-orange-500'}`} />
-                                <span className="text-xs font-medium truncate">{item.title}</span>
-                            </div>
-                        )
-                    })}
+                                    <Icon className={`w-3.5 h-3.5 mr-2 ${item.type === 'project' ? 'text-blue-500' : item.type === 'service' ? 'text-purple-500' : 'text-orange-500'}`} />
+                                    <span className="text-xs font-medium truncate">{item.title}</span>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
         </div>

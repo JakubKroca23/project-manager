@@ -21,9 +21,15 @@ Implement functionality to generate and download PDF documents for Production Or
 
 ### UI Implementation
 
+#### [FIX] Timeline Visuals
+- **TimelineGrid**: Ensure `min-height: 100%` and background grid repeats to fill the viewport even when there are few projects.
+- **TimelineSidebar**: Ensure sidebar visuals (lines/borders) match the grid height relative to the viewport.
+
 #### [NEW] `src/components/production/pdf-document.tsx`
 - Define the PDF layout using `react-pdf` components (`Document`, `Page`, `View`, `Text`, `StyleSheet`).
 - Styling to match the professional look (clean, readable, simple for printing).
+- **Content**: Order ID, Project Name, Client, Description, Tasks (Checklist), BOM (List).
+- **Constraints**: No prices, "Job Card" style.
 
 #### [NEW] `src/components/production/pdf-download-button.tsx`
 - Client component to handle the PDF generation and download trigger using `PDFDownloadLink`.
