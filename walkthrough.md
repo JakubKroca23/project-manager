@@ -24,3 +24,13 @@
 ## Verification
 - **Visuals**: Timeline should now look "full" vertically.
 - **Functionality**: Clicking "Stáhnout PDF" generates a file named `job-card.pdf` with the order details.
+
+## 3. UI Refinements
+**Goal**: Polish user experience and fix mobile layout issues.
+
+**Changes**:
+- **AppShell**: Implemented conditional layout rendering. `TopBar` is now hidden on `/login` and `/signup` pages.
+- **TopBar**:
+  - Added **User Dropdown** (Initials -> Settings/Logout).
+  - Added **Mobile Hamburger Menu** for better navigation on small screens.
+- **Dashboard**: Replaced generic greeting with "Vítejte zpět, [Jméno]".

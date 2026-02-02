@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { TopBar } from "@/components/layout/TopBar";
+import { AppShell } from "@/components/layout/app-shell";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -38,12 +38,9 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <div className="relative min-h-screen flex flex-col bg-muted/30">
-                        <TopBar role={role} />
-                        <main className="flex-1 w-full max-w-7xl mx-auto pt-28 px-6 pb-12 flex flex-col">
-                            {children}
-                        </main>
-                    </div>
+                    <AppShell role={role} user={user}>
+                        {children}
+                    </AppShell>
                 </ThemeProvider>
             </body>
         </html>

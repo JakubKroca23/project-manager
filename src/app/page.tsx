@@ -10,8 +10,14 @@ export default async function Home() {
     let scheduledServices = 0
     let criticalOrders = 0
 
+    let userName = "Uživateli"
+
     try {
         const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+            userName = user.user_metadata?.full_name || user.email?.split("@")[0] || "Uživateli"
+        }
 
         // Parallel fetching of counts
         const results = await Promise.all([
@@ -42,7 +48,7 @@ export default async function Home() {
         <div className="space-y-8">
             {/* Welcome Section */}
             <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight">Vítejte zpět 👋</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Vítejte zpět, {userName} 👋</h1>
                 <p className="text-muted-foreground">Tady je přehled toho, co se děje ve vašich projektech.</p>
             </div>
 

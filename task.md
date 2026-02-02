@@ -103,3 +103,9 @@
 - [x] Create `PdfDownloadButton` component
 - [x] Integrate into Production Order Detail Page
 - [x] Verify PDF content (Tasks, BOM, No Prices)
+
+# UI Refinements & Fixes
+- [x] Dashboard: Display logged-in user's name
+- [x] TopBar: Add User Settings & Logout (Dropdown)
+- [x] TopBar: Fix mobile navigation (Hamburger Menu)
+- [x] Layout: Hide TopBar on Login/Signup pages (AppShell)
