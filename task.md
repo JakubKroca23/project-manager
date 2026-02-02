@@ -36,3 +36,4 @@
 - [x] Implement smooth interaction (Wheel zoom, Drag scroll)
 - [x] Visual Polish: Transparent BG, Extended Range (365d), Dynamic Header
 - [x] Implement 3-state Zoom controls (Day/Week/Month)
+- [x] Visual Enhancements: Weekends, Current Day, Month Separators

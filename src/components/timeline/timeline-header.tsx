@@ -57,15 +57,20 @@ export function TimelineHeader() {
                 {showTimelineBottom && (
                     <div className="flex h-1/2">
                         {showDays ? (
-                            days.map(day => (
-                                <div
-                                    key={day.toISOString()}
-                                    className="flex items-center justify-center border-r border-border/5 text-[10px] text-muted-foreground select-none overflow-hidden"
-                                    style={{ width: pixelsPerDay }}
-                                >
-                                    {pixelsPerDay > 45 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
-                                </div>
-                            ))
+                            days.map(day => {
+                                const isToday = day.toDateString() === new Date().toDateString()
+                                return (
+                                    <div
+                                        key={day.toISOString()}
+                                        className={`flex items-center justify-center border-r border-border/5 text-[10px] select-none overflow-hidden
+                                        ${isToday ? 'bg-primary text-primary-foreground font-bold' : 'text-muted-foreground'}
+                                    `}
+                                        style={{ width: pixelsPerDay }}
+                                    >
+                                        {pixelsPerDay > 45 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
+                                    </div>
+                                )
+                            })
                         ) : (
                             weeks.map(week => {
                                 const start = week < startDate ? startDate : week

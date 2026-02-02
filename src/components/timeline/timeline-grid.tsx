@@ -35,14 +35,24 @@ export function TimelineGrid() {
             <div className="relative min-h-full" style={{ width: totalWidth, height: visibleItems.length * ROW_HEIGHT }}>
 
                 {/* Background Grid - Subtler */}
-                <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none flex opacity-30">
-                    {eachDayOfInterval({ start: startDate, end: END_DATE }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="h-full border-r border-border/10"
-                            style={{ width: pixelsPerDay }}
-                        />
-                    ))}
+                <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none flex">
+                    {eachDayOfInterval({ start: startDate, end: END_DATE }).map((day, i) => {
+                        const isWeekend = day.getDay() === 0 || day.getDay() === 6
+                        const isToday = day.toDateString() === new Date().toDateString()
+                        const isMonthStart = day.getDate() === 1
+
+                        return (
+                            <div
+                                key={i}
+                                className={`h-full border-r border-border/10 
+                                    ${isWeekend ? 'bg-secondary/20' : ''} 
+                                    ${isToday ? 'bg-primary/5 border-l border-l-primary/30 border-r-primary/30' : ''}
+                                    ${isMonthStart ? 'border-l border-l-border/50' : ''}
+                                `}
+                                style={{ width: pixelsPerDay }}
+                            />
+                        )
+                    })}
                 </div>
 
                 {/* Rows & Bars */}
