@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
-import { Briefcase, Factory, Wrench, AlertCircle } from "lucide-react"
-import { StatCard } from "@/components/dashboard/stat-card"
 import { ActivityStream } from "@/components/dashboard/activity-stream"
+import { DashboardStats } from "@/components/dashboard/dashboard-stats"
+
+export const dynamic = 'force-dynamic'
 
 export default async function Home() {
     let activeProjects = 0
@@ -45,36 +46,13 @@ export default async function Home() {
                 <p className="text-muted-foreground">Tady je přehled toho, co se děje ve vašich projektech.</p>
             </div>
 
-            {/* KPI Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                    title="Aktivní Projekty"
-                    value={activeProjects || 0}
-                    icon={Briefcase}
-                    trend="neutral"
-                    delay={0.1}
-                />
-                <StatCard
-                    title="Zakázky ve Výrobě"
-                    value={activeOrders || 0}
-                    icon={Factory}
-                    trend="neutral"
-                    delay={0.2}
-                />
-                <StatCard
-                    title="Naplánované Servisy"
-                    value={scheduledServices || 0}
-                    icon={Wrench}
-                    trend="neutral"
-                    delay={0.3}
-                />
-                <StatCard
-                    title="Kritické Úkoly"
-                    value={criticalOrders || 0}
-                    icon={AlertCircle}
-                    delay={0.4}
-                />
-            </div>
+            {/* KPI Stats Grid - Client Component */}
+            <DashboardStats
+                activeProjects={activeProjects}
+                activeOrders={activeOrders}
+                scheduledServices={scheduledServices}
+                criticalOrders={criticalOrders}
+            />
 
             {/* Main Content Grid */}
             <div className="grid gap-6 md:grid-cols-7">
