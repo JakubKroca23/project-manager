@@ -80,3 +80,11 @@
 - [x] Verification on different resolutions
 - [x] Refine zoom controls (horizontal, smaller)
 - [x] Implement mouse panning (drag & drop interaction)
+
+# Timeline Fullscreen Toggle
+
+- [/] Requirements & Planning (Shared state for Navbar/Timeline)
+- [ ] Implement `isFullscreen` state in `TimelineProvider`
+- [ ] Re-introduce header and container styling for standard mode
+- [ ] Implement Fullscreen button (Toggle Navbar + Viewport expansion)
+- [ ] Ensure persistence or clean transition between modes

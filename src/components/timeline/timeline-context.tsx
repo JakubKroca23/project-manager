@@ -29,6 +29,8 @@ interface TimelineContextType {
     expandedIds: Set<string>
     toggleExpand: (id: string) => void
     visibleItems: TimelineItemType[] // Flattened tree with expanded items only
+    isFullscreen: boolean
+    setIsFullscreen: (val: boolean) => void
 }
 
 const TimelineContext = createContext<TimelineContextType | undefined>(undefined)
@@ -55,6 +57,7 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
     const [pixelsPerDay, setPixelsPerDay] = useState(40) // Default zoom
     const [scrollX, setScrollX] = useState(0)
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+    const [isFullscreen, setIsFullscreen] = useState(false)
 
     const toggleExpand = useCallback((id: string) => {
         setExpandedIds(prev => {
@@ -106,7 +109,8 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
             scrollX, setScrollX,
             expandedIds, toggleExpand,
             visibleItems,
-            headerHeight // Exposed
+            headerHeight, // Exposed
+            isFullscreen, setIsFullscreen
         }}>
             {children}
         </TimelineContext.Provider>

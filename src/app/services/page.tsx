@@ -10,9 +10,5 @@ export default async function ServicesPage() {
         .select("*")
         .order('service_date', { ascending: true })
 
-    return (
-        <PageContainer>
-            <ServicesClient initialData={services || []} />
-        </PageContainer>
-    )
+    return <ServicesClient initialData={services || []} />
 }

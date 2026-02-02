@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { ProductionClient } from "./production-client"
-import { PageContainer } from "@/components/layout/PageContainer"
 
 export default async function ProductionPage() {
   const supabase = await createClient()
@@ -16,9 +15,5 @@ export default async function ProductionPage() {
     `)
     .order('created_at', { ascending: false })
 
-  return (
-    <PageContainer>
-      <ProductionClient initialData={productionOrders || []} />
-    </PageContainer>
-  )
+  return <ProductionClient initialData={productionOrders || []} />
 }

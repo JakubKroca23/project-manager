@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { ActivityStream } from "@/components/dashboard/activity-stream"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { PageContainer } from "@/components/layout/PageContainer"
 
 export const dynamic = 'force-dynamic'
 
@@ -40,39 +39,37 @@ export default async function Home() {
     }
 
     return (
-        <PageContainer>
-            <div className="space-y-8">
-                {/* Welcome Section */}
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold tracking-tight">Vítejte zpět 👋</h1>
-                    <p className="text-muted-foreground">Tady je přehled toho, co se děje ve vašich projektech.</p>
+        <div className="space-y-8">
+            {/* Welcome Section */}
+            <div className="flex flex-col gap-1">
+                <h1 className="text-3xl font-bold tracking-tight">Vítejte zpět 👋</h1>
+                <p className="text-muted-foreground">Tady je přehled toho, co se děje ve vašich projektech.</p>
+            </div>
+
+            {/* KPI Stats Grid - Client Component */}
+            <DashboardStats
+                activeProjects={activeProjects}
+                activeOrders={activeOrders}
+                scheduledServices={scheduledServices}
+                criticalOrders={criticalOrders}
+            />
+
+            {/* Main Content Grid */}
+            <div className="grid gap-6 md:grid-cols-7">
+                {/* Left Column (Activity Stream) */}
+                <div className="md:col-span-3 lg:col-span-3">
+                    <ActivityStream />
                 </div>
 
-                {/* KPI Stats Grid - Client Component */}
-                <DashboardStats
-                    activeProjects={activeProjects}
-                    activeOrders={activeOrders}
-                    scheduledServices={scheduledServices}
-                    criticalOrders={criticalOrders}
-                />
-
-                {/* Main Content Grid */}
-                <div className="grid gap-6 md:grid-cols-7">
-                    {/* Left Column (Activity Stream) */}
-                    <div className="md:col-span-3 lg:col-span-3">
-                        <ActivityStream />
-                    </div>
-
-                    {/* Right Column (Placeholder for Quick Tasks / Timeline Preview) */}
-                    <div className="md:col-span-4 lg:col-span-4 space-y-6">
-                        <div className="glass-panel min-h-[400px] flex items-center justify-center border-dashed border-2 border-primary/20 bg-background/50">
-                            <div className="text-center">
-                                <p className="text-muted-foreground mb-4">Náhled Timeline (Coming Soon)</p>
-                            </div>
+                {/* Right Column (Placeholder for Quick Tasks / Timeline Preview) */}
+                <div className="md:col-span-4 lg:col-span-4 space-y-6">
+                    <div className="glass-panel min-h-[400px] flex items-center justify-center border-dashed border-2 border-primary/20 bg-background/50">
+                        <div className="text-center">
+                            <p className="text-muted-foreground mb-4">Náhled Timeline (Coming Soon)</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </PageContainer>
+        </div>
     )
 }

@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react"
 import { TimelineProvider, useTimeline } from "@/components/timeline/timeline-context"
 import { TimelineLayout } from "@/components/timeline/timeline-layout"
-import { Plus, Minus, Search, ZoomIn } from "lucide-react"
+import { Plus, Minus, Maximize2, Minimize2 } from "lucide-react"
 
 function TimelineControls() {
-    const { pixelsPerDay, setPixelsPerDay } = useTimeline()
+    const { pixelsPerDay, setPixelsPerDay, isFullscreen, setIsFullscreen } = useTimeline()
 
     return (
         <div className="flex items-center gap-1 bg-background/40 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-xl">
@@ -27,12 +27,22 @@ function TimelineControls() {
             >
                 <Minus className="w-4 h-4" />
             </button>
+
+            <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+            <button
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-primary"
+                title={isFullscreen ? "Ukončit celou obrazovku" : "Celá obrazovka"}
+            >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
         </div>
     )
 }
 
 function TimelineWrapper({ items }: { items: any[] }) {
-    const { setPixelsPerDay, pixelsPerDay } = useTimeline()
+    const { setPixelsPerDay, pixelsPerDay, isFullscreen } = useTimeline()
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Wheel Zoom Handler
@@ -53,11 +63,33 @@ function TimelineWrapper({ items }: { items: any[] }) {
     }, [pixelsPerDay, setPixelsPerDay])
 
     return (
-        <div ref={containerRef} className="h-full relative overflow-hidden">
-            <TimelineLayout items={items} />
+        <div
+            ref={containerRef}
+            className={`
+                ${isFullscreen
+                    ? 'fixed inset-0 z-[100] bg-background p-0'
+                    : 'h-full flex flex-col gap-4'
+                }
+                relative overflow-hidden
+            `}
+        >
+            {!isFullscreen && (
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
+                            Timeline 2.0 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">Beta</span>
+                        </h1>
+                        <p className="text-sm text-muted-foreground">Podržte CTRL + Kolečko pro zoom, nebo použijte slider.</p>
+                    </div>
+                </div>
+            )}
+
+            <div className={`flex-1 min-h-0 ${!isFullscreen ? 'border border-border/50 rounded-xl shadow-2xl overflow-hidden' : ''}`}>
+                <TimelineLayout items={items} />
+            </div>
 
             {/* Zoom Controls Overlay */}
-            <div className="absolute bottom-6 right-6 z-50">
+            <div className={`absolute ${isFullscreen ? 'bottom-8 right-8' : 'bottom-6 right-6'} z-[110]`}>
                 <TimelineControls />
             </div>
         </div>

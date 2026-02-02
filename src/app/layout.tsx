@@ -40,7 +40,7 @@ export default async function RootLayout({
                 >
                     <div className="relative min-h-screen flex flex-col bg-muted/30">
                         <TopBar role={role} />
-                        <main className="flex-1 w-full flex flex-col">
+                        <main className="flex-1 w-full max-w-7xl mx-auto pt-28 px-6 pb-12">
                             {children}
                         </main>
                     </div>

@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { ProjectsClient } from "./projects-client"
-import { PageContainer } from "@/components/layout/PageContainer"
 
 export default async function ProjectsPage() {
     const supabase = await createClient()
@@ -20,9 +19,5 @@ export default async function ProjectsPage() {
         progress: Math.floor(Math.random() * 100) // Mock progress for now
     })) || []
 
-    return (
-        <PageContainer>
-            <ProjectsClient initialData={projectsWithDetails} />
-        </PageContainer>
-    )
+    return <ProjectsClient initialData={projectsWithDetails} />
 }
