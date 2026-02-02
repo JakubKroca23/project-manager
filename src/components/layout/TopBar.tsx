@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LayoutGrid, Briefcase, Factory, Wrench, Calendar, Search, Bell, Users } from "lucide-react"
+import { LayoutGrid, Briefcase, Factory, Wrench, Calendar, Search, Bell, Users, Database } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "@/components/mode-toggle"
 
@@ -13,6 +13,7 @@ const navItems = [
     { name: "Výroba", href: "/production", icon: Factory },
     { name: "Servis", href: "/services", icon: Wrench },
     { name: "Timeline", href: "/timeline", icon: Calendar },
+    { name: "Katalogy", href: "/catalogs", icon: Database },
 ]
 
 interface TopBarProps {

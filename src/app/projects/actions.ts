@@ -384,12 +384,97 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
     }
 
     // 3. Insert Orders
-    const { error: insertError } = await supabase
+    const { data: createdOrders, error: insertError } = await supabase
         .from("production_orders")
-        .insert(ordersToCreate as any);
+        .insert(ordersToCreate as any)
+        .select();
 
-    if (insertError) {
-        return { error: `Chyba při vytváření zakázek: ${insertError.message}` };
+    if (insertError || !createdOrders) {
+        return { error: `Chyba při vytváření zakázek: ${insertError?.message}` };
+    }
+
+    // 4. Generate Manufacturing Tasks for each Order
+    const defaultTasks = [
+        { title: "Příjem podvozku", description: "Kontrola podvozku a dokumentace", estimated_hours: 2 },
+        { title: "Příprava montáže", description: "Příprava rámu a pomocného rámu", estimated_hours: 8 },
+        { title: "Montáž nástavby", description: "Usazení a fixace nástavby", estimated_hours: 16 },
+        { title: "Hydraulika", description: "Zapojení čerpadla a hydraulického okruhu", estimated_hours: 12 },
+        { title: "Elektroinstalace", description: "Zapojení ovládání a osvětlení", estimated_hours: 10 },
+        { title: "Kompletace", description: "Montáž doplňků a blatníků", estimated_hours: 6 },
+        { title: "Testování a Kontrola", description: "Funkční zkouška a výstupní kontrola", estimated_hours: 4 },
+    ];
+
+    const tasksToCreate = [];
+    for (const order of createdOrders) {
+        for (const task of defaultTasks) {
+            tasksToCreate.push({
+                order_id: (order as any).id,
+                title: task.title,
+                description: task.description,
+                status: "queue",
+                estimated_hours: task.estimated_hours
+            });
+        }
+    }
+
+    if (tasksToCreate.length > 0) {
+        await supabase.from("manufacturing_tasks").insert(tasksToCreate as any);
+    }
+
+    // 5. Generate BOM (Bill of Materials) for Project
+    // Chassis
+    const bomItems = [];
+
+    if (project.chassis_type) {
+        bomItems.push({
+            project_id: projectId,
+            name: `Podvozek ${project.manufacturer || ""} ${project.chassis_type}`,
+            quantity: quantity, // 1 per vehicle
+            unit: "ks",
+            status: "to_order",
+            is_custom: false
+        });
+    }
+
+    // Superstructures
+    // Fetch superstructures if not available in projectRaw (depending on query depth)
+    // We used select("*") in step 1. Might not imply relations.
+    // Let's verify we need to fetch them.
+    const { data: superstructures } = await supabase.from("superstructures").select("*").eq("project_id", projectId);
+
+    if (superstructures) {
+        for (const s of (superstructures as any[])) {
+            bomItems.push({
+                project_id: projectId,
+                name: `Nástavba: ${s.type}`,
+                quantity: quantity, // 1 per vehicle (assuming superstructure def is generic per project)
+                unit: "ks",
+                status: s.order_status === "ordered" ? "ordered" : "to_order",
+                supplier: s.supplier,
+                is_custom: true
+            });
+        }
+    }
+
+    // Accessories
+    const { data: accessories } = await supabase.from("project_accessories").select("*").eq("project_id", projectId);
+
+    if (accessories) {
+        for (const acc of (accessories as any[])) {
+            bomItems.push({
+                project_id: projectId,
+                name: acc.name,
+                quantity: (acc.quantity || 1) * quantity, // Total needed
+                unit: "ks",
+                status: acc.order_status === "ordered" ? "ordered" : "to_order",
+                supplier: acc.supplier,
+                is_custom: false
+            });
+        }
+    }
+
+    if (bomItems.length > 0) {
+        await supabase.from("bom_items").insert(bomItems as any);
     }
 
     await logProjectHistory(projectId, "production_orders_generated", { count: quantity, durationWeeks });

@@ -48,3 +48,24 @@
 - [x] Controls: Add +/- Zoom Buttons and fix "jumping" behavior
 - [x] Interaction: Enforce strict "Snap-to-Day" logic for drag/resize
 - [x] Navigation: Move detail click to Sidebar (Name) instead of Bar
+
+# Manufacturing System Implementation
+
+- [x] Requirements & Planning
+    - [x] Clarify scope and data model with User
+    - [x] Design database schema for Orders, Tasks, and Catalogs
+    - [x] Create Implementation Plan
+- [x] Database Implementation (Catalogs & Manufacturing)
+    - [x] Verify/Create `clients`, `superstructures`, `accessories` catalogs
+    - [x] Create `production_orders` table (already in schema)
+    - [x] Create `manufacturing_tasks` table (with statuses: Queue, In Progress, Done, Check)
+    - [x] Create `bom_items` table (for material lists)
+- [x] UI Implementation - Catalogs
+    - [x] Ensure CRM functionality allows managing Clients/Superstructures/Accessories
+- [x] UI Implementation - Production Orders
+    - [x] "Generate Order from Project" Action  (split by quantity)
+    - [x] Order Detail View (Status, Deadlines, BOM)
+    - [ ] PDF Generation for Order
+- [x] UI Implementation - Shop Floor (Tasks)
+    - [x] Task Dashboard (Kanban/List) for workers (Implemented via Detail/Dashboard)
+    - [x] Task Status Transitions
