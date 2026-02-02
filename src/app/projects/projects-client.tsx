@@ -10,6 +10,18 @@ import { CreateProjectModal } from "@/components/projects/create-project-modal"
 type Project = Database['public']['Tables']['projects']['Row'] & {
     progress?: number
     manager_name?: string
+    production_description?: string | null
+    op_crm?: string | null
+    sector?: string | null
+    billing_company?: string | null
+    delivery_address?: string | null
+    requested_action?: string | null
+    assembly_company?: string | null
+    completion_percentage?: number | null
+    op_opv_sro?: string | null
+    op_group_zakaznik?: string | null
+    ov_group_sro?: string | null
+    zakazka_sro?: string | null
 }
 
 const statusMap: Record<string, { label: string; color: string; icon: any }> = {
@@ -56,9 +68,32 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         enableHiding: false
                     },
                     {
+                        id: "id",
+                        header: "ID",
+                        accessorKey: "id",
+                        cell: (p: Project) => <span className="font-mono text-xs text-muted-foreground">{p.id.slice(0, 8)}...</span>
+                    },
+                    {
+                        id: "created_by",
+                        header: "Vytvořil",
+                        accessorKey: "created_by"
+                    },
+                    {
                         id: "client",
                         header: "Klient",
                         accessorKey: "client_name"
+                    },
+                    {
+                        id: "description",
+                        header: "Popis",
+                        accessorKey: "description",
+                        cell: (p: Project) => <span className="truncate max-w-[200px] block" title={p.description || ""}>{p.description}</span>
+                    },
+                    {
+                        id: "production_description",
+                        header: "Popis zakázky",
+                        accessorKey: "production_description",
+                        cell: (p: Project) => <span className="truncate max-w-[200px] block" title={p.production_description || ""}>{p.production_description}</span>
                     },
                     {
                         id: "manager",
@@ -81,10 +116,10 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         }
                     },
                     {
-                        id: "end_date",
-                        header: "Termín",
-                        accessorKey: "end_date",
-                        cell: (p: Project) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
+                        id: "quantity",
+                        header: "Počet",
+                        accessorKey: "quantity",
+                        cell: (p: Project) => p.quantity ? `${p.quantity} ks` : '1 ks'
                     },
                     {
                         id: "start_date",
@@ -93,16 +128,93 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                         cell: (p: Project) => p.start_date ? new Date(p.start_date).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
-                        id: "quantity",
-                        header: "Počet",
-                        accessorKey: "quantity",
-                        cell: (p: Project) => p.quantity ? `${p.quantity} ks` : '1 ks'
+                        id: "end_date",
+                        header: "Termín",
+                        accessorKey: "end_date",
+                        cell: (p: Project) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
+                    },
+                    {
+                        id: "chassis_type",
+                        header: "Typ podvozku",
+                        accessorKey: "chassis_type"
+                    },
+                    {
+                        id: "manufacturer",
+                        header: "Výrobce",
+                        accessorKey: "manufacturer"
+                    },
+                    {
+                        id: "superstructure_type",
+                        header: "Typ nástavby",
+                        accessorKey: "superstructure_type"
+                    },
+                    {
+                        id: "accessories",
+                        header: "Příslušenství",
+                        accessorKey: "accessories",
+                        cell: (p: Project) => <span className="truncate max-w-[150px] block" title={p.accessories || ""}>{p.accessories}</span>
+                    },
+                    {
+                        id: "op_crm",
+                        header: "OP CRM",
+                        accessorKey: "op_crm"
+                    },
+                    {
+                        id: "sector",
+                        header: "Sektor",
+                        accessorKey: "sector"
+                    },
+                    {
+                        id: "billing_company",
+                        header: "Fakturační firma",
+                        accessorKey: "billing_company"
+                    },
+                    {
+                        id: "delivery_address",
+                        header: "Dodací adresa",
+                        accessorKey: "delivery_address"
+                    },
+                    {
+                        id: "requested_action",
+                        header: "Požadovaná akce",
+                        accessorKey: "requested_action"
+                    },
+                    {
+                        id: "assembly_company",
+                        header: "Montážní firma",
+                        accessorKey: "assembly_company"
+                    },
+                    {
+                        id: "op_opv_sro",
+                        header: "OP OPV",
+                        accessorKey: "op_opv_sro"
+                    },
+                    {
+                        id: "op_group_zakaznik",
+                        header: "OP Skupina",
+                        accessorKey: "op_group_zakaznik"
+                    },
+                    {
+                        id: "ov_group_sro",
+                        header: "OV Skupina",
+                        accessorKey: "ov_group_sro"
+                    },
+                    {
+                        id: "zakazka_sro",
+                        header: "Zakázka s.r.o.",
+                        accessorKey: "zakazka_sro"
                     },
                     {
                         id: "updated_at",
                         header: "Poslední úprava",
                         accessorKey: "updated_at",
                         cell: (p: Project) => p.updated_at ? new Date(p.updated_at).toLocaleDateString('cs-CZ') : '-'
+                    },
+                    {
+                        id: "created_at",
+                        header: "Vytvořeno",
+                        accessorKey: "created_at",
+                        cell: (p: Project) => p.created_at ? new Date(p.created_at).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
                         id: "progress",
@@ -112,7 +224,7 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                             <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-primary rounded-full transition-all"
-                                    style={{ width: `${p.progress ?? 0}%` }}
+                                    style={{ width: `${p.completion_percentage ?? p.progress ?? 0}%` }}
                                 />
                             </div>
                         )
