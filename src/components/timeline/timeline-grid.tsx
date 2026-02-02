@@ -72,14 +72,15 @@ export function TimelineGrid() {
                         const isWeekend = day.getDay() === 0 || day.getDay() === 6
                         const isToday = day.toDateString() === new Date().toDateString()
                         const isMonthStart = day.getDate() === 1
+                        const isWeekStart = day.getDay() === 1
 
                         return (
                             <div
                                 key={i}
                                 className={`h-full border-r border-border/10 
-                                    ${isWeekend ? 'bg-secondary/20' : ''} 
-                                    ${isToday ? 'bg-primary/5 border-l border-l-primary/30 border-r-primary/30' : ''}
-                                    ${isMonthStart ? 'border-l border-l-border/50' : ''}
+                                    ${isWeekend ? 'bg-secondary/30' : ''} 
+                                    ${isToday ? 'bg-primary/10 border-l border-l-primary/50 border-r-primary/50' : ''}
+                                    ${isMonthStart ? 'border-l-2 border-l-primary/30' : isWeekStart ? 'border-l border-l-border/30' : ''}
                                 `}
                                 style={{ width: pixelsPerDay }}
                             />

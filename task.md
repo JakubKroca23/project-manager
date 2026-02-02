@@ -42,3 +42,4 @@
 - [x] Refine Zoom: Continuous Slider + 3-Row Header (Stacking)
 - [x] Fix Layout Sync: Header height mismatches fixed
 - [x] Fix Interaction: Click now opens project detail
+- [x] Visual Contrast: Enhance Month/Week/Day headers and Grid lines

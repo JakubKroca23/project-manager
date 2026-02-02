@@ -45,7 +45,7 @@ export function TimelineHeader() {
             >
                 {/* 1. TOP ROW: MONTHS */}
                 {showMonths && (
-                    <div className="flex h-[25px] border-b border-border/10">
+                    <div className="flex h-[25px] border-b border-border">
                         {months.map(month => {
                             const start = month < startDate ? startDate : month
                             const end = endOfMonth(month) > END_DATE ? END_DATE : endOfMonth(month)
@@ -58,7 +58,7 @@ export function TimelineHeader() {
                             return (
                                 <div
                                     key={month.toISOString()}
-                                    className="flex items-center px-2 border-r border-border/20 text-xs font-bold uppercase text-muted-foreground whitespace-nowrap overflow-hidden bg-secondary/5"
+                                    className="flex items-center px-2 border-r border-border text-xs font-bold uppercase text-foreground/80 whitespace-nowrap overflow-hidden bg-secondary/30"
                                     style={{ width }}
                                 >
                                     {format(month, 'MMMM yyyy', { locale: cs })}
@@ -70,7 +70,7 @@ export function TimelineHeader() {
 
                 {/* 2. MIDDLE ROW: WEEKS */}
                 {showWeeks && (
-                    <div className="flex h-[25px] border-b border-border/10">
+                    <div className="flex h-[25px] border-b border-border/50">
                         {weeks.map(week => {
                             const start = week < startDate ? startDate : week
                             const end = endOfWeek(week, { weekStartsOn: 1 }) > END_DATE ? END_DATE : endOfWeek(week, { weekStartsOn: 1 })
@@ -83,7 +83,7 @@ export function TimelineHeader() {
                             return (
                                 <div
                                     key={week.toISOString()}
-                                    className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none bg-black/5 overflow-hidden whitespace-nowrap"
+                                    className="flex items-center justify-center border-r border-border/30 text-[10px] text-muted-foreground font-medium select-none bg-background/50 overflow-hidden whitespace-nowrap"
                                     style={{ width }}
                                 >
                                     {/* Show week number if width allows */}
@@ -96,14 +96,15 @@ export function TimelineHeader() {
 
                 {/* 3. BOTTOM ROW: DAYS */}
                 {showDays && (
-                    <div className="flex h-[25px]">
+                    <div className="flex h-[25px] border-b border-border/20">
                         {days.map(day => {
                             const isToday = day.toDateString() === new Date().toDateString()
+                            const isWeekend = day.getDay() === 0 || day.getDay() === 6
                             return (
                                 <div
                                     key={day.toISOString()}
-                                    className={`flex items-center justify-center border-r border-border/5 text-[9px] select-none overflow-hidden
-                                        ${isToday ? 'bg-primary text-primary-foreground font-bold' : 'text-muted-foreground'}
+                                    className={`flex items-center justify-center border-r border-border/10 text-[9px] select-none overflow-hidden
+                                        ${isToday ? 'bg-primary text-primary-foreground font-bold' : isWeekend ? 'bg-secondary/10 text-muted-foreground' : 'text-muted-foreground'}
                                     `}
                                     style={{ width: pixelsPerDay }}
                                 >
