@@ -344,7 +344,7 @@ export interface Database {
                 Update: {
                     id?: string
                     order_id?: string | null
-                    title: string
+                    title?: string
                     description?: string | null
                     status?: string | null
                     assigned_to?: string | null
