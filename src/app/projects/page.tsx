@@ -3,14 +3,20 @@ import { ProjectsClient } from "./projects-client"
 
 export default async function ProjectsPage() {
     const supabase = await createClient()
-    const { data: projects } = await supabase.from("projects").select("*").order('created_at', { ascending: false })
+    const { data: projects } = await supabase
+        .from("projects")
+        .select(`
+            *,
+            manager:profiles!projects_created_by_fkey(full_name)
+        `)
+        .order('created_at', { ascending: false })
 
-    // Transform data if needed, or pass as is. 
-    // We'll mock progress for now as it's not in DB
-    const projectsWithProgress = projects?.map((p: any) => ({
+    // Transform data
+    const projectsWithDetails = projects?.map((p: any) => ({
         ...p,
-        progress: Math.floor(Math.random() * 100) // Mock progress
+        manager_name: p.manager?.full_name || 'Neznámý',
+        progress: Math.floor(Math.random() * 100) // Mock progress for now
     })) || []
 
-    return <ProjectsClient initialData={projectsWithProgress} />
+    return <ProjectsClient initialData={projectsWithDetails} />
 }

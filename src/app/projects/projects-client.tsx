@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
 import { CreateProjectModal } from "@/components/projects/create-project-modal"
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
-    progress?: number // Optional since not in DB yet
+    progress?: number
+    manager_name?: string
 }
 
 const statusMap: Record<string, { label: string; color: string }> = {
@@ -19,6 +21,7 @@ const statusMap: Record<string, { label: string; color: string }> = {
 
 export function ProjectsClient({ initialData }: { initialData: Project[] }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const router = useRouter()
 
     return (
         <div className="space-y-6">
@@ -40,18 +43,19 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
 
             <DataTable<Project>
                 data={initialData}
-                onRowClick={(p) => console.log("Clicked", p.title)}
+                onRowClick={(p: Project) => router.push(`/projects/${p.id}`)}
                 columns={[
                     {
                         header: "Název Projektu",
                         accessorKey: "title",
-                        cell: (p) => <span className="font-medium text-foreground">{p.title}</span>
+                        cell: (p: Project) => <span className="font-medium text-foreground">{p.title}</span>
                     },
                     { header: "Klient", accessorKey: "client_name" },
+                    { header: "Vedoucí", accessorKey: "manager_name" },
                     {
                         header: "Stav",
                         accessorKey: "status",
-                        cell: (p) => {
+                        cell: (p: Project) => {
                             const status = statusMap[p.status] || { label: p.status, color: "bg-secondary text-secondary-foreground" }
                             return (
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
@@ -63,12 +67,12 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                     {
                         header: "Termín",
                         accessorKey: "end_date",
-                        cell: (p) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
+                        cell: (p: Project) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
                     },
                     {
                         header: "Progres",
                         accessorKey: "progress",
-                        cell: (p) => (
+                        cell: (p: Project) => (
                             <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-primary rounded-full transition-all"
