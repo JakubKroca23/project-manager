@@ -7,10 +7,12 @@ import { differenceInDays, addDays, eachDayOfInterval } from "date-fns"
 import { motion } from "framer-motion"
 
 import { updateTimelineItemDate } from "@/app/timeline/actions"
+import { useRouter } from "next/navigation"
 
 export function TimelineGrid() {
     const { visibleItems, startDate, pixelsPerDay, setScrollX, updateItemDates } = useTimeline()
     const containerRef = useRef<HTMLDivElement>(null)
+    const router = useRouter()
 
     // Sync X and Y scroll
     const handleScroll = () => {
@@ -121,7 +123,11 @@ export function TimelineGrid() {
                                 animate={{ opacity: 1, scaleX: 1, x: 0 }} // x: 0 ensures it resets visually after drag (since we update left/width via state)
                                 className={`absolute h-6 top-2 rounded-md shadow-sm ${color} border border-white/20 cursor-grab hover:brightness-110 active:scale-95 transition-all z-10`}
                                 style={{ left, width, minWidth: 4 }}
-                                onClick={() => alert(`Edit ${item.title} (ID: ${item.id})`)} // Placeholder for interaction
+                                onClick={() => {
+                                    if (item.type === 'project') {
+                                        router.push(`/projects/${item.id}`)
+                                    }
+                                }}
                             >
                                 {/* Label inside bar */}
                                 {width > 20 && (

@@ -4,7 +4,7 @@ import { cs } from "date-fns/locale"
 import { motion } from "framer-motion"
 
 export function TimelineHeader() {
-    const { startDate, pixelsPerDay, scrollX } = useTimeline()
+    const { startDate, pixelsPerDay, scrollX, headerHeight } = useTimeline()
 
     // 1. Extend Range to 365 Days
     const END_DATE = addDays(startDate, 365)
@@ -27,7 +27,7 @@ export function TimelineHeader() {
     const showDays = pixelsPerDay >= 10 // Days visible if day width > 10px
 
     // Height calculation
-    const headerHeight = (showMonths ? 25 : 0) + (showWeeks ? 25 : 0) + (showDays ? 25 : 0)
+    // Height calculation - used from context now
 
     // Rows Data
     const months = eachMonthOfInterval({ start: startDate, end: END_DATE })

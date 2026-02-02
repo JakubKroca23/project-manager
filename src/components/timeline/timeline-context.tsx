@@ -24,6 +24,7 @@ interface TimelineContextType {
     setPixelsPerDay: (px: number) => void
     scrollX: number
     setScrollX: (x: number) => void
+    headerHeight: number
     // Grouping & Expansion
     expandedIds: Set<string>
     toggleExpand: (id: string) => void
@@ -90,6 +91,12 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
         return result
     }, [items, expandedIds])
 
+    // Calculate dynamic header height based on zoom
+    const showMonths = true
+    const showWeeks = pixelsPerDay >= 2
+    const showDays = pixelsPerDay >= 10
+    const headerHeight = (showMonths ? 25 : 0) + (showWeeks ? 25 : 0) + (showDays ? 25 : 0)
+
     return (
         <TimelineContext.Provider value={{
             items,
@@ -98,7 +105,8 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
             pixelsPerDay, setPixelsPerDay,
             scrollX, setScrollX,
             expandedIds, toggleExpand,
-            visibleItems
+            visibleItems,
+            headerHeight // Exposed
         }}>
             {children}
         </TimelineContext.Provider>

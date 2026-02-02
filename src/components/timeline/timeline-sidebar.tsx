@@ -6,12 +6,15 @@ import { ChevronRight, ChevronDown, Folder, Briefcase, Wrench } from "lucide-rea
 export const ROW_HEIGHT = 42 // Matches the grid row height
 
 export function TimelineSidebar() {
-    const { visibleItems, toggleExpand, expandedIds } = useTimeline()
+    const { visibleItems, toggleExpand, expandedIds, headerHeight } = useTimeline()
 
     return (
         <div className="w-[250px] flex-shrink-0 border-r border-border/50 bg-background/95 backdrop-blur z-20 flex flex-col">
             {/* Header placeholder to align with timeline header */}
-            <div className="h-[50px] border-b border-border/50 flex items-center px-4 font-bold text-sm bg-secondary/5">
+            <div
+                className="border-b border-border/50 flex items-center px-4 font-bold text-sm bg-secondary/5 transition-all duration-300"
+                style={{ height: headerHeight }}
+            >
                 Projekty / Zakázky
             </div>
 
