@@ -22,7 +22,7 @@ export function TimelineGrid() {
         }
     }
 
-    const END_DATE = addDays(startDate, 60)
+    const END_DATE = addDays(startDate, 365)
     const totalDays = differenceInDays(END_DATE, startDate)
     const totalWidth = totalDays * pixelsPerDay
 
@@ -30,16 +30,16 @@ export function TimelineGrid() {
         <div
             ref={containerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-auto relative custom-scrollbar bg-slate-50/50"
+            className="flex-1 overflow-auto relative custom-scrollbar bg-transparent" // Transparent BG
         >
             <div className="relative min-h-full" style={{ width: totalWidth, height: visibleItems.length * ROW_HEIGHT }}>
 
-                {/* Background Grid */}
-                <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none flex">
+                {/* Background Grid - Subtler */}
+                <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none flex opacity-30">
                     {eachDayOfInterval({ start: startDate, end: END_DATE }).map((_, i) => (
                         <div
                             key={i}
-                            className="h-full border-r border-border/5"
+                            className="h-full border-r border-border/10"
                             style={{ width: pixelsPerDay }}
                         />
                     ))}
@@ -67,19 +67,20 @@ export function TimelineGrid() {
                     return (
                         <div
                             key={item.id}
-                            className="absolute w-full border-b border-border/5 hover:bg-black/5 transition-colors"
+                            className="absolute w-full border-b border-border/5 hover:bg-white/5 transition-colors group"
                             style={{ height: ROW_HEIGHT, top }}
                         >
                             {/* Bar */}
                             <motion.div
                                 initial={{ opacity: 0, scaleX: 0 }}
                                 animate={{ opacity: 1, scaleX: 1 }}
-                                className={`absolute h-6 top-2 rounded-md shadow-sm ${color} border border-white/20`}
+                                className={`absolute h-6 top-2 rounded-md shadow-sm ${color} border border-white/20 cursor-pointer hover:brightness-110 active:scale-95 transition-all z-10`}
                                 style={{ left, width, minWidth: 4 }}
+                                onClick={() => alert(`Edit ${item.title} (ID: ${item.id})`)} // Placeholder for interaction
                             >
-                                {/* Label inside bar if wide enough */}
+                                {/* Label inside bar */}
                                 {width > 60 && (
-                                    <span className="absolute inset-0 flex items-center px-2 text-[10px] font-bold text-white truncate drop-shadow-md">
+                                    <span className="absolute inset-0 flex items-center px-2 text-[10px] font-bold text-white truncate drop-shadow-md pointer-events-none">
                                         {item.title}
                                     </span>
                                 )}

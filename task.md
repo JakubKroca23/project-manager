@@ -34,3 +34,4 @@
 - [x] Create `TimelineSidebar` (Project/Service list)
 - [x] Create `TimelineGrid` (The rendered bars)
 - [x] Implement smooth interaction (Wheel zoom, Drag scroll)
+- [x] Visual Polish: Transparent BG, Extended Range (365d), Dynamic Header
