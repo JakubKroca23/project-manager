@@ -11,7 +11,7 @@ interface TimelineLayoutProps {
 
 export function TimelineLayout({ items }: TimelineLayoutProps) {
     return (
-        <div className="flex h-full border border-border/50 rounded-xl overflow-hidden shadow-2xl bg-background">
+        <div className="flex h-full overflow-hidden">
             {/* Left Sidebar */}
             <TimelineSidebar />
 

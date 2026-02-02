@@ -69,3 +69,12 @@
 - [x] UI Implementation - Shop Floor (Tasks)
     - [x] Task Dashboard (Kanban/List) for workers (Implemented via Detail/Dashboard)
     - [x] Task Status Transitions
+
+# Timeline Layout Refactor (FullScreen)
+
+- [x] Requirements & Planning (FullScreen vs Controls)
+- [x] Implement Full-Viewport layout in `app/timeline/page.tsx`
+- [x] Remove header and zoom controls in `timeline-view.tsx`
+- [x] Remove container styling (borders, rounded corners) in `timeline-layout.tsx`
+- [x] Adjust Sidebar/Grid proportions for fullscreen view
+- [x] Verification on different resolutions

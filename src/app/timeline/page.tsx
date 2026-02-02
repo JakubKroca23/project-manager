@@ -6,7 +6,7 @@ export default async function TimelinePage() {
     const { data: items } = await supabase.from("timeline_items").select("*")
 
     return (
-        <div className="h-[calc(100vh-140px)]">
+        <div className="h-[calc(100vh-64px)] w-full overflow-hidden">
             <TimelineView items={items || []} />
         </div>
     )

@@ -6,45 +6,26 @@ import { TimelineLayout } from "@/components/timeline/timeline-layout"
 import { Plus, Minus, Search, ZoomIn } from "lucide-react"
 
 function TimelineControls() {
-    const { pixelsPerDay, setPixelsPerDay, setStartDate, startDate } = useTimeline()
+    const { pixelsPerDay, setPixelsPerDay } = useTimeline()
 
     return (
-        <div className="flex items-center gap-4 bg-background/50 p-2 rounded-xl border border-border/50">
-            {/* Zoom Slider */}
-            <div className="flex items-center gap-2">
-                <ZoomIn className="w-4 h-4 text-muted-foreground mr-2" />
+        <div className="flex flex-col gap-2 bg-background/40 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-xl">
+            <button
+                onClick={() => setPixelsPerDay(Math.min(100, pixelsPerDay + 5))}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-foreground"
+                title="Zoom In"
+            >
+                <Plus className="w-5 h-5" />
+            </button>
 
-                <button
-                    onClick={() => setPixelsPerDay(Math.max(2, pixelsPerDay - 5))}
-                    className="p-1 hover:bg-secondary rounded-md"
-                >
-                    <Minus className="w-3 h-3" />
-                </button>
-
-                <input
-                    type="range"
-                    min="2"
-                    max="100"
-                    value={pixelsPerDay}
-                    onChange={(e) => setPixelsPerDay(Number(e.target.value))}
-                    className="w-32 h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                />
-
-                <button
-                    onClick={() => setPixelsPerDay(Math.min(100, pixelsPerDay + 5))}
-                    className="p-1 hover:bg-secondary rounded-md"
-                >
-                    <Plus className="w-3 h-3" />
-                </button>
-
-                <span className="text-xs font-mono text-muted-foreground w-8 text-right">{pixelsPerDay}px</span>
-            </div>
+            <div className="h-px bg-white/10 mx-1" />
 
             <button
-                onClick={() => setPixelsPerDay(40)}
-                className="text-xs text-primary font-medium hover:underline"
+                onClick={() => setPixelsPerDay(Math.max(2, pixelsPerDay - 5))}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-foreground"
+                title="Zoom Out"
             >
-                Reset
+                <Minus className="w-5 h-5" />
             </button>
         </div>
     )
@@ -63,7 +44,7 @@ function TimelineWrapper({ items }: { items: any[] }) {
             if (e.ctrlKey) {
                 e.preventDefault()
                 const delta = e.deltaY > 0 ? -5 : 5
-                setPixelsPerDay(Math.max(10, Math.min(200, pixelsPerDay + delta)))
+                setPixelsPerDay(Math.max(2, Math.min(100, pixelsPerDay + delta)))
             }
         }
 
@@ -72,18 +53,13 @@ function TimelineWrapper({ items }: { items: any[] }) {
     }, [pixelsPerDay, setPixelsPerDay])
 
     return (
-        <div ref={containerRef} className="h-full flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-                        Timeline 2.0 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">Beta</span>
-                    </h1>
-                    <p className="text-sm text-muted-foreground">Podržte CTRL + Kolečko pro zoom, nebo použijte slider.</p>
-                </div>
+        <div ref={containerRef} className="h-full relative overflow-hidden">
+            <TimelineLayout items={items} />
+
+            {/* Zoom Controls Overlay */}
+            <div className="absolute bottom-6 right-6 z-50">
                 <TimelineControls />
             </div>
-
-            <TimelineLayout items={items} />
         </div>
     )
 }
