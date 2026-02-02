@@ -37,6 +37,17 @@ export async function createProject(data: {
     manufacturer?: string | null;
     chassis_type?: string | null;
     quantity: number;
+    op_crm?: string;
+    sector?: string;
+    billing_company?: string;
+    delivery_address?: string;
+    requested_action?: string;
+    assembly_company?: string;
+    completion_percentage?: number;
+    op_opv_sro?: string;
+    op_group_zakaznik?: string;
+    ov_group_sro?: string;
+    zakazka_sro?: string;
     superstructures?: any[];
     accessories?: any[];
 }) {
@@ -55,7 +66,18 @@ export async function createProject(data: {
             status: data.status,
             manufacturer: data.manufacturer,
             chassis_type: data.chassis_type,
-            quantity: data.quantity
+            quantity: data.quantity,
+            op_crm: data.op_crm,
+            sector: data.sector,
+            billing_company: data.billing_company,
+            delivery_address: data.delivery_address,
+            requested_action: data.requested_action,
+            assembly_company: data.assembly_company,
+            completion_percentage: data.completion_percentage,
+            op_opv_sro: data.op_opv_sro,
+            op_group_zakaznik: data.op_group_zakaznik,
+            ov_group_sro: data.ov_group_sro,
+            zakazka_sro: data.zakazka_sro
         } as any)
         .select()
         .single();
@@ -120,6 +142,17 @@ export async function updateProject(projectId: string, data: {
     superstructure_type?: string | null;
     accessories?: string | null;
     quantity?: number | null;
+    op_crm?: string;
+    sector?: string;
+    billing_company?: string;
+    delivery_address?: string;
+    requested_action?: string;
+    assembly_company?: string;
+    completion_percentage?: number;
+    op_opv_sro?: string;
+    op_group_zakaznik?: string;
+    ov_group_sro?: string;
+    zakazka_sro?: string;
 }) {
     const supabase = await createClient();
 

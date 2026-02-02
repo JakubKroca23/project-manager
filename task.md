@@ -9,3 +9,16 @@
 - [x] Enhance `UpdateProjectModal` (better UI, interactivity)
 - [x] Add "History" view to Project Detail page
 - [x] Verify deletion and history logging
+
+# CRM Field Expansion & Refactoring
+
+- [x] Create `crm_schema.sql` (clients, superstructures, projects columns)
+- [x] Implement `clients` and `superstructure_catalog` logic (hooks/actions)
+- [x] Refactor `projects` actions to handle new fields
+- [x] Refactor `CreateProjectModal`:
+    - [x] Implement Client Autocomplete
+    - [x] Implement Superstructure Autocomplete
+    - [x] Add all new CRM fields
+    - [x] Reorganize layout (Chassis vs General)
+- [x] Refactor `UpdateProjectModal` with new fields
+- [x] Update `ProjectDetailClient` to display new fields

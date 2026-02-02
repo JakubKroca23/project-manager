@@ -32,9 +32,15 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
         status: project.status,
         manufacturer: project.manufacturer || "",
         chassis_type: project.chassis_type || "",
-        superstructure_type: project.superstructure_type || "",
-        accessories: project.accessories || "",
-        quantity: project.quantity || 1
+        quantity: project.quantity || 1,
+        op_crm: project.op_crm || "",
+        sector: project.sector || "",
+        billing_company: project.billing_company || "",
+        delivery_address: project.delivery_address || "",
+        requested_action: project.requested_action || "",
+        assembly_company: project.assembly_company || "",
+        op_opv_sro: project.op_opv_sro || "",
+        zakazka_sro: project.zakazka_sro || ""
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -56,189 +62,149 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
         setIsLoading(false)
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
     }
 
     return (
-        <Modal title="Upravit projekt" isOpen={isOpen} onClose={onClose} className="max-w-3xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 text-sm font-medium"
-                    >
-                        {error}
-                    </motion.div>
-                )}
+        <Modal title="Upravit projekt" isOpen={isOpen} onClose={onClose} className="max-w-3xl max-h-[90vh] flex flex-col">
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar p-1">
+                <form id="update-project-form" onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 text-sm font-medium">
+                            {error}
+                        </div>
+                    )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Základní informace */}
+                    {/* SECTION 1: CRM & BASIC INFO */}
                     <div className="space-y-6">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-primary/70">Základní info</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="h-6 w-1 bg-primary rounded-full" />
+                            <h4 className="text-sm font-bold tracking-tight uppercase text-primary/70">Základní a CRM data</h4>
+                        </div>
 
-                        <div className="space-y-4">
-                            <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Název Projektu</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    required
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all font-semibold"
-                                />
-                            </div>
-
-                            <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Klient</label>
-                                <input
-                                    type="text"
-                                    name="client_name"
-                                    value={formData.client_name}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Left Col */}
+                            <div className="space-y-4">
                                 <div className="group space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Zahájení</label>
-                                    <input
-                                        type="date"
-                                        name="start_date"
-                                        required
-                                        value={formData.start_date}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                    />
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Název Projektu</label>
+                                    <input required type="text" name="title" value={formData.title} onChange={handleChange}
+                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none font-semibold" />
                                 </div>
                                 <div className="group space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Dokončení</label>
-                                    <input
-                                        type="date"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                    />
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Zákazník</label>
+                                    <input type="text" name="client_name" value={formData.client_name} onChange={handleChange}
+                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="group space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">OP CRM</label>
+                                        <input type="text" name="op_crm" value={formData.op_crm} onChange={handleChange}
+                                            className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm" />
+                                    </div>
+                                    <div className="group space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Zakázka SRO</label>
+                                        <input type="text" name="zakazka_sro" value={formData.zakazka_sro} onChange={handleChange}
+                                            className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Col */}
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="group space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Zahájení</label>
+                                        <input type="date" name="start_date" value={formData.start_date} onChange={handleChange}
+                                            className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm" />
+                                    </div>
+                                    <div className="group space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Dokončení</label>
+                                        <input type="date" name="end_date" value={formData.end_date} onChange={handleChange}
+                                            className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm" />
+                                    </div>
+                                </div>
+                                <div className="group space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Sektor</label>
+                                    <select name="sector" value={formData.sector} onChange={handleChange}
+                                        className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm">
+                                        <option value="">Vyberte...</option>
+                                        <option value="Hasiči">Hasiči</option>
+                                        <option value="Technické služby">Technické služby</option>
+                                        <option value="Armáda">Armáda</option>
+                                        <option value="Soukromý">Soukromý</option>
+                                    </select>
+                                </div>
+                                <div className="group space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Aktuální stav</label>
+                                    <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-transparent focus:border-primary/50 outline-none text-sm">
+                                        {statusOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Aktuální stav</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {statusOptions.map((opt) => (
-                                    <button
-                                        key={opt.value}
-                                        type="button"
-                                        onClick={() => setFormData(prev => ({ ...prev, status: opt.value }))}
-                                        className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all ${formData.status === opt.value
-                                            ? `border-primary bg-primary/5 shadow-sm`
-                                            : "border-transparent bg-secondary/30 hover:bg-secondary/50 text-muted-foreground"
-                                            }`}
-                                    >
-                                        <opt.icon className={`w-3.5 h-3.5 ${formData.status === opt.value ? opt.color : "text-current"}`} />
-                                        <span className="text-[11px] font-bold">{opt.label}</span>
-                                    </button>
-                                ))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/10 rounded-xl border border-border/50">
+                            <div className="group space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Fakturační firma</label>
+                                <input type="text" name="billing_company" value={formData.billing_company} onChange={handleChange}
+                                    className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-sm" />
+                            </div>
+                            <div className="group space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Montážní firma</label>
+                                <input type="text" name="assembly_company" value={formData.assembly_company} onChange={handleChange}
+                                    className="w-full px-3 py-2 rounded-lg bg-background border border-border/50 text-sm" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Technické specifikace */}
+                    <div className="w-full h-px bg-border/50" />
+
+                    {/* SECTION 2: CHASSIS & TECHNICAL */}
                     <div className="space-y-6">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-primary/70">Technické specifikace</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="h-6 w-1 bg-orange-500 rounded-full" />
+                            <h4 className="text-sm font-bold tracking-tight uppercase text-orange-600/70">Podvozek</h4>
+                        </div>
 
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce / Podvozek / Počet</label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <input
-                                        type="text"
-                                        name="manufacturer"
-                                        value={formData.manufacturer}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                        placeholder="Výrobce"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="chassis_type"
-                                        value={formData.chassis_type}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                        placeholder="Typ podvozku"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="quantity"
-                                        value={formData.quantity}
-                                        onChange={handleChange}
-                                        min="1"
-                                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                        placeholder="Počet"
-                                    />
-                                </div>
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Výrobce</label>
+                                <input type="text" name="manufacturer" value={formData.manufacturer} onChange={handleChange} placeholder="Výrobce"
+                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm" />
                             </div>
-
                             <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Typ nástavby</label>
-                                <input
-                                    type="text"
-                                    name="superstructure_type"
-                                    value={formData.superstructure_type}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all text-sm"
-                                    placeholder="např. CAS 20"
-                                />
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Typ podvozku</label>
+                                <input type="text" name="chassis_type" value={formData.chassis_type} onChange={handleChange} placeholder="Typ podvozku"
+                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm" />
                             </div>
-
                             <div className="group space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Příslušenství / Výbava</label>
-                                <textarea
-                                    name="accessories"
-                                    value={formData.accessories}
-                                    onChange={handleChange}
-                                    rows={4}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all resize-none text-sm"
-                                    placeholder="Vyjmenujte hlavní prvky výbavy..."
-                                />
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Počet Kusů</label>
+                                <input type="number" name="quantity" min="1" value={formData.quantity} onChange={handleChange} placeholder="Počet"
+                                    className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm" />
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="group space-y-1">
-                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Interní poznámky / Popis</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        rows={2}
-                        className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 focus:bg-background outline-none transition-all resize-none text-sm"
-                    />
-                </div>
+                    <div className="group space-y-1">
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Popis / Poznámky</label>
+                        <textarea name="description" value={formData.description} onChange={handleChange} rows={3}
+                            className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none resize-none text-sm" />
+                    </div>
 
-                <div className="pt-2 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-6 py-2 rounded-xl text-sm font-semibold hover:bg-secondary transition-colors"
-                    >
-                        Zrušit
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="px-8 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Uložit změny"}
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
+
+            <div className="pt-4 border-t border-border mt-2 flex justify-end gap-3">
+                <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-semibold hover:bg-secondary transition-colors">
+                    Zrušit
+                </button>
+                <button type="submit" form="update-project-form" disabled={isLoading}
+                    className="px-8 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg flex items-center gap-2">
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Uložit změny"}
+                </button>
+            </div>
         </Modal>
     )
 }
