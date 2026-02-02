@@ -14,15 +14,20 @@ export function TimelineHeader() {
     const totalWidth = totalDays * pixelsPerDay
 
     // 3. Logic: What to show?
-    const showDays = pixelsPerDay >= 10 // Show days even in week view (12px)
-    const showWeeks = pixelsPerDay >= 4 && pixelsPerDay < 40 // Weeks visible in Month view or Week view as overlay?
-    // In Week view (12px), we want Days on bottom. Weeks on top? No, Top is months. 
-    // User wants: "in week view [12px] days can be visible".
-    // Current layout: Top=Months, Bottom=Days/Weeks.
+    // User wants: "always visible" unless too small.
+    // Pixel thresholds for readability:
+    // Day label: needs ~20px to show number? ~40px for full?
+    // Week label: needs ~30px?
 
-    // If we show days at 12px, they are quite small. But user wants it.
+    // We will stack them: Month (top), Week (middle), Day (bottom). 
+    // Total header height needs to increase.
 
-    const showTimelineBottom = pixelsPerDay >= 4
+    const showMonths = true
+    const showWeeks = pixelsPerDay >= 2 // Weeks visible almost always, unless extremely zoomed out (year view)
+    const showDays = pixelsPerDay >= 10 // Days visible if day width > 10px
+
+    // Height calculation
+    const headerHeight = (showMonths ? 25 : 0) + (showWeeks ? 25 : 0) + (showDays ? 25 : 0)
 
     // Rows Data
     const months = eachMonthOfInterval({ start: startDate, end: END_DATE })
@@ -30,74 +35,82 @@ export function TimelineHeader() {
     const days = eachDayOfInterval({ start: startDate, end: END_DATE })
 
     return (
-        <div className="h-[50px] bg-background/95 backdrop-blur border-b border-border/50 sticky top-0 z-10 overflow-hidden">
+        <div
+            className="bg-background/95 backdrop-blur border-b border-border/50 sticky top-0 z-10 overflow-hidden transition-all duration-300"
+            style={{ height: headerHeight }}
+        >
             <motion.div
-                className="h-full relative"
+                className="h-full relative flex flex-col"
                 style={{ x: -scrollX, width: totalWidth }}
             >
-                {/* TOP ROW: MONTHS */}
-                <div className="flex h-1/2 border-b border-border/10">
-                    {months.map(month => {
-                        const start = month < startDate ? startDate : month
-                        const end = endOfMonth(month) > END_DATE ? END_DATE : endOfMonth(month)
-                        const daysInMonth = eachDayOfInterval({ start, end })
+                {/* 1. TOP ROW: MONTHS */}
+                {showMonths && (
+                    <div className="flex h-[25px] border-b border-border/10">
+                        {months.map(month => {
+                            const start = month < startDate ? startDate : month
+                            const end = endOfMonth(month) > END_DATE ? END_DATE : endOfMonth(month)
+                            const daysInMonth = eachDayOfInterval({ start, end })
 
-                        if (daysInMonth.length === 0) return null
+                            if (daysInMonth.length === 0) return null
 
-                        const width = daysInMonth.length * pixelsPerDay
+                            const width = daysInMonth.length * pixelsPerDay
 
-                        return (
-                            <div
-                                key={month.toISOString()}
-                                className="flex items-center px-2 border-r border-border/20 text-xs font-bold uppercase text-muted-foreground whitespace-nowrap overflow-hidden bg-secondary/5"
-                                style={{ width }}
-                            >
-                                {format(month, 'MMMM yyyy', { locale: cs })}
-                            </div>
-                        )
-                    })}
-                </div>
+                            return (
+                                <div
+                                    key={month.toISOString()}
+                                    className="flex items-center px-2 border-r border-border/20 text-xs font-bold uppercase text-muted-foreground whitespace-nowrap overflow-hidden bg-secondary/5"
+                                    style={{ width }}
+                                >
+                                    {format(month, 'MMMM yyyy', { locale: cs })}
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
 
-                {/* BOTTOM ROW: DAYS or WEEKS */}
-                {showTimelineBottom && (
-                    <div className="flex h-1/2">
-                        {showDays ? (
-                            days.map(day => {
-                                const isToday = day.toDateString() === new Date().toDateString()
-                                return (
-                                    <div
-                                        key={day.toISOString()}
-                                        className={`flex items-center justify-center border-r border-border/5 text-[10px] select-none overflow-hidden
+                {/* 2. MIDDLE ROW: WEEKS */}
+                {showWeeks && (
+                    <div className="flex h-[25px] border-b border-border/10">
+                        {weeks.map(week => {
+                            const start = week < startDate ? startDate : week
+                            const end = endOfWeek(week, { weekStartsOn: 1 }) > END_DATE ? END_DATE : endOfWeek(week, { weekStartsOn: 1 })
+                            const daysInWeek = eachDayOfInterval({ start, end })
+
+                            if (daysInWeek.length === 0) return null
+
+                            const width = daysInWeek.length * pixelsPerDay
+
+                            return (
+                                <div
+                                    key={week.toISOString()}
+                                    className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none bg-black/5 overflow-hidden whitespace-nowrap"
+                                    style={{ width }}
+                                >
+                                    {/* Show week number if width allows */}
+                                    {width > 15 && `T${format(week, 'w')}`}
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+
+                {/* 3. BOTTOM ROW: DAYS */}
+                {showDays && (
+                    <div className="flex h-[25px]">
+                        {days.map(day => {
+                            const isToday = day.toDateString() === new Date().toDateString()
+                            return (
+                                <div
+                                    key={day.toISOString()}
+                                    className={`flex items-center justify-center border-r border-border/5 text-[9px] select-none overflow-hidden
                                         ${isToday ? 'bg-primary text-primary-foreground font-bold' : 'text-muted-foreground'}
                                     `}
-                                        style={{ width: pixelsPerDay }}
-                                    >
-                                        {pixelsPerDay > 45 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
-                                    </div>
-                                )
-                            })
-                        ) : (
-                            weeks.map(week => {
-                                const start = week < startDate ? startDate : week
-                                const end = endOfWeek(week, { weekStartsOn: 1 }) > END_DATE ? END_DATE : endOfWeek(week, { weekStartsOn: 1 })
-                                const daysInWeek = eachDayOfInterval({ start, end })
-
-                                if (daysInWeek.length === 0) return null
-
-                                const width = daysInWeek.length * pixelsPerDay
-
-                                return (
-                                    <div
-                                        key={week.toISOString()}
-                                        className="flex items-center justify-center border-r border-border/10 text-[10px] text-muted-foreground select-none bg-black/5"
-                                        style={{ width }}
-                                    >
-                                        {/* Only show label if wide enough */}
-                                        {width > 20 && `T${format(week, 'w')}`}
-                                    </div>
-                                )
-                            })
-                        )}
+                                    style={{ width: pixelsPerDay }}
+                                >
+                                    {pixelsPerDay > 30 ? format(day, 'd. E', { locale: cs }) : format(day, 'd')}
+                                </div>
+                            )
+                        })}
                     </div>
                 )}
             </motion.div>

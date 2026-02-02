@@ -39,3 +39,4 @@
 - [x] Visual Enhancements: Weekends, Current Day, Month Separators
 - [x] Final Polish: Start from Jan 1st, Smaller text, Show days in Week view
 - [x] Implement Drag & Drop (Change dates via UI)
+- [x] Refine Zoom: Continuous Slider + 3-Row Header (Stacking)
