@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react"
 import { addDays, startOfWeek } from "date-fns"
+import { ZOOM_LEVELS } from "@/lib/timeline-utils"
 
 interface TimelineContextType {
     startDate: Date
@@ -10,6 +11,7 @@ interface TimelineContextType {
     setZoom: (zoom: "day" | "week" | "month") => void
     scrollX: number
     setScrollX: (x: number) => void
+    columnWidth: number
 }
 
 const TimelineContext = createContext<TimelineContextType | undefined>(undefined)
@@ -20,8 +22,10 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
     const [zoom, setZoom] = useState<"day" | "week" | "month">("day")
     const [scrollX, setScrollX] = useState(0)
 
+    const columnWidth = ZOOM_LEVELS[zoom]
+
     return (
-        <TimelineContext.Provider value={{ startDate, setStartDate, zoom, setZoom, scrollX, setScrollX }}>
+        <TimelineContext.Provider value={{ startDate, setStartDate, zoom, setZoom, scrollX, setScrollX, columnWidth }}>
             {children}
         </TimelineContext.Provider>
     )

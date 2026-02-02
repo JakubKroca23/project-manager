@@ -5,7 +5,7 @@ import { useTimeline } from "./timeline-context"
 import { TimelineHeader } from "./timeline-header"
 import { TimelineItem } from "./timeline-item"
 import { motion } from "framer-motion"
-import { getDaysInRange, COLUMN_WIDTH } from "@/lib/timeline-utils"
+import { getDaysInRange } from "@/lib/timeline-utils"
 import { addDays } from "date-fns"
 
 import { Database } from "@/lib/database.types"
@@ -19,7 +19,7 @@ const typeColors = {
 }
 
 export function TimelineLayout({ items }: { items: TimelineItemData[] }) {
-    const { setScrollX, startDate, scrollX } = useTimeline()
+    const { setScrollX, startDate, scrollX, columnWidth } = useTimeline()
     const listRef = useRef<HTMLDivElement>(null)
 
     // Sync scroll
@@ -36,7 +36,7 @@ export function TimelineLayout({ items }: { items: TimelineItemData[] }) {
     }, [setScrollX])
 
     const days = getDaysInRange(startDate, addDays(startDate, 30))
-    const totalWidth = days.length * COLUMN_WIDTH
+    const totalWidth = days.length * columnWidth
 
     return (
         <div className="flex flex-col h-full border border-border/50 rounded-xl overflow-hidden bg-background/50 backdrop-blur-sm shadow-inner">
@@ -56,7 +56,7 @@ export function TimelineLayout({ items }: { items: TimelineItemData[] }) {
                             <div
                                 key={i}
                                 className="h-full border-r border-border/10 border-dashed"
-                                style={{ width: COLUMN_WIDTH }}
+                                style={{ width: columnWidth }}
                             />
                         ))}
                     </div>

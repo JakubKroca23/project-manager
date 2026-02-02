@@ -1,12 +1,12 @@
 "use client"
 
 import { useTimeline } from "./timeline-context"
-import { getDaysInRange, formatDateCS, COLUMN_WIDTH, HEADER_HEIGHT } from "@/lib/timeline-utils"
+import { getDaysInRange, formatDateCS, HEADER_HEIGHT } from "@/lib/timeline-utils"
 import { addDays } from "date-fns"
 import { motion } from "framer-motion"
 
 export function TimelineHeader() {
-    const { startDate, scrollX } = useTimeline()
+    const { startDate, scrollX, columnWidth } = useTimeline()
 
     // Render 30 days for now
     const days = getDaysInRange(startDate, addDays(startDate, 30))
@@ -24,7 +24,7 @@ export function TimelineHeader() {
                     <div
                         key={i}
                         className="flex-shrink-0 flex items-center justify-center border-r border-border/20 text-xs font-medium text-muted-foreground select-none hover:bg-white/5 transition-colors"
-                        style={{ width: COLUMN_WIDTH }}
+                        style={{ width: columnWidth }}
                     >
                         <div className="text-center">
                             <div className="opacity-50 text-[10px] uppercase">{formatDateCS(day, "EEE")}</div>

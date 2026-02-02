@@ -20,5 +20,11 @@
     - [x] Implement Superstructure Autocomplete
     - [x] Add all new CRM fields
     - [x] Reorganize layout (Chassis vs General)
+    - [x] Add detailed forms for Superstructures/Accessories
 - [x] Refactor `UpdateProjectModal` with new fields
 - [x] Update `ProjectDetailClient` to display new fields
+
+# Timeline Improvements
+
+- [x] Fix zooming functionality (Day/Week/Month support)
+- [x] Improve project name visibility on timeline bars
