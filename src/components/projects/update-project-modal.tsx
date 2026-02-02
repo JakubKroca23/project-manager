@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Modal } from "@/components/ui/modal"
-import { updateProject } from "@/app/projects/actions"
+import { updateProject, getProfiles } from "@/app/projects/actions"
 import { Loader2, Layout, Settings, Factory, CheckCircle2, Octagon } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -23,9 +23,12 @@ const statusOptions = [
 export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectModalProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [profiles, setProfiles] = useState<{ id: string, full_name: string | null }[]>([])
+
     const [formData, setFormData] = useState({
         title: project.title,
         client_name: project.client_name || "",
+        manager_id: project.manager_id || "",
         description: project.description || "",
         start_date: project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : "",
         end_date: project.end_date ? new Date(project.end_date).toISOString().split('T')[0] : "",
@@ -42,6 +45,12 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
         op_opv_sro: project.op_opv_sro || "",
         zakazka_sro: project.zakazka_sro || ""
     })
+
+    useEffect(() => {
+        if (isOpen) {
+            getProfiles().then(setProfiles)
+        }
+    }, [isOpen])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -97,6 +106,18 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
                                     <input type="text" name="client_name" value={formData.client_name} onChange={handleChange}
                                         className="w-full px-4 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm" />
                                 </div>
+
+                                <div className="group space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Vedoucí projektu</label>
+                                    <select name="manager_id" value={formData.manager_id} onChange={handleChange}
+                                        className="w-full px-3 py-2.5 rounded-xl bg-secondary/30 border-2 border-transparent focus:border-primary/50 outline-none text-sm font-medium">
+                                        <option value="">Vyberte vedoucího...</option>
+                                        {profiles.map(p => (
+                                            <option key={p.id} value={p.id}>{p.full_name || p.id}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="group space-y-1">
                                         <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">OP CRM</label>

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { Modal } from "@/components/ui/modal"
 import { useCreateProject } from "@/hooks/use-create-project"
-import { createProject } from "@/app/projects/actions"
+import { createProject, getProfiles } from "@/app/projects/actions"
 import { useAccessoryCatalog } from "@/hooks/use-accessory-catalog"
 import { useCRMCatalog } from "@/hooks/use-crm-catalog"
 import {
@@ -30,9 +30,12 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
     const { catalog: accessoryCatalog, addToCatalog } = useAccessoryCatalog()
     const { clients: clientCatalog, superstructures: superstructureCatalog, addClient, addSuperstructureType } = useCRMCatalog()
 
+    const [profiles, setProfiles] = useState<{ id: string, full_name: string | null }[]>([])
+
     const [formData, setFormData] = useState({
         title: "",
         client_name: "",
+        manager_id: "",
         op_crm: "",
         sector: "",
         billing_company: "",
@@ -93,12 +96,16 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
     const [showAccSuggestions, setShowAccSuggestions] = useState(false)
 
     useEffect(() => {
-        if (!isOpen) resetForm()
+        if (isOpen) {
+            getProfiles().then(setProfiles)
+        } else {
+            resetForm()
+        }
     }, [isOpen])
 
     const resetForm = () => {
         setFormData({
-            title: "", client_name: "", op_crm: "", sector: "", billing_company: "", delivery_address: "",
+            title: "", client_name: "", manager_id: "", op_crm: "", sector: "", billing_company: "", delivery_address: "",
             description: "", start_date: "", end_date: "", status: "planning",
             manufacturer: "", chassis_type: "", quantity: 1, requested_action: "", assembly_company: "",
             op_opv_sro: "", op_group_zakaznik: "", ov_group_sro: "", zakazka_sro: ""
@@ -211,6 +218,18 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
                                     <input required type="text" name="title" value={formData.title} onChange={handleChange}
                                         className="w-full px-4 py-2 rounded-xl bg-secondary/30 border border-border focus:border-primary/50 outline-none font-bold text-lg" />
                                 </div>
+
+                                <div className="group space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Vedoucí projektu</label>
+                                    <select name="manager_id" value={formData.manager_id} onChange={handleChange}
+                                        className="w-full px-3 py-2 rounded-xl bg-secondary/30 border border-border focus:border-primary/50 outline-none text-sm font-medium">
+                                        <option value="">Vyberte vedoucího...</option>
+                                        {profiles.map(p => (
+                                            <option key={p.id} value={p.id}>{p.full_name || p.id}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="group space-y-1">
                                         <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">OP CRM</label>

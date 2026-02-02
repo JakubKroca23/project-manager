@@ -25,11 +25,26 @@ async function logProjectHistory(projectId: string, action_type: string, details
 }
 
 /**
+ * Get all profiles for manager selection
+ */
+export async function getProfiles() {
+    const supabase = await createClient();
+    const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .order("full_name");
+
+    if (error) return [];
+    return profiles;
+}
+
+/**
  * Create a new project with superstructures and accessories
  */
 export async function createProject(data: {
     title: string;
     client_name?: string;
+    manager_id?: string;
     description?: string;
     start_date?: string;
     end_date?: string | null;
@@ -60,6 +75,7 @@ export async function createProject(data: {
         .insert({
             title: data.title,
             client_name: data.client_name,
+            manager_id: data.manager_id,
             description: data.description,
             start_date: data.start_date,
             end_date: data.end_date,
@@ -133,6 +149,7 @@ export async function createProject(data: {
 export async function updateProject(projectId: string, data: {
     title?: string;
     client_name?: string;
+    manager_id?: string;
     description?: string;
     status?: string;
     start_date?: string;
