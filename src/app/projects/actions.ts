@@ -183,7 +183,11 @@ export async function updateProject(projectId: string, data: {
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "updated", data);
+    if (data.status) {
+        await logProjectHistory(projectId, "status_updated", data);
+    } else {
+        await logProjectHistory(projectId, "updated", data);
+    }
     revalidatePath("/projects");
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
