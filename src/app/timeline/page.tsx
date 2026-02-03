@@ -23,11 +23,9 @@ export default async function TimelinePage() {
             title: s.title,
             type: "service",
             status: s.status,
-            start_date: s.service_date,
+            start_date: format(start, 'yyyy-MM-dd'),
             end_date: format(end, 'yyyy-MM-dd'), // Timeline expects YYYY-MM-DD
             owner_id: s.assigned_to,
-            // Services usually don't have a parent item in this context, or maybe client_name is useful?
-            // For now, mapping strictly to timeline_items interface
         }
     })
 
