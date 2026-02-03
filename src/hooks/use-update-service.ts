@@ -20,6 +20,7 @@ export function useUpdateService() {
         try {
             const { error: updateError } = await supabase
                 .from("services")
+                // @ts-ignore
                 .update(data as any)
                 .eq('id', id)
 
