@@ -11,8 +11,8 @@ export default async function Home() {
     let scheduledServices = 0
     let deadlinesCount = 0
 
-    let recentProjects = []
-    let recentActivities = []
+    let recentProjects: any[] = []
+    let recentActivities: any[] = []
     let userId = ""
 
     let userName = "Uživateli"
