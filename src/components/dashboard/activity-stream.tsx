@@ -52,12 +52,12 @@ export function ActivityStream({ initialActivities }: ActivityStreamProps) {
 
                     if (newActivity.user_id) {
                         const { data } = await supabase.from('profiles').select('full_name').eq('id', newActivity.user_id).single()
-                        if (data) userName = data.full_name
+                        if (data) userName = (data as any).full_name
                     }
 
                     if (newActivity.project_id) {
                         const { data } = await supabase.from('projects').select('title').eq('id', newActivity.project_id).single()
-                        if (data) projectTitle = data.title
+                        if (data) projectTitle = (data as any).title
                     }
 
                     const enrichedActivity = {
