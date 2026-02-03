@@ -68,32 +68,52 @@ export async function createProject(data: {
 }) {
     const supabase = await createClient();
 
+    // Sanitize input data
+    const safeData = {
+        ...data,
+        manager_id: data.manager_id || null,
+        start_date: data.start_date || null,
+        end_date: data.end_date || null,
+        manufacturer: data.manufacturer || null,
+        chassis_type: data.chassis_type || null,
+        op_crm: data.op_crm || null,
+        sector: data.sector || null,
+        billing_company: data.billing_company || null,
+        delivery_address: data.delivery_address || null,
+        requested_action: data.requested_action || null,
+        assembly_company: data.assembly_company || null,
+        op_opv_sro: data.op_opv_sro || null,
+        op_group_zakaznik: data.op_group_zakaznik || null,
+        ov_group_sro: data.ov_group_sro || null,
+        zakazka_sro: data.zakazka_sro || null
+    };
+
     // 1. Create Project
     const { data: project, error: projError } = await supabase
         .from("projects")
         // @ts-ignore
         .insert({
-            title: data.title,
-            client_name: data.client_name,
-            manager_id: data.manager_id,
-            description: data.description,
-            start_date: data.start_date,
-            end_date: data.end_date,
-            status: data.status,
-            manufacturer: data.manufacturer,
-            chassis_type: data.chassis_type,
-            quantity: data.quantity,
-            op_crm: data.op_crm,
-            sector: data.sector,
-            billing_company: data.billing_company,
-            delivery_address: data.delivery_address,
-            requested_action: data.requested_action,
-            assembly_company: data.assembly_company,
-            completion_percentage: data.completion_percentage,
-            op_opv_sro: data.op_opv_sro,
-            op_group_zakaznik: data.op_group_zakaznik,
-            ov_group_sro: data.ov_group_sro,
-            zakazka_sro: data.zakazka_sro
+            title: safeData.title,
+            client_name: safeData.client_name,
+            manager_id: safeData.manager_id,
+            description: safeData.description,
+            start_date: safeData.start_date,
+            end_date: safeData.end_date,
+            status: safeData.status,
+            manufacturer: safeData.manufacturer,
+            chassis_type: safeData.chassis_type,
+            quantity: safeData.quantity,
+            op_crm: safeData.op_crm,
+            sector: safeData.sector,
+            billing_company: safeData.billing_company,
+            delivery_address: safeData.delivery_address,
+            requested_action: safeData.requested_action,
+            assembly_company: safeData.assembly_company,
+            completion_percentage: safeData.completion_percentage,
+            op_opv_sro: safeData.op_opv_sro,
+            op_group_zakaznik: safeData.op_group_zakaznik,
+            ov_group_sro: safeData.ov_group_sro,
+            zakazka_sro: safeData.zakazka_sro
         } as any)
         .select()
         .single();
