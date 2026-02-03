@@ -47,14 +47,23 @@ export function ActivityStream({ initialActivities }: ActivityStreamProps) {
                         return
                     }
 
-                    // We need to fetch related names because foreign keys aren't joined in realtime payload
-                    const { data: userData } = await supabase.from('profiles').select('full_name').eq('id', newActivity.user_id).single()
-                    const { data: projectData } = await supabase.from('projects').select('title').eq('id', newActivity.project_id).single()
+                    let userName = 'Neznámý uživatel'
+                    let projectTitle = 'Neznámý projekt'
+
+                    if (newActivity.user_id) {
+                        const { data } = await supabase.from('profiles').select('full_name').eq('id', newActivity.user_id).single()
+                        if (data) userName = data.full_name
+                    }
+
+                    if (newActivity.project_id) {
+                        const { data } = await supabase.from('projects').select('title').eq('id', newActivity.project_id).single()
+                        if (data) projectTitle = data.title
+                    }
 
                     const enrichedActivity = {
                         ...newActivity,
-                        user_name: userData?.full_name || 'Neznámý uživatel',
-                        project_title: projectData?.title || 'Neznámý projekt'
+                        user_name: userName,
+                        project_title: projectTitle
                     }
 
                     setActivities(prev => [enrichedActivity, ...prev].slice(0, 10))
