@@ -1,19 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Modal } from "@/components/ui/modal"
 import { useCreateService } from "@/hooks/use-create-service"
+import { useUpdateService } from "@/hooks/use-update-service"
 import { useServiceOptions } from "@/hooks/use-service-options"
 import { Loader2 } from "lucide-react"
+import { Database } from "@/lib/database.types"
 
-interface CreateServiceModalProps {
+type Service = Database['public']['Tables']['services']['Row']
+
+interface ServiceModalProps {
     isOpen: boolean
     onClose: () => void
+    serviceToEdit?: Service | null
 }
 
-export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps) {
-    const { createService, isLoading, error } = useCreateService()
+export function ServiceModal({ isOpen, onClose, serviceToEdit }: ServiceModalProps) {
+    const { createService, isLoading: isCreating, error: createError } = useCreateService()
+    const { updateService, isLoading: isUpdating, error: updateError } = useUpdateService()
     const { profiles, clients, isLoading: isLoadingOptions } = useServiceOptions()
+
+    const isLoading = isCreating || isUpdating
+    const error = createError || updateError
 
     const [formData, setFormData] = useState({
         title: "",
@@ -26,26 +35,19 @@ export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps)
         description: ""
     })
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        // Construct datetime from string if needed, or just save provided string
-        // Assuming Supabase expects ISO timestamp for timestamptz
-        const serviceDate = formData.service_date ? new Date(formData.service_date).toISOString() : null
-
-        const success = await createService({
-            title: formData.title,
-            client_name: formData.client_name,
-            location: formData.location || null,
-            status: formData.status,
-            service_date: serviceDate,
-            duration_hours: formData.duration_hours ? Number(formData.duration_hours) : null,
-            assigned_to: formData.assigned_to || null,
-            description: formData.description || null
-        })
-
-        if (success) {
-            onClose()
+    useEffect(() => {
+        if (serviceToEdit) {
+            setFormData({
+                title: serviceToEdit.title,
+                client_name: serviceToEdit.client_name || "",
+                location: serviceToEdit.location || "",
+                status: serviceToEdit.status,
+                service_date: serviceToEdit.service_date ? new Date(serviceToEdit.service_date).toISOString().slice(0, 16) : "",
+                duration_hours: serviceToEdit.duration_hours?.toString() || "",
+                assigned_to: serviceToEdit.assigned_to || "",
+                description: serviceToEdit.description || ""
+            })
+        } else {
             setFormData({
                 title: "",
                 client_name: "",
@@ -57,6 +59,34 @@ export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps)
                 description: ""
             })
         }
+    }, [serviceToEdit, isOpen])
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        const serviceDate = formData.service_date ? new Date(formData.service_date).toISOString() : null
+
+        const payload = {
+            title: formData.title,
+            client_name: formData.client_name,
+            location: formData.location || null,
+            status: formData.status,
+            service_date: serviceDate,
+            duration_hours: formData.duration_hours ? Number(formData.duration_hours) : null,
+            assigned_to: formData.assigned_to || null,
+            description: formData.description || null
+        }
+
+        let success = false
+        if (serviceToEdit) {
+            success = await updateService(serviceToEdit.id, payload)
+        } else {
+            success = await createService(payload)
+        }
+
+        if (success) {
+            onClose()
+        }
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -64,7 +94,11 @@ export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps)
     }
 
     return (
-        <Modal title="Naplánovat Servis" isOpen={isOpen} onClose={onClose}>
+        <Modal
+            title={serviceToEdit ? "Upravit Servis" : "Naplánovat Servis"}
+            isOpen={isOpen}
+            onClose={onClose}
+        >
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 text-sm">
@@ -200,7 +234,7 @@ export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps)
                         disabled={isLoading}
                         className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center min-w-[100px] justify-center"
                     >
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Vytvořit"}
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (serviceToEdit ? "Uložit" : "Vytvořit")}
                     </button>
                 </div>
             </form>

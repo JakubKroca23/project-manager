@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Plus, MapPin, CalendarClock } from "lucide-react"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
-import { CreateServiceModal } from "@/components/services/create-service-modal"
+import { ServiceModal } from "@/components/services/create-service-modal"
 
 type Service = Database['public']['Tables']['services']['Row']
 
@@ -17,13 +17,24 @@ const statusMap: Record<string, { label: string; color: string }> = {
 
 export function ServicesClient({ initialData }: { initialData: Service[] }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null)
+
+    const handleCreate = () => {
+        setServiceToEdit(null)
+        setIsModalOpen(true)
+    }
+
+    const handleEdit = (service: Service) => {
+        setServiceToEdit(service)
+        setIsModalOpen(true)
+    }
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">Servis</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleCreate}
                     className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
                 >
                     <Plus className="w-4 h-4" />
@@ -31,14 +42,15 @@ export function ServicesClient({ initialData }: { initialData: Service[] }) {
                 </button>
             </div>
 
-            <CreateServiceModal
+            <ServiceModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
+                serviceToEdit={serviceToEdit}
             />
 
             <DataTable<Service>
                 data={initialData}
-                onRowClick={(s) => console.log("Clicked", s.title)}
+                onRowClick={handleEdit}
                 columns={[
                     {
                         header: "Servisní úkon",
