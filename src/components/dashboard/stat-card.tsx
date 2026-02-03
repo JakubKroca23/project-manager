@@ -20,8 +20,8 @@ export function StatCard({ title, value, icon: Icon, change, trend = "neutral", 
             transition={{ duration: 0.5, delay }}
             className="glass-panel relative overflow-hidden group"
         >
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Icon className="w-16 h-16" />
+            <div className="absolute -top-2 -right-2 p-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity rotate-12">
+                <Icon className="w-24 h-24" />
             </div>
 
             <div className="flex items-start justify-between">
@@ -32,8 +32,8 @@ export function StatCard({ title, value, icon: Icon, change, trend = "neutral", 
                     {change && (
                         <div className="flex items-center mt-1">
                             <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${trend === "up" ? "bg-green-500/10 text-green-600 dark:text-green-400" :
-                                    trend === "down" ? "bg-red-500/10 text-red-600 dark:text-red-400" :
-                                        "bg-secondary text-secondary-foreground"
+                                trend === "down" ? "bg-red-500/10 text-red-600 dark:text-red-400" :
+                                    "bg-secondary text-secondary-foreground"
                                 }`}>
                                 {change}
                             </span>
