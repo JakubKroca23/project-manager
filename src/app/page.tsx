@@ -84,7 +84,7 @@ export default async function Home() {
 
             // Enrich activities with names (manual join since Supabase simple client doesn't deep join easily in one go without predefined Views/Foreign Tables setup sometimes)
             // Or better: use a View. But manual join for 10 items is fast.
-            const activitiesData = activitiesRes.data || []
+            const activitiesData: any[] = activitiesRes.data || []
 
             if (activitiesData.length > 0) {
                 // Fetch profiles and projects for these activities
