@@ -96,8 +96,8 @@ export default async function Home() {
                     supabase.from('projects').select('id, title').in('id', projectIds)
                 ])
 
-                const usersMap = new Map(usersMapRes.data?.map(u => [u.id, u.full_name]) || [])
-                const projectsMap = new Map(projectsMapRes.data?.map(p => [p.id, p.title]) || [])
+                const usersMap = new Map((usersMapRes.data as any[])?.map(u => [u.id, u.full_name]) || [])
+                const projectsMap = new Map((projectsMapRes.data as any[])?.map(p => [p.id, p.title]) || [])
 
                 recentActivities = activitiesData.map(a => ({
                     ...a,
