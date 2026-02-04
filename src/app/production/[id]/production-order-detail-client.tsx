@@ -1,45 +1,27 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { Database } from "@/lib/database.types"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, Calendar, FileText, CheckCircle2, Clock, PlayCircle, AlertCircle } from "lucide-react"
-
-import { PdfDownloadButton } from "@/components/production/pdf-download-button"
+import { ChevronLeft, Calendar, FileText } from "lucide-react"
 
 type Order = Database['public']['Tables']['production_orders']['Row'] & {
-    project?: { id: string, title: string, client?: { name: string }, description?: string } | null
-}
-type Task = Database['public']['Tables']['manufacturing_tasks']['Row']
-
-const statusMap: Record<string, { label: string; color: string; icon: any }> = {
-    queue: { label: "Ve frontě", color: "text-muted-foreground", icon: Clock },
-    in_progress: { label: "Probíhá", color: "text-blue-500", icon: PlayCircle },
-    done: { label: "Hotovo", color: "text-green-500", icon: CheckCircle2 },
-    check: { label: "Kontrola", color: "text-orange-500", icon: AlertCircle },
+    project?: { id: string, title: string } | null
 }
 
-export function ProductionOrderDetailClient({ order, tasks: initialTasks, bomItems = [] }: { order: Order, tasks: Task[], bomItems?: any[] }) {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks)
+const statusMap: Record<string, { label: string; color: string }> = {
+    new: { label: "Nová", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+    fabrication: { label: "Výroba", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
+    assembly: { label: "Montáž", color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" },
+    testing: { label: "Testování", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
+    done: { label: "Hotovo", color: "bg-green-500/10 text-green-600 dark:text-green-400" },
+    planned: { label: "Naplánováno", color: "bg-gray-500/10 text-gray-600" },
+}
+
+export function ProductionOrderDetailClient({ order }: { order: Order }) {
     const router = useRouter()
-    const supabase = createClient()
 
-    const updateTaskStatus = async (taskId: string, newStatus: string) => {
-        // Optimistic update
-        setTasks(current => current.map(t => t.id === taskId ? { ...t, status: newStatus } : t))
-
-        const { error } = await (supabase as any)
-            .from("manufacturing_tasks")
-            .update({ status: newStatus })
-            .eq("id", taskId)
-
-        if (error) {
-            console.error("Failed to update status", error)
-            // Revert on error could be implemented here
-        }
-    }
+    const status = statusMap[order.status || 'new'] || { label: order.status, color: "bg-secondary" }
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto">
@@ -63,61 +45,34 @@ export function ProductionOrderDetailClient({ order, tasks: initialTasks, bomIte
                         </span>
                     </div>
                 </div>
-                <div className="ml-auto">
-                    <PdfDownloadButton order={order} tasks={tasks} bomItems={bomItems} />
-                </div>
             </div>
 
-            {/* Manufacturing Tasks */}
-            <div className="space-y-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                    Výrobní kroky
-                    <span className="ml-2 text-xs font-normal text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                        {tasks.filter(t => t.status === 'done').length} / {tasks.length}
-                    </span>
-                </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass-panel p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Detaily zakázky</h3>
+                    <div className="space-y-3">
+                        <div className="flex justify-between border-b pb-2">
+                            <span className="text-muted-foreground">Stav</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${status.color}`}>
+                                {status.label}
+                            </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                            <span className="text-muted-foreground">Množství</span>
+                            <span className="font-bold">{order.quantity} ks</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                            <span className="text-muted-foreground">Priorita</span>
+                            <span className="font-bold uppercase text-xs">{order.priority}</span>
+                        </div>
+                    </div>
+                </div>
 
-                <div className="grid gap-4">
-                    {tasks.map((task) => {
-                        const status = statusMap[task.status || 'queue'] || statusMap.queue
-                        const StatusIcon = status.icon
-
-                        return (
-                            <div key={task.id} className="p-4 rounded-xl border border-border/50 bg-card hover:bg-secondary/10 transition-colors flex items-center justify-between gap-4">
-                                <div className="space-y-1">
-                                    <h3 className="font-semibold">{task.title}</h3>
-                                    <p className="text-sm text-muted-foreground">{task.description}</p>
-                                    <div className="flex items-center gap-4 pt-1">
-                                        <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${status.color}`}>
-                                            <StatusIcon className="w-3.5 h-3.5" />
-                                            {status.label}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground font-mono">
-                                            {task.estimated_hours}h
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    {task.status !== 'in_progress' && task.status !== 'done' && (
-                                        <Button size="sm" variant="outline" onClick={() => updateTaskStatus(task.id, 'in_progress')}>
-                                            Začít
-                                        </Button>
-                                    )}
-                                    {task.status === 'in_progress' && (
-                                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => updateTaskStatus(task.id, 'done')}>
-                                            Dokončit
-                                        </Button>
-                                    )}
-                                    {task.status === 'done' && (
-                                        <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => updateTaskStatus(task.id, 'queue')}>
-                                            Reset
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    })}
+                <div className="glass-panel p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Poznámky</h3>
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">
+                        {order.notes || "Žádné poznámky."}
+                    </p>
                 </div>
             </div>
         </div>

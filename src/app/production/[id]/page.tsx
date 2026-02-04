@@ -21,31 +21,9 @@ export default async function ProductionDetailPage({ params }: { params: Promise
         notFound()
     }
 
-    // Fetch tasks for this order
-    const { data: tasks } = await supabase
-        .from("manufacturing_tasks")
-        .select("*")
-        .eq("order_id", id)
-        .order("created_at")
-
-    // Fetch BOM items if project exists
-    let bomItems: any[] = []
-    const orderData = order as any
-
-    if (orderData?.project?.id) {
-        const { data: bom } = await supabase
-            .from("bom_items")
-            .select("*")
-            .eq("project_id", orderData.project.id)
-
-        if (bom) bomItems = bom
-    }
-
     return (
         <div className="container mx-auto py-8">
-            <ProductionOrderDetailClient order={orderData} tasks={tasks || []} bomItems={bomItems} />
+            <ProductionOrderDetailClient order={order} />
         </div>
     )
 }
-
-
