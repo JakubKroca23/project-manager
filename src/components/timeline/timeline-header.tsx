@@ -4,7 +4,7 @@ import { cs } from "date-fns/locale"
 import { motion } from "framer-motion"
 
 export function TimelineHeader() {
-    const { startDate, pixelsPerDay, scrollX, headerHeight } = useTimeline()
+    const { startDate, pixelsPerDay, headerHeight } = useTimeline()
 
     // 1. Extend Range to 365 Days
     const END_DATE = addDays(startDate, 365)
@@ -39,9 +39,10 @@ export function TimelineHeader() {
             className="bg-background/95 backdrop-blur border-b border-border/50 sticky top-0 z-10 overflow-hidden transition-all duration-300"
             style={{ height: headerHeight }}
         >
-            <motion.div
-                className="h-full relative flex flex-col"
-                style={{ x: -scrollX, width: totalWidth }}
+            <div
+                id="timeline-header-container"
+                className="h-full relative flex flex-col overflow-hidden"
+                style={{ width: totalWidth }}
             >
                 {/* 1. TOP ROW: MONTHS */}
                 {showMonths && (
@@ -114,7 +115,7 @@ export function TimelineHeader() {
                         })}
                     </div>
                 )}
-            </motion.div>
+            </div>
         </div>
     )
 }

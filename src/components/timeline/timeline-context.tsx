@@ -22,8 +22,6 @@ interface TimelineContextType {
     setStartDate: (date: Date) => void
     pixelsPerDay: number
     setPixelsPerDay: (px: number) => void
-    scrollX: number
-    setScrollX: (x: number) => void
     headerHeight: number
     // Grouping & Expansion
     expandedIds: Set<string>
@@ -55,7 +53,6 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
     // Start from beginning of year to show past
     const [startDate, setStartDate] = useState(startOfYear(new Date()))
     const [pixelsPerDay, setPixelsPerDay] = useState(40) // Default zoom
-    const [scrollX, setScrollX] = useState(0)
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
     const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -106,14 +103,13 @@ export function TimelineProvider({ children, items: initialItems }: { children: 
             updateItemDates,
             startDate, setStartDate,
             pixelsPerDay, setPixelsPerDay,
-            scrollX, setScrollX,
             expandedIds, toggleExpand,
             visibleItems,
             headerHeight, // Exposed
             isFullscreen, setIsFullscreen
         }}>
             {children}
-        </TimelineContext.Provider>
+        </TimelineContext.Provider >
     )
 }
 
