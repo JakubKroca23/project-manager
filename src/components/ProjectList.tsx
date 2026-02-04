@@ -144,7 +144,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         </button>
     );
 
-    const Th = ({ id, label, isVisible = true }: { id: string, label: string, isVisible?: boolean }) => {
+    const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
         if (!isVisible) return null;
         return (
             <th style={{ width: columnWidths[id], minWidth: columnWidths[id], position: 'relative' }}>
@@ -218,7 +218,15 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                 <table className="project-table" style={{ tableLayout: 'fixed' }}>
                     <thead>
                         <tr>
-                            <Th id="main" label="Předmět / Kód" />
+                            <Th 
+                                id="main" 
+                                label={
+                                    <div style={{ lineHeight: '1.2' }}>
+                                        <div>Předmět</div>
+                                        <div style={{ fontSize: '8px', opacity: 0.8, fontWeight: 'normal' }}>Číslo OP</div>
+                                    </div>
+                                } 
+                            />
                             <Th id="customer" label="Zákazník" isVisible={visibleColumns.customer} />
                             <Th id="manager" label="Vlastník" isVisible={visibleColumns.manager} />
                             <Th id="abra_project" label="Abra Zakázka" isVisible={visibleColumns.abra_project} />

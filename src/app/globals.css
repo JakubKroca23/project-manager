@@ -411,8 +411,7 @@ header p {
   text-align: left;
   background: var(--bg-table-header);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 2px solid var(--primary);
   border-right: 1px solid var(--border-light);
   overflow: hidden;
   white-space: nowrap;
