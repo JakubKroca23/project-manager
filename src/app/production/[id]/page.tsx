@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { ProductionOrderDetailClient } from "./production-order-detail-client"
 
-export default async function ProductionDetailPage({ params }: { params: { id: string } }) {
+export default async function ProductionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params
+    const id = resolvedParams.id
     const supabase = await createClient()
 
     // Fetch order with project details
@@ -12,7 +14,7 @@ export default async function ProductionDetailPage({ params }: { params: { id: s
             *,
             project:projects(id, title)
         `)
-        .eq("id", params.id)
+        .eq("id", id)
         .single()
 
     if (!order) {
@@ -23,7 +25,7 @@ export default async function ProductionDetailPage({ params }: { params: { id: s
     const { data: tasks } = await supabase
         .from("manufacturing_tasks")
         .select("*")
-        .eq("order_id", params.id)
+        .eq("order_id", id)
         .order("created_at")
 
     // Fetch BOM items if project exists
