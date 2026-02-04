@@ -1,243 +1,190 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Modal } from "@/components/ui/modal"
-import { useCreateService } from "@/hooks/use-create-service"
-import { useUpdateService } from "@/hooks/use-update-service"
-import { useServiceOptions } from "@/hooks/use-service-options"
-import { Loader2 } from "lucide-react"
-import { Database } from "@/lib/database.types"
+import * as React from "react";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { createService } from "@/app/services/actions";
+import { getProfiles } from "@/app/projects/actions";
+import { useRouter } from "next/navigation";
+import { Loader2, Plus, AlertCircle } from "lucide-react";
 
-type Service = Database['public']['Tables']['services']['Row']
-
-interface ServiceModalProps {
-    isOpen: boolean
-    onClose: () => void
-    serviceToEdit?: Service | null
+interface CreateServiceModalProps {
+    isOpen: boolean;
+    onClose: () => void;
 }
 
-export function ServiceModal({ isOpen, onClose, serviceToEdit }: ServiceModalProps) {
-    const { createService, isLoading: isCreating, error: createError } = useCreateService()
-    const { updateService, isLoading: isUpdating, error: updateError } = useUpdateService()
-    const { profiles, clients, isLoading: isLoadingOptions } = useServiceOptions()
+export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps) {
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const [profiles, setProfiles] = React.useState<any[]>([]);
+    const router = useRouter();
 
-    const isLoading = isCreating || isUpdating
-    const error = createError || updateError
-
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = React.useState({
         title: "",
         client_name: "",
         location: "",
-        status: "scheduled",
+        status: "scheduled" as any,
         service_date: "",
-        duration_hours: "",
-        assigned_to: "", // ID of profile
-        description: ""
-    })
+        duration_hours: 1,
+        assigned_to: "",
+        description: "",
+        is_recurring: false,
+    });
 
-    useEffect(() => {
-        if (serviceToEdit) {
-            setFormData({
-                title: serviceToEdit.title,
-                client_name: serviceToEdit.client_name || "",
-                location: serviceToEdit.location || "",
-                status: serviceToEdit.status,
-                service_date: serviceToEdit.service_date ? new Date(serviceToEdit.service_date).toISOString().slice(0, 16) : "",
-                duration_hours: serviceToEdit.duration_hours?.toString() || "",
-                assigned_to: serviceToEdit.assigned_to || "",
-                description: serviceToEdit.description || ""
-            })
-        } else {
-            setFormData({
-                title: "",
-                client_name: "",
-                location: "",
-                status: "scheduled",
-                service_date: "",
-                duration_hours: "",
-                assigned_to: "",
-                description: ""
-            })
+    React.useEffect(() => {
+        if (isOpen) {
+            getProfiles().then(setProfiles);
         }
-    }, [serviceToEdit, isOpen])
+    }, [isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        const serviceDate = formData.service_date ? new Date(formData.service_date).toISOString() : null
+        try {
+            const result = await createService({
+                ...formData,
+                duration_hours: Number(formData.duration_hours)
+            } as any);
 
-        const payload = {
-            title: formData.title,
-            client_name: formData.client_name,
-            location: formData.location || null,
-            status: formData.status,
-            service_date: serviceDate,
-            duration_hours: formData.duration_hours ? Number(formData.duration_hours) : null,
-            assigned_to: formData.assigned_to || null,
-            description: formData.description || null
+            if (result.error) {
+                setError(result.error);
+            } else {
+                router.refresh();
+                onClose();
+                setFormData({
+                    title: "",
+                    client_name: "",
+                    location: "",
+                    status: "scheduled",
+                    service_date: "",
+                    duration_hours: 1,
+                    assigned_to: "",
+                    description: "",
+                    is_recurring: false,
+                });
+            }
+        } catch (err: any) {
+            setError(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
         }
-
-        let success = false
-        if (serviceToEdit) {
-            success = await updateService(serviceToEdit.id, payload)
-        } else {
-            success = await createService(payload)
-        }
-
-        if (success) {
-            onClose()
-        }
-    }
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    }
+    };
 
     return (
         <Modal
-            title={serviceToEdit ? "Upravit Servis" : "Naplánovat Servis"}
             isOpen={isOpen}
             onClose={onClose}
+            title="Naplánovat Servis"
         >
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 py-2">
                 {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 text-sm">
+                    <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-900/50">
+                        <AlertCircle className="w-4 h-4" />
                         {error}
                     </div>
                 )}
 
-                <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium">Servisní úkon</label>
-                    <input
-                        type="text"
-                        name="title"
-                        required
-                        value={formData.title}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all font-medium"
-                        placeholder="např. Pravidelná kontrola"
-                    />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="client_name" className="text-sm font-medium">Klient</label>
-                        <input
-                            type="text"
-                            name="client_name"
-                            list="clients-list"
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Název úkonu *</label>
+                        <Input
                             required
+                            placeholder="Např. Roční prohlídka, Oprava hydrauliky..."
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Zákazník</label>
+                        <Input
+                            placeholder="Jméno zákazníka..."
                             value={formData.client_name}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
-                            placeholder="Vyberte nebo zadejte nového"
-                            autoComplete="off"
-                        />
-                        <datalist id="clients-list">
-                            {clients.map((client, i) => (
-                                <option key={i} value={client} />
-                            ))}
-                        </datalist>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="location" className="text-sm font-medium">Místo</label>
-                        <input
-                            type="text"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
-                            placeholder="např. Praha"
+                            onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                         />
                     </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label htmlFor="service_date" className="text-sm font-medium">Datum a Čas</label>
-                        <input
-                            type="datetime-local"
-                            name="service_date"
-                            required
-                            value={formData.service_date}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
+                        <label className="text-sm font-medium">Lokalita</label>
+                        <Input
+                            placeholder="Místo servisu..."
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         />
                     </div>
+
                     <div className="space-y-2">
-                        <label htmlFor="duration_hours" className="text-sm font-medium">Trvání (hodiny)</label>
-                        <input
+                        <label className="text-sm font-medium">Datum a čas</label>
+                        <Input
+                            type="datetime-local"
+                            value={formData.service_date}
+                            onChange={(e) => setFormData({ ...formData, service_date: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Odhadované trvání (h)</label>
+                        <Input
                             type="number"
-                            name="duration_hours"
                             min="0.5"
                             step="0.5"
                             value={formData.duration_hours}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
+                            onChange={(e) => setFormData({ ...formData, duration_hours: parseFloat(e.target.value) || 1 })}
                         />
                     </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="assigned_to" className="text-sm font-medium">Přidělit technikovi</label>
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Technik</label>
                         <select
-                            name="assigned_to"
+                            className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             value={formData.assigned_to}
-                            onChange={handleChange}
-                            disabled={isLoadingOptions}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all appearance-none"
+                            onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
                         >
-                            <option value="">-- Nepřiřazeno --</option>
-                            {profiles.map(p => (
+                            <option value="">Vyberte technika...</option>
+                            {profiles.map((p) => (
                                 <option key={p.id} value={p.id}>{p.full_name || p.email}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="status" className="text-sm font-medium">Stav</label>
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all appearance-none"
-                        >
-                            <option value="scheduled">Naplánováno</option>
-                            <option value="waiting_parts">Čeká na díly</option>
-                            <option value="in_progress">Probíhá</option>
-                            <option value="done">Hotovo</option>
-                        </select>
+
+                    <div className="col-span-2 flex items-center gap-2 py-2">
+                        <input
+                            type="checkbox"
+                            id="is_recurring"
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            checked={formData.is_recurring}
+                            onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
+                        />
+                        <label htmlFor="is_recurring" className="text-sm font-medium cursor-pointer">
+                            Opakovaný servis
+                        </label>
+                    </div>
+
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Popis práce</label>
+                        <textarea
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Popište co je potřeba udělat..."
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        />
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label htmlFor="description" className="text-sm font-medium">Poznámky</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all resize-none"
-                    />
-                </div>
-
-                <div className="pt-4 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-secondary transition-colors"
-                    >
+                <div className="pt-4 flex justify-end gap-3">
+                    <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                         Zrušit
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center min-w-[100px] justify-center"
-                    >
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (serviceToEdit ? "Uložit" : "Vytvořit")}
-                    </button>
+                    </Button>
+                    <Button type="submit" disabled={loading} className="gap-2">
+                        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        <Plus className="w-4 h-4" />
+                        Naplánovat
+                    </Button>
                 </div>
             </form>
         </Modal>
-    )
+    );
 }

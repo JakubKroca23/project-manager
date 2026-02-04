@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
-    Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft,
+    ChevronLeft,
+    ChevronRight,
     Layout, Settings, Factory, CheckCircle2, Octagon,
+    Edit2, Trash2, Calendar, User, Briefcase,
     MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X, Truck, Building, MapPin,
     FileText, Zap, Wrench, History, Info
 } from "lucide-react"
-import { UpdateProjectModal } from "@/components/projects/update-project-modal"
-import { AddSuperstructureModal } from "@/components/projects/add-superstructure-modal"
-import { AddAccessoryModal } from "@/components/projects/add-accessory-modal"
+
 import { ProjectHistoryModal } from "@/components/projects/project-history-modal"
 import { EditableField } from "@/components/projects/editable-field"
 import { ProductionDescriptionModal } from "@/components/projects/production-description-modal"
@@ -20,10 +20,19 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { StatusStepper } from "@/components/projects/status-stepper"
 import { createClient } from "@/lib/supabase/client"
+import { Database } from "@/lib/database.types"
 
 type TabType = 'overview' | 'production' | 'services' | 'accessories' | 'history'
 
-export function ProjectDetailClient({ project }: { project: any }) {
+type Project = Database['public']['Tables']['projects']['Row'] & {
+    manager?: { full_name: string | null } | null
+    assigned_manager?: { full_name: string | null } | null
+    production_orders?: any[]
+    superstructures?: any[]
+    project_accessories?: any[]
+}
+
+export function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter()
     const supabase = createClient()
     const [activeTab, setActiveTab] = useState<TabType>('overview')
@@ -210,7 +219,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                                     <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
                                                         <User className="w-4 h-4 text-indigo-500" />
                                                     </div>
-                                                    <span className="font-bold text-lg">{project.assigned_manager?.full_name || "Nepřiřazeno"}</span>
+                                                    <span className="font-bold text-lg">{project.assigned_manager?.full_name || project.manager?.full_name || "Nepřiřazeno"}</span>
                                                 </div>
                                             </div>
                                             <EditableField
@@ -275,13 +284,13 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span>Dokončeno</span>
-                                            <span className="text-primary">{project.completion_percentage || 0}%</span>
+                                            <span className="text-primary">{project.completion_percentage || project.progress || 0}%</span>
                                         </div>
                                         <div className="h-3 w-full bg-secondary rounded-full overflow-hidden border border-border/50 p-0.5">
                                             <motion.div
                                                 initial={{ width: 0 }}
-                                                animate={{ width: `${project.completion_percentage || 0}%` }}
-                                                className="h-full bg-primary rounded-full"
+                                                animate={{ width: `${project.completion_percentage || project.progress || 0}%` }}
+                                                className="h-full bg-primary rounded-full shadow-[0_0_12px_rgba(59,130,246,0.5)]"
                                             />
                                         </div>
                                     </div>
@@ -302,7 +311,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {project.superstructures?.length > 0 ? project.superstructures.map((s: any, i: number) => (
+                                {project.superstructures && project.superstructures.length > 0 ? project.superstructures.map((s: any, i: number) => (
                                     <motion.div
                                         key={s.id}
                                         initial={{ opacity: 0, scale: 0.95 }}
@@ -328,9 +337,11 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                 )}
                             </div>
 
-                            <h3 className="text-xl font-bold pt-6 border-t border-border/10">Výrobní zakázky</h3>
+                            <h3 className="text-xl font-bold pt-6 border-t border-border/10 flex items-center gap-2">
+                                <Wrench className="w-5 h-5 text-indigo-500" /> Výrobní zakázky
+                            </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                                {project.production_orders?.length > 0 ? project.production_orders.map((order: any) => (
+                                {project.production_orders && project.production_orders.length > 0 ? project.production_orders.map((order: any) => (
                                     <div
                                         key={order.id}
                                         onClick={() => router.push(`/production/${order.id}`)}
@@ -346,8 +357,8 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-black uppercase text-muted-foreground">Konec</div>
-                                            <div className="text-xs font-bold">{new Date(order.end_date).toLocaleDateString('cs-CZ')}</div>
+                                            <div className="text-[10px] font-black uppercase text-muted-foreground">Termín</div>
+                                            <div className="text-xs font-bold">{order.end_date ? new Date(order.end_date).toLocaleDateString('cs-CZ') : '-'}</div>
                                         </div>
                                     </div>
                                 )) : (
@@ -374,7 +385,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
                             </div>
 
                             <div className="flex flex-wrap gap-3">
-                                {project.project_accessories?.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
+                                {project.project_accessories && project.project_accessories.length > 0 ? project.project_accessories.map((acc: any, i: number) => (
                                     <motion.div
                                         key={acc.id}
                                         initial={{ opacity: 0, x: -10 }}
@@ -442,21 +453,19 @@ export function ProjectDetailClient({ project }: { project: any }) {
             <UpdateProjectModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} project={project} />
             <AddSuperstructureModal isOpen={isAddSuperstructureOpen} onClose={() => setIsAddSuperstructureOpen(false)} projectId={project.id} />
             <AddAccessoryModal isOpen={isAddAccessoryOpen} onClose={() => setIsAddAccessoryOpen(false)} projectId={project.id} />
-            <ProjectHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} projectId={project.id} />
-
             <ProductionDescriptionModal
                 isOpen={isDescriptionOpen}
                 onClose={() => setIsDescriptionOpen(false)}
                 projectId={project.id}
-                initialDescription={project.production_description}
+                initialDescription={project.production_description || ""}
             />
-
             <GenerateJobsModal
                 isOpen={isGenerateOpen}
                 onClose={() => setIsGenerateOpen(false)}
                 projectId={project.id}
                 quantity={project.quantity || 1}
             />
+            <ProjectHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} projectId={project.id} />
         </div>
     )
 }

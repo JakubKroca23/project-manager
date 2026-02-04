@@ -115,7 +115,7 @@ export const JobCardPdf = ({ order, tasks, bomItems }: JobCardProps) => {
                         <Text style={styles.value}>{order?.project?.title || 'N/A'}</Text>
                     </View>
                     <View style={styles.row}>
-                        <Text style={styles.label}>Klient:</Text>
+                        <Text style={styles.label}>Zákazník:</Text>
                         <Text style={styles.value}>{order?.project?.client?.name || 'N/A'}</Text>
                     </View>
                     <View style={styles.row}>

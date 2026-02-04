@@ -49,10 +49,6 @@ export function ProductionClient({ initialData }: { initialData: ProductionOrder
                 onClose={() => setIsModalOpen(false)}
             />
 
-            <div className="grid gap-4 md:grid-cols-3">
-                {/* Mini stats could go here */}
-            </div>
-
             <DataTable<ProductionOrder>
                 data={initialData}
                 onRowClick={(p) => router.push(`/production/${p.id}`)}
@@ -99,7 +95,7 @@ export function ProductionClient({ initialData }: { initialData: ProductionOrder
                     },
                     {
                         header: "Termín",
-                        accessorKey: "end_date", // Mapped from deadline/end_date in DB
+                        accessorKey: "end_date",
                         cell: (p) => p.end_date ? new Date(p.end_date).toLocaleDateString('cs-CZ') : '-'
                     },
                 ]}

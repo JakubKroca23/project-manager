@@ -24,7 +24,6 @@ const navItems = [
     { name: "Výroba", href: "/production", icon: Factory },
     { name: "Servis", href: "/services", icon: Wrench },
     { name: "Timeline", href: "/timeline", icon: Calendar },
-    { name: "Katalogy", href: "/catalogs", icon: Database },
 ]
 
 interface TopBarProps {

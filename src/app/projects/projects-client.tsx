@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
 import { CreateProjectModal } from "@/components/projects/create-project-modal"
-import { ProjectCard } from "@/components/projects/project-card" // This line remains as ProjectCard is imported, not defined here.
+import { ProjectCard } from "@/components/projects/project-card"
 import { motion, AnimatePresence } from "framer-motion"
 
 type Project = Database['public']['Tables']['projects']['Row'] & {

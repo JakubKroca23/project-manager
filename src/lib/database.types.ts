@@ -34,7 +34,7 @@ export interface Database {
                     details?: Json | null
                     created_at?: string
                 }
-            },
+            }
             profiles: {
                 Row: {
                     id: string
@@ -42,7 +42,6 @@ export interface Database {
                     full_name: string | null
                     avatar_url: string | null
                     role: string
-                    is_approved: boolean | null
                     created_at: string
                 }
                 Insert: {
@@ -51,7 +50,6 @@ export interface Database {
                     full_name?: string | null
                     avatar_url?: string | null
                     role?: string
-                    is_approved?: boolean | null
                     created_at?: string
                 }
                 Update: {
@@ -60,7 +58,6 @@ export interface Database {
                     full_name?: string | null
                     avatar_url?: string | null
                     role?: string
-                    is_approved?: boolean | null
                     created_at?: string
                 }
             }
@@ -69,174 +66,108 @@ export interface Database {
                     id: string
                     title: string
                     description: string | null
-                    status: string
+                    client_name: string | null
+                    zakazka_sro: string | null
+                    op_crm: string | null
+                    manufacturer: string | null
+                    chassis_type: string | null
+                    sector: string | null
+                    assembly_company: string | null
+                    quantity: number
+                    status: "planning" | "development" | "production" | "completed" | "stopped"
+                    progress: number
                     start_date: string | null
                     end_date: string | null
-                    client_name: string | null
+                    manager_id: string | null
                     created_by: string | null
                     created_at: string
                     updated_at: string
-                    chassis_type: string | null
-                    manufacturer: string | null
-                    superstructure_type: string | null
-                    accessories: string | null
-                    quantity: number | null
                 }
                 Insert: {
                     id?: string
                     title: string
                     description?: string | null
-                    status?: string
+                    client_name?: string | null
+                    zakazka_sro?: string | null
+                    op_crm?: string | null
+                    manufacturer?: string | null
+                    chassis_type?: string | null
+                    sector?: string | null
+                    assembly_company?: string | null
+                    quantity?: number
+                    status?: "planning" | "development" | "production" | "completed" | "stopped"
+                    progress?: number
                     start_date?: string | null
                     end_date?: string | null
-                    client_name?: string | null
+                    manager_id?: string | null
                     created_by?: string | null
                     created_at?: string
                     updated_at?: string
-                    chassis_type?: string | null
-                    manufacturer?: string | null
-                    superstructure_type?: string | null
-                    accessories?: string | null
-                    quantity?: number | null
                 }
                 Update: {
                     id?: string
                     title?: string
                     description?: string | null
-                    status?: string
+                    client_name?: string | null
+                    zakazka_sro?: string | null
+                    op_crm?: string | null
+                    manufacturer?: string | null
+                    chassis_type?: string | null
+                    sector?: string | null
+                    assembly_company?: string | null
+                    quantity?: number
+                    status?: "planning" | "development" | "production" | "completed" | "stopped"
+                    progress?: number
                     start_date?: string | null
                     end_date?: string | null
-                    client_name?: string | null
+                    manager_id?: string | null
                     created_by?: string | null
                     created_at?: string
                     updated_at?: string
-                    chassis_type?: string | null
-                    manufacturer?: string | null
-                    superstructure_type?: string | null
-                    accessories?: string | null
-                    quantity?: number | null
-                }
-            }
-            superstructures: {
-                Row: {
-                    id: string
-                    project_id: string | null
-                    type: string
-                    details: string | null
-                    supplier: string | null
-                    order_status: string | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    project_id?: string | null
-                    type: string
-                    details?: string | null
-                    supplier?: string | null
-                    order_status?: string | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    project_id?: string | null
-                    type?: string
-                    details?: string | null
-                    supplier?: string | null
-                    order_status?: string | null
-                    created_at?: string
-                }
-            }
-            accessory_catalog: {
-                Row: {
-                    id: string
-                    name: string
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    name: string
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    name?: string
-                    created_at?: string
-                }
-            }
-            project_accessories: {
-                Row: {
-                    id: string
-                    project_id: string | null
-                    name: string
-                    action_type: "manufacture" | "purchase" | "stock" | null
-                    supplier: string | null
-                    order_status: string | null
-                    quantity: number | null
-                    notes: string | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    project_id?: string | null
-                    name: string
-                    action_type?: "manufacture" | "purchase" | "stock" | null
-                    supplier?: string | null
-                    order_status?: string | null
-                    quantity?: number | null
-                    notes?: string | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    project_id?: string | null
-                    name?: string
-                    action_type?: "manufacture" | "purchase" | "stock" | null
-                    supplier?: string | null
-                    order_status?: string | null
-                    quantity?: number | null
-                    notes?: string | null
-                    created_at?: string
                 }
             }
             production_orders: {
                 Row: {
                     id: string
-                    project_id: string | null
+                    project_id: string
                     title: string
                     quantity: number
-                    status: string
-                    priority: string
+                    status: "new" | "fabrication" | "assembly" | "testing" | "done" | "planned"
+                    priority: "low" | "medium" | "high" | "critical"
                     start_date: string | null
                     end_date: string | null
                     assigned_to: string | null
                     notes: string | null
                     created_at: string
+                    updated_at: string
                 }
                 Insert: {
                     id?: string
-                    project_id?: string | null
+                    project_id: string
                     title: string
                     quantity?: number
-                    status?: string
-                    priority?: string
+                    status?: "new" | "fabrication" | "assembly" | "testing" | "done" | "planned"
+                    priority?: "low" | "medium" | "high" | "critical"
                     start_date?: string | null
                     end_date?: string | null
                     assigned_to?: string | null
                     notes?: string | null
                     created_at?: string
+                    updated_at?: string
                 }
                 Update: {
                     id?: string
-                    project_id?: string | null
+                    project_id?: string
                     title?: string
                     quantity?: number
-                    status?: string
-                    priority?: string
+                    status?: "new" | "fabrication" | "assembly" | "testing" | "done" | "planned"
+                    priority?: "low" | "medium" | "high" | "critical"
                     start_date?: string | null
                     end_date?: string | null
                     assigned_to?: string | null
                     notes?: string | null
                     created_at?: string
+                    updated_at?: string
                 }
             }
             services: {
@@ -245,176 +176,42 @@ export interface Database {
                     title: string
                     client_name: string | null
                     location: string | null
-                    status: string
+                    status: "scheduled" | "in_progress" | "waiting_parts" | "done" | "cancelled"
                     service_date: string | null
                     duration_hours: number | null
                     assigned_to: string | null
                     description: string | null
+                    is_recurring: boolean
                     created_at: string
+                    updated_at: string
                 }
                 Insert: {
                     id?: string
                     title: string
                     client_name?: string | null
                     location?: string | null
-                    status?: string
+                    status?: "scheduled" | "in_progress" | "waiting_parts" | "done" | "cancelled"
                     service_date?: string | null
                     duration_hours?: number | null
                     assigned_to?: string | null
                     description?: string | null
+                    is_recurring?: boolean
                     created_at?: string
+                    updated_at?: string
                 }
                 Update: {
                     id?: string
                     title?: string
                     client_name?: string | null
                     location?: string | null
-                    status?: string
+                    status?: "scheduled" | "in_progress" | "waiting_parts" | "done" | "cancelled"
                     service_date?: string | null
                     duration_hours?: number | null
                     assigned_to?: string | null
                     description?: string | null
+                    is_recurring?: boolean
                     created_at?: string
-                }
-            }
-            clients: {
-                Row: {
-                    id: string
-                    name: string
-                    billing_address: string | null
-                    delivery_address: string | null
-                    ico: string | null
-                    dic: string | null
-                    contact_person: string | null
-                    email: string | null
-                    phone: string | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    name: string
-                    billing_address?: string | null
-                    delivery_address?: string | null
-                    ico?: string | null
-                    dic?: string | null
-                    contact_person?: string | null
-                    email?: string | null
-                    phone?: string | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    name?: string
-                    billing_address?: string | null
-                    delivery_address?: string | null
-                    ico?: string | null
-                    dic?: string | null
-                    contact_person?: string | null
-                    email?: string | null
-                    phone?: string | null
-                    created_at?: string
-                }
-            }
-            accessories_catalog: {
-                Row: {
-                    id: string
-                    name: string
-                    category: string | null
-                    part_number: string | null
-                    price: number | null
-                    description: string | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    name: string
-                    category?: string | null
-                    part_number?: string | null
-                    price?: number | null
-                    description?: string | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    name?: string
-                    category?: string | null
-                    part_number?: string | null
-                    price?: number | null
-                    description?: string | null
-                    created_at?: string
-                }
-            }
-            manufacturing_tasks: {
-                Row: {
-                    id: string
-                    order_id: string | null
-                    title: string
-                    description: string | null
-                    status: string | null
-                    assigned_to: string | null
-                    estimated_hours: number | null
-                    created_at: string
-                    updated_at: string | null
-                }
-                Insert: {
-                    id?: string
-                    order_id?: string | null
-                    title: string
-                    description?: string | null
-                    status?: string | null
-                    assigned_to?: string | null
-                    estimated_hours?: number | null
-                    created_at?: string
-                    updated_at?: string | null
-                }
-                Update: {
-                    id?: string
-                    order_id?: string | null
-                    title?: string
-                    description?: string | null
-                    status?: string | null
-                    assigned_to?: string | null
-                    estimated_hours?: number | null
-                    created_at?: string
-                    updated_at?: string | null
-                }
-            }
-            bom_items: {
-                Row: {
-                    id: string
-                    project_id: string | null
-                    name: string
-                    quantity: number | null
-                    unit: string | null
-                    status: string | null
-                    supplier: string | null
-                    order_reference: string | null
-                    is_custom: boolean | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    project_id?: string | null
-                    name: string
-                    quantity?: number | null
-                    unit?: string | null
-                    status?: string | null
-                    supplier?: string | null
-                    order_reference?: string | null
-                    is_custom?: boolean | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    project_id?: string | null
-                    name?: string
-                    quantity?: number | null
-                    unit?: string | null
-                    status?: string | null
-                    supplier?: string | null
-                    order_reference?: string | null
-                    is_custom?: boolean | null
-                    created_at?: string
+                    updated_at?: string
                 }
             }
         }

@@ -1,122 +1,138 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Modal } from "@/components/ui/modal"
-import { useCreateProduction } from "@/hooks/use-create-production"
-import { useProjectOptions } from "@/hooks/use-project-options"
-import { Loader2 } from "lucide-react"
+import * as React from "react";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { createOrder } from "@/app/production/actions";
+import { getProjects, getProfiles } from "@/app/projects/actions";
+import { useRouter } from "next/navigation";
+import { Loader2, Plus, AlertCircle } from "lucide-react";
 
 interface CreateProductionModalProps {
-    isOpen: boolean
-    onClose: () => void
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 export function CreateProductionModal({ isOpen, onClose }: CreateProductionModalProps) {
-    const { createProduction, isLoading, error } = useCreateProduction()
-    const { projects, isLoading: isLoadingProjects } = useProjectOptions()
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const [projects, setProjects] = React.useState<any[]>([]);
+    const [profiles, setProfiles] = React.useState<any[]>([]);
+    const router = useRouter();
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = React.useState({
         title: "",
         project_id: "",
         quantity: 1,
-        priority: "medium",
-        status: "new",
+        status: "new" as any,
+        priority: "medium" as any,
         start_date: "",
-        end_date: "", // deadline
-        notes: ""
-    })
+        end_date: "",
+        assigned_to: "",
+        notes: "",
+    });
+
+    React.useEffect(() => {
+        if (isOpen) {
+            getProjects().then(setProjects);
+            getProfiles().then(setProfiles);
+        }
+    }, [isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        const success = await createProduction({
-            title: formData.title,
-            project_id: formData.project_id || null, // Convert empty string to null
-            quantity: Number(formData.quantity),
-            priority: formData.priority,
-            status: formData.status,
-            start_date: formData.start_date || null,
-            end_date: formData.end_date || null,
-            notes: formData.notes
-        })
-
-        if (success) {
-            onClose()
-            setFormData({
-                title: "",
-                project_id: "",
-                quantity: 1,
-                priority: "medium",
-                status: "new",
-                start_date: "",
-                end_date: "",
-                notes: ""
-            })
+        if (!formData.project_id) {
+            setError("Musíte vybrat projekt.");
+            setLoading(false);
+            return;
         }
-    }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    }
+        try {
+            const result = await createOrder(formData as any);
+            if (result.error) {
+                setError(result.error);
+            } else {
+                router.refresh();
+                onClose();
+                setFormData({
+                    title: "",
+                    project_id: "",
+                    quantity: 1,
+                    status: "new",
+                    priority: "medium",
+                    start_date: "",
+                    end_date: "",
+                    assigned_to: "",
+                    notes: "",
+                });
+            }
+        } catch (err: any) {
+            setError(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <Modal title="Nová Výrobní Zakázka" isOpen={isOpen} onClose={onClose}>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Nová Výrobní Zakázka"
+        >
+            <form onSubmit={handleSubmit} className="space-y-4 py-2">
                 {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 text-sm">
+                    <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-900/50">
+                        <AlertCircle className="w-4 h-4" />
                         {error}
                     </div>
                 )}
 
-                <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium">Název Zakázky</label>
-                    <input
-                        type="text"
-                        name="title"
-                        required
-                        value={formData.title}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all font-medium"
-                        placeholder="např. Výroba komponent A"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label htmlFor="project_id" className="text-sm font-medium">Projekt (Volitelné)</label>
-                    <select
-                        name="project_id"
-                        value={formData.project_id}
-                        onChange={handleChange}
-                        disabled={isLoadingProjects}
-                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all appearance-none"
-                    >
-                        <option value="">-- Žádný projekt --</option>
-                        {projects.map(p => (
-                            <option key={p.id} value={p.id}>{p.title}</option>
-                        ))}
-                    </select>
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="quantity" className="text-sm font-medium">Množství (ks)</label>
-                        <input
-                            type="number"
-                            name="quantity"
-                            min="1"
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Název zakázky *</label>
+                        <Input
                             required
-                            value={formData.quantity}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
+                            placeholder="Zadejte název..."
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="priority" className="text-sm font-medium">Priorita</label>
+
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Projekt *</label>
                         <select
-                            name="priority"
+                            className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            value={formData.project_id}
+                            required
+                            onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
+                        >
+                            <option value="">Vyberte projekt...</option>
+                            {projects.map((p) => (
+                                <option key={p.id} value={p.id}>{p.title}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Množství</label>
+                        <Input
+                            type="number"
+                            min="1"
+                            value={formData.quantity}
+                            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Priorita</label>
+                        <select
+                            className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             value={formData.priority}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all appearance-none"
+                            onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                         >
                             <option value="low">Nízká</option>
                             <option value="medium">Střední</option>
@@ -124,59 +140,61 @@ export function CreateProductionModal({ isOpen, onClose }: CreateProductionModal
                             <option value="critical">Kritická</option>
                         </select>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label htmlFor="start_date" className="text-sm font-medium">Začátek</label>
-                        <input
+                        <label className="text-sm font-medium">Datum zahájení</label>
+                        <Input
                             type="date"
-                            name="start_date"
                             value={formData.start_date}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
+                            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                         />
                     </div>
+
                     <div className="space-y-2">
-                        <label htmlFor="end_date" className="text-sm font-medium">Deadline</label>
-                        <input
+                        <label className="text-sm font-medium">Termín dokončení</label>
+                        <Input
                             type="date"
-                            name="end_date"
                             value={formData.end_date}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all"
+                            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Přiřazeno komu</label>
+                        <select
+                            className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            value={formData.assigned_to}
+                            onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
+                        >
+                            <option value="">Vyberte osobu...</option>
+                            {profiles.map((p) => (
+                                <option key={p.id} value={p.id}>{p.full_name || p.email}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="col-span-2 space-y-2">
+                        <label className="text-sm font-medium">Poznámky</label>
+                        <textarea
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Zadejte poznámky..."
+                            value={formData.notes}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         />
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label htmlFor="notes" className="text-sm font-medium">Poznámky</label>
-                    <textarea
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleChange}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-transparent focus:border-primary focus:ring-0 transition-all resize-none"
-                    />
-                </div>
-
-                <div className="pt-4 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-secondary transition-colors"
-                    >
+                <div className="pt-4 flex justify-end gap-3">
+                    <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                         Zrušit
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center min-w-[100px] justify-center"
-                    >
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Vytvořit"}
-                    </button>
+                    </Button>
+                    <Button type="submit" disabled={loading} className="gap-2">
+                        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        <Plus className="w-4 h-4" />
+                        Vytvořit Zakázku
+                    </Button>
                 </div>
             </form>
         </Modal>
-    )
+    );
 }

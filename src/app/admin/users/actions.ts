@@ -14,10 +14,8 @@ export async function toggleApproval(userId: string, isApproved: boolean) {
 
     if (!adminProfile || (adminProfile as any).role !== "admin") return { error: "Prohibited" };
 
-    const { error } = await supabase
-        .from("profiles")
-        // @ts-ignore
-        .update({ is_approved: isApproved } as any)
+    const { error } = await (supabase.from("profiles") as any)
+        .update({ is_approved: isApproved })
         .eq("id", userId);
 
     if (error) {
@@ -39,10 +37,8 @@ export async function updateRole(userId: string, newRole: string) {
 
     if (!adminProfile || (adminProfile as any).role !== "admin") return { error: "Prohibited" };
 
-    const { error } = await supabase
-        .from("profiles")
-        // @ts-ignore
-        .update({ role: newRole } as any)
+    const { error } = await (supabase.from("profiles") as any)
+        .update({ role: newRole })
         .eq("id", userId);
 
     if (error) {

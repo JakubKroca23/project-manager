@@ -14,10 +14,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         .from("projects")
         .select(`
             *,
-            created_by_user:profiles!projects_created_by_fkey(full_name),
-            assigned_manager:profiles!manager_id(full_name),
-            superstructures(*),
-            project_accessories(*),
+            manager:profiles!manager_id(full_name),
             production_orders(*)
         `)
         .eq("id", id)
