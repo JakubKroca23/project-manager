@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { TimelineView } from "@/components/timeline/timeline-view"
+import { TimelineRoot } from "@/components/timeline-new/timeline-root"
 import { addHours, format } from "date-fns"
 
 export default async function TimelinePage() {
@@ -74,7 +74,7 @@ export default async function TimelinePage() {
 
     return (
         <div className="flex-1 flex flex-col">
-            <TimelineView items={validItems} />
+            <TimelineRoot items={validItems} />
         </div>
     )
 }
