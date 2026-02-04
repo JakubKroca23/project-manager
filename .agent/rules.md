@@ -22,6 +22,12 @@
 - **Styling**: Tailwind CSS 4.
 - **UI & Logika**: Odděluj UI komponenty od byznys logiky.
 
+## Specializovaná technická pravidla
+- **Next.js Dynamic Routes**: Parametry (`params`) v `page.tsx` MUSÍ být asynchronně awaitovány: `const { id } = await params`. Jinak hrozí 404 nebo runtime error.
+- **Timeline Performance**: Nikdy nepoužívej stovky DIVů pro mřížku. VŽDY používej CSS `repeating-linear-gradient`.
+- **Data Fetching (Timeline)**: Pokud SQL view selhává nebo je prázdný, upřednostni paralelní `Hard Fetch` přímo z tabulek (`projects`, `production_orders`, `services`).
+- **Timeline V2**: Nový vývoj probíhá v `src/components/timeline-new`. Starou složku `timeline` nemazat, dokud nebude V2 plně otestována v produkci.
+
 ## Debugování
 - Než začneš opravovat chybu, proveď hloubkovou analýzu příčiny.
 - Používej workflow v `.agent/workflows/debug.md`.
