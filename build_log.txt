@@ -1,7 +1,0 @@
-﻿
-> project-manager@0.1.0 build
-> next build
-
-Ôľ▓ Next.js 16.1.6 (Turbopack)
-
-  Creating an optimized production build ...
