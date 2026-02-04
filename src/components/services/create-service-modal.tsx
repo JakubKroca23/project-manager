@@ -99,9 +99,9 @@ export function CreateServiceModal({ isOpen, onClose }: CreateServiceModalProps)
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Klient</label>
+                        <label className="text-sm font-medium">Zákazník</label>
                         <Input
-                            placeholder="Jméno klienta..."
+                            placeholder="Jméno zákazníka..."
                             value={formData.client_name}
                             onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                         />

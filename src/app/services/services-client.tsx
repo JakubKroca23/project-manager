@@ -51,7 +51,7 @@ export function ServicesClient({ initialData }: { initialData: Service[] }) {
                             </div>
                         )
                     },
-                    { header: "Klient", accessorKey: "client_name" },
+                    { header: "Zákazník", accessorKey: "client_name" },
                     {
                         header: "Lokace",
                         accessorKey: "location",

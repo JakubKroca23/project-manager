@@ -109,7 +109,7 @@ export function RecentProjects({ initialProjects, userId }: RecentProjectsProps)
                     <TableHeader>
                         <TableRow className="hover:bg-transparent border-border/50">
                             <TableHead className="w-[40%]">Název</TableHead>
-                            <TableHead>Klient</TableHead>
+                            <TableHead>Zákazník</TableHead>
                             <TableHead>Stav</TableHead>
                             <TableHead className="text-right">Termín</TableHead>
                         </TableRow>

@@ -58,7 +58,7 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
                     },
                     {
                         id: "client",
-                        header: "Klient",
+                        header: "Zákazník",
                         accessorKey: "client_name"
                     },
                     {
