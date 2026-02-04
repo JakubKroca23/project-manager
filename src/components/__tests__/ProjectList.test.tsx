@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import ProjectList from '../ProjectList'
+import ProjectList from '@/components/ProjectList'
 import { Project } from '@/types/project'
 
 const mockProjects: Project[] = [
@@ -9,7 +9,9 @@ const mockProjects: Project[] = [
         manager: 'Jakub Kroca',
         customer: 'Auto Škoda',
         quantity: 100,
-        status: 'in_progress',
+        status: 'production',
+        deadline: '20.02.2026',
+        action_needed_by: 'internal',
         created_at: new Date().toISOString()
     }
 ]
@@ -21,7 +23,8 @@ describe('ProjectList', () => {
         expect(screen.getByText('Projekt A')).toBeInTheDocument()
         expect(screen.getByText('Jakub Kroca')).toBeInTheDocument()
         expect(screen.getByText('Auto Škoda')).toBeInTheDocument()
-        expect(screen.getByText('100')).toBeInTheDocument()
-        expect(screen.getByText('Probíhá')).toBeInTheDocument() // Assuming status mapping
+        expect(screen.getByText('100 ks')).toBeInTheDocument()
+        expect(screen.getByText('VÝROBA')).toBeInTheDocument()
+        expect(screen.getByText('Nás')).toBeInTheDocument()
     })
 })
