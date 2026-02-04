@@ -2,11 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { addDays, format } from "date-fns"
+import { format } from "date-fns"
+import { Database } from "@/lib/database.types"
+
+type UpdateTimelineType = 'project' | 'production' | 'service';
 
 export async function updateTimelineItemDate(
     id: string,
-    type: 'project' | 'production' | 'service',
+    type: UpdateTimelineType,
     newStart: string,
     newEnd: string
 ) {
@@ -15,15 +18,16 @@ export async function updateTimelineItemDate(
     try {
         const start = new Date(newStart)
         const end = new Date(newEnd)
+        const formattedStart = format(start, 'yyyy-MM-dd')
+        const formattedEnd = format(end, 'yyyy-MM-dd')
 
         if (type === 'project') {
             const { error } = await supabase
                 .from('projects')
-                // @ts-ignore
                 .update({
-                    start_date: format(start, 'yyyy-MM-dd'),
-                    end_date: format(end, 'yyyy-MM-dd')
-                })
+                    start_date: formattedStart,
+                    end_date: formattedEnd
+                } as Database['public']['Tables']['projects']['Update'])
                 .eq('id', id)
 
             if (error) throw error
@@ -31,28 +35,20 @@ export async function updateTimelineItemDate(
         else if (type === 'production') {
             const { error } = await supabase
                 .from('production_orders')
-                // @ts-ignore
                 .update({
-                    start_date: format(start, 'yyyy-MM-dd'),
-                    end_date: format(end, 'yyyy-MM-dd')
-                })
+                    start_date: formattedStart,
+                    end_date: formattedEnd
+                } as Database['public']['Tables']['production_orders']['Update'])
                 .eq('id', id)
 
             if (error) throw error
         }
         else if (type === 'service') {
-            // Services might have specific logic (duration vs end_date), 
-            // but for now we assume we just update the start_date. 
-            // Note: The view calculates end_date based on duration.
-            // Changing duration via drag is harder, so dragging usually implies moving the WHOLE block (start date change).
-            // For simplicity in this iteration: dragging service changes start_date only.
-
             const { error } = await supabase
                 .from('services')
-                // @ts-ignore
                 .update({
-                    service_date: format(start, 'yyyy-MM-dd') // Services table uses service_date
-                } as any)
+                    service_date: formattedStart
+                } as Database['public']['Tables']['services']['Update'])
                 .eq('id', id)
 
             if (error) throw error
@@ -60,8 +56,11 @@ export async function updateTimelineItemDate(
 
         revalidatePath('/timeline')
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to update timeline item:", error)
-        return { success: false, error }
+        return {
+            success: false,
+            error: error?.message || (typeof error === 'string' ? error : 'Neznámá chyba')
+        }
     }
 }

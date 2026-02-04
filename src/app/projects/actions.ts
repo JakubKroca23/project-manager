@@ -2,27 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-
-/**
- * Log entry into project_history
- */
-async function logProjectHistory(projectId: string, action_type: string, details: any) {
-    const supabase = await createClient();
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        await supabase.from("project_history").insert({
-            project_id: projectId,
-            user_id: user.id,
-            action_type,
-            details
-        } as any);
-    } catch (err) {
-        console.error("Failed to log history:", err);
-        // We don't throw here to avoid blocking the main action
-    }
-}
+import { logProjectChange } from "@/lib/history";
+import { Database } from "@/lib/database.types";
 
 /**
  * Get all profiles for manager selection
@@ -160,7 +141,7 @@ export async function createProject(data: {
         // But let's proceed.
     }
 
-    await logProjectHistory(projectId, "created", { title: data.title });
+    await logProjectChange(projectId, "created", { title: data.title });
 
     revalidatePath("/projects");
     return { success: true, projectId };
@@ -204,9 +185,9 @@ export async function updateProject(projectId: string, data: {
     }
 
     if (data.status) {
-        await logProjectHistory(projectId, "status_updated", data);
+        await logProjectChange(projectId, "status_updated", data);
     } else {
-        await logProjectHistory(projectId, "updated", data);
+        await logProjectChange(projectId, "updated", data);
     }
     revalidatePath("/projects");
     revalidatePath(`/projects/${projectId}`);
@@ -255,7 +236,7 @@ export async function createSuperstructure(projectId: string, data: {
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "superstructure_added", data);
+    await logProjectChange(projectId, "superstructure_added", data);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
@@ -272,7 +253,7 @@ export async function deleteSuperstructure(id: string, projectId: string) {
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "superstructure_removed", { id });
+    await logProjectChange(projectId, "superstructure_removed", { id });
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
@@ -299,7 +280,7 @@ export async function createProjectAccessory(projectId: string, data: {
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "accessory_added", data);
+    await logProjectChange(projectId, "accessory_added", data);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
@@ -316,7 +297,7 @@ export async function deleteProjectAccessory(id: string, projectId: string) {
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "accessory_removed", { id });
+    await logProjectChange(projectId, "accessory_removed", { id });
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
@@ -334,7 +315,7 @@ export async function updateProjectProductionDescription(projectId: string, desc
         return { error: error.message };
     }
 
-    await logProjectHistory(projectId, "production_description_updated", {});
+    await logProjectChange(projectId, "production_description_updated", {});
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
@@ -342,10 +323,14 @@ export async function updateProjectProductionDescription(projectId: string, desc
 export async function generateProductionOrders(projectId: string, durationWeeks: number) {
     const supabase = await createClient();
 
-    // 1. Get Project Data
+    // 1. Get Project Data with Relations in one go
     const { data: projectRaw, error: projError } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+            *,
+            superstructures (*),
+            project_accessories (*)
+        `)
         .eq("id", projectId)
         .single();
 
@@ -355,12 +340,10 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
 
     const project = projectRaw as any;
 
-    // @ts-ignore
     if (!project.production_description) {
         return { error: "Chybí 'Popis zakázky'. Před generováním je nutné jej vyplnit." };
     }
 
-    // @ts-ignore
     if (!project.start_date) {
         return { error: "Projekt nemá nastavené datum zahájení." };
     }
@@ -368,75 +351,59 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
     const quantity = project.quantity || 1;
     const startDate = new Date(project.start_date);
     const durationMs = durationWeeks * 7 * 24 * 60 * 60 * 1000;
-    const overlapMs = 1 * 7 * 24 * 60 * 60 * 1000; // 1 week overlap
+    const overlapMs = 1 * 7 * 24 * 60 * 60 * 1000;
 
-    const ordersToCreate = [];
-
-    // 2. Calculate Timeline
-    // Job 1: Start = Project Start
-    // Job 2: Start = Job 1 End - Overlap
-    // ...
-
-    let previousEndDate = startDate.getTime(); // Initialize for logic mainly, but specifically for first item:
+    // 2. Prepare Orders
+    const ordersToCreate: Database['public']['Tables']['production_orders']['Insert'][] = [];
+    let previousEndDate = startDate.getTime();
 
     for (let i = 0; i < quantity; i++) {
-        let currentStartDateMs;
-
-        if (i === 0) {
-            currentStartDateMs = startDate.getTime();
-        } else {
-            // Start = Previous End - Overlap
-            currentStartDateMs = previousEndDate - overlapMs;
-        }
-
+        const currentStartDateMs = (i === 0) ? startDate.getTime() : previousEndDate - overlapMs;
         const currentEndDateMs = currentStartDateMs + durationMs;
-        const startIso = new Date(currentStartDateMs).toISOString();
-        const endIso = new Date(currentEndDateMs).toISOString();
-
-        previousEndDate = currentEndDateMs;
 
         ordersToCreate.push({
             project_id: projectId,
             title: `Výrobní zakázka #${i + 1} - ${project.title}`,
-            quantity: 1, // 1 vehicle per job? implied by logic
+            quantity: 1,
             status: "planned",
             priority: "medium",
-            start_date: startIso,
-            end_date: endIso,
+            start_date: new Date(currentStartDateMs).toISOString(),
+            end_date: new Date(currentEndDateMs).toISOString(),
             notes: "Automaticky vygenerováno z projektu"
         });
+
+        previousEndDate = currentEndDateMs;
     }
 
-    // 3. Insert Orders
+    // 3. Insert Orders and get IDs back
     const { data: createdOrders, error: insertError } = await supabase
         .from("production_orders")
         .insert(ordersToCreate as any)
         .select();
 
     if (insertError || !createdOrders) {
-        return { error: `Chyba při vytváření zakázek: ${insertError?.message}` };
+        return { error: `Chyba při vytváření zakázek: ${insertError.message}` };
     }
 
-    // 4. Generate Manufacturing Tasks for each Order
+    // 4. Prepare Manufacturing Tasks (Template base)
     const defaultTasks = [
-        { title: "Příjem podvozku", description: "Kontrola podvozku a dokumentace", estimated_hours: 2 },
-        { title: "Příprava montáže", description: "Příprava rámu a pomocného rámu", estimated_hours: 8 },
-        { title: "Montáž nástavby", description: "Usazení a fixace nástavby", estimated_hours: 16 },
-        { title: "Hydraulika", description: "Zapojení čerpadla a hydraulického okruhu", estimated_hours: 12 },
-        { title: "Elektroinstalace", description: "Zapojení ovládání a osvětlení", estimated_hours: 10 },
-        { title: "Kompletace", description: "Montáž doplňků a blatníků", estimated_hours: 6 },
-        { title: "Testování a Kontrola", description: "Funkční zkouška a výstupní kontrola", estimated_hours: 4 },
+        { title: "Příjem podvozku", hours: 2 },
+        { title: "Příprava montáže", hours: 8 },
+        { title: "Montáž nástavby", hours: 16 },
+        { title: "Hydraulika", hours: 12 },
+        { title: "Elektroinstalace", hours: 10 },
+        { title: "Kompletace", hours: 6 },
+        { title: "Testování a Kontrola", hours: 4 },
     ];
 
-    const tasksToCreate = [];
+    const tasksToCreate: Database['public']['Tables']['manufacturing_tasks']['Insert'][] = [];
     for (const order of createdOrders) {
-        for (const task of defaultTasks) {
+        for (const t of defaultTasks) {
             tasksToCreate.push({
-                order_id: (order as any).id,
-                title: task.title,
-                description: task.description,
+                order_id: order.id,
+                title: t.title,
                 status: "queue",
-                estimated_hours: task.estimated_hours
+                estimated_hours: t.hours
             });
         }
     }
@@ -445,33 +412,28 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
         await supabase.from("manufacturing_tasks").insert(tasksToCreate as any);
     }
 
-    // 5. Generate BOM (Bill of Materials) for Project
-    // Chassis
-    const bomItems = [];
+    // 5. Prepare BOM Items
+    const bomItems: Database['public']['Tables']['bom_items']['Insert'][] = [];
 
+    // Chassis
     if (project.chassis_type) {
         bomItems.push({
             project_id: projectId,
             name: `Podvozek ${project.manufacturer || ""} ${project.chassis_type}`,
-            quantity: quantity, // 1 per vehicle
+            quantity: quantity,
             unit: "ks",
             status: "to_order",
             is_custom: false
         });
     }
 
-    // Superstructures
-    // Fetch superstructures if not available in projectRaw (depending on query depth)
-    // We used select("*") in step 1. Might not imply relations.
-    // Let's verify we need to fetch them.
-    const { data: superstructures } = await supabase.from("superstructures").select("*").eq("project_id", projectId);
-
-    if (superstructures) {
-        for (const s of (superstructures as any[])) {
+    // Superstructures (using fetched relation)
+    if (Array.isArray(project.superstructures)) {
+        for (const s of project.superstructures) {
             bomItems.push({
                 project_id: projectId,
                 name: `Nástavba: ${s.type}`,
-                quantity: quantity, // 1 per vehicle (assuming superstructure def is generic per project)
+                quantity: quantity,
                 unit: "ks",
                 status: s.order_status === "ordered" ? "ordered" : "to_order",
                 supplier: s.supplier,
@@ -480,15 +442,13 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
         }
     }
 
-    // Accessories
-    const { data: accessories } = await supabase.from("project_accessories").select("*").eq("project_id", projectId);
-
-    if (accessories) {
-        for (const acc of (accessories as any[])) {
+    // Accessories (using fetched relation)
+    if (Array.isArray(project.project_accessories)) {
+        for (const acc of project.project_accessories) {
             bomItems.push({
                 project_id: projectId,
                 name: acc.name,
-                quantity: (acc.quantity || 1) * quantity, // Total needed
+                quantity: (acc.quantity || 1) * quantity,
                 unit: "ks",
                 status: acc.order_status === "ordered" ? "ordered" : "to_order",
                 supplier: acc.supplier,
@@ -501,7 +461,8 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
         await supabase.from("bom_items").insert(bomItems as any);
     }
 
-    await logProjectHistory(projectId, "production_orders_generated", { count: quantity, durationWeeks });
+    await logProjectChange(projectId, "production_orders_generated", { count: quantity, durationWeeks });
+
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
 }
