@@ -11,11 +11,11 @@ export async function createOrder(data: OrderInsert) {
     const supabase = await createClient();
 
     // Use any to bypass strict type inference issues during the build
-    const { data: order, error } = await supabase
+    const { data: order, error } = await (supabase
         .from("production_orders")
         .insert(data as any)
         .select()
-        .single();
+        .single() as any);
 
     if (error || !order) return { error: error?.message || "Failed to create order" };
 

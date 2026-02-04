@@ -11,11 +11,11 @@ export async function createService(data: ServiceInsert) {
     const supabase = await createClient();
 
     // Use any to bypass strict type inference issues during build
-    const { data: service, error } = await supabase
+    const { data: service, error } = await (supabase
         .from("services")
         .insert(data as any)
         .select()
-        .single();
+        .single() as any);
 
     if (error || !service) return { error: error?.message || "Failed to create service" };
 
