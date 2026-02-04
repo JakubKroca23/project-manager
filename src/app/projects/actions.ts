@@ -49,11 +49,10 @@ export async function createProject(data: ProjectInsert) {
         safeData[key] = (typeof val === 'string' && val.trim() === '') ? null : val;
     });
 
-    const { data: project, error } = await (supabase
-        .from("projects")
+    const { data: project, error } = await (supabase.from("projects") as any)
         .insert(safeData)
         .select()
-        .single() as any);
+        .single();
 
     if (error || !project) {
         return { error: error?.message || "Failed to create project" };
@@ -78,12 +77,11 @@ export async function updateProject(projectId: string, data: ProjectUpdate) {
         safeData[key] = (typeof val === 'string' && val.trim() === '') ? null : val;
     });
 
-    const { data: updated, error } = await (supabase
-        .from("projects")
+    const { data: updated, error } = await (supabase.from("projects") as any)
         .update(safeData)
         .eq("id", projectId)
         .select()
-        .single() as any);
+        .single();
 
     if (error) {
         return { error: error.message };

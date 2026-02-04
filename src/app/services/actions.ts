@@ -10,12 +10,11 @@ type ServiceUpdate = Database['public']['Tables']['services']['Update'];
 export async function createService(data: ServiceInsert) {
     const supabase = await createClient();
 
-    // Use any to bypass strict type inference issues during build
-    const { data: service, error } = await (supabase
-        .from("services")
-        .insert(data as any)
+    // Use any on the table selector to bypass strict type inference issues during build
+    const { data: service, error } = await (supabase.from("services") as any)
+        .insert(data)
         .select()
-        .single() as any);
+        .single();
 
     if (error || !service) return { error: error?.message || "Failed to create service" };
 
@@ -26,9 +25,8 @@ export async function createService(data: ServiceInsert) {
 export async function updateService(serviceId: string, data: ServiceUpdate) {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("services")
-        .update(data as any)
+    const { error } = await (supabase.from("services") as any)
+        .update(data)
         .eq("id", serviceId);
 
     if (error) return { error: error.message };

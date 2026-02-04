@@ -10,12 +10,11 @@ type OrderUpdate = Database['public']['Tables']['production_orders']['Update'];
 export async function createOrder(data: OrderInsert) {
     const supabase = await createClient();
 
-    // Use any to bypass strict type inference issues during the build
-    const { data: order, error } = await (supabase
-        .from("production_orders")
-        .insert(data as any)
+    // Use any on the table selector to bypass strict type inference issues during the build
+    const { data: order, error } = await (supabase.from("production_orders") as any)
+        .insert(data)
         .select()
-        .single() as any);
+        .single();
 
     if (error || !order) return { error: error?.message || "Failed to create order" };
 
@@ -27,9 +26,8 @@ export async function createOrder(data: OrderInsert) {
 export async function updateOrder(orderId: string, data: OrderUpdate) {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("production_orders")
-        .update(data as any)
+    const { error } = await (supabase.from("production_orders") as any)
+        .update(data)
         .eq("id", orderId);
 
     if (error) return { error: error.message };
