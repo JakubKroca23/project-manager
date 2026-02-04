@@ -8,7 +8,7 @@ import {
     MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X, Truck, Building, MapPin,
     FileText, Zap, Wrench
 } from "lucide-react"
-import { UpdateProjectModal } from "@/components/projects/update-project-modal"
+
 import { AddSuperstructureModal } from "@/components/projects/add-superstructure-modal"
 import { AddAccessoryModal } from "@/components/projects/add-accessory-modal"
 import { ProjectHistoryModal } from "@/components/projects/project-history-modal"
@@ -105,7 +105,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
 
                     <div className="w-px h-6 bg-border mx-2 hidden md:block" />
 
-                    <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
+                    <Button variant="secondary" onClick={() => { }} className="opacity-50 cursor-not-allowed">
                         <Edit2 className="w-3.5 h-3.5 mr-2" /> Upravit
                     </Button>
                     <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
@@ -347,7 +347,7 @@ export function ProjectDetailClient({ project }: { project: any }) {
 
             </div>
 
-            <UpdateProjectModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} project={project} />
+
             <AddSuperstructureModal isOpen={isAddSuperstructureOpen} onClose={() => setIsAddSuperstructureOpen(false)} projectId={project.id} />
             <AddAccessoryModal isOpen={isAddAccessoryOpen} onClose={() => setIsAddAccessoryOpen(false)} projectId={project.id} />
             <ProjectHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} projectId={project.id} />

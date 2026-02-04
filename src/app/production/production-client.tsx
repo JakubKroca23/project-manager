@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Plus, AlertOctagon } from "lucide-react"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
-import { CreateProductionModal } from "@/components/production/create-production-modal"
+
 
 type ProductionOrder = Database['public']['Tables']['production_orders']['Row'] & {
     project?: { title: string } | null
@@ -36,18 +36,15 @@ export function ProductionClient({ initialData }: { initialData: ProductionOrder
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">Výroba</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                    onClick={() => { }} // Disabled for now
+                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 opacity-50 cursor-not-allowed"
                 >
                     <Plus className="w-4 h-4" />
                     Nová Zakázka
                 </button>
             </div>
 
-            <CreateProductionModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
+
 
             <div className="grid gap-4 md:grid-cols-3">
                 {/* Mini stats could go here */}

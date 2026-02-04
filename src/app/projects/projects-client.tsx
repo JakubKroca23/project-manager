@@ -5,7 +5,7 @@ import { Plus, Layout, Settings, Factory, CheckCircle2, Octagon } from "lucide-r
 import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/ui/data-table"
 import { Database } from "@/lib/database.types"
-import { CreateProjectModal } from "@/components/projects/create-project-modal"
+
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
     progress?: number
@@ -30,18 +30,15 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">Projekty</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                    onClick={() => { }} // Disabled for now
+                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 opacity-50 cursor-not-allowed"
                 >
                     <Plus className="w-4 h-4" />
                     Nový Projekt
                 </button>
             </div>
 
-            <CreateProjectModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
+
 
             <DataTable<Project>
                 data={initialData}
