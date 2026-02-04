@@ -22,33 +22,33 @@ export async function updateTimelineItemDate(
         const formattedEnd = format(end, 'yyyy-MM-dd')
 
         if (type === 'project') {
-            const { error } = await supabase
-                .from('projects')
+            const { error } = await (supabase
+                .from('projects') as any)
                 .update({
                     start_date: formattedStart,
                     end_date: formattedEnd
-                } as Database['public']['Tables']['projects']['Update'])
+                } as any)
                 .eq('id', id)
 
             if (error) throw error
         }
         else if (type === 'production') {
-            const { error } = await supabase
-                .from('production_orders')
+            const { error } = await (supabase
+                .from('production_orders') as any)
                 .update({
                     start_date: formattedStart,
                     end_date: formattedEnd
-                } as Database['public']['Tables']['production_orders']['Update'])
+                } as any)
                 .eq('id', id)
 
             if (error) throw error
         }
         else if (type === 'service') {
-            const { error } = await supabase
-                .from('services')
+            const { error } = await (supabase
+                .from('services') as any)
                 .update({
                     service_date: formattedStart
-                } as Database['public']['Tables']['services']['Update'])
+                } as any)
                 .eq('id', id)
 
             if (error) throw error

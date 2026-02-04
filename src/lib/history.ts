@@ -58,7 +58,7 @@ export async function logProjectChange(
 
         const { error } = await supabase
             .from('project_history')
-            .insert(logEntry)
+            .insert(logEntry as any)
 
         if (error) {
             console.error("Failed to insert history log:", error)

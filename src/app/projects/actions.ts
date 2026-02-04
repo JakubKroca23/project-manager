@@ -397,7 +397,7 @@ export async function generateProductionOrders(projectId: string, durationWeeks:
     ];
 
     const tasksToCreate: Database['public']['Tables']['manufacturing_tasks']['Insert'][] = [];
-    for (const order of createdOrders) {
+    for (const order of (createdOrders as any[])) {
         for (const t of defaultTasks) {
             tasksToCreate.push({
                 order_id: order.id,
