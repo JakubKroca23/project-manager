@@ -6,7 +6,7 @@ import {
     Edit2, Trash2, Calendar, User, Briefcase, ChevronLeft,
     Layout, Settings, Factory, CheckCircle2, Octagon,
     MoreVertical, ExternalLink, Package, ShoppingCart, Plus, X, Truck, Building, MapPin,
-    FileText, Zap
+    FileText, Zap, Wrench
 } from "lucide-react"
 import { UpdateProjectModal } from "@/components/projects/update-project-modal"
 import { AddSuperstructureModal } from "@/components/projects/add-superstructure-modal"
@@ -244,6 +244,47 @@ export function ProjectDetailClient({ project }: { project: any }) {
                                     </div>
                                 )) : (
                                     <p className="text-sm text-muted-foreground italic pl-2">Zatím žádné příslušenství.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Production Orders (Výrobní Zakázky) */}
+                        <div className="space-y-4 pt-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                    <Wrench className="w-5 h-5 text-indigo-500" /> Výrobní Zakázky
+                                </h3>
+                                {/* Generator trigger is already in top actions */}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {project.production_orders?.length > 0 ? project.production_orders.map((order: any) => (
+                                    <div
+                                        key={order.id}
+                                        onClick={() => router.push(`/production/${order.id}`)}
+                                        className="cursor-pointer p-4 rounded-xl bg-background border border-border/50 flex justify-between items-center group hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all shadow-sm"
+                                    >
+                                        <div>
+                                            <p className="font-bold text-sm flex items-center gap-2">
+                                                {order.title}
+                                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Stav: <span className="uppercase text-[10px] font-bold tracking-wider">{order.status}</span>
+                                            </p>
+                                        </div>
+                                        <div className="text-right text-xs text-muted-foreground">
+                                            <div>Start: {new Date(order.start_date).toLocaleDateString('cs-CZ')}</div>
+                                            <div>Konec: {new Date(order.end_date).toLocaleDateString('cs-CZ')}</div>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div className="col-span-full p-6 border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center text-muted-foreground gap-2 bg-secondary/10">
+                                        <Wrench className="w-6 h-6 opacity-20" />
+                                        <p className="text-sm">Žádné výrobní zakázky.</p>
+                                        <Button variant="link" size="sm" onClick={() => setIsGenerateOpen(true)} className="text-indigo-500">
+                                            Vygenerovat nyní
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
                         </div>

@@ -48,6 +48,8 @@ export function TimelineSidebar() {
                                     onClick={() => {
                                         if (item.type === 'project') {
                                             router.push(`/projects/${item.id}`)
+                                        } else if (item.type === 'production') {
+                                            router.push(`/production/${item.id}`)
                                         }
                                     }}
                                     style={{ height: ROW_HEIGHT, paddingLeft: item.parent_id ? '2rem' : '0.75rem' }}

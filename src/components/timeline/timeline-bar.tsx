@@ -148,6 +148,11 @@ export function TimelineBar({ item, startDate, pixelsPerDay, onUpdate, height, t
             style={{ height, top }}
         >
             <motion.div
+                onDoubleClick={(e) => {
+                    e.stopPropagation()
+                    if (item.type === 'project') router.push(`/projects/${item.id}`)
+                    if (item.type === 'production') router.push(`/production/${item.id}`)
+                }}
                 onPointerDown={handleDragStart}
                 className={`absolute h-8 top-1 shadow-sm ${color} cursor-grab active:cursor-grabbing border border-primary/20 bg-opacity-90 hover:bg-opacity-100 transition-colors z-10 flex items-center select-none`}
                 style={{
