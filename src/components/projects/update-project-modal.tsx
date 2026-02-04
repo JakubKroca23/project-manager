@@ -59,7 +59,6 @@ export function UpdateProjectModal({ isOpen, onClose, project }: UpdateProjectMo
 
         const result = await updateProject(project.id, {
             ...formData,
-            end_date: formData.end_date || null,
             quantity: Number(formData.quantity)
         })
 

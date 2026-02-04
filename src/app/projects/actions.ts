@@ -50,52 +50,17 @@ export async function createProject(data: {
     const supabase = await createClient();
 
     // Sanitize input data
-    const safeData = {
-        ...data,
-        manager_id: data.manager_id || null,
-        start_date: data.start_date || null,
-        end_date: data.end_date || null,
-        manufacturer: data.manufacturer || null,
-        chassis_type: data.chassis_type || null,
-        op_crm: data.op_crm || null,
-        sector: data.sector || null,
-        billing_company: data.billing_company || null,
-        delivery_address: data.delivery_address || null,
-        requested_action: data.requested_action || null,
-        assembly_company: data.assembly_company || null,
-        op_opv_sro: data.op_opv_sro || null,
-        op_group_zakaznik: data.op_group_zakaznik || null,
-        ov_group_sro: data.ov_group_sro || null,
-        zakazka_sro: data.zakazka_sro || null
-    };
+    // Sanitize all string fields - convert empty strings to null
+    const safeData: any = {};
+    Object.keys(data).forEach(key => {
+        const val = (data as any)[key];
+        safeData[key] = (typeof val === 'string' && val.trim() === '') ? null : val;
+    });
 
     // 1. Create Project
     const { data: project, error: projError } = await supabase
         .from("projects")
-        // @ts-ignore
-        .insert({
-            title: safeData.title,
-            client_name: safeData.client_name,
-            manager_id: safeData.manager_id,
-            description: safeData.description,
-            start_date: safeData.start_date,
-            end_date: safeData.end_date,
-            status: safeData.status,
-            manufacturer: safeData.manufacturer,
-            chassis_type: safeData.chassis_type,
-            quantity: safeData.quantity,
-            op_crm: safeData.op_crm,
-            sector: safeData.sector,
-            billing_company: safeData.billing_company,
-            delivery_address: safeData.delivery_address,
-            requested_action: safeData.requested_action,
-            assembly_company: safeData.assembly_company,
-            completion_percentage: safeData.completion_percentage,
-            op_opv_sro: safeData.op_opv_sro,
-            op_group_zakaznik: safeData.op_group_zakaznik,
-            ov_group_sro: safeData.ov_group_sro,
-            zakazka_sro: safeData.zakazka_sro
-        } as any)
+        .insert(safeData as any)
         .select()
         .single();
 
@@ -147,37 +112,19 @@ export async function createProject(data: {
     return { success: true, projectId };
 }
 
-export async function updateProject(projectId: string, data: {
-    title?: string;
-    client_name?: string;
-    manager_id?: string;
-    description?: string;
-    status?: string;
-    start_date?: string;
-    end_date?: string | null;
-    chassis_type?: string | null;
-    manufacturer?: string | null;
-    superstructure_type?: string | null;
-    accessories?: string | null;
-    quantity?: number | null;
-    op_crm?: string;
-    sector?: string;
-    billing_company?: string;
-    delivery_address?: string;
-    requested_action?: string;
-    assembly_company?: string;
-    completion_percentage?: number;
-    op_opv_sro?: string;
-    op_group_zakaznik?: string;
-    ov_group_sro?: string;
-    zakazka_sro?: string;
-}) {
+export async function updateProject(projectId: string, data: any) {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("projects")
-        // @ts-ignore
-        .update(data as any)
+    // Sanitize data - empty strings to null
+    const safeData: any = {};
+    Object.keys(data).forEach(key => {
+        const val = data[key];
+        safeData[key] = (typeof val === 'string' && val.trim() === '') ? null : val;
+    });
+
+    const { error } = await (supabase
+        .from("projects") as any)
+        .update(safeData)
         .eq("id", projectId);
 
     if (error) {
