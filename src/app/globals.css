@@ -365,19 +365,22 @@ header p {
 
 .project-table {
   width: max-content;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
 }
 
 .project-table-container {
   flex: 1;
-  overflow: auto;
+  overflow: visible;
+  /* Změna na visible aby sticky fungovalo vůči oknu */
   position: relative;
 }
 
 .project-table th {
   position: sticky;
-  top: 0;
+  top: 50px;
+  /* Výška navbaru */
   z-index: 100;
   /* Zvýšeno aby bylo nad vším v tabulce */
   padding: 10px 10px;
@@ -397,6 +400,23 @@ header p {
   line-height: 1.3;
   box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   /* Jemný stín pro oddělení */
+  cursor: grab;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.project-table th:active {
+  cursor: grabbing;
+}
+
+.project-table th.is-dragging {
+  opacity: 0.5;
+  background: var(--bg-light);
+  border: 2px dashed var(--primary);
+}
+
+.project-table th:hover {
+  background: #e2e8f0;
 }
 
 .th-content {
