@@ -277,7 +277,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                 );
             case 'customer_handover':
                 return (
-                    <td className="truncate-text">
+                    <td>
                         <div style={{ color: 'var(--primary)', fontWeight: '600' }} className="truncate-text">
                             {project.customer_handover || '-'}
                         </div>
@@ -302,13 +302,13 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                 );
             case 'abra_project':
             case 'serial_number':
-                return <td className="font-mono text-xs truncate-text">{(project as any)[columnId] || '-'}</td>;
+                return <td><div className="font-mono text-xs truncate-text">{(project as any)[columnId] || '-'}</div></td>;
             case 'abra_order':
             case 'chassis_delivery':
             case 'closed_at':
-                return <td className="text-secondary truncate-text">{(project as any)[columnId] || '-'}</td>;
+                return <td><div className="text-secondary truncate-text">{(project as any)[columnId] || '-'}</div></td>;
             default:
-                return <td className="truncate-text">{(project as any)[columnId] || '-'}</td>;
+                return <td><div className="truncate-text">{(project as any)[columnId] || '-'}</div></td>;
         }
     };
 
