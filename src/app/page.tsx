@@ -34,14 +34,13 @@ export default function TimelinePage() {
   const dayWidth = zoomWidths[zoomLevel];
   const hideDayNumbers = dayWidth < 18;
 
-  // Generování dat pro celý rok 2026
-  const currentYear = new Date().getFullYear();
   const today = new Date();
 
+  // Generování dat pro roky 2025 - 2026
   const calendarData = useMemo(() => {
     const dates = [];
-    const start = new Date(currentYear, 0, 1);
-    const end = new Date(currentYear, 11, 31);
+    const start = new Date(2025, 0, 1);
+    const end = new Date(2026, 11, 31);
 
     let current = new Date(start);
     while (current <= end) {
@@ -49,7 +48,7 @@ export default function TimelinePage() {
       current.setDate(current.getDate() + 1);
     }
     return dates;
-  }, [currentYear]);
+  }, []);
 
   // Automatický scroll na dnešní den
   useEffect(() => {
@@ -131,13 +130,16 @@ export default function TimelinePage() {
                 const monthDays = calendarData.filter(d => d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()).length;
 
                 if (isFirstDayOfMonth) {
+                  const monthName = getMonthName(date.getMonth());
+                  const displayMonth = date.getMonth() === 0 ? `${monthName} ${date.getFullYear()}` : monthName;
+
                   return (
                     <th
-                      key={`month-${date.getMonth()}`}
+                      key={`month-${date.getFullYear()}-${date.getMonth()}`}
                       colSpan={monthDays}
                       className="month-name-header month-divider"
                     >
-                      {getMonthName(date.getMonth())}
+                      {displayMonth}
                     </th>
                   );
                 }
