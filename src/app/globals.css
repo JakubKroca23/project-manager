@@ -382,20 +382,11 @@ header p {
   position: relative;
 }
 
-.project-table th,
-.project-table td,
-.project-table th *,
-.project-table td * {
-  min-width: 0 !important;
-  /* Force ignoring content width */
-}
-
 .project-table th {
   position: sticky;
   top: 0;
   z-index: 10;
   padding: 8px 10px;
-  /* Mírně zvýšen padding pro lepší vzhled při zalomení */
   font-size: 10px;
   font-weight: 700;
   color: var(--text-secondary);
@@ -406,7 +397,6 @@ header p {
   border-right: 1px solid var(--border-light);
   overflow: hidden;
   white-space: normal;
-  /* Povolení zalamování textu */
   line-height: 1.3;
 }
 

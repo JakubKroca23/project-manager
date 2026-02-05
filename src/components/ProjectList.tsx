@@ -135,6 +135,26 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         }));
     };
 
+    // Definice sloupců pro snadnější mapování
+    const columns = [
+        { id: 'main', label: 'Předmět', visible: true },
+        { id: 'customer', label: 'Zákazník', visible: visibleColumns.customer },
+        { id: 'manager', label: 'Vlastník', visible: visibleColumns.manager },
+        { id: 'abra_project', label: 'Abra Zakázka', visible: visibleColumns.abra_project },
+        { id: 'abra_order', label: 'Abra Obj.', visible: visibleColumns.abra_order },
+        { id: 'mounting_company', label: 'Montáž', visible: visibleColumns.mounting_company },
+        { id: 'serial_number', label: 'Výr. číslo', visible: visibleColumns.serial_number },
+        { id: 'body_delivery', label: 'Termín Nástavba', visible: visibleColumns.body_delivery },
+        { id: 'chassis_delivery', label: 'Termín Podvozek', visible: visibleColumns.chassis_delivery },
+        { id: 'customer_handover', label: 'Předání Zákaz.', visible: visibleColumns.customer_handover },
+        { id: 'closed_at', label: 'Uzavřeno', visible: visibleColumns.closed_at },
+        { id: 'actions', label: 'Vyžadovaná akce', visible: visibleColumns.actions },
+        { id: 'note', label: 'Poznámka', visible: visibleColumns.note }
+    ];
+
+    const activeColumns = columns.filter(col => col.visible);
+    const totalTableWidth = activeColumns.reduce((sum, col) => sum + (columnWidths[col.id] || 0), 0);
+
     const DropdownCheck = ({ label, column }: { label: string, column: keyof typeof visibleColumns }) => (
         <button className="dropdown-item" onClick={() => toggleColumn(column)}>
             <div className={`checkbox ${visibleColumns[column] ? 'checked' : ''}`}>
@@ -147,8 +167,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
         if (!isVisible) return null;
         return (
-            <th style={{ width: columnWidths[id], maxWidth: columnWidths[id], position: 'relative', minWidth: 0 }}>
-                <div className="th-content" style={{ minWidth: 0 }}>{label}</div>
+            <th style={{ position: 'relative' }}>
+                <div className="th-content">{label}</div>
                 <div
                     className="column-resizer"
                     onMouseDown={(e) => handleMouseDown(e, id)}
@@ -215,7 +235,19 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
             </div>
 
             <div className="project-table-container">
-                <table className="project-table" style={{ tableLayout: 'fixed' }}>
+                <table
+                    className="project-table"
+                    style={{
+                        tableLayout: 'fixed',
+                        width: totalTableWidth,
+                        minWidth: '100%'
+                    }}
+                >
+                    <colgroup>
+                        {activeColumns.map(col => (
+                            <col key={col.id} style={{ width: columnWidths[col.id] }} />
+                        ))}
+                    </colgroup>
                     <thead>
                         <tr>
                             <Th
@@ -227,72 +259,61 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                                     </div>
                                 }
                             />
-                            <Th id="customer" label="Zákazník" isVisible={visibleColumns.customer} />
-                            <Th id="manager" label="Vlastník" isVisible={visibleColumns.manager} />
-                            <Th id="abra_project" label="Abra Zakázka" isVisible={visibleColumns.abra_project} />
-                            <Th id="abra_order" label="Abra Obj." isVisible={visibleColumns.abra_order} />
-                            <Th id="mounting_company" label="Montáž" isVisible={visibleColumns.mounting_company} />
-                            <Th id="serial_number" label="Výr. číslo" isVisible={visibleColumns.serial_number} />
-                            <Th id="body_delivery" label="Termín Nástavba" isVisible={visibleColumns.body_delivery} />
-                            <Th id="chassis_delivery" label="Termín Podvozek" isVisible={visibleColumns.chassis_delivery} />
-                            <Th id="customer_handover" label="Předání Zákaz." isVisible={visibleColumns.customer_handover} />
-                            <Th id="closed_at" label="Uzavřeno" isVisible={visibleColumns.closed_at} />
-                            <Th id="actions" label="Vyžadovaná akce" isVisible={visibleColumns.actions} />
-                            <Th id="note" label="Poznámka" isVisible={visibleColumns.note} />
+                            {columns.slice(1).map(col => (
+                                <Th key={col.id} id={col.id} label={col.label} isVisible={col.visible} />
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredProjects.map((project) => {
-                            return (
-                                <tr key={project.id}>
-                                    <td className="font-bold" style={{ minWidth: 0 }}>
-                                        <div className="truncate-text" style={{ fontSize: '12px', minWidth: 0 }}>{project.name}</div>
-                                        <div className="text-secondary truncate-text" style={{ fontSize: '10px', fontWeight: '400', minWidth: 0 }}>{project.id}</div>
+                        {filteredProjects.map((project) => (
+                            <tr key={project.id}>
+                                <td className="font-bold">
+                                    <div className="truncate-text" style={{ fontSize: '12px' }}>{project.name}</div>
+                                    <div className="text-secondary truncate-text" style={{ fontSize: '10px', fontWeight: '400' }}>{project.id}</div>
+                                </td>
+                                {visibleColumns.customer && <td className="text-secondary truncate-text">{project.customer || '-'}</td>}
+                                {visibleColumns.manager && <td className="truncate-text">{project.manager}</td>}
+                                {visibleColumns.abra_project && <td className="font-mono text-xs truncate-text">{project.abra_project || '-'}</td>}
+                                {visibleColumns.abra_order && <td className="font-mono text-xs text-secondary truncate-text">{project.abra_order || '-'}</td>}
+                                {visibleColumns.mounting_company && <td className="text-secondary truncate-text">{project.mounting_company || '-'}</td>}
+                                {visibleColumns.serial_number && <td className="font-mono text-xs truncate-text">{project.serial_number || '-'}</td>}
+
+                                {visibleColumns.body_delivery && <td className="truncate-text">{project.body_delivery || '-'}</td>}
+                                {visibleColumns.chassis_delivery && <td className="text-secondary truncate-text">{project.chassis_delivery || '-'}</td>}
+                                {visibleColumns.customer_handover && (
+                                    <td className="truncate-text">
+                                        <div style={{ color: 'var(--primary)', fontWeight: '600' }} className="truncate-text">
+                                            {project.customer_handover || '-'}
+                                        </div>
                                     </td>
-                                    {visibleColumns.customer && <td className="text-secondary truncate-text">{project.customer || '-'}</td>}
-                                    {visibleColumns.manager && <td className="truncate-text">{project.manager}</td>}
-                                    {visibleColumns.abra_project && <td className="font-mono text-xs truncate-text">{project.abra_project || '-'}</td>}
-                                    {visibleColumns.abra_order && <td className="font-mono text-xs text-secondary truncate-text">{project.abra_order || '-'}</td>}
-                                    {visibleColumns.mounting_company && <td className="text-secondary truncate-text">{project.mounting_company || '-'}</td>}
-                                    {visibleColumns.serial_number && <td className="font-mono text-xs truncate-text">{project.serial_number || '-'}</td>}
+                                )}
+                                {visibleColumns.closed_at && <td className="text-secondary truncate-text">{project.closed_at || '-'}</td>}
 
-                                    {visibleColumns.body_delivery && <td className="truncate-text">{project.body_delivery || '-'}</td>}
-                                    {visibleColumns.chassis_delivery && <td className="text-secondary truncate-text">{project.chassis_delivery || '-'}</td>}
-                                    {visibleColumns.customer_handover && (
-                                        <td className="truncate-text">
-                                            <div style={{ color: 'var(--primary)', fontWeight: '600' }} className="truncate-text">
-                                                {project.customer_handover || '-'}
-                                            </div>
-                                        </td>
-                                    )}
-                                    {visibleColumns.closed_at && <td className="text-secondary truncate-text">{project.closed_at || '-'}</td>}
-
-                                    {visibleColumns.actions && (
-                                        <td>
-                                            <div className="action-toggle-container">
-                                                <button
-                                                    className={`action-toggle ${project.action_needed_by === 'internal' ? 'active-internal' : ''}`}
-                                                >
-                                                    Int.
-                                                </button>
-                                                <button
-                                                    className={`action-toggle ${project.action_needed_by === 'external' ? 'active-external' : ''}`}
-                                                >
-                                                    Ext.
-                                                </button>
-                                            </div>
-                                        </td>
-                                    )}
-                                    {visibleColumns.note && (
-                                        <td>
-                                            <div className="note-cell" title={project.note || 'Bez poznámky'}>
-                                                <span className="truncate-text">{project.note || '-'}</span>
-                                            </div>
-                                        </td>
-                                    )}
-                                </tr>
-                            );
-                        })}
+                                {visibleColumns.actions && (
+                                    <td>
+                                        <div className="action-toggle-container">
+                                            <button
+                                                className={`action-toggle ${project.action_needed_by === 'internal' ? 'active-internal' : ''}`}
+                                            >
+                                                Int.
+                                            </button>
+                                            <button
+                                                className={`action-toggle ${project.action_needed_by === 'external' ? 'active-external' : ''}`}
+                                            >
+                                                Ext.
+                                            </button>
+                                        </div>
+                                    </td>
+                                )}
+                                {visibleColumns.note && (
+                                    <td>
+                                        <div className="note-cell" title={project.note || 'Bez poznámky'}>
+                                            <span className="truncate-text">{project.note || '-'}</span>
+                                        </div>
+                                    </td>
+                                )}
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
