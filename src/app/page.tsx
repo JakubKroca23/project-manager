@@ -189,18 +189,40 @@ export default function TimelinePage() {
 
                   const dChassis = parseDate(project.chassis_delivery);
                   const dBody = parseDate(project.body_delivery);
+                  const dClosed = parseDate(project.closed_at);
 
-                  let isInRangeM1M2 = false;
-                  let isInRangePostM2 = false;
+                  let isInRangeGreen = false; // M0 (Closed) -> min(M1, M2)
+                  let isInRangeBlue = false;  // min(M1, M2) -> max(M1, M2)
+                  let isInRangeYellow = false; // max(M1, M2) -> 14 dní po
 
-                  if (dChassis && dBody) {
-                    isInRangeM1M2 = date >= dChassis && date <= dBody;
+                  if (dClosed && (dChassis || dBody)) {
+                    const firstMilestone = dChassis && dBody
+                      ? new Date(Math.min(dChassis.getTime(), dBody.getTime()))
+                      : (dChassis || dBody)!;
+
+                    if (date >= dClosed && date < firstMilestone) {
+                      isInRangeGreen = true;
+                    }
                   }
 
-                  if (dBody) {
-                    const dPost14 = new Date(dBody);
+                  if (dChassis && dBody) {
+                    const start = new Date(Math.min(dChassis.getTime(), dBody.getTime()));
+                    const end = new Date(Math.max(dChassis.getTime(), dBody.getTime()));
+                    if (date >= start && date <= end) {
+                      isInRangeBlue = true;
+                    }
+                  }
+
+                  const lastMainMilestone = dChassis && dBody
+                    ? new Date(Math.max(dChassis.getTime(), dBody.getTime()))
+                    : (dChassis || dBody);
+
+                  if (lastMainMilestone) {
+                    const dPost14 = new Date(lastMainMilestone);
                     dPost14.setDate(dPost14.getDate() + 14);
-                    isInRangePostM2 = date > dBody && date <= dPost14;
+                    if (date > lastMainMilestone && date <= dPost14) {
+                      isInRangeYellow = true;
+                    }
                   }
 
                   const events = [];
@@ -217,8 +239,9 @@ export default function TimelinePage() {
                     'day-cell',
                     isToday ? 'current-day-col' : '',
                     isFirstDay ? 'month-divider' : '',
-                    isInRangeM1M2 ? 'range-m1-m2' : '',
-                    isInRangePostM2 ? 'range-post-m2' : ''
+                    isInRangeGreen ? 'range-green' : '',
+                    isInRangeBlue ? 'range-blue' : '',
+                    isInRangeYellow ? 'range-yellow' : ''
                   ].filter(Boolean).join(' ');
 
                   return (
@@ -229,21 +252,10 @@ export default function TimelinePage() {
                       title={tooltip}
                     >
                       <div className="milestone-wrapper">
-                        {zoomLevel === 'compact' ? (
-                          <>
-                            {hasChassis && <div className="milestone-line line-chassis"></div>}
-                            {hasBody && <div className="milestone-line line-body"></div>}
-                            {hasHandover && <div className="milestone-line line-handover"></div>}
-                            {hasClosed && <div className="milestone-line line-closed"></div>}
-                          </>
-                        ) : (
-                          <>
-                            {hasChassis && <div className={`milestone-dot dot-chassis dot-${zoomLevel}`}></div>}
-                            {hasBody && <div className={`milestone-dot dot-body dot-${zoomLevel}`}></div>}
-                            {hasHandover && <div className={`milestone-dot dot-handover dot-${zoomLevel}`}></div>}
-                            {hasClosed && <div className={`milestone-dot dot-closed dot-${zoomLevel}`}></div>}
-                          </>
-                        )}
+                        {hasChassis && <div className="milestone-line line-chassis"></div>}
+                        {hasBody && <div className="milestone-line line-body"></div>}
+                        {hasHandover && <div className="milestone-line line-handover"></div>}
+                        {hasClosed && <div className="milestone-line line-closed"></div>}
                       </div>
                     </td>
                   );

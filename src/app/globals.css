@@ -647,11 +647,13 @@ body.resizing {
 .timeline-table td {
   white-space: nowrap;
 }
+
 .timeline-table td .timeline-project-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .timeline-table td .timeline-project-id {
   white-space: nowrap;
   overflow: hidden;
@@ -667,45 +669,34 @@ body.resizing {
 /* Current day highlight column */
 .current-day-col {
   position: relative;
-  background: rgba(59, 130, 246, 0.12) !important;
-}
-
-.current-day-col::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: var(--primary);
-  z-index: 200;
+  border-left: 1px solid #ef4444 !important;
+  border-right: 1px solid #ef4444 !important;
+  z-index: 10;
 }
 
 .current-day-header {
-  background: var(--primary) !important;
-  color: white !important;
+  background: #fff5f5 !important;
+  /* Pastelově červená */
+  color: #ef4444 !important;
   position: relative;
   z-index: 155 !important;
+  font-weight: 800;
 }
 
-.current-day-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.6);
-  z-index: 200;
+/* Timeline Ranges (Pastel) */
+.range-green {
+  background: #f0fdf4 !important;
+  /* Pastelově zelená */
 }
 
-/* Timeline Ranges */
-.range-m1-m2 {
-  background: #f1f5f9 !important; /* Šedá */
+.range-blue {
+  background: #eff6ff !important;
+  /* Pastelově modrá */
 }
 
-.range-post-m2 {
-  background: #ffeb3b !important; /* Sytě žlutá (standard) */
+.range-yellow {
+  background: #fef9c3 !important;
+  /* Pastelově žlutá */
 }
 
 /* Override milestone colors to show ranges behind them if needed,
@@ -777,43 +768,12 @@ body.resizing {
 }
 
 /* Cell background colors for milestones */
-.day-cell:has(.line-chassis) {
-  background: rgba(59, 130, 246, 0.3) !important;
+/* Standard line-clamp for compatibility */
+.truncate-text {
+  line-clamp: 2;
 }
 
-.day-cell:has(.line-body) {
-  background: rgba(245, 158, 11, 0.3) !important;
-}
-
-.day-cell:has(.line-handover) {
-  background: rgba(16, 185, 129, 0.3) !important;
-}
-
-.day-cell:has(.line-closed) {
-  background: rgba(100, 116, 139, 0.3) !important;
-}
-
-/* Cell background colors for milestone dots (medium/detailed zoom) */
-.day-cell:has(.dot-chassis) {
-  background: rgba(59, 130, 246, 0.3) !important;
-}
-
-.day-cell:has(.dot-body) {
-  background: rgba(245, 158, 11, 0.3) !important;
-}
-
-.day-cell:has(.dot-handover) {
-  background: rgba(16, 185, 129, 0.3) !important;
-}
-
-.day-cell:has(.dot-closed) {
-  background: rgba(100, 116, 139, 0.3) !important;
-}
-
-/* Current day highlight should override milestone colors */
-.day-cell.current-day-col {
-  background: rgba(59, 130, 246, 0.08) !important;
-}
+/* Milestone styles are handled by background ranges and milestone-line elements */
 
 .dot-chassis,
 .line-chassis {
