@@ -9,15 +9,12 @@ import {
     ShieldCheck,
     Search,
     Bell,
-    Moon,
-    Sun,
     User
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { useTheme } from '@/lib/ThemeContext';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -33,7 +30,6 @@ const navItems = [
 
 const Navbar = () => {
     const pathname = usePathname();
-    const { theme, toggleTheme } = useTheme();
 
     return (
         <nav className="navbar-glass">
@@ -66,9 +62,6 @@ const Navbar = () => {
                     <button className="action-btn relative">
                         <Bell size={18} />
                         <span className="notification-dot"></span>
-                    </button>
-                    <button className="action-btn" onClick={toggleTheme} title={theme === 'light' ? 'Zapnout tmavý režim' : 'Zapnout světlý režim'}>
-                        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                     </button>
                 </div>
             </div>

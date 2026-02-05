@@ -18,24 +18,6 @@
   --nav-active-text: #2563eb;
 }
 
-/* DARK THEME - Premium Deep Slate */
-[data-theme='dark'] {
-  --bg-main: #020617;
-  --bg-card: #0f172a;
-  --bg-table-header: #1e293b;
-  --text-main: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border-light: rgba(51, 65, 85, 0.5);
-  --glass-bg: #0f172a;
-  --navbar-bg: #1e293b;
-  /* V tmavém režimu je již dostatečně tmavá */
-  --glass-border: rgba(51, 65, 85, 0.5);
-  --glass-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  --nav-active-bg: #1e293b;
-  --nav-active-text: #60a5fa;
-  --primary: #60a5fa;
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -467,10 +449,6 @@ body.resizing {
   filter: brightness(0.98);
 }
 
-[data-theme='dark'] .project-table tr:hover td {
-  filter: brightness(1.2);
-}
-
 .manager-avatar {
   width: 28px;
   height: 28px;
@@ -519,10 +497,6 @@ body.resizing {
 .status-cancelled {
   background: #fee2e2;
   color: #991b1b;
-}
-
-[data-theme='dark'] .status-badge {
-  filter: saturate(1.5) brightness(0.9);
 }
 
 /* ACTION TOGGLE */
