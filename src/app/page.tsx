@@ -13,12 +13,13 @@ export default function TimelinePage() {
 
   // Konfigurace šířky podle zoomu
   const zoomWidths: Record<ZoomLevel, number> = {
-    compact: 28,
-    medium: 45,
-    detailed: 75
+    compact: 5,
+    medium: 12,
+    detailed: 28
   };
 
   const dayWidth = zoomWidths[zoomLevel];
+  const hideDayNumbers = dayWidth < 18;
 
   // Generování dat pro celý rok 2026
   const currentYear = new Date().getFullYear();
@@ -94,9 +95,9 @@ export default function TimelinePage() {
 
           {/* Legenda */}
           <div className="flex gap-4 text-xs font-bold mb-1">
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-chassis dot-medium" style={{ cursor: 'default' }}></span> Podvozek</div>
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-body dot-medium" style={{ cursor: 'default' }}></span> Nástavba</div>
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-handover dot-medium" style={{ cursor: 'default' }}></span> Předání</div>
+            <div className="flex items-center gap-1"><span className="milestone-dot dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Podvozek</div>
+            <div className="flex items-center gap-1"><span className="milestone-dot dot-body dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Nástavba</div>
+            <div className="flex items-center gap-1"><span className="milestone-dot dot-handover dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Předání</div>
           </div>
         </div>
       </header>
@@ -135,7 +136,7 @@ export default function TimelinePage() {
                     style={{ width: dayWidth, minWidth: dayWidth }}
                     className={`day-cell ${isToday ? 'current-day-header' : ''} ${isFirstDay ? 'month-divider' : ''}`}
                   >
-                    {date.getDate()}
+                    {!hideDayNumbers && date.getDate()}
                   </th>
                 );
               })}
@@ -157,17 +158,39 @@ export default function TimelinePage() {
                   const hasHandover = isSameDay(date, project.customer_handover);
                   const hasClosed = isSameDay(date, project.closed_at);
 
+                  const events = [];
+                  if (hasChassis) events.push("Podvozek");
+                  if (hasBody) events.push("Nástavba");
+                  if (hasHandover) events.push("Předání");
+                  if (hasClosed) events.push("Uzavřeno");
+
+                  const tooltip = events.length > 0
+                    ? `${date.toLocaleDateString('cs-CZ')}: ${events.join(", ")}`
+                    : `${date.toLocaleDateString('cs-CZ')}`;
+
                   return (
                     <td
                       key={idx}
                       style={{ width: dayWidth, minWidth: dayWidth }}
                       className={`day-cell ${isToday ? 'current-day-col' : ''} ${isFirstDay ? 'month-divider' : ''}`}
+                      title={tooltip}
                     >
                       <div className="milestone-wrapper">
-                        {hasChassis && <div className={`milestone-dot dot-chassis dot-${zoomLevel}`} title="Dodání podvozku"></div>}
-                        {hasBody && <div className={`milestone-dot dot-body dot-${zoomLevel}`} title="Dodání nástavby"></div>}
-                        {hasHandover && <div className={`milestone-dot dot-handover dot-${zoomLevel}`} title="Předání zákazníkovi"></div>}
-                        {hasClosed && <div className={`milestone-dot dot-closed dot-${zoomLevel}`} title="Uzavřeno"></div>}
+                        {zoomLevel === 'compact' ? (
+                          <>
+                            {hasChassis && <div className="milestone-line line-chassis"></div>}
+                            {hasBody && <div className="milestone-line line-body"></div>}
+                            {hasHandover && <div className="milestone-line line-handover"></div>}
+                            {hasClosed && <div className="milestone-line line-closed"></div>}
+                          </>
+                        ) : (
+                          <>
+                            {hasChassis && <div className={`milestone-dot dot-chassis dot-${zoomLevel}`}></div>}
+                            {hasBody && <div className={`milestone-dot dot-body dot-${zoomLevel}`}></div>}
+                            {hasHandover && <div className={`milestone-dot dot-handover dot-${zoomLevel}`}></div>}
+                            {hasClosed && <div className={`milestone-dot dot-closed dot-${zoomLevel}`}></div>}
+                          </>
+                        )}
                       </div>
                     </td>
                   );

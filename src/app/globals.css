@@ -679,41 +679,53 @@ body.resizing {
 
 /* Dot sizes based on zoom */
 .dot-compact {
-  width: 7px;
-  height: 7px;
-  border-width: 1px;
+  width: 4px;
+  height: 4px;
+  border: none;
 }
 
 .dot-medium {
-  width: 11px;
-  height: 11px;
+  width: 6px;
+  height: 6px;
+  border-width: 1px;
 }
 
 .dot-detailed {
-  width: 15px;
-  height: 15px;
-  border-width: 2px;
+  width: 8px;
+  height: 8px;
+  border-width: 1.5px;
 }
 
-.milestone-dot:hover {
-  transform: scale(1.5);
-  z-index: 50;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* Milestone Lines for Compact Zoom */
+.milestone-line {
+  width: 100%;
+  height: 100%;
+  min-height: 20px;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.dot-chassis {
+.milestone-line:hover {
+  opacity: 0.7;
+}
+
+.dot-chassis,
+.line-chassis {
   background: #3b82f6;
 }
 
-.dot-body {
+.dot-body,
+.line-body {
   background: #f59e0b;
 }
 
-.dot-handover {
+.dot-handover,
+.line-handover {
   background: #10b981;
 }
 
-.dot-closed {
+.dot-closed,
+.line-closed {
   background: #64748b;
 }
 
