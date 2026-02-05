@@ -1,8 +1,10 @@
 'use client';
 
+
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { getMappedProjects } from '@/lib/data-utils';
 import { Project } from '@/types/project';
+import { Search } from 'lucide-react';
 
 type ZoomLevel = 'compact' | 'medium' | 'detailed';
 
@@ -10,6 +12,17 @@ export default function TimelinePage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const projects = useMemo(() => getMappedProjects(), []);
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('medium');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filtrované projekty podle vyhledávání
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery) return projects;
+    return projects.filter((project: Project) =>
+      (project.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (project.customer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (project.id?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    );
+  }, [projects, searchQuery]);
 
   // Konfigurace šířky podle zoomu
   const zoomWidths: Record<ZoomLevel, number> = {
@@ -73,34 +86,35 @@ export default function TimelinePage() {
 
   return (
     <div className="dashboard-container">
-      <header className="mb-6 flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-bold">Timeline {currentYear}</h1>
-          <p className="text-secondary text-sm">Časový přehled všech zakázek a termínů.</p>
+      <div className="table-header-actions" style={{ marginBottom: '1rem' }}>
+        <div className="search-in-table" style={{ position: 'relative' }}>
+          <Search
+            size={16}
+            className="text-secondary"
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+          />
+          <input
+            type="text"
+            placeholder="Hledat zakázky, zákazníky, kódy..."
+            className="table-search-input"
+            style={{ paddingLeft: '40px', width: '400px' }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        <div className="flex items-center gap-6">
-          {/* Zoom Controls */}
-          <div className="zoom-controls">
-            {(['compact', 'medium', 'detailed'] as ZoomLevel[]).map((level) => (
-              <button
-                key={level}
-                onClick={() => setZoomLevel(level)}
-                className={`zoom-btn ${zoomLevel === level ? 'active' : ''}`}
-              >
-                {level === 'compact' ? 'Malé' : level === 'medium' ? 'Střední' : 'Velké'}
-              </button>
-            ))}
-          </div>
-
-          {/* Legenda */}
-          <div className="flex gap-4 text-xs font-bold mb-1">
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Podvozek</div>
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-body dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Nástavba</div>
-            <div className="flex items-center gap-1"><span className="milestone-dot dot-handover dot-detailed" style={{ cursor: 'default', width: 8, height: 8 }}></span> Předání</div>
-          </div>
+        <div className="zoom-controls">
+          {(['compact', 'medium', 'detailed'] as ZoomLevel[]).map((level) => (
+            <button
+              key={level}
+              onClick={() => setZoomLevel(level)}
+              className={`zoom-btn ${zoomLevel === level ? 'active' : ''}`}
+            >
+              {level === 'compact' ? 'Malé' : level === 'medium' ? 'Střední' : 'Velké'}
+            </button>
+          ))}
         </div>
-      </header>
+      </div>
 
       <div className="timeline-container" ref={scrollContainerRef}>
         <table className="timeline-table">
@@ -143,7 +157,7 @@ export default function TimelinePage() {
             </tr>
           </thead>
           <tbody>
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <tr key={project.id}>
                 <td>
                   <div className="timeline-project-name">{project.name}</div>

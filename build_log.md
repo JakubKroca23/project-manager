@@ -24,3 +24,10 @@
 - **Detail**: Implementace nezávislého resizingu pomocí `<colgroup>` a `<col>`, který řeší stabilitu šířek a směr resizingu (k levému okraji). Odstraněny konflikty s Drag & Drop systémem.
 - **Změna**: Optimalizace šířky Navbaru.
 - **Detail**: Snížení `max-width` na 900px v `globals.css` pro lepší vizuální rovnováhu.
+
+## [2026-02-05] - UI Timeline úpravy
+- **Změna**: Odstranění hlavičky Timeline a legendy (`src/app/page.tsx`).
+- **Detail**: Odstraněn nadpis "Timeline 2026" s popiskem a legenda (Podvozek, Nástavba, Předání). 
+- **Změna**: Sjednocení hlavičky Timeline se stylem ProjectList.
+- **Detail**: Přidáno vyhledávací pole s ikonou Search (z `lucide-react`) a filtrování projektů. Zoom controls přesunuty doprava. Použitý layout `table-header-actions` pro konzistentní vzhled.
+

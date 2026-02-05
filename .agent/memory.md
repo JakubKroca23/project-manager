@@ -26,3 +26,8 @@
 - **Refaktoring Projekty**: Stránka nyní slouží pouze jako čistý wrapper nad komponentou `ProjectList`, přičemž veškerá data jsou dodávána skrze sjednocené mapování v `data-utils.ts`. To umožňuje okamžitou propagaci změn v datech do Timeline i do seznamu projektů.
 - **Vizuální Ladění**: Navbar byl zmenšen na `max-width: 900px` pro lepší harmonii s obsahem Timeline a tabulky projektů.
 - **Sticky Komponenty**: Timeline využívá pokročilé `sticky` pozicování pro zachování kontextu projektu (levý sloupec) i času (hlavička) při scrollování oběma směry.
+
+## 2026-02-05: Timeline UI refactoring
+- **Header Redesign**: Odstraněn nadpis "Timeline 2026" s popiskem a legenda milníků. Hlavička Timeline nyní sdílí vizuální styl s ProjectList pomocí `table-header-actions` layoutu.
+- **Search Functionality**: Přidáno vyhledávací pole s ikonou Search z `lucide-react` pro filtrování projektů podle názvu, zákazníka nebo čísla zakázky.
+- **Konzistentní UI**: Zoom controls přesunuty doprava, vyhledávání vlevo - stejný pattern jako v ProjectList komponentě.
