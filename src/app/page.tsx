@@ -27,7 +27,7 @@ export default function TimelinePage() {
   // Konfigurace šířky podle zoomu
   const zoomWidths: Record<ZoomLevel, number> = {
     compact: 5,
-    medium: 12,
+    medium: 20,
     detailed: 28
   };
 
