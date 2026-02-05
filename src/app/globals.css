@@ -46,23 +46,19 @@ body {
 .navbar-glass {
   position: sticky;
   top: 0;
-  width: fit-content;
-  /* Dynamicky dle obsahu */
-  min-width: 850px;
-  /* Aby se vešel obsah v pohodě */
+  width: 95%;
+  max-width: 1200px;
   margin: 0 auto;
   height: 50px;
   background: var(--navbar-bg);
   border: 1px solid var(--glass-border);
   border-top: none;
   border-radius: 0 0 20px 20px;
-  /* Výraznější zakulacení */
   box-shadow: var(--glass-shadow);
   z-index: 1000;
   display: flex;
   align-items: center;
-  padding: 0 40px;
-  /* Více prostoru po stranách obsahu */
+  padding: 0 20px;
   transition: all 0.3s ease;
   flex-shrink: 0;
   color: var(--navbar-text);
@@ -382,19 +378,25 @@ header p {
 .project-table th {
   position: sticky;
   top: 0;
-  z-index: 10;
-  padding: 8px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-secondary);
+  z-index: 100;
+  /* Zvýšeno aby bylo nad vším v tabulce */
+  padding: 10px 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+  /* Extra tlusté dle požadavku */
+  color: var(--text-main);
+  /* Tmavší text pro lepší čitelnost */
   text-align: left;
-  background: var(--bg-table-header);
+  background: #f1f5f9;
+  /* Světle šedé pozadí pro odlišení */
   text-transform: uppercase;
   border-bottom: 2px solid var(--primary);
   border-right: 1px solid var(--border-light);
   overflow: hidden;
   white-space: normal;
   line-height: 1.3;
+  box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  /* Jemný stín pro oddělení */
 }
 
 .th-content {
