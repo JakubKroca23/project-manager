@@ -77,6 +77,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     // Drag and drop state
     const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
     const [dropTarget, setDropTarget] = useState<{ id: string, side: 'left' | 'right' } | null>(null);
+    const dragSourceRef = useRef<string | null>(null);
 
     const handleMouseDown = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
@@ -139,20 +140,32 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
 
     // Drag and Drop handlery
     const onDragStart = (e: React.DragEvent, id: string) => {
+        dragSourceRef.current = id;
         setDraggedColumn(id);
-        // Nutné pro Firefox a některé verze Chrome aby se drag spustil hned
-        e.dataTransfer.setData('text/plain', id);
+
+        // Nutné pro Firefox a Chrome aby se drag spustil korektně
+        e.dataTransfer.setData('columnId', id);
         e.dataTransfer.effectAllowed = 'move';
 
-        // Vizuální feedback při startu
-        const ghost = e.currentTarget.cloneNode(true) as HTMLElement;
-        ghost.style.opacity = '0.5';
+        // Vizuální feedback
+        const target = e.currentTarget as HTMLElement;
+        target.style.opacity = '0.5';
+    };
+
+    const onDragEnd = (e: React.DragEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        target.style.opacity = '1';
+        setDraggedColumn(null);
+        setDropTarget(null);
+        dragSourceRef.current = null;
     };
 
     const onDragOver = (e: React.DragEvent, id: string) => {
         e.preventDefault();
-        if (draggedColumn === id) {
-            setDropTarget(null);
+        const sourceId = dragSourceRef.current;
+
+        if (sourceId === id) {
+            if (dropTarget) setDropTarget(null);
             return;
         }
 
@@ -160,30 +173,34 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         const midpoint = rect.left + rect.width / 2;
         const side = e.clientX < midpoint ? 'left' : 'right';
 
-        setDropTarget({ id, side });
-    };
-
-    const onDragLeave = () => {
-        setDropTarget(null);
+        // Optimalizace renderování
+        if (!dropTarget || dropTarget.id !== id || dropTarget.side !== side) {
+            setDropTarget({ id, side });
+        }
     };
 
     const onDrop = (e: React.DragEvent, targetId: string) => {
         e.preventDefault();
-        const sourceId = draggedColumn;
-        const target = dropTarget;
+        const sourceId = dragSourceRef.current || e.dataTransfer.getData('columnId');
+        const currentTarget = dropTarget;
 
         setDraggedColumn(null);
         setDropTarget(null);
+        dragSourceRef.current = null;
 
-        if (!sourceId || !target || sourceId === target.id) return;
+        if (!sourceId || !currentTarget || sourceId === currentTarget.id) return;
 
-        setColumnOrder((prevOrder) => {
+        setColumnOrder((prevOrder: string[]) => {
             const newOrder = [...prevOrder];
             const draggedIdx = newOrder.indexOf(sourceId);
+            if (draggedIdx === -1) return prevOrder;
+
             newOrder.splice(draggedIdx, 1);
 
-            const targetIdx = newOrder.indexOf(target.id);
-            const finalIdx = target.side === 'right' ? targetIdx + 1 : targetIdx;
+            const targetIndexInNewOrder = newOrder.indexOf(currentTarget.id);
+            if (targetIndexInNewOrder === -1) return prevOrder;
+
+            const finalIdx = currentTarget.side === 'right' ? targetIndexInNewOrder + 1 : targetIndexInNewOrder;
 
             newOrder.splice(finalIdx, 0, sourceId);
             return newOrder;
@@ -236,8 +253,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                 style={{ position: 'relative' }}
                 draggable
                 onDragStart={(e) => onDragStart(e, id)}
+                onDragEnd={onDragEnd}
                 onDragOver={(e) => onDragOver(e, id)}
-                onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(e, id)}
                 className={`${isDragging ? 'is-dragging' : ''} ${dropSideClass}`}
             >
