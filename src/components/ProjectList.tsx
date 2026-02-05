@@ -86,7 +86,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         requestAnimationFrame(() => {
             if (!isResizing.current) return;
             const diff = e.pageX - startX.current;
-            const newWidth = Math.max(60, startWidth.current + diff);
+            const newWidth = Math.max(20, startWidth.current + diff);
 
             setColumnWidths(prev => ({
                 ...prev,
@@ -218,14 +218,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                 <table className="project-table" style={{ tableLayout: 'fixed' }}>
                     <thead>
                         <tr>
-                            <Th 
-                                id="main" 
+                            <Th
+                                id="main"
                                 label={
                                     <div style={{ lineHeight: '1.2' }}>
                                         <div>Předmět</div>
                                         <div style={{ fontSize: '8px', opacity: 0.8, fontWeight: 'normal' }}>Číslo OP</div>
                                     </div>
-                                } 
+                                }
                             />
                             <Th id="customer" label="Zákazník" isVisible={visibleColumns.customer} />
                             <Th id="manager" label="Vlastník" isVisible={visibleColumns.manager} />
