@@ -147,8 +147,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
         if (!isVisible) return null;
         return (
-            <th style={{ width: columnWidths[id], position: 'relative' }}>
-                <div className="th-content">{label}</div>
+            <th style={{ width: columnWidths[id], maxWidth: columnWidths[id], position: 'relative', minWidth: 0 }}>
+                <div className="th-content" style={{ minWidth: 0 }}>{label}</div>
                 <div
                     className="column-resizer"
                     onMouseDown={(e) => handleMouseDown(e, id)}
@@ -245,9 +245,9 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                         {filteredProjects.map((project) => {
                             return (
                                 <tr key={project.id}>
-                                    <td className="font-bold">
-                                        <div className="truncate-text" style={{ fontSize: '12px' }}>{project.name}</div>
-                                        <div className="text-secondary truncate-text" style={{ fontSize: '10px', fontWeight: '400' }}>{project.id}</div>
+                                    <td className="font-bold" style={{ minWidth: 0 }}>
+                                        <div className="truncate-text" style={{ fontSize: '12px', minWidth: 0 }}>{project.name}</div>
+                                        <div className="text-secondary truncate-text" style={{ fontSize: '10px', fontWeight: '400', minWidth: 0 }}>{project.id}</div>
                                     </td>
                                     {visibleColumns.customer && <td className="text-secondary truncate-text">{project.customer || '-'}</td>}
                                     {visibleColumns.manager && <td className="truncate-text">{project.manager}</td>}

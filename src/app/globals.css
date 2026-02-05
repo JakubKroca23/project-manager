@@ -382,6 +382,14 @@ header p {
   position: relative;
 }
 
+.project-table th,
+.project-table td,
+.project-table th *,
+.project-table td * {
+  min-width: 0 !important;
+  /* Force ignoring content width */
+}
+
 .project-table th {
   position: sticky;
   top: 0;
@@ -400,7 +408,6 @@ header p {
   white-space: normal;
   /* Povolení zalamování textu */
   line-height: 1.3;
-  min-width: 0;
 }
 
 .th-content {
@@ -443,8 +450,6 @@ body.resizing {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  min-width: 0;
-  /* Allow shrinking below content size */
 }
 
 .project-table th:last-child,
