@@ -88,7 +88,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
             const diff = e.pageX - startX.current;
             const newWidth = Math.max(30, startWidth.current + diff);
 
-            setColumnWidths(prev => ({
+            setColumnWidths((prev: Record<string, number>) => ({
                 ...prev,
                 [isResizing.current!]: newWidth
             }));
@@ -119,7 +119,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredProjects = projects.filter(project =>
+    const filteredProjects = projects.filter((project: Project) =>
         (project.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
         (project.customer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
         (project.manager?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
@@ -129,14 +129,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     );
 
     const toggleColumn = (column: keyof typeof visibleColumns) => {
-        setVisibleColumns(prev => ({
+        setVisibleColumns((prev: typeof visibleColumns) => ({
             ...prev,
             [column]: !prev[column]
         }));
     };
 
     // Definice sloupců pro snadnější mapování
-    const columns = [
+    const columns: { id: string, label: React.ReactNode, visible: boolean }[] = [
         { id: 'main', label: 'Předmět', visible: true },
         { id: 'customer', label: 'Zákazník', visible: visibleColumns.customer },
         { id: 'manager', label: 'Vlastník', visible: visibleColumns.manager },
@@ -164,14 +164,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         </button>
     );
 
-    const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
+    const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean, key?: string }) => {
         if (!isVisible) return null;
         return (
             <th style={{ position: 'relative' }}>
                 <div className="th-content">{label}</div>
                 <div
                     className="column-resizer"
-                    onMouseDown={(e) => handleMouseDown(e, id)}
+                    onMouseDown={(e: React.MouseEvent) => handleMouseDown(e, id)}
                 />
             </th>
         );
@@ -239,8 +239,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                     className="project-table"
                     style={{
                         tableLayout: 'fixed',
-                        width: totalTableWidth,
-                        minWidth: '100%'
+                        width: totalTableWidth
                     }}
                 >
                     <colgroup>
@@ -265,7 +264,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredProjects.map((project) => (
+                        {filteredProjects.map((project: Project) => (
                             <tr key={project.id}>
                                 <td className="font-bold">
                                     <div className="truncate-text" style={{ fontSize: '12px' }}>{project.name}</div>
