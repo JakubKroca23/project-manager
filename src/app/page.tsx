@@ -70,10 +70,15 @@ export default function TimelinePage() {
 
   const isSameDay = (d1: Date, d2Str?: string) => {
     if (!d2Str || d2Str === "-") return false;
-    const d2 = new Date(d2Str);
-    return d1.getDate() === d2.getDate() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getFullYear() === d2.getFullYear();
+    // Parse Czech date format DD.MM.YYYY
+    const parts = d2Str.split('.');
+    if (parts.length !== 3) return false;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // months are 0-indexed
+    const year = parseInt(parts[2], 10);
+    return d1.getDate() === day &&
+      d1.getMonth() === month &&
+      d1.getFullYear() === year;
   };
 
   const getMonthName = (monthIndex: number) => {
