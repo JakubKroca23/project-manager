@@ -666,7 +666,19 @@ body.resizing {
 
 /* Current day highlight column */
 .current-day-col {
-  background: rgba(59, 130, 246, 0.08) !important;
+  position: relative;
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+.current-day-col::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--primary);
+  z-index: 200;
 }
 
 .current-day-header {
@@ -675,6 +687,30 @@ body.resizing {
   position: relative;
   z-index: 155 !important;
 }
+
+.current-day-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 200;
+}
+
+/* Timeline Ranges */
+.range-m1-m2 {
+  background: #f1f5f9 !important; /* Šedá */
+}
+
+.range-post-m2 {
+  background: #ffeb3b !important; /* Sytě žlutá (standard) */
+}
+
+/* Override milestone colors to show ranges behind them if needed,
+   but user said "nad milníky" for the stripe,
+   and ranges should probably be background. */
 
 /* Timeline Milestones (Dots) */
 .milestone-wrapper {

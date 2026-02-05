@@ -146,7 +146,7 @@ export default function TimelinePage() {
             </tr>
             <tr>
               {calendarData.map((date, idx) => {
-                const isToday = isSameDay(date, today.toISOString());
+                const isToday = isSameDay(date, today.toLocaleDateString('cs-CZ'));
                 const isFirstDay = date.getDate() === 1;
 
                 return (
@@ -171,13 +171,37 @@ export default function TimelinePage() {
                   )}
                 </td>
                 {calendarData.map((date, idx) => {
-                  const isToday = isSameDay(date, today.toISOString());
+                  const isToday = isSameDay(date, today.toLocaleDateString('cs-CZ'));
                   const isFirstDay = date.getDate() === 1;
 
                   const hasChassis = isSameDay(date, project.chassis_delivery);
                   const hasBody = isSameDay(date, project.body_delivery);
                   const hasHandover = isSameDay(date, project.customer_handover);
                   const hasClosed = isSameDay(date, project.closed_at);
+
+                  // Výpočet rozsahů
+                  const parseDate = (dStr?: string) => {
+                    if (!dStr || dStr === "-") return null;
+                    const parts = dStr.split('.');
+                    if (parts.length !== 3) return null;
+                    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+                  };
+
+                  const dChassis = parseDate(project.chassis_delivery);
+                  const dBody = parseDate(project.body_delivery);
+
+                  let isInRangeM1M2 = false;
+                  let isInRangePostM2 = false;
+
+                  if (dChassis && dBody) {
+                    isInRangeM1M2 = date >= dChassis && date <= dBody;
+                  }
+
+                  if (dBody) {
+                    const dPost14 = new Date(dBody);
+                    dPost14.setDate(dPost14.getDate() + 14);
+                    isInRangePostM2 = date > dBody && date <= dPost14;
+                  }
 
                   const events = [];
                   if (hasChassis) events.push("Podvozek");
@@ -189,11 +213,19 @@ export default function TimelinePage() {
                     ? `${date.toLocaleDateString('cs-CZ')}: ${events.join(", ")}`
                     : `${date.toLocaleDateString('cs-CZ')}`;
 
+                  const cellClasses = [
+                    'day-cell',
+                    isToday ? 'current-day-col' : '',
+                    isFirstDay ? 'month-divider' : '',
+                    isInRangeM1M2 ? 'range-m1-m2' : '',
+                    isInRangePostM2 ? 'range-post-m2' : ''
+                  ].filter(Boolean).join(' ');
+
                   return (
                     <td
                       key={idx}
                       style={{ width: dayWidth, minWidth: dayWidth }}
-                      className={`day-cell ${isToday ? 'current-day-col' : ''} ${isFirstDay ? 'month-divider' : ''}`}
+                      className={cellClasses}
                       title={tooltip}
                     >
                       <div className="milestone-wrapper">
