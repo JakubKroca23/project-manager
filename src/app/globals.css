@@ -368,12 +368,9 @@ header p {
 }
 
 .project-table {
-  min-width: 100%;
   width: max-content;
-  /* Tabulka se rozšiřuje podle sloupců */
   border-collapse: collapse;
   table-layout: fixed;
-  /* Nutné pro přesný resizing */
 }
 
 .project-table-container {

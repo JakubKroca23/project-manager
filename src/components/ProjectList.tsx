@@ -239,12 +239,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                     className="project-table"
                     style={{
                         tableLayout: 'fixed',
-                        width: totalTableWidth
+                        width: `${totalTableWidth}px`,
+                        minWidth: `${totalTableWidth}px`,
+                        maxWidth: `${totalTableWidth}px`
                     }}
                 >
                     <colgroup>
                         {activeColumns.map(col => (
-                            <col key={col.id} style={{ width: columnWidths[col.id] }} />
+                            <col key={col.id} style={{ width: `${columnWidths[col.id]}px` }} />
                         ))}
                     </colgroup>
                     <thead>
