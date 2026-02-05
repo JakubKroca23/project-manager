@@ -245,7 +245,8 @@ header p {
 }
 
 .table-header-actions {
-  padding: 10px 24px;
+  padding: 4px 24px;
+  /* Sníženo pro menší mezeru */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -372,15 +373,17 @@ header p {
 
 .project-table-container {
   flex: 1;
-  overflow: visible;
-  /* Změna na visible aby sticky fungovalo vůči oknu */
+  overflow: auto;
+  /* Zpět na auto pro vnitřní scrollování */
   position: relative;
+  min-height: 0;
+  /* Důležité pro flexbox scrollování */
 }
 
 .project-table th {
   position: sticky;
-  top: 50px;
-  /* Výška navbaru */
+  top: 0;
+  /* Ukotvení k horní hraně kontejneru */
   z-index: 100;
   /* Zvýšeno aby bylo nad vším v tabulce */
   padding: 10px 10px;
@@ -417,6 +420,15 @@ header p {
 
 .project-table th:hover {
   background: #e2e8f0;
+}
+
+/* DROP TARGET INDICATORS */
+.project-table th.drop-target-left {
+  border-left: 3px solid var(--primary);
+}
+
+.project-table th.drop-target-right {
+  border-right: 3px solid var(--primary);
 }
 
 .th-content {

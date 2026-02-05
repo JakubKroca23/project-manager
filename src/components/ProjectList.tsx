@@ -76,6 +76,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
 
     // Drag and drop state
     const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+    const [dropTarget, setDropTarget] = useState<{ id: string, side: 'left' | 'right' } | null>(null);
 
     const handleMouseDown = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
@@ -137,30 +138,56 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     };
 
     // Drag and Drop handlery
-    const onDragStart = (id: string) => {
+    const onDragStart = (e: React.DragEvent, id: string) => {
         setDraggedColumn(id);
+        // Nutné pro Firefox a některé verze Chrome aby se drag spustil hned
+        e.dataTransfer.setData('text/plain', id);
+        e.dataTransfer.effectAllowed = 'move';
+
+        // Vizuální feedback při startu
+        const ghost = e.currentTarget.cloneNode(true) as HTMLElement;
+        ghost.style.opacity = '0.5';
     };
 
     const onDragOver = (e: React.DragEvent, id: string) => {
         e.preventDefault();
-        if (draggedColumn === id) return;
+        if (draggedColumn === id) {
+            setDropTarget(null);
+            return;
+        }
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midpoint = rect.left + rect.width / 2;
+        const side = e.clientX < midpoint ? 'left' : 'right';
+
+        setDropTarget({ id, side });
+    };
+
+    const onDragLeave = () => {
+        setDropTarget(null);
     };
 
     const onDrop = (e: React.DragEvent, targetId: string) => {
         e.preventDefault();
-        if (!draggedColumn || draggedColumn === targetId) return;
+        const sourceId = draggedColumn;
+        const target = dropTarget;
+
+        setDraggedColumn(null);
+        setDropTarget(null);
+
+        if (!sourceId || !target || sourceId === target.id) return;
 
         setColumnOrder((prevOrder) => {
             const newOrder = [...prevOrder];
-            const draggedIdx = newOrder.indexOf(draggedColumn);
-            const targetIdx = newOrder.indexOf(targetId);
-
+            const draggedIdx = newOrder.indexOf(sourceId);
             newOrder.splice(draggedIdx, 1);
-            newOrder.splice(targetIdx, 0, draggedColumn);
 
+            const targetIdx = newOrder.indexOf(target.id);
+            const finalIdx = target.side === 'right' ? targetIdx + 1 : targetIdx;
+
+            newOrder.splice(finalIdx, 0, sourceId);
             return newOrder;
         });
-        setDraggedColumn(null);
     };
 
     // Všechny definice sloupců
@@ -185,8 +212,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         .filter(id => columnDefinitions[id])
         .map(id => ({ id, ...columnDefinitions[id] }));
 
-    const activeColumns = orderedColumns.filter(col => col.visible);
-    const totalTableWidth = activeColumns.reduce((sum, col) => sum + (columnWidths[col.id] || 0), 0);
+    const activeColumns = orderedColumns.filter((col: any) => col.visible);
+    const totalTableWidth = activeColumns.reduce((sum: number, col: any) => sum + (columnWidths[col.id] || 0), 0);
 
     const DropdownCheck = ({ label, column }: { label: string, column: string }) => (
         <button className="dropdown-item" onClick={() => toggleColumn(column)}>
@@ -199,14 +226,20 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
 
     const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
         if (!isVisible) return null;
+
+        const isDragging = draggedColumn === id;
+        const isTarget = dropTarget?.id === id;
+        const dropSideClass = isTarget ? (dropTarget.side === 'left' ? 'drop-target-left' : 'drop-target-right') : '';
+
         return (
             <th
                 style={{ position: 'relative' }}
                 draggable
-                onDragStart={() => onDragStart(id)}
-                onDragOver={(e: React.DragEvent) => onDragOver(e, id)}
-                onDrop={(e: React.DragEvent) => onDrop(e, id)}
-                className={draggedColumn === id ? 'is-dragging' : ''}
+                onDragStart={(e) => onDragStart(e, id)}
+                onDragOver={(e) => onDragOver(e, id)}
+                onDragLeave={onDragLeave}
+                onDrop={(e) => onDrop(e, id)}
+                className={`${isDragging ? 'is-dragging' : ''} ${dropSideClass}`}
             >
                 <div className="th-content">{label}</div>
                 <div
@@ -263,7 +296,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     };
 
     return (
-        <div className="card-glass overflow-visible">
+        <div className="card-glass h-full">
             <div className="table-header-actions">
                 <div className="search-in-table" style={{ position: 'relative' }}>
                     <Search
