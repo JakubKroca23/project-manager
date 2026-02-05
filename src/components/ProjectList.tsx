@@ -86,7 +86,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         requestAnimationFrame(() => {
             if (!isResizing.current) return;
             const diff = e.pageX - startX.current;
-            const newWidth = Math.max(20, startWidth.current + diff);
+            const newWidth = Math.max(30, startWidth.current + diff);
 
             setColumnWidths(prev => ({
                 ...prev,
@@ -147,8 +147,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
     const Th = ({ id, label, isVisible = true }: { id: string, label: React.ReactNode, isVisible?: boolean }) => {
         if (!isVisible) return null;
         return (
-            <th style={{ width: columnWidths[id], minWidth: columnWidths[id], position: 'relative' }}>
-                <div className="th-content">{label}</div>
+            <th style={{ width: columnWidths[id], position: 'relative' }}>
+                <div className="th-content truncate-text">{label}</div>
                 <div
                     className="column-resizer"
                     onMouseDown={(e) => handleMouseDown(e, id)}
@@ -247,25 +247,25 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
                                 <tr key={project.id}>
                                     <td className="font-bold">
                                         <div className="truncate-text" style={{ fontSize: '12px' }}>{project.name}</div>
-                                        <div className="text-secondary" style={{ fontSize: '10px', fontWeight: '400' }}>{project.id}</div>
+                                        <div className="text-secondary truncate-text" style={{ fontSize: '10px', fontWeight: '400' }}>{project.id}</div>
                                     </td>
                                     {visibleColumns.customer && <td className="text-secondary truncate-text">{project.customer || '-'}</td>}
                                     {visibleColumns.manager && <td className="truncate-text">{project.manager}</td>}
-                                    {visibleColumns.abra_project && <td className="font-mono text-xs">{project.abra_project || '-'}</td>}
-                                    {visibleColumns.abra_order && <td className="font-mono text-xs text-secondary">{project.abra_order || '-'}</td>}
+                                    {visibleColumns.abra_project && <td className="font-mono text-xs truncate-text">{project.abra_project || '-'}</td>}
+                                    {visibleColumns.abra_order && <td className="font-mono text-xs text-secondary truncate-text">{project.abra_order || '-'}</td>}
                                     {visibleColumns.mounting_company && <td className="text-secondary truncate-text">{project.mounting_company || '-'}</td>}
-                                    {visibleColumns.serial_number && <td className="font-mono text-xs">{project.serial_number || '-'}</td>}
+                                    {visibleColumns.serial_number && <td className="font-mono text-xs truncate-text">{project.serial_number || '-'}</td>}
 
-                                    {visibleColumns.body_delivery && <td>{project.body_delivery || '-'}</td>}
-                                    {visibleColumns.chassis_delivery && <td className="text-secondary">{project.chassis_delivery || '-'}</td>}
+                                    {visibleColumns.body_delivery && <td className="truncate-text">{project.body_delivery || '-'}</td>}
+                                    {visibleColumns.chassis_delivery && <td className="text-secondary truncate-text">{project.chassis_delivery || '-'}</td>}
                                     {visibleColumns.customer_handover && (
-                                        <td>
-                                            <div style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                                        <td className="truncate-text">
+                                            <div style={{ color: 'var(--primary)', fontWeight: '600' }} className="truncate-text">
                                                 {project.customer_handover || '-'}
                                             </div>
                                         </td>
                                     )}
-                                    {visibleColumns.closed_at && <td className="text-secondary">{project.closed_at || '-'}</td>}
+                                    {visibleColumns.closed_at && <td className="text-secondary truncate-text">{project.closed_at || '-'}</td>}
 
                                     {visibleColumns.actions && (
                                         <td>

@@ -397,14 +397,14 @@ header p {
   border-right: 1px solid var(--border-light);
   overflow: hidden;
   white-space: nowrap;
-  /* Zákaz zalamování */
   text-overflow: ellipsis;
+  min-width: 0; /* Allow shrinking below content size */
 }
 
 .th-content {
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 8px;
+  padding-right: 12px;
   white-space: nowrap;
   width: 100%;
 }
@@ -413,11 +413,12 @@ header p {
   position: absolute;
   right: 0;
   top: 0;
-  width: 4px;
+  width: 6px;
   height: 100%;
   cursor: col-resize;
   background: transparent;
   transition: background 0.2s;
+  z-index: 20;
 }
 
 .column-resizer:hover {
@@ -439,8 +440,8 @@ body.resizing {
   background: var(--bg-card);
   overflow: hidden;
   white-space: nowrap;
-  /* Zákaz zalamování */
   text-overflow: ellipsis;
+  min-width: 0; /* Allow shrinking below content size */
 }
 
 .project-table th:last-child,
