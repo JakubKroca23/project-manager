@@ -148,7 +148,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         if (!isVisible) return null;
         return (
             <th style={{ width: columnWidths[id], position: 'relative' }}>
-                <div className="th-content truncate-text">{label}</div>
+                <div className="th-content">{label}</div>
                 <div
                     className="column-resizer"
                     onMouseDown={(e) => handleMouseDown(e, id)}
