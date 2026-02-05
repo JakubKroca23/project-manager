@@ -60,8 +60,8 @@ export default function TimelinePage() {
         const elementLeft = (todayElement as HTMLElement).offsetLeft;
         const elementWidth = (todayElement as HTMLElement).offsetWidth;
 
-        // Offset pro sticky sloupec (250px)
-        const stickyOffset = 250;
+        // Offset pro sticky sloupec (180px)
+        const stickyOffset = 180;
 
         scrollContainerRef.current.scrollLeft = (elementLeft - stickyOffset) - (containerWidth / 2) + (elementWidth / 2) + stickyOffset;
       }
