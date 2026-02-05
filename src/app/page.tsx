@@ -117,7 +117,7 @@ export default function TimelinePage() {
       </div>
 
       <div className="timeline-container" ref={scrollContainerRef}>
-        <table className="timeline-table">
+        <table className={`timeline-table timeline-zoom-${zoomLevel}`}>
           <thead>
             <tr>
               <th rowSpan={2}>Projekty / Zakázky</th>
@@ -161,7 +161,9 @@ export default function TimelinePage() {
               <tr key={project.id}>
                 <td>
                   <div className="timeline-project-name">{project.name}</div>
-                  <div className="timeline-project-id">{project.id} | {project.customer}</div>
+                  {zoomLevel !== 'compact' && (
+                    <div className="timeline-project-id">{project.id} | {project.customer}</div>
+                  )}
                 </td>
                 {calendarData.map((date, idx) => {
                   const isToday = isSameDay(date, today.toISOString());

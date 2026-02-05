@@ -778,6 +778,21 @@ body.resizing {
   border-left: 2px solid var(--primary) !important;
 }
 
+/* Compact mode - smaller rows */
+.timeline-zoom-compact .day-cell {
+  height: 16px;
+  line-height: 16px;
+}
+
+.timeline-zoom-compact td:first-child {
+  padding: 1px 4px !important;
+}
+
+.timeline-zoom-compact .timeline-project-name {
+  font-size: 9px;
+  line-height: 1;
+}
+
 .month-name-header {
   height: 30px;
   /* Snížená výška pro měsíce */
