@@ -578,6 +578,7 @@ body.resizing {
   /* Text wrapping with 2-line clamp */
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -669,8 +670,8 @@ body.resizing {
 /* Current day highlight column */
 .current-day-col {
   position: relative;
-  border-left: 1px solid #ef4444 !important;
-  border-right: 1px solid #ef4444 !important;
+  border-left: 2px solid #ef4444 !important;
+  border-right: 2px solid #ef4444 !important;
   z-index: 10;
 }
 
@@ -683,20 +684,20 @@ body.resizing {
   font-weight: 800;
 }
 
-/* Timeline Ranges (Pastel) */
+/* Timeline Ranges (Saturated) */
 .range-green {
-  background: #f0fdf4 !important;
-  /* Pastelově zelená */
-}
-
-.range-blue {
-  background: #eff6ff !important;
-  /* Pastelově modrá */
+  background: #bbf7d0 !important;
+  /* Sytější zelená */
 }
 
 .range-yellow {
-  background: #fef9c3 !important;
-  /* Pastelově žlutá */
+  background: #fef08a !important;
+  /* Sytá žlutá */
+}
+
+.range-orange {
+  background: #fed7aa !important;
+  /* Sytá oranžová */
 }
 
 /* Override milestone colors to show ranges behind them if needed,
@@ -777,22 +778,30 @@ body.resizing {
 
 .dot-chassis,
 .line-chassis {
-  background: #3b82f6;
+  background: #6b7280 !important;
 }
 
 .dot-body,
 .line-body {
-  background: #f59e0b;
+  background: #3b82f6 !important;
 }
 
 .dot-handover,
 .line-handover {
-  background: #10b981;
+  background: #a855f7 !important;
 }
 
 .dot-closed,
 .line-closed {
-  background: #64748b;
+  background: #22c55e !important;
+}
+
+.line-body,
+.line-chassis,
+.line-handover,
+.line-closed {
+  opacity: 1 !important;
+  z-index: 20;
 }
 
 .day-cell {

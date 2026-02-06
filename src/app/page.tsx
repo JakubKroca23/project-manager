@@ -193,37 +193,31 @@ export default function TimelinePage() {
                   const dBody = parseDate(project.body_delivery);
                   const dClosed = parseDate(project.closed_at);
 
-                  let isInRangeGreen = false; // M0 (Closed) -> min(M1, M2)
-                  let isInRangeBlue = false;  // min(M1, M2) -> max(M1, M2)
-                  let isInRangeYellow = false; // max(M1, M2) -> 14 dní po
+                  let isInRangeGreen = false;  // M0 (Closed) -> max(M1, M2)
+                  let isInRangeYellow = false; // max(M1, M2) -> +14 dní
+                  let isInRangeOrange = false; // +14 dní -> +21 dní (7 dní okno)
 
-                  if (dClosed && (dChassis || dBody)) {
-                    const firstMilestone = dChassis && dBody
-                      ? new Date(Math.min(dChassis.getTime(), dBody.getTime()))
-                      : (dChassis || dBody)!;
+                  const lastMainMilestone = dChassis && dBody
+                    ? new Date(Math.max(dChassis.getTime(), dBody.getTime()))
+                    : (dChassis || dBody || null);
 
-                    if (date >= dClosed && date < firstMilestone) {
+                  if (dClosed && lastMainMilestone) {
+                    if (date >= dClosed && date <= lastMainMilestone) {
                       isInRangeGreen = true;
                     }
                   }
 
-                  if (dChassis && dBody) {
-                    const start = new Date(Math.min(dChassis.getTime(), dBody.getTime()));
-                    const end = new Date(Math.max(dChassis.getTime(), dBody.getTime()));
-                    if (date >= start && date <= end) {
-                      isInRangeBlue = true;
-                    }
-                  }
-
-                  const lastMainMilestone = dChassis && dBody
-                    ? new Date(Math.max(dChassis.getTime(), dBody.getTime()))
-                    : (dChassis || dBody);
-
                   if (lastMainMilestone) {
                     const dPost14 = new Date(lastMainMilestone);
                     dPost14.setDate(dPost14.getDate() + 14);
+
+                    const dPost21 = new Date(dPost14);
+                    dPost21.setDate(dPost21.getDate() + 7);
+
                     if (date > lastMainMilestone && date <= dPost14) {
                       isInRangeYellow = true;
+                    } else if (date > dPost14 && date <= dPost21) {
+                      isInRangeOrange = true;
                     }
                   }
 
@@ -242,8 +236,8 @@ export default function TimelinePage() {
                     isToday ? 'current-day-col' : '',
                     isFirstDay ? 'month-divider' : '',
                     isInRangeGreen ? 'range-green' : '',
-                    isInRangeBlue ? 'range-blue' : '',
-                    isInRangeYellow ? 'range-yellow' : ''
+                    isInRangeYellow ? 'range-yellow' : '',
+                    isInRangeOrange ? 'range-orange' : ''
                   ].filter(Boolean).join(' ');
 
                   return (
