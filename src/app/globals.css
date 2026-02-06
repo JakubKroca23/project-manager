@@ -712,6 +712,20 @@ body.resizing {
   color: #6b21a8 !important;
 }
 
+/* Ohraničení skupiny fází (Žlutá + Oranžová) */
+.range-group-mid {
+  border-top: 1px solid #4b5563 !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.range-group-start {
+  border-left: 1px solid #4b5563 !important;
+}
+
+.range-group-end {
+  border-right: 1px solid #4b5563 !important;
+}
+
 /* Timeline Milestones (Dots) */
 .milestone-wrapper {
   display: flex;

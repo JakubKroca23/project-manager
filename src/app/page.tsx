@@ -288,6 +288,9 @@ export default function TimelinePage() {
                   let isInRangeYellow = false; // max(M1, M2) -> +14 dní
                   let isInRangeOrange = false; // +14 dní -> +21 dní
                   let isInRangeRed = false;    // +21 dní -> Předání / Dnes
+                  let isGroupStart = false;
+                  let isGroupEnd = false;
+                  let isGroupMid = false;
 
                   const lastM = (dCh && dBo)
                     ? new Date(Math.max(dCh.getTime(), dBo.getTime()))
@@ -316,6 +319,20 @@ export default function TimelinePage() {
                     } else if (date > dP21 && date <= gridEndDate) {
                       isInRangeRed = true;
                     }
+
+                    // Logika pro ohraničení skupiny (Žlutá + Oranžová)
+                    const isInRangeGroup = isInRangeYellow || isInRangeOrange;
+                    if (isInRangeGroup) {
+                      const dStart = new Date(lastM);
+                      dStart.setDate(dStart.getDate() + 1);
+                      if (date.getDate() === dStart.getDate() && date.getMonth() === dStart.getMonth() && date.getFullYear() === dStart.getFullYear()) {
+                        isGroupStart = true;
+                      }
+                      if (date.getDate() === dP21.getDate() && date.getMonth() === dP21.getMonth() && date.getFullYear() === dP21.getFullYear()) {
+                        isGroupEnd = true;
+                      }
+                      isGroupMid = true;
+                    }
                   }
 
                   const events = [];
@@ -335,7 +352,10 @@ export default function TimelinePage() {
                     isInRangeGreen ? 'range-green' : '',
                     isInRangeYellow ? 'range-yellow' : '',
                     isInRangeOrange ? 'range-orange' : '',
-                    isInRangeRed ? 'range-red' : ''
+                    isInRangeRed ? 'range-red' : '',
+                    isGroupStart ? 'range-group-start' : '',
+                    isGroupEnd ? 'range-group-end' : '',
+                    isGroupMid ? 'range-group-mid' : ''
                   ].filter(Boolean).join(' ');
 
                   return (
