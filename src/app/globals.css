@@ -956,15 +956,15 @@ body.resizing {
 }
 
 .legend-box {
-  width: 10px;
-  height: 10px;
+  width: 28px;
+  height: 12px;
   border-radius: 2px;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .legend-line {
-  width: 2px;
-  height: 12px;
+  width: 8px;
+  height: 14px;
   border-radius: 1px;
 }
 
