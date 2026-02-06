@@ -834,23 +834,24 @@ body.resizing {
 }
 
 .timeline-project-id {
-  font-size: 8px;
-  color: #4b5563;
-  font-weight: 400;
-  opacity: 0.8;
+  font-size: 8.5px;
+  color: #000000 !important;
+  /* Sytě černá */
+  font-weight: 500;
+  opacity: 1;
   line-height: 1.1;
 }
 
 .month-divider {
-  border-left: 1px solid #cbd5e1 !important;
-  /* Ztmavená mřížka */
+  border-left: 1px solid #94a3b8 !important;
+  /* Více ztmavená mřížka */
 }
 
 .timeline-table thead th,
 .timeline-table td:first-child,
 .timeline-table th:first-child {
-  border: 1px solid #cbd5e1 !important;
-  /* Světlejší ohraničení */
+  border: 1px solid #64748b !important;
+  /* Výraznější ohraničení struktury */
   padding: 4px;
 }
 
@@ -910,4 +911,56 @@ body.resizing {
   background: white;
   color: var(--primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Timeline Legend */
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 10px;
+  margin-left: 12px;
+}
+
+.legend-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  color: #475569;
+}
+
+.legend-box {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-line {
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+}
+
+.legend-item span {
+  font-weight: 500;
+}
+
+.legend-divider {
+  width: 1px;
+  height: 16px;
+  background: #cbd5e1;
+  margin: 0 4px;
 }

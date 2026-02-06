@@ -139,20 +139,39 @@ export default function TimelinePage() {
   return (
     <div className="dashboard-container">
       <div className="table-header-actions" style={{ marginBottom: '1rem' }}>
-        <div className="search-in-table" style={{ position: 'relative' }}>
-          <Search
-            size={16}
-            className="text-secondary"
-            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-          />
-          <input
-            type="text"
-            placeholder="Hledat zakázky, zákazníky, kódy..."
-            className="table-search-input"
-            style={{ paddingLeft: '40px', width: '400px' }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="search-in-table" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <Search
+              size={16}
+              className="text-secondary"
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+            />
+            <input
+              type="text"
+              placeholder="Hledat..."
+              className="table-search-input"
+              style={{ paddingLeft: '40px', width: '250px' }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="timeline-legend">
+            <div className="legend-section">
+              <div className="legend-item"><div className="legend-box range-green"></div><span>Příprava</span></div>
+              <div className="legend-item"><div className="legend-box range-yellow"></div><span>Montáž</span></div>
+              <div className="legend-item"><div className="legend-box range-orange"></div><span>Finále</span></div>
+              <div className="legend-item"><div className="legend-box range-red"></div><span>Zpoždění</span></div>
+              <div className="legend-item"><div className="legend-box range-purple"></div><span>Předáno</span></div>
+            </div>
+            <div className="legend-divider"></div>
+            <div className="legend-section">
+              <div className="legend-item"><div className="legend-line line-closed"></div><span>Uzavřeno</span></div>
+              <div className="legend-item"><div className="legend-line line-chassis"></div><span>Podvozek</span></div>
+              <div className="legend-item"><div className="legend-line line-body"></div><span>Nástavba</span></div>
+              <div className="legend-item"><div className="legend-line line-handover"></div><span>Předání</span></div>
+            </div>
+          </div>
         </div>
 
         <div className="zoom-controls">
