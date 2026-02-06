@@ -696,8 +696,8 @@ body.resizing {
 }
 
 .range-orange {
-  background: #fed7aa !important;
-  /* Sytá oranžová */
+  background: #fdba74 !important;
+  /* Sytější oranžová */
 }
 
 .range-red {
@@ -822,9 +822,10 @@ body.resizing {
 }
 
 .timeline-project-name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 10px;
-  color: var(--text-main);
+  color: #000000 !important;
+  /* Sytě černá */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -834,21 +835,22 @@ body.resizing {
 
 .timeline-project-id {
   font-size: 8px;
-  color: var(--text-secondary);
+  color: #4b5563;
   font-weight: 400;
   opacity: 0.8;
   line-height: 1.1;
 }
 
 .month-divider {
-  border-left: 1px solid #e2e8f0 !important;
-  /* Světlejší šedá */
+  border-left: 1px solid #cbd5e1 !important;
+  /* Ztmavená mřížka */
 }
 
 .timeline-table thead th,
 .timeline-table td:first-child,
 .timeline-table th:first-child {
-  border: 1px solid #4b5563 !important;
+  border: 1px solid #cbd5e1 !important;
+  /* Světlejší ohraničení */
   padding: 4px;
 }
 
