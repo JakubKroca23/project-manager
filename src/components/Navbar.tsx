@@ -6,7 +6,6 @@ import {
     Briefcase,
     Factory,
     Wrench,
-    ShieldCheck,
     Search,
     Bell,
     User
@@ -25,7 +24,6 @@ const navItems = [
     { name: 'Projekty', icon: Briefcase, href: '/projekty' },
     { name: 'Výroba', icon: Factory, href: '/vyroba' },
     { name: 'Servis', icon: Wrench, href: '/servis' },
-    { name: 'Admin', icon: ShieldCheck, href: '/admin' },
 ];
 
 const Navbar = () => {
@@ -56,7 +54,7 @@ const Navbar = () => {
                 <div className="navbar-actions">
                     <div className="user-profile">
                         <div className="user-btn-corporate">
-                            <span className="user-name-text">Jakub Kroča</span>
+                            <span className="user-name-text">CONTSYSTEM s.r.o.</span>
                         </div>
                     </div>
                     <button className="action-btn relative">
