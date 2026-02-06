@@ -624,6 +624,11 @@ body.resizing {
   z-index: 150;
 }
 
+/* Day cells in header - 80% opaque background */
+.timeline-table .day-cell {
+  background: rgba(241, 245, 249, 0.8);
+}
+
 .timeline-table th,
 .timeline-table td {
   border-right: 1px solid #f1f5f9;
