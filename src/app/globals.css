@@ -848,8 +848,10 @@ body.resizing {
   border-left: 1px solid #cbd5e1 !important;
 }
 
-.timeline-table thead th {
-  border: 1px solid #cbd5e1 !important;
+.timeline-table thead th,
+.timeline-table td:first-child,
+.timeline-table th:first-child {
+  border: 1px solid #000000 !important;
   padding: 4px;
 }
 
