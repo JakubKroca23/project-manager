@@ -629,9 +629,9 @@ body.resizing {
   background: rgba(241, 245, 249, 0.8);
 }
 
-/* Weekend columns - gray background */
+/* Weekend columns - 50% transparent gray background */
 .timeline-table .weekend-col {
-  background: #e2e8f0 !important;
+  background: rgba(226, 232, 240, 0.5) !important;
 }
 
 .timeline-table th,
