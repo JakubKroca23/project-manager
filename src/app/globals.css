@@ -701,9 +701,9 @@ body.resizing {
 }
 
 .range-red {
-  background: #fee2e2 !important;
-  /* Červená (zpoždění) */
-  color: #991b1b !important;
+  background: #fca5a5 !important;
+  /* Tmavší červená (zpoždění) */
+  color: #7f1d1d !important;
 }
 
 .range-purple {
@@ -711,10 +711,6 @@ body.resizing {
   /* Fialová (dokončeno) */
   color: #6b21a8 !important;
 }
-
-/* Override milestone colors to show ranges behind them if needed,
-   but user said "nad milníky" for the stripe,
-   and ranges should probably be background. */
 
 /* Timeline Milestones (Dots) */
 .milestone-wrapper {
@@ -845,7 +841,8 @@ body.resizing {
 }
 
 .month-divider {
-  border-left: 1px solid #cbd5e1 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  /* Světlejší šedá */
 }
 
 .timeline-table thead th,
