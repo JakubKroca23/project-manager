@@ -14,14 +14,62 @@ export default function TimelinePage() {
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('medium');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filtrované projekty podle vyhledávání
-  const filteredProjects = useMemo(() => {
-    if (!searchQuery) return projects;
-    return projects.filter((project: Project) =>
-      (project.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-      (project.customer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-      (project.id?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-    );
+  // Pomocná funkce pro parsování data (použitá v řazení)
+  const parseDateForSort = (dStr?: string) => {
+    if (!dStr || dStr === "-") return 0;
+    const parts = dStr.split('.');
+    if (parts.length !== 3) return 0;
+    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10)).getTime();
+  };
+
+  // Filtrované a seřazené projekty
+  const sortedProjects = useMemo(() => {
+    const todayNum = new Date().getTime();
+
+    // 1. Filtrace
+    let result = [...projects];
+    if (searchQuery) {
+      result = result.filter((project: Project) =>
+        (project.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (project.customer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (project.id?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // 2. Kategorizace a výpočet vah pro řazení
+    return result.sort((a, b) => {
+      const getPriority = (p: Project) => {
+        const dChassis = parseDateForSort(p.chassis_delivery);
+        const dBody = parseDateForSort(p.body_delivery);
+        const dHandover = parseDateForSort(p.customer_handover);
+        const lastMain = Math.max(dChassis, dBody);
+
+        // Fialová - Předáno (nejnižší priorita)
+        if (dHandover > 0 && todayNum > dHandover) return 3;
+
+        // Červená - Zpožděné (střední priorita)
+        const dPost21 = lastMain + (21 * 24 * 60 * 60 * 1000);
+        if (lastMain > 0 && todayNum > dPost21 && dHandover === 0) return 2;
+
+        // Aktivní (nejvyšší priorita)
+        return 1;
+      };
+
+      const prioA = getPriority(a);
+      const prioB = getPriority(b);
+
+      if (prioA !== prioB) return prioA - prioB;
+
+      // V rámci stejné priority řadit podle nejnovějšího data
+      const getMaxDate = (p: Project) => Math.max(
+        parseDateForSort(p.customer_handover),
+        parseDateForSort(p.body_delivery),
+        parseDateForSort(p.chassis_delivery),
+        parseDateForSort(p.closed_at)
+      );
+
+      return getMaxDate(b) - getMaxDate(a);
+    });
   }, [projects, searchQuery]);
 
   // Konfigurace šířky podle zoomu
@@ -164,14 +212,40 @@ export default function TimelinePage() {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((project) => (
+            {sortedProjects.map((project: Project) => (
               <tr key={project.id}>
-                <td>
-                  <div className="timeline-project-name">{project.name}</div>
-                  {zoomLevel !== 'compact' && (
-                    <div className="timeline-project-id">{project.id} | {project.customer}</div>
-                  )}
-                </td>
+                {(() => {
+                  // Výpočet stavu pro levý sloupec (Dnes)
+                  const todayNum = new Date().getTime();
+                  const dChassis = parseDateForSort(project.chassis_delivery);
+                  const dBody = parseDateForSort(project.body_delivery);
+                  const dHandover = parseDateForSort(project.customer_handover);
+                  const dClosed = parseDateForSort(project.closed_at);
+                  const lastMain = Math.max(dChassis, dBody);
+
+                  let statusClass = '';
+
+                  if (dHandover > 0 && todayNum > dHandover) {
+                    statusClass = 'range-purple';
+                  } else if (lastMain > 0 && todayNum > (lastMain + 21 * 24 * 60 * 60 * 1000) && dHandover === 0) {
+                    statusClass = 'range-red';
+                  } else if (lastMain > 0 && todayNum > (lastMain + 14 * 24 * 60 * 60 * 1000)) {
+                    statusClass = 'range-orange';
+                  } else if (lastMain > 0 && todayNum > lastMain) {
+                    statusClass = 'range-yellow';
+                  } else if (dClosed > 0 && todayNum >= dClosed && todayNum <= (lastMain || todayNum)) {
+                    statusClass = 'range-green';
+                  }
+
+                  return (
+                    <td className={statusClass}>
+                      <div className="timeline-project-name">{project.name}</div>
+                      {zoomLevel !== 'compact' && (
+                        <div className="timeline-project-id">{project.id} | {project.customer}</div>
+                      )}
+                    </td>
+                  );
+                })()}
                 {calendarData.map((date, idx) => {
                   const isToday = isSameDay(date, today.toLocaleDateString('cs-CZ'));
                   const isFirstDay = date.getDate() === 1;
@@ -181,42 +255,39 @@ export default function TimelinePage() {
                   const hasHandover = isSameDay(date, project.customer_handover);
                   const hasClosed = isSameDay(date, project.closed_at);
 
-                  // Výpočet rozsahů
-                  const parseDate = (dStr?: string) => {
-                    if (!dStr || dStr === "-") return null;
-                    const parts = dStr.split('.');
-                    if (parts.length !== 3) return null;
-                    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-                  };
+                  // Výpočet rozsahů pro grid
+                  const dChassisTimestamp = parseDateForSort(project.chassis_delivery);
+                  const dBodyTimestamp = parseDateForSort(project.body_delivery);
+                  const dClosedTimestamp = parseDateForSort(project.closed_at);
 
-                  const dChassis = parseDate(project.chassis_delivery);
-                  const dBody = parseDate(project.body_delivery);
-                  const dClosed = parseDate(project.closed_at);
+                  const dCh = dChassisTimestamp ? new Date(dChassisTimestamp) : null;
+                  const dBo = dBodyTimestamp ? new Date(dBodyTimestamp) : null;
+                  const dCl = dClosedTimestamp ? new Date(dClosedTimestamp) : null;
 
                   let isInRangeGreen = false;  // M0 (Closed) -> max(M1, M2)
                   let isInRangeYellow = false; // max(M1, M2) -> +14 dní
-                  let isInRangeOrange = false; // +14 dní -> +21 dní (7 dní okno)
+                  let isInRangeOrange = false; // +14 dní -> +21 dní
 
-                  const lastMainMilestone = dChassis && dBody
-                    ? new Date(Math.max(dChassis.getTime(), dBody.getTime()))
-                    : (dChassis || dBody || null);
+                  const lastM = (dCh && dBo)
+                    ? new Date(Math.max(dCh.getTime(), dBo.getTime()))
+                    : (dCh || dBo || null);
 
-                  if (dClosed && lastMainMilestone) {
-                    if (date >= dClosed && date <= lastMainMilestone) {
+                  if (dCl && lastM) {
+                    if (date >= dCl && date <= lastM) {
                       isInRangeGreen = true;
                     }
                   }
 
-                  if (lastMainMilestone) {
-                    const dPost14 = new Date(lastMainMilestone);
-                    dPost14.setDate(dPost14.getDate() + 14);
+                  if (lastM) {
+                    const dP14 = new Date(lastM);
+                    dP14.setDate(dP14.getDate() + 14);
 
-                    const dPost21 = new Date(dPost14);
-                    dPost21.setDate(dPost21.getDate() + 7);
+                    const dP21 = new Date(dP14);
+                    dP21.setDate(dP21.getDate() + 7);
 
-                    if (date > lastMainMilestone && date <= dPost14) {
+                    if (date > lastM && date <= dP14) {
                       isInRangeYellow = true;
-                    } else if (date > dPost14 && date <= dPost21) {
+                    } else if (date > dP14 && date <= dP21) {
                       isInRangeOrange = true;
                     }
                   }

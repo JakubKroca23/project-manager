@@ -700,6 +700,18 @@ body.resizing {
   /* Sytá oranžová */
 }
 
+.range-red {
+  background: #fee2e2 !important;
+  /* Červená (zpoždění) */
+  color: #991b1b !important;
+}
+
+.range-purple {
+  background: #f3e8ff !important;
+  /* Fialová (dokončeno) */
+  color: #6b21a8 !important;
+}
+
 /* Override milestone colors to show ranges behind them if needed,
    but user said "nad milníky" for the stripe,
    and ranges should probably be background. */
