@@ -31,3 +31,6 @@
 - **Změna**: Sjednocení hlavičky Timeline se stylem ProjectList.
 - **Detail**: Přidáno vyhledávací pole s ikonou Search (z `lucide-react`) a filtrování projektů. Zoom controls přesunuty doprava. Použitý layout `table-header-actions` pro konzistentní vzhled.
 
+## [2026-02-06] - UI Polishing
+- **Změna**: Úprava podbarvení víkendů v Timeline.
+- **Detail**: Změna barvy sloupců `.weekend-col` z poloprůhledné na neprůhlednou `#e2e8f0` v `globals.css` pro lepší čitelnost.
