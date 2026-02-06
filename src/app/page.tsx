@@ -1,7 +1,7 @@
 'use client';
 
 
-import React, { useEffect, useRef, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { getMappedProjects } from '@/lib/data-utils';
 import { Project } from '@/types/project';
 import { Search } from 'lucide-react';
@@ -13,6 +13,13 @@ export default function TimelinePage() {
   const projects = useMemo(() => getMappedProjects(), []);
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('medium');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Drag-to-scroll state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
+  const velocityRef = useRef({ x: 0, y: 0 });
+  const lastPosRef = useRef({ x: 0, y: 0 });
+  const momentumRef = useRef<number | null>(null);
 
   // Pomocná funkce pro parsování data (použitá v řazení)
   const parseDateForSort = (dStr?: string) => {
@@ -115,6 +122,84 @@ export default function TimelinePage() {
     }
   }, [calendarData, zoomLevel]);
 
+  /**
+   * Drag-to-scroll handlery s momentum efektem
+   */
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Ignorovat kliknutí na milestones
+    const target = e.target as HTMLElement;
+    if (target.closest('.milestone-wrapper') || target.closest('.milestone-line')) {
+      return;
+    }
+
+    if (momentumRef.current) {
+      cancelAnimationFrame(momentumRef.current);
+      momentumRef.current = null;
+    }
+
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: scrollContainerRef.current?.scrollLeft || 0,
+      scrollTop: scrollContainerRef.current?.scrollTop || 0
+    };
+    lastPosRef.current = { x: e.clientX, y: e.clientY };
+    velocityRef.current = { x: 0, y: 0 };
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+
+    scrollContainerRef.current.scrollLeft = dragStartRef.current.scrollLeft - dx;
+    scrollContainerRef.current.scrollTop = dragStartRef.current.scrollTop - dy;
+
+    // Sledování velocity pro momentum
+    velocityRef.current = {
+      x: e.clientX - lastPosRef.current.x,
+      y: e.clientY - lastPosRef.current.y
+    };
+    lastPosRef.current = { x: e.clientX, y: e.clientY };
+  }, [isDragging]);
+
+  const handleMouseUp = useCallback(() => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    // Momentum animace
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let velX = velocityRef.current.x * 10;
+    let velY = velocityRef.current.y * 10;
+    const friction = 0.95;
+
+    const animate = () => {
+      if (Math.abs(velX) < 0.5 && Math.abs(velY) < 0.5) {
+        momentumRef.current = null;
+        return;
+      }
+
+      container.scrollLeft -= velX;
+      container.scrollTop -= velY;
+      velX *= friction;
+      velY *= friction;
+
+      momentumRef.current = requestAnimationFrame(animate);
+    };
+
+    momentumRef.current = requestAnimationFrame(animate);
+  }, [isDragging]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isDragging) {
+      handleMouseUp();
+    }
+  }, [isDragging, handleMouseUp]);
+
   const isSameDay = (d1: Date, d2Str?: string) => {
     if (!d2Str || d2Str === "-") return false;
     // Parse Czech date format DD.MM.YYYY
@@ -187,7 +272,15 @@ export default function TimelinePage() {
         </div>
       </div>
 
-      <div className="timeline-container" ref={scrollContainerRef}>
+      <div
+        className={`timeline-container ${isDragging ? 'is-dragging' : ''}`}
+        ref={scrollContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
         <table className={`timeline-table timeline-zoom-${zoomLevel}`}>
           <thead>
             <tr>
