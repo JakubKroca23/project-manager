@@ -845,7 +845,23 @@ body.resizing {
 }
 
 .month-divider {
-  border-left: 2px solid var(--primary) !important;
+  border-left: 1px solid #cbd5e1 !important;
+}
+
+.timeline-table thead th {
+  border: 1px solid #cbd5e1 !important;
+  padding: 4px;
+}
+
+.month-name-header {
+  height: 30px;
+  background: #f8fafc !important;
+  font-weight: 700 !important;
+  color: #4b5563 !important;
+  text-align: center !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* Compact mode - smaller rows */
@@ -861,18 +877,6 @@ body.resizing {
 .timeline-zoom-compact .timeline-project-name {
   font-size: 9px;
   line-height: 1;
-}
-
-.month-name-header {
-  height: 30px;
-  /* Snížená výška pro měsíce */
-  background: #f8fafc !important;
-  font-weight: 700 !important;
-  color: var(--primary) !important;
-  text-align: center !important;
-  font-size: 11px !important;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 /* Zoom Controls styling */

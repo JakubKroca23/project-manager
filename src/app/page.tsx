@@ -258,6 +258,7 @@ export default function TimelinePage() {
                   // Výpočet rozsahů pro grid
                   const dChassisTimestamp = parseDateForSort(project.chassis_delivery);
                   const dBodyTimestamp = parseDateForSort(project.body_delivery);
+                  const dHandoverTimestamp = parseDateForSort(project.customer_handover);
                   const dClosedTimestamp = parseDateForSort(project.closed_at);
 
                   const dCh = dChassisTimestamp ? new Date(dChassisTimestamp) : null;
@@ -267,6 +268,7 @@ export default function TimelinePage() {
                   let isInRangeGreen = false;  // M0 (Closed) -> max(M1, M2)
                   let isInRangeYellow = false; // max(M1, M2) -> +14 dní
                   let isInRangeOrange = false; // +14 dní -> +21 dní
+                  let isInRangeRed = false;    // +21 dní -> Předání / Dnes
 
                   const lastM = (dCh && dBo)
                     ? new Date(Math.max(dCh.getTime(), dBo.getTime()))
@@ -285,10 +287,15 @@ export default function TimelinePage() {
                     const dP21 = new Date(dP14);
                     dP21.setDate(dP21.getDate() + 7);
 
+                    const dHan = dHandoverTimestamp ? new Date(dHandoverTimestamp) : null;
+                    const gridEndDate = dHan || today;
+
                     if (date > lastM && date <= dP14) {
                       isInRangeYellow = true;
                     } else if (date > dP14 && date <= dP21) {
                       isInRangeOrange = true;
+                    } else if (date > dP21 && date <= gridEndDate) {
+                      isInRangeRed = true;
                     }
                   }
 
@@ -308,7 +315,8 @@ export default function TimelinePage() {
                     isFirstDay ? 'month-divider' : '',
                     isInRangeGreen ? 'range-green' : '',
                     isInRangeYellow ? 'range-yellow' : '',
-                    isInRangeOrange ? 'range-orange' : ''
+                    isInRangeOrange ? 'range-orange' : '',
+                    isInRangeRed ? 'range-red' : ''
                   ].filter(Boolean).join(' ');
 
                   return (
