@@ -217,12 +217,13 @@ export default function TimelinePage() {
               {calendarData.map((date, idx) => {
                 const isToday = isSameDay(date, today.toLocaleDateString('cs-CZ'));
                 const isFirstDay = date.getDate() === 1;
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
                 return (
                   <th
                     key={idx}
                     style={{ width: dayWidth, minWidth: dayWidth }}
-                    className={`day-cell ${isToday ? 'current-day-header' : ''} ${isFirstDay ? 'month-divider' : ''}`}
+                    className={`day-cell ${isToday ? 'current-day-header' : ''} ${isFirstDay ? 'month-divider' : ''} ${isWeekend ? 'weekend-col' : ''}`}
                   >
                     {!hideDayNumbers && date.getDate()}
                   </th>
@@ -268,6 +269,7 @@ export default function TimelinePage() {
                 {calendarData.map((date, idx) => {
                   const isToday = isSameDay(date, today.toLocaleDateString('cs-CZ'));
                   const isFirstDay = date.getDate() === 1;
+                  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
                   const hasChassis = isSameDay(date, project.chassis_delivery);
                   const hasBody = isSameDay(date, project.body_delivery);
@@ -349,6 +351,7 @@ export default function TimelinePage() {
                     'day-cell',
                     isToday ? 'current-day-col' : '',
                     isFirstDay ? 'month-divider' : '',
+                    isWeekend ? 'weekend-col' : '',
                     isInRangeGreen ? 'range-green' : '',
                     isInRangeYellow ? 'range-yellow' : '',
                     isInRangeOrange ? 'range-orange' : '',

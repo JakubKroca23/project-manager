@@ -629,6 +629,11 @@ body.resizing {
   background: rgba(241, 245, 249, 0.8);
 }
 
+/* Weekend columns - gray background */
+.timeline-table .weekend-col {
+  background: #e2e8f0 !important;
+}
+
 .timeline-table th,
 .timeline-table td {
   border-right: 1px solid #f1f5f9;
