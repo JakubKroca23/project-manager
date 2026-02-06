@@ -851,7 +851,7 @@ body.resizing {
 .timeline-table thead th,
 .timeline-table td:first-child,
 .timeline-table th:first-child {
-  border: 1px solid #000000 !important;
+  border: 1px solid #4b5563 !important;
   padding: 4px;
 }
 
