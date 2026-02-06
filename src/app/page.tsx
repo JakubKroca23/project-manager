@@ -132,6 +132,9 @@ export default function TimelinePage() {
       return;
     }
 
+    // Zabránit výběru textu
+    e.preventDefault();
+
     if (momentumRef.current) {
       cancelAnimationFrame(momentumRef.current);
       momentumRef.current = null;
