@@ -8,7 +8,8 @@ import {
     Wrench,
     Search,
     Bell,
-    User
+    User,
+    GanttChart
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -21,6 +22,7 @@ function cn(...inputs: ClassValue[]) {
 
 const navItems = [
     { name: 'Timeline', icon: Calendar, href: '/' },
+    { name: 'Časová osa', icon: GanttChart, href: '/casova-osa' },
     { name: 'Projekty', icon: Briefcase, href: '/projekty' },
     { name: 'Výroba', icon: Factory, href: '/vyroba' },
     { name: 'Servis', icon: Wrench, href: '/servis' },
