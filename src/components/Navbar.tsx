@@ -1,32 +1,11 @@
 'use client';
 
 import React from 'react';
-import {
-    Calendar,
-    Briefcase,
-    Factory,
-    Wrench,
-    Search,
-    Bell,
-    User,
-    GanttChart
-} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/lib/utils';
+import { Factory, Wrench, Bell, LayoutDashboard } from 'lucide-react';
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-const navItems = [
-    { name: 'Timeline', icon: Calendar, href: '/' },
-    { name: 'Časová osa', icon: GanttChart, href: '/casova-osa' },
-    { name: 'Projekty', icon: Briefcase, href: '/projekty' },
-    { name: 'Výroba', icon: Factory, href: '/vyroba' },
-    { name: 'Servis', icon: Wrench, href: '/servis' },
-];
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -35,22 +14,42 @@ const Navbar = () => {
         <nav className="navbar-glass">
             <div className="navbar-container">
                 <div className="navbar-links">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={cn(
-                                    "nav-link",
-                                    isActive && "nav-link-active"
-                                )}
-                            >
-                                <item.icon size={18} />
-                                <span>{item.name}</span>
-                            </Link>
-                        );
-                    })}
+                    <div className="flex items-center gap-1 bg-[#1a1a1a] p-1 rounded-lg border border-white/10">
+                        <Link
+                            href="/"
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[13px] font-bold tracking-wide transition-all ${pathname === '/'
+                                ? 'bg-[#0091ff] text-white shadow-[0_0_15px_rgba(0,145,255,0.4)]'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <LayoutDashboard size={14} strokeWidth={2.5} />
+                            <span>DASHBOARD</span>
+                        </Link>
+
+                        <div className="w-[1px] h-4 bg-white/10 mx-1"></div>
+
+                        <Link
+                            href="/vyroba"
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[13px] font-bold tracking-wide transition-all ${pathname === '/vyroba'
+                                ? 'bg-[#0091ff] text-white shadow-[0_0_15px_rgba(0,145,255,0.4)]'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Factory size={14} strokeWidth={2.5} />
+                            <span>VÝROBA</span>
+                        </Link>
+
+                        <Link
+                            href="/servis"
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[13px] font-bold tracking-wide transition-all ${pathname === '/servis'
+                                ? 'bg-[#0091ff] text-white shadow-[0_0_15px_rgba(0,145,255,0.4)]'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Wrench size={14} strokeWidth={2.5} />
+                            <span>SERVIS</span>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="navbar-actions">
