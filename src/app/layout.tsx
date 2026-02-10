@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import NavbarWrapper from '@/components/NavbarWrapper';
+import AuthGuard from '@/components/AuthGuard';
 
 const inter = Inter({ subsets: ['latin', 'latin-ext'] });
 
@@ -20,12 +21,14 @@ export default function RootLayout({
     <html lang="cs" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-            <NavbarWrapper />
-            <main className="p-6">
-              {children}
-            </main>
-          </div>
+          <AuthGuard>
+            <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+              <NavbarWrapper />
+              <main className="p-6">
+                {children}
+              </main>
+            </div>
+          </AuthGuard>
         </ThemeProvider>
       </body>
     </html>

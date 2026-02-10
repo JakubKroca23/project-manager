@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
                                         return (
                                             <th
                                                 key={header.id}
-                                                className="h-8 px-2 text-left align-middle font-medium text-muted-foreground relative group whitespace-nowrap"
+                                                className="h-8 px-2 text-left align-middle font-semibold text-muted-foreground relative group whitespace-nowrap uppercase tracking-wider text-xs"
                                                 style={{ width: header.getSize() }}
                                             >
                                                 {header.isPlaceholder ? null : (
@@ -115,8 +115,8 @@ export function DataTable<TData, TValue>({
                                         {row.getVisibleCells().map((cell) => (
                                             <td
                                                 key={cell.id}
-                                                className="p-2 align-middle"
-                                                style={{ width: cell.column.getSize() }}
+                                                className="p-2 align-middle whitespace-nowrap overflow-hidden text-ellipsis"
+                                                style={{ width: cell.column.getSize(), maxWidth: cell.column.getSize() }}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>

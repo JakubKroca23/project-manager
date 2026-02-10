@@ -32,32 +32,31 @@ const columns: ColumnDef<Project>[] = [
     {
         accessorKey: 'id',
         header: 'Kód',
-        minSize: 40,
-        cell: ({ row }) => <span className="font-mono font-medium">{row.getValue('id')}</span>,
+        minSize: 60,
+        cell: ({ row }) => <span>{row.getValue('id')}</span>,
     },
     {
         accessorKey: 'name',
         header: 'Název',
-        minSize: 100,
-        cell: ({ row }) => <div className="max-w-[200px] truncate font-medium" title={row.getValue('name')}>{row.getValue('name')}</div>,
+        minSize: 120,
+        cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
         accessorKey: 'customer',
         header: 'Klient',
-        minSize: 80,
-        cell: ({ row }) => <div className="max-w-[150px] truncate text-muted-foreground" title={row.getValue('customer')}>{row.getValue('customer')}</div>,
+        minSize: 100,
     },
     {
         accessorKey: 'manager',
         header: 'Manažer',
-        minSize: 60,
+        minSize: 100,
     },
     {
         accessorKey: 'status',
         header: 'Status',
-        minSize: 70,
+        minSize: 80,
         cell: ({ row }) => (
-            <span className="px-2 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary border border-primary/20 whitespace-nowrap">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/20">
                 {row.getValue('status')}
             </span>
         ),
@@ -65,60 +64,58 @@ const columns: ColumnDef<Project>[] = [
     {
         accessorKey: 'production_status',
         header: 'Status Výroby',
-        minSize: 60,
+        minSize: 120,
     },
     {
         accessorKey: 'chassis_delivery',
         header: 'Dodání Podvozku',
-        minSize: 60,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('chassis_delivery') || '-'}</span>,
+        minSize: 130,
+        cell: ({ row }) => <span>{row.getValue('chassis_delivery') || '-'}</span>,
     },
     {
         accessorKey: 'body_delivery',
         header: 'Dodání Nástavby',
-        minSize: 60,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('body_delivery') || '-'}</span>,
+        minSize: 130,
+        cell: ({ row }) => <span>{row.getValue('body_delivery') || '-'}</span>,
     },
     {
         accessorKey: 'customer_handover',
         header: 'Předání',
-        minSize: 60,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('customer_handover') || '-'}</span>,
+        minSize: 100,
+        cell: ({ row }) => <span>{row.getValue('customer_handover') || '-'}</span>,
     },
     {
         accessorKey: 'abra_project',
         header: 'ABRA Zakázka',
-        minSize: 60,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('abra_project') || '-'}</span>,
+        minSize: 120,
+        cell: ({ row }) => <span>{row.getValue('abra_project') || '-'}</span>,
     },
     {
         accessorKey: 'mounting_company',
         header: 'Montáž',
-        minSize: 60,
+        minSize: 100,
     },
     {
         accessorKey: 'category',
         header: 'Kategorie',
-        minSize: 60,
-        cell: ({ row }) => <span className="text-muted-foreground">{row.getValue('category') || '-'}</span>,
+        minSize: 100,
     },
     {
         accessorKey: 'body_setup',
         header: 'Nastavení Nástavby',
-        minSize: 70,
-        cell: ({ row }) => <div className="max-w-[200px] truncate" title={row.getValue('body_setup')}>{row.getValue('body_setup') || '-'}</div>,
+        minSize: 150,
     },
     {
         accessorKey: 'closed_at',
         header: 'Uzavřeno',
         minSize: 50,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('closed_at') || '-'}</span>,
+        cell: ({ row }) => <span>{row.getValue('closed_at') || '-'}</span>,
     },
     {
         accessorKey: 'serial_number',
         header: 'VIN / VČ',
         minSize: 50,
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.getValue('serial_number') || '-'}</span>,
+        cell: ({ row }) => <span>{row.getValue('serial_number') || '-'}</span>,
     },
 ];
 
