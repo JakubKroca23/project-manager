@@ -26,6 +26,8 @@ export interface Project {
     // Interní pole systému
     quantity: number;
     action_needed_by: ActionNeededBy;
+    project_type: 'civil' | 'military';
+    custom_fields?: Record<string, any>;
     note?: string;
     created_at: string;
 }

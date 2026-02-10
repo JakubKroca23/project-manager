@@ -84,6 +84,7 @@ interface DataTableProps<TData, TValue> {
     onSortingChange?: (sorting: SortingState) => void;
     columnSizing?: ColumnSizingState;
     onColumnSizingChange?: (sizing: ColumnSizingState) => void;
+    onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -100,6 +101,7 @@ export function DataTable<TData, TValue>({
     onSortingChange,
     columnSizing: externalColumnSizing,
     onColumnSizingChange,
+    onRowClick,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -236,39 +238,19 @@ export function DataTable<TData, TValue>({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-shrink-0 pb-3">
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* Left: Import + info */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                        {toolbar}
-                    </div>
-
-                    {/* Center: Search */}
-                    {onSearchChange !== undefined && (
-                        <div className="flex-1 flex justify-center min-w-[200px]">
-                            <div className="relative w-full max-w-sm">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                                <input
-                                    type="text"
-                                    placeholder="Hledat ve všech sloupcích..."
-                                    className="w-full h-8 pl-9 pr-3 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all"
-                                    value={searchValue || ''}
-                                    onChange={(e) => onSearchChange(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Right: Auto-fit + Column toggle */}
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <div className="flex flex-wrap items-center justify-end gap-2 px-1">
+                    {/* Far Right Action Group */}
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={handleAutoFit}
-                            className="flex items-center gap-2 px-3 py-2 bg-background border border-input rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
                             title="Obnovit zobrazení – přizpůsobí sloupce šířce okna"
                         >
-                            <Maximize2 size={16} />
-                            <span className="hidden sm:inline">Obnovit zobrazení</span>
+                            <Maximize2 size={14} />
+                            <span className="hidden sm:inline">Obnovit</span>
                         </button>
                         <ColumnToggle table={table} />
+                        {toolbar}
                     </div>
                 </div>
             </div>
@@ -336,12 +318,13 @@ export function DataTable<TData, TValue>({
                                         <tr
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
-                                            className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                                            onClick={() => onRowClick?.(row.original)}
+                                            className={`border-b transition-all duration-200 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] active:scale-[0.998]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted`}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <td
                                                     key={cell.id}
-                                                    className="p-2 align-middle truncate border-r border-border last:border-r-0"
+                                                    className="px-3 py-2.5 align-middle truncate border-r border-border/50 last:border-r-0 group-hover/row:border-primary/10 transition-colors"
                                                     style={{ width: cell.column.getSize(), maxWidth: cell.column.getSize() }}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

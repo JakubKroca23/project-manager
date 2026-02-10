@@ -64,14 +64,17 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
 
     // Mapping state
     const [showMapping, setShowMapping] = useState(false);
+    const [showSourceSelect, setShowSourceSelect] = useState(false);
     const [importSource, setImportSource] = useState<ImportSource>(() => {
         if (typeof window !== 'undefined') {
             return (localStorage.getItem('last_import_source') as ImportSource) || 'raynet';
         }
         return 'raynet';
     });
+    const [projectType, setProjectType] = useState<'civil' | 'military'>('civil');
     const [excelColumns, setExcelColumns] = useState<string[]>([]);
     const [mapping, setMapping] = useState<Record<string, string>>({});
+    const [customFields, setCustomFields] = useState<string[]>([]);
     const [rawData, setRawData] = useState<any[]>([]);
     const [currentFile, setCurrentFile] = useState<File | null>(null);
 
@@ -95,18 +98,18 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
         }) || "";
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, source: ImportSource) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleProcessFile = async (source: ImportSource, pType: 'civil' | 'military') => {
+        if (!currentFile) return;
 
         setLoading(true);
         setMessage(null);
-        setCurrentFile(file);
         setImportSource(source);
+        setProjectType(pType);
         localStorage.setItem('last_import_source', source);
+        setShowSourceSelect(false);
 
         try {
-            const data = await file.arrayBuffer();
+            const data = await currentFile.arrayBuffer();
             const workbook = XLSX.read(data, { type: 'array' });
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
@@ -167,8 +170,6 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             setMessage({ type: 'error', text: err.message || 'Chyba při nahrávání souboru.' });
             setLoading(false);
         }
-        // Reset input
-        e.target.value = '';
     };
 
     const executeImport = async () => {
@@ -200,8 +201,15 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                     mounting_company: cleanNaN(item[mapping['mounting_company']]),
                     body_setup: cleanNaN(item[mapping['body_setup']]),
                     serial_number: cleanNaN(item[mapping['serial_number']]),
+                    project_type: projectType,
+                    custom_fields: {},
                     created_at: new Date().toISOString()
                 };
+
+                // Add selected custom fields
+                customFields.forEach(col => {
+                    project.custom_fields[col] = item[col];
+                });
 
                 // Final validation of data row
                 if (!project.id || !project.name) {
@@ -237,6 +245,7 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             setMessage({ type: 'success', text: `Importováno ${projects.length} projektů.` });
             onImportSuccess();
             setShowMapping(false);
+            setCustomFields([]); // Reset
 
         } catch (err: any) {
             console.error('Import execution error:', err);
@@ -249,56 +258,26 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
     if (permsLoading) return <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />;
 
     return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
                 {canImport ? (
-                    <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-lg border border-border/50">
-                        <div className="relative group/btn">
-                            <input
-                                type="file"
-                                accept=".xlsx, .xls"
-                                onChange={(e) => handleFileUpload(e, 'raynet')}
-                                disabled={loading}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
-                                id="excel-upload-raynet"
-                            />
-                            <label
-                                htmlFor="excel-upload-raynet"
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap uppercase tracking-wider ${loading
-                                    ? 'bg-muted text-muted-foreground'
-                                    : 'bg-green-600 hover:bg-green-700 text-white shadow-sm hover:scale-[1.02] active:scale-[0.98]'
-                                    }`}
-                            >
-                                <Upload size={12} />
-                                <span>Raynet Export</span>
-                            </label>
-                        </div>
-
-                        <div className="relative group/btn">
-                            <input
-                                type="file"
-                                accept=".xlsx, .xls"
-                                onChange={(e) => handleFileUpload(e, 'group')}
-                                disabled={loading}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
-                                id="excel-upload-group"
-                            />
-                            <label
-                                htmlFor="excel-upload-group"
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap uppercase tracking-wider ${loading
-                                    ? 'bg-muted text-muted-foreground'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:scale-[1.02] active:scale-[0.98]'
-                                    }`}
-                            >
-                                <TableIcon size={12} />
-                                <span>Tabulka Group</span>
-                            </label>
-                        </div>
+                    <div className="relative group/btn">
+                        <button
+                            onClick={() => setShowSourceSelect(true)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap uppercase tracking-wider ${loading
+                                ? 'bg-muted text-muted-foreground'
+                                : 'bg-[#0099ee] hover:bg-[#00aaff] text-white shadow-lg shadow-blue-500/10 hover:scale-[1.02] active:scale-[0.98]'
+                                }`}
+                            disabled={loading}
+                        >
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                            <span>{loading ? 'Zpracovávám...' : 'Importovat Excel'}</span>
+                        </button>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md text-muted-foreground text-sm border border-dashed border-border opacity-60">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-muted-foreground text-[10px] border border-dashed border-border opacity-60">
                         <Lock size={14} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Import uzamčen</span>
+                        <span className="font-bold uppercase tracking-widest">Import uzamčen</span>
                     </div>
                 )}
 
@@ -317,11 +296,92 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                 </div>
             )}
 
+            {/* Source Selection Modal */}
+            {showSourceSelect && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowSourceSelect(false)} />
+                    <div className="relative w-full max-w-md bg-card border border-border rounded-3xl shadow-2xl p-8 animate-in zoom-in-95 duration-300">
+                        <div className="text-center space-y-2 mb-8">
+                            <h3 className="text-2xl font-bold text-foreground">Konfigurace Importu</h3>
+                            <p className="text-sm text-muted-foreground">Vyberte cílovou kategorii a formát dat</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Category Selection */}
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Kategorie Projektů</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setProjectType('civil')}
+                                        className={`px-4 py-3 rounded-2xl border-2 transition-all font-bold text-xs uppercase tracking-wider ${projectType === 'civil'
+                                            ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10'
+                                            : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                                            }`}
+                                    >
+                                        Civilní
+                                    </button>
+                                    <button
+                                        onClick={() => setProjectType('military')}
+                                        className={`px-4 py-3 rounded-2xl border-2 transition-all font-bold text-xs uppercase tracking-wider ${projectType === 'military'
+                                            ? 'border-indigo-600 bg-indigo-600/10 text-indigo-600 shadow-lg shadow-indigo-600/10'
+                                            : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                                            }`}
+                                    >
+                                        Armáda
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Source Selection */}
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Formát Tabulky</label>
+                                <div className="grid grid-cols-1 gap-3">
+                                    <button
+                                        onClick={() => handleProcessFile('raynet', projectType)}
+                                        className="flex items-center justify-between px-5 py-4 rounded-2xl bg-green-600 hover:bg-green-700 text-white transition-all group active:scale-[0.98] shadow-lg shadow-green-600/20"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Upload size={18} />
+                                            <div className="text-left">
+                                                <div className="text-xs font-bold uppercase tracking-wider">Raynet Export</div>
+                                                <div className="text-[10px] opacity-80 font-medium">Standardní export z CRM</div>
+                                            </div>
+                                        </div>
+                                        <CheckCircle size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleProcessFile('group', projectType)}
+                                        className="flex items-center justify-between px-5 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white transition-all group active:scale-[0.98] shadow-lg shadow-blue-600/20"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <TableIcon size={18} />
+                                            <div className="text-left">
+                                                <div className="text-xs font-bold uppercase tracking-wider">Tabulka Group</div>
+                                                <div className="text-[10px] opacity-80 font-medium">Zakázkový formát Tabulka Group</div>
+                                            </div>
+                                        </div>
+                                        <CheckCircle size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowSourceSelect(false)}
+                            className="w-full mt-6 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            Zrušit
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Mapping Modal */}
             {showMapping && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
                     <div className="absolute inset-0 bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => !loading && setShowMapping(false)} />
-                    <div className="relative w-full max-w-3xl bg-card border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 overflow-hidden">
+                    <div className="relative w-full max-w-4xl bg-card border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 overflow-hidden">
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-border bg-muted/5">
                             <div className="flex items-center gap-4">
@@ -332,8 +392,8 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                                     <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                                         Mapování sloupců
                                         <span className={`text-[10px] px-2 py-0.5 rounded-full border ${importSource === 'raynet'
-                                                ? 'bg-green-500/10 text-green-600 border-green-500/20'
-                                                : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                                            ? 'bg-green-500/10 text-green-600 border-green-500/20'
+                                            : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
                                             }`}>
                                             {importSource === 'raynet' ? 'RAYNET EXPORT' : 'TABULKA GROUP'}
                                         </span>
@@ -403,6 +463,46 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* Dynamic Fields Section */}
+                            <div className="space-y-4 pt-4 border-t border-border/50">
+                                <div className="flex flex-col gap-1">
+                                    <h4 className="text-[11px] font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
+                                        Nenapárované sloupce
+                                        <span className="text-[9px] font-medium text-muted-foreground normal-case bg-muted px-2 py-0.5 rounded-md border border-border/50">
+                                            Volitelné (uloží se jako doplňující data)
+                                        </span>
+                                    </h4>
+                                    <p className="text-[10px] text-muted-foreground">Vyberte další sloupce z Excelu, které chcete u projektů sledovat.</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {excelColumns
+                                        .filter(col => !Object.values(mapping).includes(col))
+                                        .map(col => (
+                                            <button
+                                                key={col}
+                                                onClick={() => {
+                                                    setCustomFields(prev =>
+                                                        prev.includes(col)
+                                                            ? prev.filter(c => c !== col)
+                                                            : [...prev, col]
+                                                    );
+                                                }}
+                                                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border flex items-center gap-2 ${customFields.includes(col)
+                                                    ? 'bg-primary/20 border-primary/40 text-primary shadow-sm'
+                                                    : 'bg-muted/30 border-border/60 text-muted-foreground hover:bg-muted/50 hover:border-border'
+                                                    }`}
+                                            >
+                                                {customFields.includes(col) ? <CheckCircle size={10} /> : <Settings2 size={10} />}
+                                                {col}
+                                            </button>
+                                        ))
+                                    }
+                                    {excelColumns.filter(col => !Object.values(mapping).includes(col)).length === 0 && (
+                                        <p className="text-[10px] italic text-muted-foreground">Všechny sloupce byly napárovány.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
