@@ -70,12 +70,12 @@ export function DataTable<TData, TValue>({
                                         return (
                                             <th
                                                 key={header.id}
-                                                className="h-8 px-2 text-left align-middle font-medium text-muted-foreground relative group"
+                                                className="h-8 px-2 text-left align-middle font-medium text-muted-foreground relative group whitespace-nowrap"
                                                 style={{ width: header.getSize() }}
                                             >
                                                 {header.isPlaceholder ? null : (
                                                     <div
-                                                        className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2 hover:text-foreground transition-colors' : ''}
+                                                        className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2 hover:text-foreground transition-colors whitespace-nowrap' : 'whitespace-nowrap'}
                                                         onClick={header.column.getToggleSortingHandler()}
                                                     >
                                                         {flexRender(
