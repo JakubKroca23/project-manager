@@ -215,7 +215,7 @@ export default function CasovaOsaPage() {
                         </div>
                     }
                 >
-                    <Willow>
+                    {/* <Willow>
                         <Gantt
                             tasks={ganttTasks}
                             scales={scales}
@@ -223,7 +223,10 @@ export default function CasovaOsaPage() {
                             cellWidth={zoomLevel === 'day' ? 30 : zoomLevel === 'week' ? 80 : 120}
                             cellHeight={38}
                         />
-                    </Willow>
+                    </Willow> */}
+                    <div className="p-8 text-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
+                        <p className="text-gray-500">Gantt chart temporarily disabled for debugging.</p>
+                    </div>
                 </ErrorBoundary>
             </div>
         </div>
