@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { getMappedProjects } from '@/lib/data-utils';
 import { projectsToGanttTasks, GanttTask } from '@/types/gantt';
 import { Search, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Dynamický import pro wx-react-gantt (SSR disabled)
 const Gantt = dynamic(
@@ -204,16 +205,26 @@ export default function CasovaOsaPage() {
             </div>
 
             {/* Gantt Chart */}
-            <div className="gantt-container">
-                <Willow>
-                    <Gantt
-                        tasks={ganttTasks}
-                        scales={scales}
-                        columns={columns}
-                        cellWidth={zoomLevel === 'day' ? 30 : zoomLevel === 'week' ? 80 : 120}
-                        cellHeight={38}
-                    />
-                </Willow>
+            <div className="gantt-container" style={{ minHeight: '500px', position: 'relative' }}>
+                <ErrorBoundary
+                    fallback={
+                        <div className="p-8 text-center border-2 border-dashed border-red-200 rounded-xl bg-red-50">
+                            <h3 className="text-lg font-bold text-red-600 mb-2">Chyba při načítání grafu</h3>
+                            <p className="text-red-500 mb-4">Komponentu časové osy se nepodařilo načíst.</p>
+                            <p className="text-xs text-gray-500">Zkuste stránku obnovit nebo kontaktujte podporu.</p>
+                        </div>
+                    }
+                >
+                    <Willow>
+                        <Gantt
+                            tasks={ganttTasks}
+                            scales={scales}
+                            columns={columns}
+                            cellWidth={zoomLevel === 'day' ? 30 : zoomLevel === 'week' ? 80 : 120}
+                            cellHeight={38}
+                        />
+                    </Willow>
+                </ErrorBoundary>
             </div>
         </div>
     );
