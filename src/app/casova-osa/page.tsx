@@ -16,6 +16,10 @@ const Willow = dynamic(
     () => import('wx-react-gantt').then(mod => mod.Willow),
     { ssr: false }
 );
+const Material = dynamic(
+    () => import('wx-react-gantt').then(mod => mod.Material),
+    { ssr: false }
+);
 
 type ZoomLevel = 'day' | 'week' | 'month';
 
