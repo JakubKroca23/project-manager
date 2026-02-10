@@ -7,19 +7,7 @@ import { projectsToGanttTasks, GanttTask } from '@/types/gantt';
 import { Search, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-// Dynamický import pro wx-react-gantt (SSR disabled)
-const Gantt = dynamic(
-    () => import('wx-react-gantt').then(mod => mod.Gantt),
-    { ssr: false, loading: () => <div className="loading-container"><div className="loading-spinner"></div></div> }
-);
-const Willow = dynamic(
-    () => import('wx-react-gantt').then(mod => mod.Willow),
-    { ssr: false }
-);
-const Material = dynamic(
-    () => import('wx-react-gantt').then(mod => mod.Material),
-    { ssr: false }
-);
+import { CustomGantt } from '@/components/CustomGantt';
 
 type ZoomLevel = 'day' | 'week' | 'month';
 
@@ -219,15 +207,11 @@ export default function CasovaOsaPage() {
                         </div>
                     }
                 >
-                    <Material>
-                        <Gantt
-                            tasks={ganttTasks}
-                            scales={scales}
-                            columns={columns}
-                            cellWidth={zoomLevel === 'day' ? 30 : zoomLevel === 'week' ? 80 : 120}
-                            cellHeight={38}
-                        />
-                    </Material>
+                    {/* Custom Gantt Implementation */}
+                    <CustomGantt
+                        tasks={ganttTasks}
+                        zoomLevel={zoomLevel}
+                    />
                     {/* <div className="p-8 text-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
                         <p className="text-gray-500">Gantt chart temporarily disabled for debugging.</p>
                     </div> */}
