@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
-import { Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertCircle, Lock } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const cleanNaN = (val: any) => val === "NaN" || val === null || val === undefined ? undefined : val;
 
@@ -143,29 +144,40 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
         }
     };
 
+    const { canImport, isLoading: permsLoading } = usePermissions();
+
+    if (permsLoading) return <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />;
+
     return (
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
-                <div className="relative">
-                    <input
-                        type="file"
-                        accept=".xlsx, .xls"
-                        onChange={handleFileUpload}
-                        disabled={loading}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                        id="excel-upload"
-                    />
-                    <label
-                        htmlFor="excel-upload"
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${loading
-                            ? 'bg-muted text-muted-foreground'
-                            : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
-                            }`}
-                    >
-                        {loading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                        {loading ? 'Importuji...' : 'Import z Raynetu'}
-                    </label>
-                </div>
+                {canImport ? (
+                    <div className="relative">
+                        <input
+                            type="file"
+                            accept=".xlsx, .xls"
+                            onChange={handleFileUpload}
+                            disabled={loading}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                            id="excel-upload"
+                        />
+                        <label
+                            htmlFor="excel-upload"
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${loading
+                                ? 'bg-muted text-muted-foreground'
+                                : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
+                                }`}
+                        >
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                            {loading ? 'Importuji...' : 'Import z Raynetu'}
+                        </label>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md text-muted-foreground text-sm border border-dashed border-border" title="Nemáte oprávnění k importu">
+                        <Lock size={14} />
+                        <span>Import omezen</span>
+                    </div>
+                )}
 
                 {message && (
                     <span className={`flex items-center gap-1 text-xs ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}>
