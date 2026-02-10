@@ -3,29 +3,33 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2 } from 'lucide-react';
+import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2, KeyRound } from 'lucide-react';
 
-// --- SVG Logo Component ---
+// --- SVG Logo Component (Refined to match image exactly) ---
 const ContSystemLogo = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 400 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Stylized "F" (Horizontal Bars) */}
-        <g opacity="0.8">
-            <rect x="50" y="10" width="80" height="4" fill="white" />
-            <rect x="55" y="18" width="75" height="4" fill="white" />
-            <rect x="60" y="26" width="70" height="4" fill="white" />
-            <rect x="65" y="34" width="65" height="4" fill="white" />
-            <rect x="70" y="42" width="60" height="4" fill="white" />
-            <rect x="75" y="50" width="55" height="4" fill="white" />
-            <rect x="80" y="58" width="50" height="4" fill="white" />
+    <svg viewBox="0 0 500 160" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* The stylized "F" structure made of horizontal bars */}
+        <g transform="translate(60, 20)">
+            <rect x="0" y="0" width="110" height="4" fill="#d1d5db" />
+            <rect x="10" y="10" width="100" height="4" fill="#d1d5db" />
+            <rect x="20" y="20" width="90" height="4" fill="#d1d5db" />
+            <rect x="30" y="30" width="80" height="4" fill="#d1d5db" />
+            <rect x="40" y="40" width="70" height="4" fill="#d1d5db" />
+            <rect x="50" y="50" width="60" height="4" fill="#d1d5db" />
+            <rect x="60" y="60" width="50" height="4" fill="#d1d5db" />
+
+            {/* The vertical bar connector for the 'F' look */}
+            <rect x="30" y="68" width="50" height="4" fill="#d1d5db" />
+            <rect x="30" y="76" width="50" height="4" fill="#d1d5db" />
         </g>
 
-        {/* "ContSystem" Text */}
-        <text x="40" y="85" fill="white" style={{ font: 'bold 56px sans-serif', letterSpacing: '-2px' }}>
+        {/* "ContSystem" Text - Bold Italic Sans */}
+        <text x="30" y="115" fill="white" style={{ font: 'italic bold 82px sans-serif', letterSpacing: '-2px' }}>
             ContSystem
         </text>
 
-        {/* "SIMPLE HANDLING" Text */}
-        <text x="210" y="105" fill="#0ea5e9" style={{ font: 'bold 20px sans-serif', letterSpacing: '1px' }}>
+        {/* "SIMPLE HANDLING" Text - Blue Bold Italic */}
+        <text x="235" y="145" fill="#0ea5e9" style={{ font: 'italic bold 30px sans-serif' }}>
             SIMPLE HANDLING
         </text>
     </svg>
@@ -37,7 +41,7 @@ export default function LoginPage() {
     const [rememberMe, setRememberMe] = useState(true);
     const [loading, setLoading] = useState(false);
     const [requestLoading, setRequestLoading] = useState(false);
-    const [requestSent, setRequestSent] = useState(false);
+    const [requestSent, setRequestSent] = useState<{ type: 'access' | 'password', text: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
@@ -88,8 +92,6 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            // Check if user exists first or just try to track request
-            // For now, we'll try to update the profile if it exists
             const { data: userData } = await supabase.auth.getUser();
 
             if (userData?.user) {
@@ -103,12 +105,52 @@ export default function LoginPage() {
 
                 if (updateError) throw updateError;
             } else {
-                // If not logged in, we inform they need to be registered first
                 setError('Před žádostí o přístup se musíte nejprve zaregistrovat nebo přihlásit.');
                 return;
             }
 
-            setRequestSent(true);
+            setRequestSent({ type: 'access', text: 'Žádost o přístup byla odeslána.' });
+        } catch (err: any) {
+            setError('Nepodařilo se odeslat žádost. Zkuste to prosím později.');
+        } finally {
+            setRequestLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!email) {
+            setError('Pro reset hesla zadejte svůj e-mail.');
+            return;
+        }
+
+        setRequestLoading(true);
+        setError(null);
+
+        try {
+            // Instead of native Supabase reset, we use the user's custom system
+            // We find the profile by email and set password_reset_requested = true
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .single();
+
+            if (!profile) {
+                setError('Uživatel s tímto e-mailem nebyl nalezen.');
+                return;
+            }
+
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    password_reset_requested: true,
+                    last_request_at: new Date().toISOString()
+                })
+                .eq('id', profile.id);
+
+            if (updateError) throw updateError;
+
+            setRequestSent({ type: 'password', text: 'Žádost o reset hesla byla odeslána administrátorovi.' });
         } catch (err: any) {
             setError('Nepodařilo se odeslat žádost. Zkuste to prosím později.');
         } finally {
@@ -117,63 +159,72 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#1a1a1a] relative overflow-hidden font-sans">
+        <div className="fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#111111] overflow-hidden font-sans">
             {/* Background Decor */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] bg-[#0099ff]/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-[#0099ff]/5 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="w-full max-w-md px-6 relative z-10">
                 {/* Logo Area */}
-                <div className="flex flex-col items-center mb-10">
-                    <ContSystemLogo className="w-64 h-auto drop-shadow-2xl mb-4" />
-                    <h2 className="text-xl font-medium text-white/90 tracking-tight">Přehled projektů</h2>
+                <div className="flex flex-col items-center mb-8">
+                    <ContSystemLogo className="w-80 h-auto drop-shadow-2xl mb-2" />
+                    <h2 className="text-xl font-medium text-white/70 tracking-tight">Přehled projektů</h2>
                 </div>
 
-                <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl overflow-hidden p-8">
+                <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-8">
                     <form onSubmit={handleLogin} className="space-y-5">
                         {error && (
-                            <div className="bg-red-500/15 border border-red-500/30 text-red-300 p-3 rounded-lg text-xs flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-xs flex items-start gap-2">
                                 <AlertCircle size={14} className="mt-0.5 shrink-0" />
                                 <span>{error}</span>
                             </div>
                         )}
 
                         {requestSent && (
-                            <div className="bg-green-500/15 border border-green-500/30 text-green-300 p-3 rounded-lg text-xs flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+                            <div className="bg-green-500/10 border border-green-500/20 text-green-400 p-3 rounded-xl text-xs flex items-start gap-2">
                                 <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
-                                <span>Žádost o přístup byla odeslána administrátorovi.</span>
+                                <span>{requestSent.text}</span>
                             </div>
                         )}
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email</label>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Email</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-4.5 w-4.5 text-gray-500 group-focus-within:text-blue-400 transition-colors" />
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                    <Mail className="h-4.5 w-4.5 text-gray-600 group-focus-within:text-[#0099ff] transition-colors" />
                                 </div>
                                 <input
                                     type="email"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2.5 bg-black/20 border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                                    className="block w-full pl-11 pr-3 py-2.5 bg-black/40 border border-white/5 rounded-xl text-white text-sm placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-[#0099ff]/50 focus:border-[#0099ff]/50 transition-all font-medium"
                                     placeholder="email@contsystem.cz"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Heslo</label>
+                            <div className="flex justify-between items-center ml-1">
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Heslo</label>
+                                <button
+                                    type="button"
+                                    onClick={handleForgotPassword}
+                                    className="text-[10px] font-bold text-gray-500 hover:text-blue-400 transition-colors uppercase tracking-[0.1em]"
+                                >
+                                    Zapomenuté heslo?
+                                </button>
+                            </div>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-4.5 w-4.5 text-gray-500 group-focus-within:text-blue-400 transition-colors" />
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                    <Lock className="h-4.5 w-4.5 text-gray-600 group-focus-within:text-[#0099ff] transition-colors" />
                                 </div>
                                 <input
                                     type="password"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2.5 bg-black/20 border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                                    className="block w-full pl-11 pr-3 py-2.5 bg-black/40 border border-white/5 rounded-xl text-white text-sm placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-[#0099ff]/50 focus:border-[#0099ff]/50 transition-all font-medium"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -196,7 +247,7 @@ export default function LoginPage() {
                                         )}
                                     </div>
                                 </div>
-                                <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">Zapamatovat login</span>
+                                <span className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors">Zapamatovat login</span>
                             </label>
 
                             {!requestSent && (
@@ -215,25 +266,25 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-lg shadow-lg shadow-blue-900/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                            className="w-full flex items-center justify-center gap-2 bg-[#0099ff] hover:bg-[#0099ff]/90 text-white font-bold py-3 px-4 rounded-xl shadow-xl shadow-[#0099ff]/20 focus:outline-none focus:ring-2 focus:ring-[#0099ff]/50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 size={16} className="animate-spin" />
+                                    <Loader2 size={18} className="animate-spin" />
                                     <span>Přihlašování...</span>
                                 </>
                             ) : (
                                 <>
                                     <span>Přihlásit se</span>
-                                    <ArrowRight size={16} />
+                                    <ArrowRight size={18} />
                                 </>
                             )}
                         </button>
                     </form>
                 </div>
 
-                <div className="mt-12 group">
-                    <p className="text-[#444] text-[10px] text-center tracking-widest uppercase font-bold group-hover:text-gray-500 transition-colors">
+                <div className="absolute bottom-[-100px] left-0 right-0 py-8 opacity-30">
+                    <p className="text-gray-500 text-[10px] text-center tracking-[0.3em] uppercase font-bold">
                         © 2026 Contsystem s.r.o.
                     </p>
                 </div>

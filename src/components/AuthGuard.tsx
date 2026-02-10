@@ -13,19 +13,21 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+    // Public routes should be rendered immediately to avoid the "Ověřování přístupu..." flicker
+    const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
+
     useEffect(() => {
         const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-
-            const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
-
-            if (!session && !isPublicRoute) {
-                router.push('/login');
+            // If it's a public route, we don't need to block rendering for the session check
+            if (isPublicRoute) {
+                setIsLoading(false);
                 return;
             }
 
-            if (session && pathname === '/login') {
-                router.push('/');
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                router.push('/login');
                 return;
             }
 
@@ -35,10 +37,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
         checkAuth();
 
-        // Listen for auth state changes (login/logout)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
-
             if (!session && !isPublicRoute) {
                 router.push('/login');
             } else if (session && pathname === '/login') {
@@ -47,10 +46,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         });
 
         return () => subscription.unsubscribe();
-    }, [pathname, router]);
+    }, [pathname, router, isPublicRoute]);
 
-    // Public routes don't need the loading spinner
-    const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
     if (isPublicRoute) {
         return <>{children}</>;
     }

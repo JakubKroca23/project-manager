@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock } from 'lucide-react';
+import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -10,7 +10,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 export default function ProfilePage() {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { profiles, currentUserProfile, isAdmin, isLoading, updatePermission } = useAdmin();
+    const { profiles, currentUserProfile, isAdmin, isLoading, updatePermission, resetPasswordRequest } = useAdmin();
     const [notifications, setNotifications] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('notifications_enabled') !== 'false';
@@ -94,23 +94,31 @@ export default function ProfilePage() {
                         <div className="divide-y divide-border border rounded-lg overflow-hidden bg-background/50">
                             {profiles.length > 0 ? (
                                 profiles.map((profile) => (
-                                    <div key={profile.id} className={`p-3 flex items-center justify-between hover:bg-muted/30 transition-colors ${profile.access_requested ? 'bg-amber-500/5 border-l-4 border-l-amber-500' : ''}`}>
+                                    <div key={profile.id} className={`p-3 flex items-center justify-between hover:bg-muted/30 transition-colors ${(profile.access_requested || profile.password_reset_requested) ? 'bg-amber-500/5 border-l-4 border-l-amber-500' : ''}`}>
                                         <div className="flex flex-col gap-0.5">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm font-medium text-foreground truncate max-w-[200px] sm:max-w-none">
                                                     {profile.email}
                                                 </span>
-                                                {profile.access_requested && (
-                                                    <span className="flex items-center gap-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded uppercase animate-pulse">
-                                                        <AlertTriangle size={10} />
-                                                        <span>Žádá o přístup</span>
-                                                    </span>
-                                                )}
+                                                <div className="flex items-center gap-1.5">
+                                                    {profile.access_requested && (
+                                                        <span className="flex items-center gap-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded uppercase animate-pulse">
+                                                            <AlertTriangle size={10} />
+                                                            <span>Žádá o přístup</span>
+                                                        </span>
+                                                    )}
+                                                    {profile.password_reset_requested && (
+                                                        <span className="flex items-center gap-1 text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded uppercase animate-pulse">
+                                                            <KeyRound size={10} />
+                                                            <span>Reset hesla</span>
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                             {profile.email === 'jakub.kroca@contsystem.cz' && (
                                                 <span className="text-[10px] text-primary font-bold">Hlavní Admin</span>
                                             )}
-                                            {profile.access_requested && profile.last_request_at && (
+                                            {(profile.access_requested || profile.password_reset_requested) && profile.last_request_at && (
                                                 <span className="text-[9px] text-muted-foreground flex items-center gap-1">
                                                     <Clock size={10} />
                                                     {new Date(profile.last_request_at).toLocaleString('cs-CZ')}
@@ -118,7 +126,17 @@ export default function ProfilePage() {
                                             )}
                                         </div>
 
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-6">
+                                            {profile.password_reset_requested && (
+                                                <button
+                                                    onClick={() => resetPasswordRequest(profile.id)}
+                                                    className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                                >
+                                                    <CheckCircle size={10} />
+                                                    Odbavit reset
+                                                </button>
+                                            )}
+
                                             <div className="flex flex-col items-end gap-1">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] text-muted-foreground font-medium">Povolit import</span>

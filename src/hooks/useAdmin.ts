@@ -8,6 +8,7 @@ export interface UserProfile {
     email: string;
     can_import: boolean;
     access_requested?: boolean;
+    password_reset_requested?: boolean;
     last_request_at?: string;
 }
 
@@ -67,7 +68,7 @@ export function useAdmin() {
                 .from('profiles')
                 .update({
                     can_import: canImport,
-                    access_requested: false, // Reset request status when permission is changed
+                    access_requested: false,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', userId);
@@ -82,12 +83,35 @@ export function useAdmin() {
         }
     };
 
+    const resetPasswordRequest = async (userId: string) => {
+        if (!isAdmin) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    password_reset_requested: false,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (!error) {
+                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, password_reset_requested: false } : p));
+            } else {
+                console.error('Failed to reset password request:', error);
+            }
+        } catch (err) {
+            console.error('Error reset password request:', err);
+        }
+    };
+
     return {
         profiles,
         currentUserProfile,
         isAdmin,
         isLoading,
         updatePermission,
+        resetPasswordRequest,
         refresh: fetchProfiles
     };
 }
