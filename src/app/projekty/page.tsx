@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Upload, Loader2, Search, Database, RefreshCcw, FileSpreadsheet, History } from 'lucide-react';
+import { Upload, Loader2, Search, Database, RefreshCcw, FileSpreadsheet, History, X } from 'lucide-react';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
 
 import { Project } from '@/types/project';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 interface ImportInfo {
     date: string;
@@ -116,9 +117,10 @@ export default function ProjektyPage() {
     const activeTab = (typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military';
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTags, setSearchTags] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
-    const [lastUpdate, setLastUpdate] = useState<string>('-');
+    const [lastUpdate, setLastUpdate] = useState<React.ReactNode>('-');
     const tableSettings = useTableSettings('projects');
     const router = useRouter();
 
@@ -134,33 +136,60 @@ export default function ProjektyPage() {
         } else {
             setProjects(data || []);
 
-            // Find last database update from projects
-            if (data && data.length > 0) {
-                const latest = data[0]; // Ordered by updated_at desc
+            // Find last database update from projects FOR THIS CATEGORY
+            const categoryProjects = (data || []).filter(p => p.project_type === activeTab);
+            if (categoryProjects.length > 0) {
+                const latest = categoryProjects[0]; // Ordered by updated_at desc
                 const date = new Date(latest.updated_at || latest.created_at).toLocaleString('cs-CZ');
-                setLastUpdate(`${date} (${latest.last_modified_by || 'Neznámý'})`);
+                setLastUpdate(
+                    <div className="flex flex-col leading-tight">
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span>{date}</span>
+                            <span className="text-muted-foreground font-medium text-[10px] uppercase opacity-70">
+                                {latest.last_modified_by || 'Neznámý'}
+                            </span>
+                        </div>
+                        <Link href={`/projekty/${latest.id}`} className="text-[10px] text-muted-foreground/80 truncate max-w-[220px] hover:text-primary hover:underline transition-colors block" title={latest.name}>
+                            {latest.name}
+                        </Link>
+                    </div>
+                );
+            } else {
+                setLastUpdate('-');
             }
         }
 
-        // Load Global Import Metadata from DB
+        // Load Global Import Metadata from DB (Category Specific)
+        const metaKey = `last_import_info_${activeTab}`;
         const { data: metaData } = await supabase
             .from('app_metadata')
             .select('*')
-            .eq('key', 'last_import_info')
+            .eq('key', metaKey)
             .single();
 
         if (metaData?.value) {
             setLastImport(metaData.value as ImportInfo);
         } else {
-            // Fallback to localStorage if DB is empty
-            const stored = localStorage.getItem('lastImportInfo');
-            if (stored) {
-                try { setLastImport(JSON.parse(stored)); } catch { /* ignore */ }
+            // Fallback to old key or clear if not found
+            if (activeTab === 'civil') {
+                const { data: legacyData } = await supabase
+                    .from('app_metadata')
+                    .select('*')
+                    .eq('key', 'last_import_info')
+                    .single();
+
+                if (legacyData?.value) {
+                    setLastImport(legacyData.value as ImportInfo);
+                } else {
+                    setLastImport(null);
+                }
+            } else {
+                setLastImport(null);
             }
         }
 
         setIsLoading(false);
-    }, []);
+    }, [activeTab]);
 
     useEffect(() => {
         fetchProjects();
@@ -171,13 +200,32 @@ export default function ProjektyPage() {
         // Tab filter
         if (p.project_type !== activeTab) return false;
 
-        // Search filter
-        if (!searchTerm) return true;
-        const term = searchTerm.toLowerCase();
-        return Object.values(p).some(val =>
-            val !== null && val !== undefined && String(val).toLowerCase().includes(term)
+        // Search filter (Tags + Current Input)
+        const currentTerm = searchTerm.toLowerCase();
+        const allTerms = [...searchTags.map(t => t.toLowerCase()), currentTerm].filter(t => t);
+
+        if (allTerms.length === 0) return true;
+
+        return allTerms.every(term =>
+            Object.values(p).some(val =>
+                val !== null && val !== undefined && String(val).toLowerCase().includes(term)
+            )
         );
     });
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if ((e.key === 'Enter' || e.key === ' ') && searchTerm.trim()) {
+            e.preventDefault();
+            setSearchTags([...searchTags, searchTerm.trim()]);
+            setSearchTerm('');
+        } else if (e.key === 'Backspace' && !searchTerm && searchTags.length > 0) {
+            setSearchTags(searchTags.slice(0, -1));
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setSearchTags(searchTags.filter(tag => tag !== tagToRemove));
+    };
 
     return (
         <div className="h-full flex flex-col pt-2 bg-background">
@@ -196,15 +244,28 @@ export default function ProjektyPage() {
                         leftToolbar={
                             <div className="flex items-center gap-6 w-full">
                                 {/* Search component inside the unified row */}
-                                <div className="relative group max-w-sm flex-1">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={14} />
-                                    <input
-                                        type="text"
-                                        placeholder="Hledat..."
-                                        className="w-full h-9 pl-9 pr-4 bg-muted/20 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-xs font-medium transition-all"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                                <div className="relative group max-w-lg flex-1">
+                                    <div className="flex items-center gap-2 w-full min-h-[36px] px-3 py-1 bg-muted/20 border border-border rounded-xl focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary transition-all flex-wrap">
+                                        <Search className="text-muted-foreground group-focus-within:text-primary transition-colors flex-shrink-0" size={14} />
+
+                                        {searchTags.map((tag, idx) => (
+                                            <div key={idx} className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 text-primary rounded-lg text-xs font-bold animate-in zoom-in-50 duration-200">
+                                                <span>{tag}</span>
+                                                <button onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors">
+                                                    <X size={10} />
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                        <input
+                                            type="text"
+                                            placeholder={searchTags.length === 0 ? "Hledat..." : ""}
+                                            className="flex-1 bg-transparent border-none outline-none text-xs font-medium placeholder:text-muted-foreground min-w-[60px]"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Enhanced Metadata */}
@@ -216,20 +277,18 @@ export default function ProjektyPage() {
                                     />
                                     <MetadataItem
                                         icon={<RefreshCcw size={13} />}
-                                        label="Poslední úprava"
+                                        label="Poslední změna"
                                         value={lastUpdate}
                                     />
-                                    {lastImport && (
-                                        <MetadataItem
-                                            icon={<History size={13} />}
-                                            label="Poslední import"
-                                            value={`${lastImport.date} (${lastImport.user})`}
-                                        />
-                                    )}
+                                    <MetadataItem
+                                        icon={<History size={13} />}
+                                        label="Poslední import"
+                                        value={lastImport ? `${lastImport.date} (${lastImport.user})` : '-'}
+                                    />
                                 </div>
                             </div>
                         }
-                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} />}
+                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} projectType={activeTab} />}
                         onRowClick={(row) => router.push(`/projekty/${row.id}`)}
                         searchValue={searchTerm}
                         columnOrder={tableSettings.columnOrder}
@@ -247,7 +306,7 @@ export default function ProjektyPage() {
     );
 }
 
-function MetadataItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+function MetadataItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: React.ReactNode }) {
     return (
         <div className="flex items-center gap-2 group cursor-default">
             <div className="p-1.5 bg-muted/50 rounded-lg text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
@@ -255,7 +314,7 @@ function MetadataItem({ icon, label, value }: { icon: React.ReactNode, label: st
             </div>
             <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</span>
-                <span className="text-[11px] font-bold text-foreground/80">{value}</span>
+                <div className="text-[11px] font-bold text-foreground/80">{value}</div>
             </div>
         </div>
     );

@@ -40,6 +40,7 @@ export function usePermissions() {
         permissions,
         isLoading,
         canImport: permissions?.can_import || false,
+        canEdit: permissions?.can_import || (permissions?.email === 'jakub.kroca@contsystem.cz'),
         isAdmin: permissions?.email === 'jakub.kroca@contsystem.cz'
     };
 }

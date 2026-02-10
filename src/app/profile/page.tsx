@@ -2,15 +2,16 @@
 
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X } from 'lucide-react';
+import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
+import { cn } from '@/lib/utils';
 
 export default function ProfilePage() {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { profiles, currentUserProfile, isAdmin, isLoading, updatePermission, resetPasswordRequest } = useAdmin();
+    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, resetPasswordRequest, processUserRequest } = useAdmin();
     const [showSettings, setShowSettings] = useState(false);
     const [notifications, setNotifications] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -137,10 +138,58 @@ export default function ProfilePage() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-widest">
                                                 <Users size={16} className="text-primary" />
-                                                <span>Správa uživatelských práv</span>
+                                                <span>Správa registrovaných uživatelů</span>
                                             </div>
                                             <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">ADMIN PANEL</span>
                                         </div>
+
+                                        {/* --- GUEST REQUESTS (NEW) --- */}
+                                        {userRequests.length > 0 && (
+                                            <div className="space-y-4 pb-4">
+                                                <div className="flex items-center gap-2 text-[11px] font-bold text-amber-500 uppercase tracking-widest animate-pulse">
+                                                    <UserPlus size={14} />
+                                                    <span>Nové žádosti (Hosté)</span>
+                                                </div>
+
+                                                <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-amber-500/5 backdrop-blur-md border-amber-500/20">
+                                                    {userRequests.map((request) => (
+                                                        <div key={request.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-amber-500/10 transition-colors">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-sm font-bold text-foreground">{request.email}</span>
+                                                                    <span className={cn(
+                                                                        "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase",
+                                                                        request.request_type === 'access' ? "bg-amber-500 text-white" : "bg-blue-500 text-white"
+                                                                    )}>
+                                                                        {request.request_type === 'access' ? 'Žádost o přístup' : 'Zapomenuté heslo'}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-medium">
+                                                                    <Clock size={10} />
+                                                                    {new Date(request.created_at).toLocaleString('cs-CZ')}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => processUserRequest(request.id, 'processed')}
+                                                                    className="text-[10px] font-bold text-emerald-500 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                                                                >
+                                                                    <CheckCircle size={10} />
+                                                                    Vyřízeno
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => processUserRequest(request.id, 'rejected')}
+                                                                    className="text-[10px] font-bold text-red-500 hover:text-white bg-red-500/10 hover:bg-red-500 px-3 py-1.5 rounded-xl transition-all"
+                                                                >
+                                                                    Smazat
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-muted/10 backdrop-blur-md">
                                             {profiles.length > 0 ? (

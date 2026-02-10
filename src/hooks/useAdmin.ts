@@ -12,10 +12,20 @@ export interface UserProfile {
     last_request_at?: string;
 }
 
+export interface UserRequest {
+    id: string;
+    email: string;
+    request_type: 'access' | 'password_reset';
+    status: 'pending' | 'processed' | 'rejected';
+    created_at: string;
+    metadata?: any;
+}
+
 const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
 
 export function useAdmin() {
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
+    const [userRequests, setUserRequests] = useState<UserRequest[]>([]);
     const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -42,15 +52,27 @@ export function useAdmin() {
             setCurrentUserProfile(currentProfile);
         }
 
-        // If admin, fetch all profiles
+        // If admin, fetch all profiles and user_requests
         if (isUserAdmin) {
-            const { data: allProfiles, error } = await supabase
+            // Profiles
+            const { data: allProfiles, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
                 .order('email');
 
-            if (allProfiles && !error) {
+            if (allProfiles && !profileError) {
                 setProfiles(allProfiles);
+            }
+
+            // Guest Requests
+            const { data: requests, error: requestError } = await supabase
+                .from('user_requests')
+                .select('*')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+
+            if (requests && !requestError) {
+                setUserRequests(requests);
             }
         }
         setIsLoading(false);
@@ -105,13 +127,35 @@ export function useAdmin() {
         }
     };
 
+    const processUserRequest = async (requestId: string, status: 'processed' | 'rejected') => {
+        if (!isAdmin) return;
+
+        try {
+            const { error } = await supabase
+                .from('user_requests')
+                .update({
+                    status,
+                    processed_at: new Date().toISOString()
+                })
+                .eq('id', requestId);
+
+            if (!error) {
+                setUserRequests(prev => prev.filter(r => r.id !== requestId));
+            }
+        } catch (err) {
+            console.error('Error processing user request:', err);
+        }
+    };
+
     return {
         profiles,
+        userRequests,
         currentUserProfile,
         isAdmin,
         isLoading,
         updatePermission,
         resetPasswordRequest,
+        processUserRequest,
         refresh: fetchProfiles
     };
 }

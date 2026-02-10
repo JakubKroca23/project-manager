@@ -307,8 +307,15 @@ export function DataTable<TData, TValue>({
 
                                                         {/* Resizer Handle */}
                                                         <div
-                                                            onMouseDown={header.getResizeHandler()}
-                                                            onTouchStart={header.getResizeHandler()}
+                                                            onMouseDown={(e) => {
+                                                                e.stopPropagation();
+                                                                header.getResizeHandler()(e);
+                                                            }}
+                                                            onTouchStart={(e) => {
+                                                                e.stopPropagation();
+                                                                header.getResizeHandler()(e);
+                                                            }}
+                                                            onClick={(e) => e.stopPropagation()}
                                                             className={`absolute right-0 top-0 h-full w-1 bg-border cursor-col-resize select-none touch-none opacity-0 group-hover:opacity-100 hover:bg-primary ${header.column.getIsResizing() ? 'bg-primary opacity-100' : ''
                                                                 }`}
                                                         />

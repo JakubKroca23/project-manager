@@ -92,26 +92,35 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            const { data: userData } = await supabase.auth.getUser();
+            // First, try to send to user_requests table
+            const { error: requestError } = await supabase
+                .from('user_requests')
+                .insert({
+                    email,
+                    request_type: 'access',
+                    metadata: { source: 'login_page' }
+                });
 
-            if (userData?.user) {
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({
-                        access_requested: true,
-                        last_request_at: new Date().toISOString()
-                    })
-                    .eq('id', userData.user.id);
-
-                if (updateError) throw updateError;
-            } else {
-                setError('Před žádostí o přístup se musíte nejprve zaregistrovat nebo přihlásit.');
-                return;
+            // If table doesn't exist or other error, fallback to profiles update if logged in
+            if (requestError) {
+                const { data: userData } = await supabase.auth.getUser();
+                if (userData?.user) {
+                    const { error: updateError } = await supabase
+                        .from('profiles')
+                        .update({
+                            access_requested: true,
+                            last_request_at: new Date().toISOString()
+                        })
+                        .eq('id', userData.user.id);
+                    if (updateError) throw updateError;
+                } else {
+                    throw new Error('Žádost o přístup se nepodařilo odeslat. Prosím kontaktujte administrátora na jakub.kroca@contsystem.cz');
+                }
             }
 
-            setRequestSent({ type: 'access', text: 'Žádost o přístup byla odeslána.' });
+            setRequestSent({ type: 'access', text: 'Žádost o přístup byla odeslána administrátorovi.' });
         } catch (err: any) {
-            setError('Nepodařilo se odeslat žádost. Zkuste to prosím později.');
+            setError(err.message || 'Nepodařilo se odeslat žádost. Zkuste to prosím později.');
         } finally {
             setRequestLoading(false);
         }
@@ -127,30 +136,27 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            // Instead of native Supabase reset, we use the user's custom system
-            // We find the profile by email and set password_reset_requested = true
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('email', email)
-                .single();
+            // 1. Try native Supabase reset (Best for automated flow)
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/login?type=recovery`,
+            });
 
-            if (!profile) {
-                setError('Uživatel s tímto e-mailem nebyl nalezen.');
-                return;
+            // 2. Also log request in user_requests for admin to see
+            await supabase
+                .from('user_requests')
+                .insert({
+                    email,
+                    request_type: 'password_reset',
+                    metadata: { native_reset_sent: !resetError }
+                });
+
+            if (resetError) {
+                // If native reset fails (e.g. email not found in auth), we STILL log it in user_requests
+                // so the admin can help the user.
+                setRequestSent({ type: 'password', text: 'Požadavek byl předán administrátorovi k ručnímu vyřízení.' });
+            } else {
+                setRequestSent({ type: 'password', text: 'Instrukce pro reset hesla byly odeslány na váš e-mail.' });
             }
-
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({
-                    password_reset_requested: true,
-                    last_request_at: new Date().toISOString()
-                })
-                .eq('id', profile.id);
-
-            if (updateError) throw updateError;
-
-            setRequestSent({ type: 'password', text: 'Žádost o reset hesla byla odeslána administrátorovi.' });
         } catch (err: any) {
             setError('Nepodařilo se odeslat žádost. Zkuste to prosím později.');
         } finally {
