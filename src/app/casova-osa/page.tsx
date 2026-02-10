@@ -74,7 +74,7 @@ export default function CasovaOsaPage() {
         }
     }, [zoomLevel]);
 
-    // Transformace do formátu SVAR Gantt
+    // Transformace do formátu SVAR Gantt (užívaný Custom komponentou)
     const ganttTasks = useMemo(() => {
         return filteredTasks.map(task => ({
             id: task.id,
@@ -83,7 +83,9 @@ export default function CasovaOsaPage() {
             end: task.end,
             progress: task.progress || 0,
             type: task.type || 'task',
-            details: task.details
+            details: task.details,
+            phase: task.phase, // Added phase
+            customer: task.customer // Added customer
         }));
     }, [filteredTasks]);
 

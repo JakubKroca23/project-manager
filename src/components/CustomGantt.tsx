@@ -32,17 +32,13 @@ export const CustomGantt: React.FC<CustomGanttProps> = ({
                 minDate = new Date(Math.min(...starts));
                 maxDate = new Date(Math.max(...ends));
             } else {
-                // Default range if no tasks: current year
                 minDate = new Date(new Date().getFullYear(), 0, 1);
                 maxDate = new Date(new Date().getFullYear(), 11, 31);
             }
         }
 
-        // Add padding
         minDate.setDate(minDate.getDate() - 7);
         maxDate.setDate(maxDate.getDate() + 30);
-
-        // Normalize to start of day
         minDate.setHours(0, 0, 0, 0);
         maxDate.setHours(0, 0, 0, 0);
 
@@ -56,17 +52,17 @@ export const CustomGantt: React.FC<CustomGanttProps> = ({
         return { start: minDate, end: maxDate, days: dayArray };
     }, [tasks, startDate, endDate]);
 
-    // 2. Configuration based on zoom
+    // 2. Configuration
     const config = useMemo(() => {
         switch (zoomLevel) {
-            case 'day': return { cellWidth: 40, headerFormat: 'd' };
-            case 'week': return { cellWidth: 15, headerFormat: 'd' }; // Condensed days
-            case 'month': return { cellWidth: 5, headerFormat: '' }; // Very condensed
+            case 'day': return { cellWidth: 40 };
+            case 'week': return { cellWidth: 30 };
+            case 'month': return { cellWidth: 10 };
         }
     }, [zoomLevel]);
 
-    // 3. Helper to calculate position
-    const getPosition = (date: Date) => {
+    // 3. Position Helpers
+    const getLeftPos = (date: Date) => {
         const diffTime = date.getTime() - start.getTime();
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
         return diffDays * config.cellWidth;
@@ -74,117 +70,133 @@ export const CustomGantt: React.FC<CustomGanttProps> = ({
 
     const getWidth = (startDate: Date, endDate: Date) => {
         const diffTime = endDate.getTime() - startDate.getTime();
-        // Min width 1 day roughly
         const diffDays = Math.max(1, diffTime / (1000 * 60 * 60 * 24));
         return diffDays * config.cellWidth;
     };
 
-    // 4. Scroll to today on mount
+    // Scroll to today
     useEffect(() => {
         if (containerRef.current) {
             const today = new Date();
-            const pos = getPosition(today);
+            const pos = getLeftPos(today);
             const containerWidth = containerRef.current.clientWidth;
             containerRef.current.scrollLeft = pos - (containerWidth / 2);
         }
     }, [start, config.cellWidth]);
 
-    const getPhaseColor = (phase?: string) => {
+    const getPhaseColorHex = (phase?: string) => {
         switch (phase) {
-            case 'preparation': return 'bg-green-500';
-            case 'assembly': return 'bg-yellow-500';
-            case 'final': return 'bg-orange-500';
-            case 'delayed': return 'bg-red-500';
-            case 'completed': return 'bg-purple-500';
-            default: return 'bg-gray-400';
+            case 'preparation': return '#22c55e'; // green-500
+            case 'assembly': return '#eab308'; // yellow-500
+            case 'final': return '#f97316'; // orange-500
+            case 'delayed': return '#ef4444'; // red-500
+            case 'completed': return '#a855f7'; // purple-500
+            default: return '#9ca3af'; // gray-400
         }
     };
 
     return (
-        <div className="flex flex-col h-full border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
-            {/* Header / Timeline */}
-            <div className="overflow-x-auto overflow-y-hidden" ref={containerRef} style={{ scrollBehavior: 'smooth' }}>
-                <div style={{ width: days.length * config.cellWidth + 250, minWidth: '100%' }} className="relative">
-
-                    {/* Header Row */}
-                    <div className="flex h-10 border-b border-gray-100 items-center bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
-                        {/* Sticky Project Column Placeholder */}
-                        <div className="sticky left-0 w-[250px] bg-white border-r border-gray-200 h-full flex items-center px-4 font-bold text-xs text-gray-500 uppercase tracking-wider z-20 shadow-sm">
-                            Projekt
-                        </div>
-
-                        {/* Calendar Header */}
-                        <div className="flex h-full relative">
+        <div className="h-full border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col w-full selection:bg-blue-100">
+            <div
+                ref={containerRef}
+                className="overflow-auto flex-1 relative custom-scrollbar w-full"
+                style={{ maxHeight: 'calc(100vh - 280px)' }}
+            >
+                <table style={{ borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', width: 'max-content' }}>
+                    <thead className="sticky top-0 z-20 bg-gray-50 text-[11px]">
+                        <tr>
+                            <th className="sticky left-0 z-30 bg-gray-50 border-b border-r border-gray-200 h-9 px-4 font-bold text-gray-500 uppercase tracking-wider shadow-sm w-[250px] min-w-[250px] text-left">
+                                Projekt
+                            </th>
                             {days.map((d, i) => {
                                 const isFirstOfMonth = d.getDate() === 1;
                                 const isMonday = d.getDay() === 1;
+                                // Show label: always for Month/Week views, or just Mondays/1st for Day view to reduce clutter?
+                                // Let's stick to logic but maybe simplify font
                                 const showLabel = (zoomLevel === 'day') || (zoomLevel === 'week' && isMonday) || (zoomLevel === 'month' && isFirstOfMonth);
                                 const isToday = new Date().toDateString() === d.toDateString();
+                                const isWeekend = d.getDay() === 0 || d.getDay() === 6;
 
                                 return (
-                                    <div
+                                    <th
                                         key={i}
-                                        style={{ width: config.cellWidth }}
-                                        className={`flex-shrink-0 h-full border-r border-gray-50 flex items-center justify-center text-[10px] text-gray-400 relative group
-                                            ${isFirstOfMonth ? 'border-l-2 border-l-gray-300' : ''}
-                                            ${isToday ? 'bg-blue-50/50' : ''}
+                                        className={`h-9 border-b border-r border-gray-100 relative p-0 font-normal box-border
+                                            ${isFirstOfMonth ? 'border-l-[2px] border-l-gray-300' : ''}
+                                            ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-gray-50/50' : 'bg-white'}
                                         `}
+                                        style={{ width: config.cellWidth, minWidth: config.cellWidth }}
                                     >
                                         {showLabel && (
-                                            <span className={`absolute ${isFirstOfMonth ? 'left-1 font-bold text-gray-700' : ''}`}>
-                                                {isFirstOfMonth
-                                                    ? d.toLocaleDateString('cs-CZ', { month: 'short' })
-                                                    : d.getDate()}
+                                            <span className={`absolute top-2 text-[10px] text-gray-500 whitespace-nowrap overflow-visible z-10 ${isFirstOfMonth ? 'left-1 font-bold text-gray-700' : 'left-1/2 -translate-x-1/2'}`}>
+                                                {isFirstOfMonth ? d.toLocaleDateString('cs-CZ', { month: 'short' }) : d.getDate()}
                                             </span>
                                         )}
-                                        {isToday && <div className="absolute top-0 bottom-0 w-px bg-blue-500 z-0 opacity-30"></div>}
-                                    </div>
+                                        {isToday && <div className="absolute top-0 bottom-0 left-0 right-0 border-l border-r border-blue-400 opacity-20 pointer-events-none"></div>}
+                                    </th>
                                 );
                             })}
-                        </div>
-                    </div>
-
-                    {/* Task Rows */}
-                    <div className="flex flex-col">
+                        </tr>
+                    </thead>
+                    <tbody>
                         {tasks.map((task) => (
-                            <div key={task.id} className="flex h-10 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
-                                {/* Fixed Project Name */}
-                                <div className="sticky left-0 w-[250px] bg-white border-r border-gray-200 h-full flex items-center px-4 z-10 group-hover:bg-gray-50/50 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                                    <div className="truncate text-xs font-semibold text-slate-700 w-full" title={task.text}>
+                            <tr key={task.id} className="hover:bg-gray-50/40 group h-8 transition-colors">
+                                {/* Project Name */}
+                                <td className="sticky left-0 z-10 bg-white border-b border-r border-gray-200 px-4 h-8 group-hover:bg-gray-50/40 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] overflow-hidden">
+                                    <div className="truncate text-[11px] font-semibold text-slate-700 w-[230px]" title={task.text}>
                                         {task.text}
                                     </div>
-                                </div>
+                                </td>
 
-                                {/* Gantt Bar Area */}
-                                <div className="relative flex-1 h-full">
+                                <td colSpan={days.length} className="relative p-0 h-8 border-b border-gray-50 align-top">
+                                    {/* Grid Background */}
+                                    <div className="absolute inset-0 flex pointer-events-none">
+                                        {days.map((d, i) => {
+                                            const isFirstOfMonth = d.getDate() === 1;
+                                            const isToday = new Date().toDateString() === d.toDateString();
+                                            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                                            return (
+                                                <div
+                                                    key={i}
+                                                    style={{ width: config.cellWidth, minWidth: config.cellWidth }}
+                                                    className={`h-full border-r border-gray-50 
+                                                        ${isFirstOfMonth ? 'border-l border-l-gray-300' : ''}
+                                                        ${isToday ? 'bg-blue-50/20' : isWeekend ? 'bg-gray-50/30' : ''}
+                                                    `}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* The Bar */}
                                     <div
-                                        className={`absolute top-2 h-6 rounded-md shadow-sm border border-white/20 hover:opacity-90 hover:scale-[1.01] transition-all cursor-pointer ${getPhaseColor(task.phase)}`}
+                                        className={`absolute top-1.5 h-5 rounded-[4px] shadow-sm border border-white/20 hover:opacity-90 hover:scale-[1.01] transition-all cursor-pointer z-10 group/bar`}
                                         style={{
-                                            left: getPosition(task.start),
-                                            width: getWidth(task.start, task.end),
+                                            left: (() => {
+                                                const l = getLeftPos(task.start);
+                                                return isNaN(l) ? 0 : l;
+                                            })(),
+                                            width: (() => {
+                                                const w = getWidth(task.start, task.end);
+                                                return isNaN(w) ? 50 : Math.max(10, w);
+                                            })(),
+                                            minWidth: '10px',
+                                            backgroundColor: getPhaseColorHex(task.phase),
                                         }}
-                                        title={`${task.text} (${task.start.toLocaleDateString()} - ${task.end.toLocaleDateString()})`}
+                                        title={`${task.text} (${getPhaseColorHex(task.phase)})`}
                                     >
-                                        {/* Progress Bar (Optional) */}
+                                        {/* Progress indicator */}
                                         {task.progress !== undefined && task.progress > 0 && (
                                             <div
-                                                className="h-full bg-white/20 rounded-l-md"
+                                                className="h-full bg-white/20 rounded-l-[4px]"
                                                 style={{ width: `${task.progress}%` }}
                                             />
                                         )}
                                     </div>
-                                </div>
-                            </div>
+                                </td>
+                            </tr>
                         ))}
-                    </div>
-
-                    {/* Today Line (Vertical overlay) */}
-                    <div
-                        className="absolute top-10 bottom-0 w-0.5 bg-red-500 z-0 pointer-events-none opacity-50"
-                        style={{ left: getPosition(new Date()) + 250 + (config.cellWidth / 2) }}
-                    ></div>
-
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     );
