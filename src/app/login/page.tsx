@@ -73,7 +73,7 @@ export default function LoginPage() {
 
             if (loginError) throw loginError;
 
-            router.push('/projekty');
+            router.push('/');
             router.refresh();
         } catch (err: any) {
             setError(err.message || 'Chyba při přihlašování');
