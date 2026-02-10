@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { Search } from 'lucide-react';
 import ExcelImporter from '@/components/ExcelImporter';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
+import { useTableSettings } from '@/hooks/useTableSettings';
 
 interface Project {
     id: string;
@@ -123,6 +123,7 @@ export default function ProjektyPage() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const tableSettings = useTableSettings('projects');
 
     const fetchProjects = useCallback(async () => {
         setIsLoading(true);
@@ -143,40 +144,34 @@ export default function ProjektyPage() {
         fetchProjects();
     }, [fetchProjects]);
 
-    const filteredProjects = projects.filter(p =>
-        (p.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p.id?.toString()?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p.customer?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
+    // Universal filter – searches across ALL fields of each project
+    const filteredProjects = projects.filter(p => {
+        if (!searchTerm) return true;
+        const term = searchTerm.toLowerCase();
+        return Object.values(p).some(val =>
+            val !== null && val !== undefined && String(val).toLowerCase().includes(term)
+        );
+    });
 
     return (
-        <div className="dashboard-container">
-            <header className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Projekty</h1>
-                    <p className="text-muted-foreground">Přehled všech aktivních projektů</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <ExcelImporter onImportSuccess={fetchProjects} />
-
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Hledat projekt..."
-                            className="h-10 pl-10 pr-4 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
-            </header>
-
-            <div className="card-glass flex-1 overflow-hidden flex flex-col p-4">
+        <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-hidden flex flex-col">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64 text-muted-foreground">Načítám data...</div>
                 ) : (
-                    <DataTable columns={columns} data={filteredProjects} />
+                    <DataTable
+                        columns={columns}
+                        data={filteredProjects}
+                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} />}
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        columnOrder={tableSettings.columnOrder}
+                        onColumnOrderChange={tableSettings.setColumnOrder}
+                        columnVisibility={tableSettings.columnVisibility}
+                        onColumnVisibilityChange={tableSettings.setColumnVisibility}
+                        sorting={tableSettings.sorting}
+                        onSortingChange={tableSettings.setSorting}
+                    />
                 )}
             </div>
         </div>

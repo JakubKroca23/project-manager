@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
 import { Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
-// Helper to clean data similar to original data-utils
 const cleanNaN = (val: any) => val === "NaN" || val === null || val === undefined ? undefined : val;
 
-// Helper to find key case-insensitively
 const getVal = (obj: any, searchKey: string) => {
     if (obj[searchKey] !== undefined) return obj[searchKey];
     const normalizedSearch = searchKey.toLowerCase().replace(/[^\w\s]/gi, '');
@@ -19,28 +17,42 @@ const getVal = (obj: any, searchKey: string) => {
     return key ? obj[key] : undefined;
 };
 
-// Date parser for Excel serial dates or string dates
 const parseDate = (val: any) => {
     if (!val) return null;
     if (typeof val === 'number') {
-        // Excel serial date
         const date = new Date(Math.round((val - 25569) * 86400 * 1000));
-        return date.toISOString().split('T')[0]; // YYYY-MM-DD
+        return date.toISOString().split('T')[0];
     }
     if (typeof val === 'string') {
-        // Try parsing string date
         const date = new Date(val);
         if (!isNaN(date.getTime())) {
             return date.toISOString().split('T')[0];
         }
     }
-    return val; // Return as is if can't parse, or maybe null? Keeping as is for text fields
+    return val;
 };
 
+interface ImportInfo {
+    date: string;
+    user: string;
+    count: number;
+    excelDate: string;
+}
 
 export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: () => void }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
+
+    // Load last import info on mount
+    useEffect(() => {
+        const stored = localStorage.getItem('lastImportInfo');
+        if (stored) {
+            try {
+                setLastImport(JSON.parse(stored));
+            } catch { /* ignore */ }
+        }
+    }, []);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -53,19 +65,15 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data);
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // Convert to array of arrays to find the header row
             const jsonArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
             if (jsonArray.length === 0) {
                 throw new Error('Soubor neobsahuje žádná data.');
             }
 
-            // Find header row index
             let headerRowIndex = -1;
             for (let i = 0; i < Math.min(jsonArray.length, 20); i++) {
                 const row = jsonArray[i];
-                // Check if row contains "Kód" or "Code" (case insensitive)
                 if (row.some((cell: any) => cell && typeof cell === 'string' && (cell.toLowerCase().includes('kód') || cell.toLowerCase().includes('code')))) {
                     headerRowIndex = i;
                     break;
@@ -73,16 +81,11 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             }
 
             if (headerRowIndex === -1) {
-                // Fallback to 0 if not found, but log it
                 console.warn('Header row not found, using first row.');
                 headerRowIndex = 0;
             }
 
-            // Re-parse using the found header row
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
-
-            console.log('Detected Header Row Index:', headerRowIndex);
-            console.log('First row of data:', jsonData[0]);
 
             const projects = jsonData.map((item: any) => ({
                 id: getVal(item, "Kód")?.toString(),
@@ -91,7 +94,6 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                 manager: getVal(item, "Vlastník") || "-",
                 status: "Aktivní",
                 deadline: "-",
-
                 closed_at: parseDate(getVal(item, "Uzavřeno")),
                 category: cleanNaN(getVal(item, "Kategorie")),
                 abra_order: cleanNaN(getVal(item, "Abra Objednávka")),
@@ -103,12 +105,11 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                 mounting_company: cleanNaN(getVal(item, "Montážní společnost")),
                 body_setup: cleanNaN(getVal(item, "Nástavba nastavení")),
                 serial_number: cleanNaN(getVal(item, "Výrobní číslo")),
-
                 created_at: new Date().toISOString()
-            })).filter((p: any) => p.name && p.id); // Filter out invalid rows
+            })).filter((p: any) => p.name && p.id);
 
             if (projects.length === 0) {
-                throw new Error('Nepodařilo se načíst žádné platné projekty. Zkontrolujte názvy sloupců (Kód, Předmět).');
+                throw new Error('Nepodařilo se načíst žádné platné projekty.');
             }
 
             const { error } = await supabase.from('projects').upsert(projects);
@@ -118,23 +119,33 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                 throw error;
             }
 
-            setMessage({ type: 'success', text: `Úspěšně importováno ${projects.length} projektů.` });
-            onImportSuccess();
+            // Get current user for import info
+            const { data: { user } } = await supabase.auth.getUser();
+            const excelFileDate = new Date(file.lastModified).toLocaleDateString('cs-CZ');
+            const importInfo: ImportInfo = {
+                date: new Date().toLocaleString('cs-CZ'),
+                user: user?.email?.split('@')[0] || 'Neznámý',
+                count: projects.length,
+                excelDate: excelFileDate,
+            };
+            localStorage.setItem('lastImportInfo', JSON.stringify(importInfo));
+            setLastImport(importInfo);
 
-            // Clear input
+            setMessage({ type: 'success', text: `Importováno ${projects.length} projektů.` });
+            onImportSuccess();
             e.target.value = '';
 
         } catch (err: any) {
             console.error('Import error:', err);
-            setMessage({ type: 'error', text: err.message || 'Chyba při importu dat.' });
+            setMessage({ type: 'error', text: err.message || 'Chyba při importu.' });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col gap-4 p-4 border border-dashed border-border rounded-lg bg-muted/30">
-            <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
                 <div className="relative">
                     <input
                         type="file"
@@ -146,26 +157,28 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                     />
                     <label
                         htmlFor="excel-upload"
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${loading
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${loading
                             ? 'bg-muted text-muted-foreground'
                             : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
                             }`}
                     >
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                        {loading ? 'Zpracovávám...' : 'Importovat z Excelu'}
+                        {loading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                        {loading ? 'Importuji...' : 'Import z Raynetu'}
                     </label>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                    Podporuje .xlsx exporty z Raynetu
-                </div>
+
+                {message && (
+                    <span className={`flex items-center gap-1 text-xs ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}>
+                        {message.type === 'success' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                        {message.text}
+                    </span>
+                )}
             </div>
 
-            {message && (
-                <div className={`p-3 rounded-md text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-destructive/10 text-destructive border border-destructive/20'
-                    }`}>
-                    {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-                    {message.text}
-                </div>
+            {lastImport && !message && (
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    {lastImport.count} záznamů | Poslední import: {lastImport.user} · {lastImport.date} · Excel: {lastImport.excelDate}
+                </span>
             )}
         </div>
     );
