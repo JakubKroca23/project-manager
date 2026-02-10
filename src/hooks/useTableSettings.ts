@@ -2,18 +2,20 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { SortingState, VisibilityState } from '@tanstack/react-table';
+import { SortingState, VisibilityState, ColumnSizingState } from '@tanstack/react-table';
 
 interface TableSettings {
     columnOrder: string[];
     columnVisibility: VisibilityState;
     sorting: SortingState;
+    columnSizing: ColumnSizingState;
 }
 
 const DEFAULT_SETTINGS: TableSettings = {
     columnOrder: [],
     columnVisibility: {},
     sorting: [],
+    columnSizing: {},
 };
 
 export function useTableSettings(tableId: string) {
@@ -34,7 +36,7 @@ export function useTableSettings(tableId: string) {
 
                 const { data, error } = await supabase
                     .from('user_table_settings')
-                    .select('column_order, column_visibility, sorting')
+                    .select('column_order, column_visibility, sorting, column_sizing')
                     .eq('user_id', user.id)
                     .eq('table_id', tableId)
                     .single();
@@ -44,6 +46,7 @@ export function useTableSettings(tableId: string) {
                         columnOrder: data.column_order || [],
                         columnVisibility: (data.column_visibility as VisibilityState) || {},
                         sorting: (data.sorting as SortingState) || [],
+                        columnSizing: (data.column_sizing as ColumnSizingState) || {},
                     };
                     setSettings(loaded);
                     settingsRef.current = loaded;
@@ -71,6 +74,7 @@ export function useTableSettings(tableId: string) {
                     column_order: newSettings.columnOrder,
                     column_visibility: newSettings.columnVisibility,
                     sorting: newSettings.sorting,
+                    column_sizing: newSettings.columnSizing,
                     updated_at: new Date().toISOString(),
                 }, { onConflict: 'user_id,table_id' });
         } catch (err) {
@@ -117,13 +121,19 @@ export function useTableSettings(tableId: string) {
         updateSettings({ sorting });
     }, [updateSettings]);
 
+    const setColumnSizing = useCallback((sizing: ColumnSizingState) => {
+        updateSettings({ columnSizing: sizing });
+    }, [updateSettings]);
+
     return {
         columnOrder: settings.columnOrder,
         columnVisibility: settings.columnVisibility,
         sorting: settings.sorting,
+        columnSizing: settings.columnSizing,
         setColumnOrder,
         setColumnVisibility,
         setSorting,
+        setColumnSizing,
         isLoaded,
     };
 }

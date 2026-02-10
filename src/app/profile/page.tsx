@@ -64,15 +64,15 @@ export default function ProfilePage() {
                                 {currentUserProfile.email.split('@')[0]}
                             </h2>
                             <p className="text-sm text-muted-foreground">{currentUserProfile.email}</p>
-                            <div className="flex flex-wrap gap-2 mt-1.5">
-                                <div className="flex items-center gap-2 text-[10px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded w-fit uppercase tracking-tight">
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-md w-fit uppercase tracking-widest border border-emerald-200 dark:border-transparent">
                                     <Shield size={10} />
                                     <span>Authenticated</span>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex items-center gap-2 text-[10px] font-semibold text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded w-fit uppercase tracking-tight">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-indigo-800 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md w-fit uppercase tracking-widest border border-indigo-200 dark:border-transparent">
                                         <Key size={10} />
-                                        <span>System Admin</span>
+                                        <span>Admin</span>
                                     </div>
                                 )}
                             </div>
@@ -116,7 +116,7 @@ export default function ProfilePage() {
                                                 </div>
                                             </div>
                                             {profile.email === 'jakub.kroca@contsystem.cz' && (
-                                                <span className="text-[10px] text-primary font-bold">Hlavní Admin</span>
+                                                <span className="text-[10px] text-primary font-bold">Admin</span>
                                             )}
                                             {(profile.access_requested || profile.password_reset_requested) && profile.last_request_at && (
                                                 <span className="text-[9px] text-muted-foreground flex items-center gap-1">

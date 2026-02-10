@@ -171,6 +171,8 @@ export default function ProjektyPage() {
                         onColumnVisibilityChange={tableSettings.setColumnVisibility}
                         sorting={tableSettings.sorting}
                         onSortingChange={tableSettings.setSorting}
+                        columnSizing={tableSettings.columnSizing}
+                        onColumnSizingChange={tableSettings.setColumnSizing}
                     />
                 )}
             </div>

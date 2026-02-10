@@ -12,6 +12,7 @@ import {
     SortingState,
     ColumnFiltersState,
     VisibilityState,
+    ColumnSizingState,
 } from '@tanstack/react-table';
 import { ArrowUpDown, Search, Maximize2 } from 'lucide-react';
 import { ColumnToggle } from './ColumnToggle';
@@ -68,9 +69,6 @@ function DraggableHeader({ header, children, isSorted }: { header: any; children
     );
 }
 
-// --- restrictToHorizontalAxis modifiers import workaround ---
-// We imported it above, but if not available we'll create inline
-
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
@@ -84,6 +82,8 @@ interface DataTableProps<TData, TValue> {
     onColumnVisibilityChange?: (visibility: VisibilityState) => void;
     sorting?: SortingState;
     onSortingChange?: (sorting: SortingState) => void;
+    columnSizing?: ColumnSizingState;
+    onColumnSizingChange?: (sizing: ColumnSizingState) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -98,17 +98,21 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange,
     sorting: externalSorting,
     onSortingChange,
+    columnSizing: externalColumnSizing,
+    onColumnSizingChange,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
     const [internalColumnOrder, setInternalColumnOrder] = React.useState<ColumnOrderState>([]);
+    const [internalColumnSizing, setInternalColumnSizing] = React.useState<ColumnSizingState>({});
 
     // Use external state if provided, otherwise internal
     const sorting = externalSorting ?? internalSorting;
     const columnVisibility = externalColumnVisibility ?? internalColumnVisibility;
     const columnOrder = externalColumnOrder ?? internalColumnOrder;
+    const columnSizing = externalColumnSizing ?? internalColumnSizing;
 
     const handleSortingChange = useCallback((updaterOrValue: SortingState | ((prev: SortingState) => SortingState)) => {
         const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(sorting) : updaterOrValue;
@@ -137,6 +141,15 @@ export function DataTable<TData, TValue>({
         }
     }, [columnOrder, onColumnOrderChange]);
 
+    const handleColumnSizingChange = useCallback((updaterOrValue: ColumnSizingState | ((prev: ColumnSizingState) => ColumnSizingState)) => {
+        const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(columnSizing) : updaterOrValue;
+        if (onColumnSizingChange) {
+            onColumnSizingChange(newValue);
+        } else {
+            setInternalColumnSizing(newValue);
+        }
+    }, [columnSizing, onColumnSizingChange]);
+
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
     const table = useReactTable({
@@ -150,11 +163,13 @@ export function DataTable<TData, TValue>({
         onColumnVisibilityChange: handleVisibilityChange as any,
         onRowSelectionChange: setRowSelection,
         onColumnOrderChange: handleColumnOrderChange as any,
+        onColumnSizingChange: handleColumnSizingChange as any,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
             columnOrder,
+            columnSizing,
             rowSelection,
         },
         columnResizeMode: 'onChange',
