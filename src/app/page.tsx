@@ -24,13 +24,13 @@ export default function TimelinePage() {
   return (
     <div className="dashboard-container">
       <header className="mb-6">
-        <h1>Timeline</h1>
-        <p>Vizuální přehled projektů v čase</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Timeline</h1>
+        <p className="text-muted-foreground">Vizuální přehled projektů v čase</p>
       </header>
 
-      <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl border border-dashed border-gray-300">
-        <p className="text-gray-500 font-medium">Timeline vizualizace se připravuje...</p>
-        <p className="text-sm text-gray-400 mt-2">
+      <div className="flex flex-col items-center justify-center h-64 bg-card/50 rounded-xl border border-dashed border-border text-center">
+        <p className="text-muted-foreground font-medium">Timeline vizualizace se připravuje...</p>
+        <p className="text-sm text-muted-foreground/70 mt-2">
           {isLoading ? 'Ověřuji připojení k databázi...' : `V databázi je ${projectCount} projektů.`}
         </p>
       </div>

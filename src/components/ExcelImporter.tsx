@@ -133,7 +133,7 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
     };
 
     return (
-        <div className="flex flex-col gap-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+        <div className="flex flex-col gap-4 p-4 border border-dashed border-border rounded-lg bg-muted/30">
             <div className="flex items-center gap-4">
                 <div className="relative">
                     <input
@@ -147,7 +147,7 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                     <label
                         htmlFor="excel-upload"
                         className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${loading
-                            ? 'bg-gray-200 text-gray-500'
+                            ? 'bg-muted text-muted-foreground'
                             : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
                             }`}
                     >
@@ -155,13 +155,13 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                         {loading ? 'Zpracovávám...' : 'Importovat z Excelu'}
                     </label>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                     Podporuje .xlsx exporty z Raynetu
                 </div>
             </div>
 
             {message && (
-                <div className={`p-3 rounded-md text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                <div className={`p-3 rounded-md text-sm flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-destructive/10 text-destructive border border-destructive/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
                     {message.text}
