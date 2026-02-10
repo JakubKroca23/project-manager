@@ -9,7 +9,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
 
 import { Project } from '@/types/project';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ImportInfo {
     date: string;
@@ -111,7 +111,10 @@ const columns: ColumnDef<Project>[] = [
 
 export default function ProjektyPage() {
     const [projects, setProjects] = useState<Project[]>([]);
-    const [activeTab, setActiveTab] = useState<'civil' | 'military'>('civil');
+    const searchParams = useSearchParams();
+    const typeParam = searchParams.get('type');
+    const activeTab = (typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military';
+
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
@@ -124,29 +127,36 @@ export default function ProjektyPage() {
         const { data, error } = await supabase
             .from('projects')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('updated_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching projects:', error);
         } else {
             setProjects(data || []);
 
-            // Find last database update
+            // Find last database update from projects
             if (data && data.length > 0) {
-                const latest = data.reduce((max: string, p: any) => {
-                    const current = p.updated_at || p.created_at;
-                    return current > max ? current : max;
-                }, data[0].updated_at || data[0].created_at);
-                setLastUpdate(new Date(latest).toLocaleString('cs-CZ'));
+                const latest = data[0]; // Ordered by updated_at desc
+                const date = new Date(latest.updated_at || latest.created_at).toLocaleString('cs-CZ');
+                setLastUpdate(`${date} (${latest.last_modified_by || 'Neznámý'})`);
             }
         }
 
-        // Load Last Import Info
-        const stored = localStorage.getItem('lastImportInfo');
-        if (stored) {
-            try {
-                setLastImport(JSON.parse(stored));
-            } catch { /* ignore */ }
+        // Load Global Import Metadata from DB
+        const { data: metaData } = await supabase
+            .from('app_metadata')
+            .select('*')
+            .eq('key', 'last_import_info')
+            .single();
+
+        if (metaData?.value) {
+            setLastImport(metaData.value as ImportInfo);
+        } else {
+            // Fallback to localStorage if DB is empty
+            const stored = localStorage.getItem('lastImportInfo');
+            if (stored) {
+                try { setLastImport(JSON.parse(stored)); } catch { /* ignore */ }
+            }
         }
 
         setIsLoading(false);
@@ -171,85 +181,54 @@ export default function ProjektyPage() {
 
     return (
         <div className="h-full flex flex-col pt-2 bg-background">
-            {/* Header Content Section */}
-            <div className="px-6 mb-6 space-y-6">
-                {/* 1. Tabs */}
-                <div className="flex items-center gap-1 p-1 bg-muted/40 rounded-2xl border border-border/50 self-start">
-                    <button
-                        onClick={() => setActiveTab('civil')}
-                        className={`px-8 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeTab === 'civil'
-                            ? 'bg-card text-foreground shadow-lg shadow-black/5 ring-1 ring-border border-transparent scale-[1.02]'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                            }`}
-                    >
-                        Civilní Projekty
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('military')}
-                        className={`px-8 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeTab === 'military'
-                            ? 'bg-card text-indigo-500 shadow-lg shadow-indigo-600/5 ring-1 ring-indigo-500/20 scale-[1.02]'
-                            : 'text-muted-foreground hover:text-indigo-500 hover:bg-muted/30'
-                            }`}
-                    >
-                        Armádní Projekty
-                    </button>
-                </div>
-
-                {/* 2. Search & Filter Bar */}
-                <div className="space-y-4">
-                    <div className="relative max-w-2xl group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Hledat napříč všemi projekty a sloupci..."
-                            className="w-full h-12 pl-12 pr-6 bg-muted/30 border border-border rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary text-sm font-medium transition-all shadow-inner"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    {/* 3. Metadata Row */}
-                    <div className="flex flex-wrap items-center gap-6 px-2">
-                        <MetadataItem
-                            icon={<Database size={14} />}
-                            label="Počet projektů"
-                            value={`${filteredProjects.length}`}
-                        />
-                        <MetadataItem
-                            icon={<RefreshCcw size={14} />}
-                            label="Poslední aktualizace"
-                            value={lastUpdate}
-                        />
-                        {lastImport && (
-                            <>
-                                <MetadataItem
-                                    icon={<History size={14} />}
-                                    label="Poslední import"
-                                    value={lastImport.date}
-                                />
-                                <MetadataItem
-                                    icon={<FileSpreadsheet size={14} />}
-                                    label="Data Excelu"
-                                    value={lastImport.excelDate}
-                                />
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-hidden flex flex-col px-4">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64 text-muted-foreground">
                         <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="animate-spin text-primary" size={32} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Načítám data ze systému...</span>
+                            <Loader2 className="animate-spin text-primary" size={24} />
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Načítám prostředí...</span>
                         </div>
                     </div>
                 ) : (
                     <DataTable
                         columns={columns}
                         data={filteredProjects}
+                        leftToolbar={
+                            <div className="flex items-center gap-6 w-full">
+                                {/* Search component inside the unified row */}
+                                <div className="relative group max-w-sm flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={14} />
+                                    <input
+                                        type="text"
+                                        placeholder="Hledat..."
+                                        className="w-full h-9 pl-9 pr-4 bg-muted/20 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-xs font-medium transition-all"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Enhanced Metadata */}
+                                <div className="flex items-center gap-6">
+                                    <MetadataItem
+                                        icon={<Database size={13} />}
+                                        label="Počet"
+                                        value={`${filteredProjects.length}`}
+                                    />
+                                    <MetadataItem
+                                        icon={<RefreshCcw size={13} />}
+                                        label="Poslední úprava"
+                                        value={lastUpdate}
+                                    />
+                                    {lastImport && (
+                                        <MetadataItem
+                                            icon={<History size={13} />}
+                                            label="Poslední import"
+                                            value={`${lastImport.date} (${lastImport.user})`}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        }
                         toolbar={<ExcelImporter onImportSuccess={fetchProjects} />}
                         onRowClick={(row) => router.push(`/projekty/${row.id}`)}
                         searchValue={searchTerm}

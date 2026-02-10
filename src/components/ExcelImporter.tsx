@@ -182,6 +182,9 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
 
         setLoading(true);
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const userName = user?.email?.split('@')[0] || 'Neznámý';
+
             const projects = rawData.map((item: any) => {
                 const project: any = {
                     id: item[mapping['id']]?.toString(),
@@ -203,6 +206,7 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                     serial_number: cleanNaN(item[mapping['serial_number']]),
                     project_type: projectType,
                     custom_fields: {},
+                    last_modified_by: userName,
                     created_at: new Date().toISOString()
                 };
 
@@ -231,14 +235,21 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             localStorage.setItem(`excel_mapping_${importSource}`, JSON.stringify(mapping));
 
             // Import Info
-            const { data: { user } } = await supabase.auth.getUser();
             const excelFileDate = currentFile ? new Date(currentFile.lastModified).toLocaleDateString('cs-CZ') : '-';
             const importInfo: ImportInfo = {
                 date: new Date().toLocaleString('cs-CZ'),
-                user: user?.email?.split('@')[0] || 'Neznámý',
+                user: userName,
                 count: projects.length,
                 excelDate: excelFileDate,
             };
+
+            // Update Global Metadata in DB
+            await supabase.from('app_metadata').upsert({
+                key: 'last_import_info',
+                value: importInfo,
+                updated_at: new Date().toISOString()
+            });
+
             localStorage.setItem('lastImportInfo', JSON.stringify(importInfo));
             setLastImport(importInfo);
 
@@ -288,13 +299,6 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
                     </span>
                 )}
             </div>
-
-            {lastImport && !message && (
-                <div className="flex items-center gap-2 text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
-                    <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold">{lastImport.count} PROJEKTŮ</span>
-                    <span>Poslední: {lastImport.user} · {lastImport.date}</span>
-                </div>
-            )}
 
             {/* Source Selection Modal */}
             {showSourceSelect && (

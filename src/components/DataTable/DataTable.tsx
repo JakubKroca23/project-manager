@@ -73,6 +73,7 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     toolbar?: React.ReactNode;
+    leftToolbar?: React.ReactNode;
     searchValue?: string;
     onSearchChange?: (value: string) => void;
     // Settings props
@@ -91,6 +92,7 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     toolbar,
+    leftToolbar,
     searchValue,
     onSearchChange,
     columnOrder: externalColumnOrder,
@@ -238,8 +240,13 @@ export function DataTable<TData, TValue>({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-shrink-0 pb-3">
-                <div className="flex flex-wrap items-center justify-end gap-2 px-1">
-                    {/* Far Right Action Group */}
+                <div className="flex flex-wrap items-center justify-between gap-4 px-1">
+                    {/* Left: Search + Metadata */}
+                    <div className="flex-1 flex items-center gap-4">
+                        {leftToolbar}
+                    </div>
+
+                    {/* Right: Action Group */}
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleAutoFit}
