@@ -53,11 +53,36 @@ export default function ExcelImporter({ onImportSuccess }: { onImportSuccess: ()
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data);
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-            if (jsonData.length === 0) {
+            // Convert to array of arrays to find the header row
+            const jsonArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+
+            if (jsonArray.length === 0) {
                 throw new Error('Soubor neobsahuje žádná data.');
             }
+
+            // Find header row index
+            let headerRowIndex = -1;
+            for (let i = 0; i < Math.min(jsonArray.length, 20); i++) {
+                const row = jsonArray[i];
+                // Check if row contains "Kód" or "Code" (case insensitive)
+                if (row.some((cell: any) => cell && typeof cell === 'string' && (cell.toLowerCase().includes('kód') || cell.toLowerCase().includes('code')))) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            if (headerRowIndex === -1) {
+                // Fallback to 0 if not found, but log it
+                console.warn('Header row not found, using first row.');
+                headerRowIndex = 0;
+            }
+
+            // Re-parse using the found header row
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
+
+            console.log('Detected Header Row Index:', headerRowIndex);
+            console.log('First row of data:', jsonData[0]);
 
             const projects = jsonData.map((item: any) => ({
                 id: getVal(item, "Kód")?.toString(),
