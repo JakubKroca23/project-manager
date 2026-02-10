@@ -16,6 +16,7 @@ export interface GanttTask {
     // Custom fields
     customer?: string;
     phase?: 'preparation' | 'assembly' | 'final' | 'delayed' | 'completed';
+    projectId?: string; // New field for grouping
 }
 
 /**
@@ -115,8 +116,87 @@ export const projectToGanttTask = (project: Project): GanttTask | null => {
 /**
  * Převod pole projektů na GanttTask[]
  */
+/**
+ * Převod pole projektů na GanttTask[] - Multiple tasks per project
+ */
 export const projectsToGanttTasks = (projects: Project[]): GanttTask[] => {
-    return projects
-        .map(projectToGanttTask)
-        .filter((task): task is GanttTask => task !== null);
+    return projects.flatMap(project => {
+        const closedAt = parseCzechDate(project.closed_at);
+        const chassisDelivery = parseCzechDate(project.chassis_delivery);
+        const bodyDelivery = parseCzechDate(project.body_delivery);
+        const customerHandover = parseCzechDate(project.customer_handover);
+        const today = new Date();
+
+        const tasks: GanttTask[] = [];
+
+        // Helper to add task
+        const addTask = (start: Date, end: Date, phase: GanttTask['phase'], text: string) => {
+            // Ensure start <= end
+            if (start > end) {
+                const temp = start;
+                start = end;
+                end = temp;
+            }
+            // Ensure at least 1 day duration
+            if (start.getTime() === end.getTime()) {
+                end = new Date(start);
+                end.setDate(end.getDate() + 1);
+            }
+
+            tasks.push({
+                id: `${project.id}-${phase}-${Math.random().toString(36).substr(2, 5)}`, // Unique ID for each segment
+                projectId: String(project.id), // Group by Project ID
+                text: text,
+                start,
+                end,
+                progress: 0,
+                type: 'task',
+                customer: project.customer,
+                phase,
+                details: `${project.customer} | ${project.id}`
+            });
+        };
+
+        const lastMain = chassisDelivery && bodyDelivery
+            ? new Date(Math.max(chassisDelivery.getTime(), bodyDelivery.getTime()))
+            : (chassisDelivery || bodyDelivery);
+
+        // 1. Preparation (Start -> Max(Chassis, Body))
+        // Since we don't have a specific "Project Start Date", we might default to 14 days beore lastMain or something similar?
+        // For now, let's use a default preparation window if lastMain exists.
+
+        // Actually, let's mimick the Logic from page.tsx (Timeline)
+        // Green: Closed -> Max(Body, Chassis)
+        if (closedAt && lastMain && closedAt < lastMain) {
+            addTask(closedAt, lastMain, 'preparation', 'Příprava');
+        }
+
+        // Yellow: Max(Body, Chassis) -> +14 days
+        if (lastMain) {
+            const dP14 = new Date(lastMain);
+            dP14.setDate(dP14.getDate() + 14);
+            addTask(lastMain, dP14, 'assembly', 'Montáž');
+
+            // Orange: +14 -> +21 days
+            const dP21 = new Date(dP14);
+            dP21.setDate(dP21.getDate() + 7);
+            addTask(dP14, dP21, 'final', 'Finále');
+
+            // Red: +21 -> Handover (or Today if no handover)
+            const gridEndDate = customerHandover || today;
+            if (dP21 < gridEndDate) {
+                addTask(dP21, gridEndDate, 'delayed', 'Zpoždění');
+            }
+        }
+
+        // Purple: Handover -> Today (if delivered)
+        if (customerHandover && customerHandover < today) {
+            // Just a milestone or a short bar? Let's make it a 'completed' bar from handover to today/handover+1
+            const completedEnd = new Date(customerHandover);
+            completedEnd.setDate(completedEnd.getDate() + 2); // Show 2 days bar
+            addTask(customerHandover, completedEnd, 'completed', 'Předáno');
+        }
+
+        return tasks;
+    });
 };
