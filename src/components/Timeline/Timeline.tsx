@@ -20,6 +20,38 @@ const parseDate = (dateStr: string | undefined): Date | null => {
     return isNaN(d.getTime()) ? null : d;
 };
 
+interface IColorConfig {
+    color: string;
+    opacity: number;
+    label: string;
+}
+
+interface IColorsState {
+    phaseInitial: IColorConfig;
+    phaseMounting: IColorConfig;
+    phaseBufferYellow: IColorConfig;
+    phaseBufferOrange: IColorConfig;
+    phaseService: IColorConfig;
+    milestoneChassis: IColorConfig;
+    milestoneBody: IColorConfig;
+    milestoneHandover: IColorConfig;
+    milestoneDeadline: IColorConfig;
+    milestoneServiceStart: IColorConfig;
+    milestoneServiceEnd: IColorConfig;
+}
+
+interface IOutlineState {
+    enabled: boolean;
+    width: number;
+    color: string;
+    opacity: number;
+}
+
+interface IServiceLanesResult {
+    lanes: Project[][];
+    serviceMap: Map<string, { lane: number }>;
+}
+
 const Timeline: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -31,7 +63,7 @@ const Timeline: React.FC = () => {
 
     // Color Configuration State
     const [showColorEditor, setShowColorEditor] = useState(false);
-    const [colors, setColors] = useState({
+    const [colors, setColors] = useState<IColorsState>({
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení' },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
@@ -45,7 +77,7 @@ const Timeline: React.FC = () => {
         milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu' },
     });
 
-    const [outline, setOutline] = useState({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
+    const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
 
     const hexToRgba = (hex: string, alpha: number) => {
         const r = parseInt(hex.slice(1, 3), 16);
@@ -274,7 +306,7 @@ const Timeline: React.FC = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 const delta = e.deltaY > 0 ? -2 : 2;
-                setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
+                setRowHeight((prev: number) => Math.min(Math.max(prev + delta, 22), 80));
                 return;
             }
 
@@ -365,24 +397,24 @@ const Timeline: React.FC = () => {
         return dates.length > 0 ? Math.max(...dates) : 0;
     };
 
-    const filteredProjects = useMemo(() => {
+    const filteredProjects = useMemo((): Project[] => {
         let filtered = projects;
         if (typeFilter !== 'all') {
-            filtered = filtered.filter(p => p.project_type === typeFilter);
+            filtered = filtered.filter((p: Project) => p.project_type === typeFilter);
         }
         const query = searchQuery.toLowerCase().trim();
         if (query) {
             const terms = query.split(/\s+/);
-            filtered = filtered.filter(p => {
+            filtered = filtered.filter((p: Project) => {
                 const name = p.name?.toLowerCase() || '';
                 const customer = p.customer?.toLowerCase() || '';
                 const searchStr = `${name} ${customer}`;
-                return terms.every(term => searchStr.includes(term));
+                return terms.every((term: string) => searchStr.includes(term));
             });
         }
 
         // Řazení: Nejdále v budoucnosti nahoře
-        return filtered.sort((a, b) => {
+        return filtered.sort((a: Project, b: Project) => {
             const dateA = getLatestMilestoneDate(a);
             const dateB = getLatestMilestoneDate(b);
             return dateB - dateA;
@@ -390,18 +422,18 @@ const Timeline: React.FC = () => {
     }, [projects, searchQuery, typeFilter]);
 
     // Výpočet "pruhů" pro servisní výjezdy k automatickému rozbalení při překryvu
-    const serviceLanes = useMemo(() => {
-        const services = filteredProjects.filter(p => p.project_type === 'service');
-        const sorted = [...services].sort((a, b) => {
+    const serviceLanes = useMemo((): IServiceLanesResult => {
+        const services = filteredProjects.filter((p: Project) => p.project_type === 'service');
+        const sorted = [...services].sort((a: Project, b: Project) => {
             const startA = parseDate(a.deadline)?.getTime() || 0;
             const startB = parseDate(b.deadline)?.getTime() || 0;
             return startA - startB;
         });
 
-        const lanes: any[][] = [];
+        const lanes: Project[][] = [];
         const serviceMap = new Map<string, { lane: number }>();
 
-        sorted.forEach(service => {
+        sorted.forEach((service: Project) => {
             const start = parseDate(service.deadline)?.getTime() || 0;
             let end = parseDate(service.customer_handover)?.getTime();
             if (start && !end) {
@@ -475,16 +507,16 @@ const Timeline: React.FC = () => {
                             placeholder="Hledat..."
                             className="search-input"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         />
                     </div>
 
                     <div className="type-filters flex items-center gap-1 ml-4 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        {['all', 'civil', 'military'].map((type) => (
+                        {['all', 'civil', 'military'].map((type: string) => (
                             <button
                                 key={type}
                                 className={`filter-btn ${typeFilter === type ? 'active' : ''}`}
-                                onClick={() => setTypeFilter(type as any)}
+                                onClick={() => setTypeFilter(type as 'all' | 'civil' | 'military')}
                             >
                                 {type === 'all' ? 'Vše' : type === 'civil' ? 'Civilní' : 'Armáda'}
                             </button>
@@ -543,7 +575,13 @@ const Timeline: React.FC = () => {
                                                 <input
                                                     type="color"
                                                     value={config.color}
-                                                    onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], color: e.target.value } }))}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                        const newVal = e.target.value;
+                                                        setColors((prev: IColorsState) => ({
+                                                            ...prev,
+                                                            [key]: { ...config, color: newVal }
+                                                        }));
+                                                    }}
                                                     className="w-6 h-6 rounded cursor-pointer border-0 p-0"
                                                 />
                                             </div>
@@ -555,7 +593,13 @@ const Timeline: React.FC = () => {
                                                     max="1"
                                                     step="0.05"
                                                     value={config.opacity}
-                                                    onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], opacity: parseFloat(e.target.value) } }))}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                        const newVal = parseFloat(e.target.value);
+                                                        setColors((prev: IColorsState) => ({
+                                                            ...prev,
+                                                            [key]: { ...config, opacity: newVal }
+                                                        }));
+                                                    }}
                                                     className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
                                                 />
                                                 <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>

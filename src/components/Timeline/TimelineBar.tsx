@@ -1,11 +1,26 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { Project } from '@/types/project';
 
-interface TimelineBarProps {
+interface IPhase {
+    key: string;
+    start: Date;
+    end: Date;
+    class: string;
+}
+
+interface IMilestone {
+    key: string;
+    date: Date;
+    label: string;
+    class: string;
+}
+
+interface ITimelineBarProps {
     id: string;
     name: string;
-    project: any;
+    project: Project;
     status: string | undefined;
     startDate: Date;
     endDate: Date;
@@ -22,7 +37,11 @@ const parseDate = (dateStr: string | undefined): Date | null => {
     return isNaN(d.getTime()) ? null : d;
 };
 
-const TimelineBar: React.FC<TimelineBarProps> = ({
+/**
+ * Komponenta pro vykreslení jednoho řádku (projektu/servisu) v časové ose.
+ * Zobrazuje fáze jako barevné plochy a milníky jako body.
+ */
+const TimelineBar: React.FC<ITimelineBarProps> = ({
     id,
     name,
     project,
@@ -30,7 +49,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
     dayWidth,
     topOffset = 0,
     isService = false
-}) => {
+}: ITimelineBarProps) => {
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
@@ -39,32 +58,32 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
     const t_deadline = parseDate(project.deadline);
 
     // 1. Milníky (body v čase)
-    const groupedMilestones = useMemo(() => {
+    const groupedMilestones = useMemo((): Record<string, IMilestone[]> => {
         if (project.project_type === 'service') {
-            const raw = [
-                { key: 'service_start', date: t_deadline, label: 'Zahájení servisu', class: 'service-start' },
-                { key: 'service_end', date: t_handover, label: 'Ukončení servisu', class: 'service-end' },
+            const raw: IMilestone[] = [
+                { key: 'service_start', date: t_deadline!, label: 'Zahájení servisu', class: 'service-start' },
+                { key: 'service_end', date: t_handover!, label: 'Ukončení servisu', class: 'service-end' },
             ].filter(m => m.date !== null);
 
-            const groups: Record<string, any> = {};
+            const groups: Record<string, IMilestone[]> = {};
             raw.forEach(m => {
-                const dateKey = m.date!.toISOString().split('T')[0];
+                const dateKey = m.date.toISOString().split('T')[0];
                 if (!groups[dateKey]) groups[dateKey] = [];
                 groups[dateKey].push(m);
             });
             return groups;
         }
 
-        const raw = [
-            { key: 'chassis', date: t_chassis, label: 'Podvozek', class: 'chassis' },
-            { key: 'body', date: t_body, label: 'Nástavba', class: 'body' },
-            { key: 'handover', date: t_handover, label: 'Předání', class: 'handover' },
-            { key: 'deadline', date: t_deadline, label: 'Deadline', class: 'deadline' },
+        const raw: IMilestone[] = [
+            { key: 'chassis', date: t_chassis!, label: 'Podvozek', class: 'chassis' },
+            { key: 'body', date: t_body!, label: 'Nástavba', class: 'body' },
+            { key: 'handover', date: t_handover!, label: 'Předání', class: 'handover' },
+            { key: 'deadline', date: t_deadline!, label: 'Deadline', class: 'deadline' },
         ].filter(m => m.date !== null);
 
-        const groups: Record<string, any> = {};
+        const groups: Record<string, IMilestone[]> = {};
         raw.forEach(m => {
-            const dateKey = m.date!.toISOString().split('T')[0];
+            const dateKey = m.date.toISOString().split('T')[0];
             if (!groups[dateKey]) groups[dateKey] = [];
             groups[dateKey].push(m);
         });
@@ -72,7 +91,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
     }, [t_chassis, t_body, t_handover, t_deadline, project.project_type]);
 
     // 2. Fáze (plochy v čase)
-    const phases = useMemo(() => {
+    const phases = useMemo((): IPhase[] => {
         if (project.project_type === 'service') {
             const start = t_deadline;
             let end = t_handover;
@@ -89,7 +108,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
             return [];
         }
 
-        const list: { key: string; start: Date; end: Date; class: string }[] = [];
+        const list: IPhase[] = [];
         const mDates = [t_chassis, t_body, t_handover, t_deadline].filter((d): d is Date => d !== null);
 
         // Fáze 1: Zahájení (vlastní start -> první milník)
@@ -127,9 +146,12 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
 
 
         return list;
-    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type]);
+    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type, t_deadline, t_handover]);
 
-    const getDatePos = (date: Date) => {
+    /**
+     * Vypočítá vodorovnou pozici data v pixelech vzhledem k začátku časové osy.
+     */
+    const getDatePos = (date: Date): number => {
         const diff = (date.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
         return diff * dayWidth;
     };
@@ -143,7 +165,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
     return (
         <div className="milestones-container" style={containerStyle}>
             {/* Vykreslení fází (podklad) */}
-            {phases.map(p => {
+            {phases.map((p: IPhase) => {
                 const left = getDatePos(p.start);
                 const right = getDatePos(p.end);
                 const width = right - left;
@@ -160,7 +182,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
             })}
 
             {/* Vykreslení milníků (body) */}
-            {Object.entries(groupedMilestones).map(([dateKey, ms]) => {
+            {(Object.entries(groupedMilestones) as [string, IMilestone[]][]).map(([dateKey, ms]) => {
                 const date = new Date(dateKey);
                 const mLeft = getDatePos(date);
 
@@ -173,11 +195,11 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
                             width: dayWidth
                         }}
                     >
-                        {ms.map((m) => (
+                        {ms.map((m: IMilestone) => (
                             <div
                                 key={m.key}
                                 className={`milestone-part ${m.class}`}
-                                title={`${m.label}: ${m.date!.toLocaleDateString('cs-CZ')}`}
+                                title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
                             />
                         ))}
                     </div>
