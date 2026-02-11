@@ -379,12 +379,21 @@
 /* LEGEND STYLES */
 .timeline-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  background: var(--muted)/30;
-  border-bottom: 1px solid var(--border);
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  padding: 0;
+  background: transparent;
+  border-bottom: none;
   font-size: 0.7rem;
+  margin-left: 2rem;
+  flex: 1;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none; /* hide scrollbar for cleaner look */
+}
+
+.timeline-legend::-webkit-scrollbar {
+  display: none;
 }
 
 .legend-group {

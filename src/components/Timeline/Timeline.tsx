@@ -301,6 +301,23 @@ const Timeline: React.FC = () => {
                     </div>
                 </div>
 
+                <div className="timeline-legend">
+                    <div className="legend-group">
+                        <span className="legend-group-title">Milníky:</span>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#f97316' }}></div> Podvozek</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#a855f7' }}></div> Nástavba</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#3b82f6' }}></div> Předání</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#ef4444' }}></div> Deadline</div>
+                    </div>
+                    <div className="legend-group">
+                        <span className="legend-group-title">Fáze:</span>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(186, 230, 253, 0.6)' }}></div> Zahájení</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(74, 222, 128, 0.55)' }}></div> Příprava</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(250, 204, 21, 0.7)' }}></div> Montáž</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(251, 146, 60, 0.75)' }}></div> Revize</div>
+                    </div>
+                </div>
+
                 <div className="header-right flex items-center gap-4">
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
@@ -331,23 +348,6 @@ const Timeline: React.FC = () => {
                     </button>
                 </div>
             </header>
-
-            <div className="timeline-legend">
-                <div className="legend-group">
-                    <span className="legend-group-title">Milníky:</span>
-                    <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#f97316' }}></div> Podvozek</div>
-                    <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#a855f7' }}></div> Nástavba</div>
-                    <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#3b82f6' }}></div> Předání</div>
-                    <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#ef4444' }}></div> Deadline</div>
-                </div>
-                <div className="legend-group">
-                    <span className="legend-group-title">Fáze:</span>
-                    <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(186, 230, 253, 0.6)' }}></div> Zahájení</div>
-                    <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(74, 222, 128, 0.55)' }}></div> Příprava</div>
-                    <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(250, 204, 21, 0.7)' }}></div> Montáž</div>
-                    <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(251, 146, 60, 0.75)' }}></div> Revize</div>
-                </div>
-            </div>
 
             <div
                 className="timeline-scroll-wrapper"
