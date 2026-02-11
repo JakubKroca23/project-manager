@@ -10,7 +10,7 @@ import Image from 'next/image';
 const ContSystemLogo = ({ className }: { className?: string }) => (
     <div className={`relative ${className}`}>
         <Image
-            src="../public/contsystem-logo.png"
+            src="/contsystem-logo.png"
             alt="ContSystem Logo"
             width={400}
             height={100}
