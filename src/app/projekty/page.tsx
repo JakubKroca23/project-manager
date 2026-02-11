@@ -334,6 +334,12 @@ export default function ProjektyPage() {
                         columnSizing={tableSettings.columnSizing}
                         onColumnSizingChange={tableSettings.setColumnSizing}
                         headerClassName={activeTab === 'military' ? 'bg-emerald-100 text-emerald-900' : 'bg-blue-100 text-blue-900'}
+                        getRowClassName={(row: Project) => {
+                            if (row.project_type === 'military') return 'bg-emerald-500/5 hover:bg-emerald-500/10 active:bg-emerald-500/20';
+                            if (row.project_type === 'service') return 'bg-purple-500/5 hover:bg-purple-500/10 active:bg-purple-500/20';
+                            if (row.project_type === 'civil') return 'bg-blue-500/5 hover:bg-blue-500/10 active:bg-blue-500/20';
+                            return '';
+                        }}
                     />
                 )}
             </div>

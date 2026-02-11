@@ -88,6 +88,7 @@ interface DataTableProps<TData, TValue> {
     onRowClick?: (row: TData) => void;
     headerClassName?: string;
     toolbarSubtext?: React.ReactNode;
+    getRowClassName?: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -108,6 +109,7 @@ export function DataTable<TData, TValue>({
     onRowClick,
     headerClassName,
     toolbarSubtext,
+    getRowClassName,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -352,7 +354,7 @@ export function DataTable<TData, TValue>({
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
                                             onClick={() => onRowClick?.(row.original)}
-                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted`}
+                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted ${getRowClassName?.(row.original) || ''}`}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <td

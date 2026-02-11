@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Settings } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { ThemeToggle } from './ThemeToggle';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const navItems = [
     { name: 'TIMELINE', icon: Calendar, href: '/', color: '#bae6fd' },
@@ -44,15 +45,16 @@ const Navbar = () => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const typeParam = searchParams.get('type');
-    const [userEmail, setUserEmail] = useState<string | null>(null);
     const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
     const router = useRouter();
 
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
 
-    const [userProfile, setUserProfile] = useState<any>(null);
     const [inferredType, setInferredType] = useState<string | null>(null);
+    const { permissions, checkPerm } = usePermissions();
+
+    const userEmail = permissions?.email || null;
 
     // Determine current active category label
     const activeType = typeParam || inferredType;
@@ -86,25 +88,6 @@ const Navbar = () => {
     }, [pathname]);
 
     useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user?.email) {
-                setUserEmail(user.email);
-
-                // Fetch full profile for permissions
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile) {
-                    setUserProfile(profile);
-                }
-            }
-        };
-        getUser();
-
         // Update time and date
         const updateDateTime = () => {
             const now = new Date();
@@ -128,18 +111,6 @@ const Navbar = () => {
         await supabase.auth.signOut();
         // Force a hard redirect to login and clear router cache
         window.location.href = '/login';
-    };
-
-    // Helper function to check permissions
-    const checkPerm = (key: string) => {
-        // Always allow if no profile loaded yet (prevent flickering) or if admin
-        if (!userProfile) return true;
-        if (userEmail === 'jakub.kroca@contsystem.cz') return true;
-
-        const perms = userProfile.permissions || {};
-        // Default to true if permissions column doesn't exist yet/is null, 
-        // essentially allow everything unless explicitly set to false
-        return perms[key] !== false;
     };
 
     // Filter nav items based on permissions

@@ -153,6 +153,10 @@ export default function ProjectDetailPage() {
     }
 
     const isMilitary = project.project_type === 'military';
+    const isService = project.project_type === 'service';
+    const isCivil = project.project_type === 'civil';
+    const typeColor = isMilitary ? '#a5d6a7' : isService ? '#ce93d8' : isCivil ? '#90caf9' : '#94a3b8';
+
     const p = isEditing ? editedProject! : project;
 
     const formatDate = (date: string | null | undefined) => {
@@ -164,8 +168,16 @@ export default function ProjectDetailPage() {
         <div className="h-full overflow-y-auto bg-background text-foreground">
             {/* ── Sticky Top Bar ── */}
             <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50">
+                <div
+                    className="absolute top-0 left-0 right-0 h-[3px] transition-colors duration-500"
+                    style={{ backgroundColor: typeColor, boxShadow: `0 0 10px ${typeColor}44` }}
+                />
                 <div className="max-w-[1400px] mx-auto px-4 h-11 flex items-center justify-between">
-                    <button onClick={() => router.push('/projekty')} className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                    <button
+                        onClick={() => router.push('/projekty')}
+                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
+                        style={{ color: typeColor }}
+                    >
                         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                         Zpět
                     </button>
@@ -200,10 +212,10 @@ export default function ProjectDetailPage() {
                     <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
-                                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                    : p.project_type === 'service'
-                                        ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                                        : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                : p.project_type === 'service'
+                                    ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                                    : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 }`}>
                                 {p.project_type === 'military' ? 'Armáda' : p.project_type === 'service' ? 'Servis' : 'Civil'}
                             </span>

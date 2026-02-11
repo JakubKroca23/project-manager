@@ -14,6 +14,7 @@ export default function ProfilePage() {
     const { theme, setTheme } = useTheme();
     const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, resetPasswordRequest, processUserRequest } = useAdmin();
     const [showSettings, setShowSettings] = useState(false);
+    const [showAdminPanel, setShowAdminPanel] = useState(false);
     const [notifications, setNotifications] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('notifications_enabled') !== 'false';
@@ -189,6 +190,15 @@ export default function ProfilePage() {
                                 <Settings size={14} />
                                 <span>Nastavení</span>
                             </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowAdminPanel(true)}
+                                    className="flex items-center justify-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all font-bold text-[11px] active:scale-[0.98] uppercase tracking-wider shadow-md shadow-indigo-600/20"
+                                >
+                                    <Shield size={14} />
+                                    <span>Admin Panel</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -222,146 +232,6 @@ export default function ProfilePage() {
 
                             {/* Modal Body - Scrollable */}
                             <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                                {/* --- ADMIN SECTION --- */}
-                                {isAdmin && (
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-widest">
-                                                <Users size={16} className="text-primary" />
-                                                <span>Správa registrovaných uživatelů</span>
-                                            </div>
-                                            <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">ADMIN PANEL</span>
-                                        </div>
-
-                                        {/* --- GUEST REQUESTS (NEW) --- */}
-                                        {userRequests.length > 0 && (
-                                            <div className="space-y-4 pb-4">
-                                                <div className="flex items-center gap-2 text-[11px] font-bold text-amber-500 uppercase tracking-widest animate-pulse">
-                                                    <UserPlus size={14} />
-                                                    <span>Nové žádosti (Hosté)</span>
-                                                </div>
-
-                                                <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-amber-500/5 backdrop-blur-md border-amber-500/20">
-                                                    {userRequests.map((request) => (
-                                                        <div key={request.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-amber-500/10 transition-colors">
-                                                            <div className="flex flex-col gap-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-sm font-bold text-foreground">{request.email}</span>
-                                                                    <span className={cn(
-                                                                        "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase",
-                                                                        request.request_type === 'access' ? "bg-amber-500 text-white" : "bg-blue-500 text-white"
-                                                                    )}>
-                                                                        {request.request_type === 'access' ? 'Žádost o přístup' : 'Zapomenuté heslo'}
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-medium">
-                                                                    <Clock size={10} />
-                                                                    {new Date(request.created_at).toLocaleString('cs-CZ')}
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        if (request.request_type === 'access') {
-                                                                            openApproveModal(request);
-                                                                        } else {
-                                                                            processUserRequest(request.id, 'processed');
-                                                                        }
-                                                                    }}
-                                                                    className="text-[10px] font-bold text-emerald-500 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20"
-                                                                >
-                                                                    <CheckCircle size={10} />
-                                                                    {request.request_type === 'access' ? 'Schválit' : 'Vyřízeno'}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => processUserRequest(request.id, 'rejected')}
-                                                                    className="text-[10px] font-bold text-red-500 hover:text-white bg-red-500/10 hover:bg-red-500 px-3 py-1.5 rounded-xl transition-all"
-                                                                >
-                                                                    Smazat
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-muted/10 backdrop-blur-md">
-                                            {profiles.length > 0 ? (
-                                                profiles.map((profile) => (
-                                                    <div key={profile.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors ${(profile.access_requested || profile.password_reset_requested) ? 'bg-amber-500/5 border-l-4 border-l-amber-500' : ''}`}>
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <span className="text-sm font-bold text-foreground truncate max-w-[250px]">
-                                                                    {profile.email}
-                                                                </span>
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {profile.access_requested && (
-                                                                        <span className="flex items-center gap-1 text-[9px] font-bold text-white bg-amber-600 px-2 py-0.5 rounded-full uppercase animate-pulse shadow-sm">
-                                                                            <AlertTriangle size={10} />
-                                                                            <span>Žádá o přístup</span>
-                                                                        </span>
-                                                                    )}
-                                                                    {profile.password_reset_requested && (
-                                                                        <span className="flex items-center gap-1 text-[9px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full uppercase animate-pulse shadow-sm">
-                                                                            <KeyRound size={10} />
-                                                                            <span>Reset hesla</span>
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            {profile.email === 'jakub.kroca@contsystem.cz' && (
-                                                                <span className="text-[10px] text-primary font-bold bg-primary/10 w-fit px-1.5 py-0.5 rounded">HLAVNÍ ADMIN</span>
-                                                            )}
-                                                            {(profile.access_requested || profile.password_reset_requested) && profile.last_request_at && (
-                                                                <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-medium">
-                                                                    <Clock size={10} />
-                                                                    {new Date(profile.last_request_at).toLocaleString('cs-CZ')}
-                                                                </span>
-                                                            )}
-                                                        </div>
-
-                                                        <div className="flex items-center gap-6 justify-between sm:justify-end">
-                                                            {profile.password_reset_requested && (
-                                                                <button
-                                                                    onClick={() => resetPasswordRequest(profile.id)}
-                                                                    className="text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-600/10 hover:bg-blue-600/20 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-blue-600/20"
-                                                                >
-                                                                    <CheckCircle size={10} />
-                                                                    Odbavit reset
-                                                                </button>
-                                                            )}
-
-                                                            <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
-                                                                <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-tighter">Povolit import</span>
-                                                                <button
-                                                                    onClick={() => updatePermission(profile.id, !profile.can_import)}
-                                                                    disabled={profile.email === 'jakub.kroca@contsystem.cz'}
-                                                                    className={`relative w-9 h-5 rounded-full transition-all duration-300 ${profile.can_import ? 'bg-emerald-500' : 'bg-gray-400'} ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'}`}
-                                                                >
-                                                                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${profile.can_import ? 'translate-x-4' : 'translate-x-0'}`} />
-                                                                </button>
-                                                            </div>
-
-                                                            <button
-                                                                onClick={() => openPermissionsModal(profile)}
-                                                                disabled={profile.email === 'jakub.kroca@contsystem.cz'}
-                                                                className={`p-2 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-colors border border-indigo-500/20 ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                                title="Spravovat oprávnění"
-                                                            >
-                                                                <Shield size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="p-8 text-center text-sm text-muted-foreground italic">Žádní uživatelé k zobrazení.</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     {/* Vzhled */}
                                     <div className="bg-muted/10 border border-border rounded-2xl p-5 space-y-5">
@@ -489,6 +359,175 @@ export default function ProfilePage() {
                                     className="px-8 py-2.5 bg-primary text-primary-foreground font-bold rounded-2xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all text-sm uppercase tracking-widest"
                                 >
                                     Hotovo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Admin Panel Popup Modal */}
+                {showAdminPanel && isAdmin && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+                        <div
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+                            onClick={() => setShowAdminPanel(false)}
+                        />
+                        <div className="relative w-full max-w-4xl bg-card border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-300">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-border bg-indigo-500/[0.03]">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-indigo-500/10 rounded-2xl text-indigo-600">
+                                        <Shield size={22} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-foreground">Administrační panel</h3>
+                                        <p className="text-xs text-muted-foreground">Správa registrovaných uživatelů a přístupů</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowAdminPanel(false)}
+                                    className="p-2 hover:bg-muted rounded-full transition-colors group"
+                                >
+                                    <X size={20} className="text-muted-foreground group-hover:text-foreground" />
+                                </button>
+                            </div>
+
+                            {/* Modal Body - Scrollable */}
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                {/* --- GUEST REQUESTS --- */}
+                                {userRequests.length > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-[11px] font-bold text-amber-500 uppercase tracking-widest pl-1">
+                                            <UserPlus size={14} />
+                                            <span>Nové žádosti o přístup</span>
+                                        </div>
+
+                                        <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-amber-500/[0.02] border-amber-500/20">
+                                            {userRequests.map((request) => (
+                                                <div key={request.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-amber-500/[0.05] transition-colors">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-bold text-foreground">{request.email}</span>
+                                                            <span className={cn(
+                                                                "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase",
+                                                                request.request_type === 'access' ? "bg-amber-500 text-white" : "bg-blue-500 text-white"
+                                                            )}>
+                                                                {request.request_type === 'access' ? 'Přístup' : 'Reset'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-medium italic">
+                                                            <Clock size={10} />
+                                                            {new Date(request.created_at).toLocaleString('cs-CZ')}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                if (request.request_type === 'access') {
+                                                                    openApproveModal(request);
+                                                                } else {
+                                                                    processUserRequest(request.id, 'processed');
+                                                                }
+                                                            }}
+                                                            className="text-[10px] font-bold text-emerald-600 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 px-4 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                                                        >
+                                                            <CheckCircle size={10} />
+                                                            Schválit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => processUserRequest(request.id, 'rejected')}
+                                                            className="text-[10px] font-bold text-rose-500 hover:text-white bg-rose-500/10 hover:bg-rose-500 px-4 py-1.5 rounded-xl transition-all border border-rose-500/20"
+                                                        >
+                                                            Smazat
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* --- USER LIST --- */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between px-1">
+                                        <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                                            <Users size={14} />
+                                            <span>Registrovaní uživatelé</span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">CELKEM: {profiles.length}</span>
+                                    </div>
+
+                                    <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-muted/5">
+                                        {profiles.length > 0 ? (
+                                            profiles.map((profile) => (
+                                                <div key={profile.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/10 transition-colors ${(profile.access_requested || profile.password_reset_requested) ? 'bg-amber-500/[0.03] border-l-4 border-l-amber-500' : ''}`}>
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className="text-sm font-bold text-foreground">
+                                                                {profile.email}
+                                                            </span>
+                                                            {profile.email === 'jakub.kroca@contsystem.cz' && (
+                                                                <span className="text-[9px] text-primary font-black bg-primary/10 px-1.5 py-0.5 rounded tracking-tighter">MAIN ADMIN</span>
+                                                            )}
+                                                            <div className="flex items-center gap-1.5">
+                                                                {profile.access_requested && (
+                                                                    <span className="text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Request</span>
+                                                                )}
+                                                                {profile.password_reset_requested && (
+                                                                    <span className="text-[9px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Reset</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-tighter">ID: {profile.id.slice(0, 18)}...</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-6 justify-between sm:justify-end">
+                                                        {profile.password_reset_requested && (
+                                                            <button
+                                                                onClick={() => resetPasswordRequest(profile.id)}
+                                                                className="text-[10px] font-bold text-blue-600 hover:text-white bg-blue-600/10 hover:bg-blue-600 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-blue-600/20"
+                                                            >
+                                                                <CheckCircle size={10} />
+                                                                Reset hotov
+                                                            </button>
+                                                        )}
+
+                                                        <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
+                                                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Import</span>
+                                                            <button
+                                                                onClick={() => updatePermission(profile.id, !profile.can_import)}
+                                                                disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                                className={`relative w-8 h-4.5 rounded-full transition-all duration-300 ${profile.can_import ? 'bg-emerald-500' : 'bg-gray-300'} ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'}`}
+                                                            >
+                                                                <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform duration-300 ${profile.can_import ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                                                            </button>
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => openPermissionsModal(profile)}
+                                                            disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                            className={`p-2 rounded-lg bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-500/20 ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'active:scale-95'}`}
+                                                        >
+                                                            <Shield size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="p-8 text-center text-sm text-muted-foreground italic">Žádní uživatelé k zobrazení.</div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-border bg-muted/5 flex justify-end">
+                                <button
+                                    onClick={() => setShowAdminPanel(false)}
+                                    className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.98] transition-all text-sm uppercase tracking-widest"
+                                >
+                                    Zavřít panel
                                 </button>
                             </div>
                         </div>

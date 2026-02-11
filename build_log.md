@@ -53,4 +53,17 @@
 - **Změna**: Sjednocení barevné palety napříč aplikací.
 - **Detail**: Barvy v Timeline (sektory, fáze, milníky) byly sjednoceny s barvami v Navbaru a Login stránce (Military: #a5d6a7, Service: #ce93d8, Civil: #90caf9).
 - **Změna**: Redesign Login stránky.
-- **Detail**: Nadpis upraven na "PLÁNOVÁNÍ ZAKÁZEK" s moderním uppercase vzhledem a black font weight.
+- **Login Design**: Modernizován nadpis na "PLÁNOVÁNÍ ZAKÁZEK" s důrazem na čistý korporátní styl.
+
+## 2026-02-11 (22:45): Refaktoring UI a Admin Panelu
+- **Vizuální konzistence**: Barvy kategorií (Armáda: #a5d6a7, Servis: #ce93d8, Civil: #90caf9) se nyní propisují i do řádků tabulky projektů (jemné pozadí) a do ovládacích prvků v detailu zakázky.
+- **Architektura Profilu**: Admin Panel byl oddělen od uživatelského nastavení (Vzhled, Heslo) do samostatného modulu/popupu, což zjednodušuje UI pro běžné uživatele i administrátory.
+- **DataTable**: Komponenta rozšířena o props `getRowClassName` pro flexibilní styling řádků na základě dat.
+
+## [2026-02-11] - Refaktoring profilu a sjednocení tabulek
+- **Změna**: Vizuální sjednocení seznamu zakázek.
+- **Detail**: Řádky v tabulce projektů jsou nyní podbarveny podle kategorie (Zelená - Armáda, Fialová - Servis, Modrá - Civil), což usnadňuje orientaci v seznamu.
+- **Změna**: Inteligentní detail zakázky.
+- **Detail**: V detailu projektu přidán horní indikační pruh a tlačítko "Zpět" nyní dynamicky přebírá barvu kategorie projektu.
+- **Změna**: Separace Admin Panelu v profilu.
+- **Detail**: Administrační nástroje byly vyjmuty z obecného nastavení a přesunuty pod samostatné tlačítko "Admin Panel" s vlastním dedikovaným popupem pro lepší přehlednost.
