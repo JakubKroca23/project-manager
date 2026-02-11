@@ -55,8 +55,16 @@ interface IServiceLanesResult {
 const Timeline: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [typeFilter, setTypeFilter] = useState<'all' | 'civil' | 'military'>('all');
+    const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
+        civil: true,
+        military: true,
+        service: true
+    });
     const [isLoading, setIsLoading] = useState(true);
+
+    const toggleType = (type: string) => {
+        setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
+    };
 
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
     const [rowHeight, setRowHeight] = useState(32);
@@ -400,13 +408,11 @@ const Timeline: React.FC = () => {
     const filteredProjects = useMemo((): Project[] => {
         let filtered = projects;
 
-        // Pokud je aktivní filtr, aplikujeme ho jen na neservisní projekty,
-        // nebo zobrazíme servisy vždy (aktuální preference uživatele)
-        if (typeFilter !== 'all') {
-            filtered = filtered.filter((p: Project) =>
-                p.project_type === typeFilter || p.project_type === 'service'
-            );
-        }
+        // Filtr podle aktivních typů
+        filtered = filtered.filter((p: Project) => {
+            const type = p.project_type || 'civil';
+            return activeTypes[type] === true;
+        });
 
         const query = searchQuery.toLowerCase().trim();
         if (query) {
@@ -419,8 +425,7 @@ const Timeline: React.FC = () => {
             });
         }
 
-        // Řazení: Servisy nahoru (v rámci svých sekcí je to jedno, ale pro filteredProjects.some),
-        // pak nejdále v budoucnosti nahoře.
+        // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
         return filtered.sort((a: Project, b: Project) => {
             if (a.project_type === 'service' && b.project_type !== 'service') return -1;
             if (a.project_type !== 'service' && b.project_type === 'service') return 1;
@@ -429,51 +434,18 @@ const Timeline: React.FC = () => {
             const dateB = getLatestMilestoneDate(b);
             return dateB - dateA;
         });
-    }, [projects, searchQuery, typeFilter]);
+    }, [projects, searchQuery, activeTypes]);
 
-    // Výpočet "pruhů" pro servisní výjezdy k automatickému rozbalení při překryvu
+    // Zjednodušený výpočet pro servisní výjezdy - vždy v jednom pruhu
     const serviceLanes = useMemo((): IServiceLanesResult => {
         const services = filteredProjects.filter((p: Project) => p.project_type === 'service');
-        const sorted = [...services].sort((a: Project, b: Project) => {
-            const startA = parseDate(a.deadline)?.getTime() || 0;
-            const startB = parseDate(b.deadline)?.getTime() || 0;
-            return startA - startB;
-        });
-
-        const lanes: Project[][] = [];
         const serviceMap = new Map<string, { lane: number }>();
 
-        sorted.forEach((service: Project) => {
-            const start = parseDate(service.deadline)?.getTime() || 0;
-            let end = parseDate(service.customer_handover)?.getTime();
-            if (start && !end) {
-                end = start + 2 * 24 * 60 * 60 * 1000;
-            }
-
-            let laneIdx = -1;
-            for (let i = 0; i < lanes.length; i++) {
-                const lastInLane = lanes[i][lanes[i].length - 1];
-                const lastStart = parseDate(lastInLane.deadline)?.getTime() || 0;
-                let lastEnd = parseDate(lastInLane.customer_handover)?.getTime();
-                if (lastStart && !lastEnd) lastEnd = lastStart + 2 * 24 * 60 * 60 * 1000;
-
-                // Přidáme malou mezeru (12h) mezi projekty v jednom pruhu
-                if (start > (lastEnd || 0) + (12 * 60 * 60 * 1000)) {
-                    laneIdx = i;
-                    break;
-                }
-            }
-
-            if (laneIdx === -1) {
-                laneIdx = lanes.length;
-                lanes.push([service]);
-            } else {
-                lanes[laneIdx].push(service);
-            }
-            serviceMap.set(service.id, { lane: laneIdx });
+        services.forEach((service: Project) => {
+            serviceMap.set(service.id, { lane: 0 });
         });
 
-        return { lanes, serviceMap };
+        return { lanes: services.length > 0 ? [services] : [], serviceMap };
     }, [filteredProjects]);
 
     const jumpToToday = () => {
@@ -521,15 +493,40 @@ const Timeline: React.FC = () => {
                         />
                     </div>
 
-                    <div className="type-filters flex items-center gap-1 ml-4 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        {['all', 'civil', 'military'].map((type: string) => (
-                            <button
-                                key={type}
-                                className={`filter-btn ${typeFilter === type ? 'active' : ''}`}
-                                onClick={() => setTypeFilter(type as 'all' | 'civil' | 'military')}
+                    <div className="type-filters flex items-center gap-4 ml-6">
+                        {[
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
+                            { id: 'military', label: 'Armáda', color: '#10b981' },
+                            { id: 'service', label: 'Servis', color: '#6366f1' }
+                        ].map(({ id, label, color }) => (
+                            <label
+                                key={id}
+                                className="flex items-center gap-2 cursor-pointer group select-none"
                             >
-                                {type === 'all' ? 'Vše' : type === 'civil' ? 'Civilní' : 'Armáda'}
-                            </button>
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={activeTypes[id]}
+                                        onChange={() => toggleType(id)}
+                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
+                                        style={{
+                                            borderColor: activeTypes[id] ? color : 'var(--border)',
+                                            backgroundColor: activeTypes[id] ? color : 'transparent'
+                                        }}
+                                    />
+                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span
+                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
+                                >
+                                    {label}
+                                </span>
+                            </label>
                         ))}
                     </div>
                 </div>
@@ -734,11 +731,11 @@ const Timeline: React.FC = () => {
                         dayWidth={dayWidth}
                     >
                         <div className="timeline-rows">
-                            {/* STICKY SERVICE ROW */}
-                            {filteredProjects.some(p => p.project_type === 'service') && (
+                            {/* STICKY SERVICE ROW (Always 1 row height) */}
+                            {activeTypes.service && filteredProjects.some(p => p.project_type === 'service') && (
                                 <div
-                                    className="timeline-row bg-indigo-50/80 sticky top-[66px] z-[60] backdrop-blur-xl border-b-2 border-indigo-200/50 shadow-sm"
-                                    style={{ height: Math.max(1, serviceLanes.lanes.length) * rowHeight }}
+                                    className="timeline-row service-row-sticky"
+                                    style={{ height: rowHeight }}
                                 >
                                     <Link
                                         href="/servis"
@@ -767,7 +764,7 @@ const Timeline: React.FC = () => {
                                                     timelineStart={timelineRange.start}
                                                     dayWidth={dayWidth}
                                                     isService={true}
-                                                    topOffset={(serviceLanes.serviceMap.get(service.id)?.lane || 0) * rowHeight}
+                                                    topOffset={0}
                                                 />
                                             ))}
                                     </div>

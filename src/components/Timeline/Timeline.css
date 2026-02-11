@@ -278,6 +278,30 @@
   pointer-events: none;
 }
 
+/* Sticky service row styling */
+.service-row-sticky {
+  position: sticky !important;
+  top: 66px !important;
+  z-index: 60 !important;
+  background: rgba(238, 242, 255, 0.98) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 3px solid #6366f1 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transition: all 0.2s ease;
+  height: 42px !important;
+  /* Vyšší pro servisní řádek */
+}
+
+.service-row-sticky:hover {
+  background: rgba(238, 242, 255, 1) !important;
+}
+
+.service-row-sticky .project-info-sticky {
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-right: 2px solid rgba(99, 102, 241, 0.2) !important;
+  height: 42px !important;
+}
+
 .timeline-rows {
   display: flex;
   flex-direction: column;
@@ -370,7 +394,9 @@
 
 .phase-service {
   background-color: var(--phase-service);
-  border: 1px dashed rgba(59, 130, 246, 0.4);
+  border: 1px dashed rgba(99, 102, 241, 0.5);
+  opacity: 0.75;
+  /* Jemná průhlednost pro překryvy */
 }
 
 /* Orange - Revize */
