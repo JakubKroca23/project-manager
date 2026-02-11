@@ -1,0 +1,531 @@
+:root {
+  --timeline-bg: var(--background);
+  --timeline-border: var(--border);
+  --timeline-grid-line: color-mix(in srgb, var(--border), transparent 40%);
+  --timeline-weekend-bg: color-mix(in srgb, var(--muted), transparent 60%);
+  --timeline-today-bg: rgba(37, 99, 235, 0.05);
+  --timeline-today-line: var(--primary);
+  --timeline-row-height: 32px;
+  --timeline-header-height: auto;
+}
+
+.timeline-container {
+  width: 100%;
+  height: calc(100vh - 120px);
+  padding: 0;
+  background: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* KOMPAKTNÍ REŽIM (při malém zoomu) */
+.mode-compact {
+  --timeline-row-height: 22px;
+}
+
+.timeline-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-left h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.search-input {
+  padding: 0.35rem 0.75rem 0.35rem 2.25rem;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  width: 160px;
+  transition: all 0.2s;
+}
+
+.filter-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  color: var(--muted-foreground);
+  transition: all 0.2s;
+}
+
+.filter-btn.active {
+  background: var(--background);
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ZOOM SLIDER */
+.zoom-slider-container {
+  display: flex;
+  align-items: center;
+  background: var(--muted)/50;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  border: 1px solid var(--border);
+}
+
+.zoom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  /* Přidáno standardní appearance */
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-scroll-wrapper {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  cursor: grab;
+  /* Indikace možnosti tažení */
+}
+
+.timeline-scroll-wrapper.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+  /* Zákaz výběru textu během tažení */
+  -webkit-user-select: none;
+}
+
+.timeline-scroll-wrapper:active {
+  cursor: grabbing;
+}
+
+.timeline-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+/* Sticky Header Wrapper */
+.timeline-grid {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  /* Aby se roztáhl na celou výšku */
+}
+
+.timeline-grid-header-multi {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* Z-index pro hlavičku */
+  background: var(--background);
+  border-bottom: 2px solid var(--border);
+}
+
+.timeline-grid-content {
+  position: relative;
+  flex: 1;
+  /* Zbytek výšky */
+}
+
+.timeline-header-row {
+  display: flex;
+  width: 100%;
+}
+
+.header-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--timeline-grid-line);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.header-cell.month {
+  height: 20px;
+  text-transform: uppercase;
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.header-cell.week {
+  height: 18px;
+  background: var(--secondary)/30;
+}
+
+.header-cell.day {
+  height: 24px;
+  flex-direction: column;
+}
+
+.header-cell.is-weekend {
+  background: var(--timeline-weekend-bg);
+}
+
+.header-cell.is-today {
+  color: var(--primary);
+  background: var(--timeline-today-bg);
+}
+
+.timeline-grid-body {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  /* Natáhne se přes celou výšku timeline-content */
+  z-index: 0;
+  pointer-events: none;
+}
+
+.timeline-rows {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+}
+
+.timeline-row {
+  display: flex;
+  height: var(--timeline-row-height);
+  border-bottom: 1px solid var(--timeline-grid-line);
+  position: relative;
+  min-width: 100%;
+}
+
+.timeline-row:hover {
+  background: var(--muted)/30;
+}
+
+/* STICKY PANEL S PROJEKTY */
+.project-info-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 80;
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  text-decoration: none;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.project-info-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.customer-name {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.mode-compact .project-name {
+  font-size: 0.7rem;
+}
+
+/* PHASE COLORS - Full row backgrounds - Sytější odstíny */
+.phase-initial {
+  background-color: rgba(186, 230, 253, 0.4);
+}
+
+/* Light Blue - Zahájení */
+.phase-mounting {
+  background-color: rgba(74, 222, 128, 0.35);
+}
+
+/* Green - Příprava */
+.phase-buffer-yellow {
+  background-color: rgba(250, 204, 21, 0.5);
+}
+
+/* Yellow - Montáž */
+.phase-buffer-orange {
+  background-color: rgba(251, 146, 60, 0.55);
+}
+
+/* Orange - Revize */
+
+/* MILESTONES AS FULL BLOCKS */
+.milestones-container {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.timeline-phase {
+  position: absolute;
+  height: 100%;
+  z-index: 5;
+  /* Nad mřížkou, pod milníky */
+  pointer-events: none;
+}
+
+.milestone-cell {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.milestone-part {
+  flex: 1;
+  width: 100%;
+  transition: filter 0.1s;
+}
+
+.milestone-part:hover {
+  filter: brightness(0.85);
+  cursor: help;
+}
+
+.milestone-part.chassis {
+  background-color: #f97316;
+}
+
+/* Orange */
+.milestone-part.body {
+  background-color: #a855f7;
+}
+
+/* Purple */
+.milestone-part.handover {
+  background-color: #3b82f6;
+}
+
+/* Blue */
+.milestone-part.deadline {
+  background-color: #ef4444;
+}
+
+/* Red */
+
+/* LEGEND STYLES */
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--muted)/30;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+}
+
+.legend-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legend-group-title {
+  font-weight: 700;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  margin-right: 0.25rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--foreground);
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legend-color.dot {
+  border-radius: 50%;
+}
+
+/* GRID COLUMNS */
+.timeline-grid-column {
+  border-right: 1px solid var(--timeline-grid-line);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.timeline-grid-column.is-weekend {
+  background: var(--timeline-weekend-bg);
+}
+
+.timeline-grid-column.is-today {
+  background: var(--timeline-today-bg);
+  position: relative;
+}
+
+/* VERTIKÁLNÍ LINKA DNES */
+.timeline-grid-column.is-today::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: var(--timeline-today-line);
+  pointer-events: none;
+  z-index: 90;
+}
+
+/* --- MOBILE OPTIMIZATION --- */
+@media (max-width: 768px) {
+  .timeline-container {
+    height: calc(100vh - 80px);
+    /* Více místa na mobilu */
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .timeline-header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .header-left {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .header-left h1 {
+    font-size: 1.1rem;
+  }
+
+  .search-container {
+    order: 3;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .type-filters {
+    margin-left: auto;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .zoom-controls {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Sticky Column - Mobile */
+  .project-info-sticky {
+    width: 110px;
+    /* Zúžení sloupce */
+    padding: 0 0.25rem;
+  }
+
+  .customer-name {
+    display: none;
+    /* Skryjeme zákazníka pro úsporu místa */
+  }
+
+  .project-name {
+    font-size: 0.7rem;
+    /* Menší font */
+    white-space: normal;
+    /* Zalomíme text */
+    word-break: break-word;
+    /* Zalomení dlouhých slov */
+    max-height: 2.4em;
+    /* Max 2 řádky */
+  }
+
+  /* Legend - Mobile */
+  .timeline-legend {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.75rem;
+    /* Místo pro scrollbar */
+    -webkit-overflow-scrolling: touch;
+  }
+}
