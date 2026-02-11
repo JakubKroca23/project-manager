@@ -6,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2, KeyRound } from 'lucide-react';
 import Image from 'next/image';
 
-// --- SVG Logo Component (Refined to match image exactly) ---
+import logo from '@/assets/contsystem-logo.png';
+
+// --- ContSystem Logo Component (Image via Import) ---
 const ContSystemLogo = ({ className }: { className?: string }) => (
     <div className={`relative ${className}`}>
         <Image
-            src="/contsystem-logo.png"
+            src={logo}
             alt="ContSystem Logo"
-            width={400}
-            height={100}
             className="w-full h-auto"
             priority
             unoptimized
