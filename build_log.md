@@ -44,3 +44,13 @@
 - **Detail**: Servisní fáze mají nyní průhlednost (`0.75`), aby byly viditelné i při souběhu více výjezdů v jednom řádku.
 - **Změna**: Oprava TypeScript chyb.
 - **Detail**: Vyřešeny typové chyby u `toggleType` a `serviceLanes` v `Timeline.tsx`.
+
+## [2026-02-11] - Rozšířená oprávnění a sjednocení vizuálu
+- **Změna**: Implementace granulárních oprávnění pro sekci ZAKÁZKY.
+- **Detail**: Do profilu uživatele přidána možnost spravovat přístup k sub-kategoriím (Civilní, Armádní, Servis). Sekce ZAKÁZKY v Navbar se automaticky skryje, pokud uživatel nemá přístup ani k jedné podkategorii.
+- **Změna**: Inteligentní Navbar a vizuální kontinuita.
+- **Detail**: Navbar nyní detekuje typ projektu v detailu a zvýrazňuje správnou kategorii i bez URL parametrů. V detailu projektu přidán horní barevný pruh odpovídající kategorii.
+- **Změna**: Sjednocení barevné palety napříč aplikací.
+- **Detail**: Barvy v Timeline (sektory, fáze, milníky) byly sjednoceny s barvami v Navbaru a Login stránce (Military: #a5d6a7, Service: #ce93d8, Civil: #90caf9).
+- **Změna**: Redesign Login stránky.
+- **Detail**: Nadpis upraven na "PLÁNOVÁNÍ ZAKÁZEK" s moderním uppercase vzhledem a black font weight.

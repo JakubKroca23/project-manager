@@ -58,7 +58,12 @@
 - **TimelineBar**: Přidána logika pro zobrazení názvu projektu přímo v servisní liště, pokud to její šířka dovoluje.
 - **TypeScript**: Opraveny kritické typové chyby v `Timeline.tsx` související se stavem `activeTypes` a výpočtem `serviceLanes`.
 
-- **Navbar Update (11.2.)**:
-    - **Submenu Refactor**: Změna layoutu submenu z vertikálního na horizontální (`flex-row`) pro lepší kompaktnost.
-    - **Interakce**: Oprava zavírání submenu odstraněním mezery (`top-[90%]`) a zvýšením z-indexu (`z-50`).
-    - **Vizuál**: Přidány globální hover efekty (podbarvení, border) pro všechny položky menu, sjednocený design s podtržením submenu barvou kategorie.
+## 2026-02-11: Granulární oprávnění a sjednocená barva (Design System)
+- **Oprávnění**: Systém rozšířen o granulární správu přístupů (Civil/Armáda/Servis). Administrátor může omezit viditelnost jednotlivých kategorií zakázek v Navbaru i Timeline.
+- **Navbar Logika**: Pokud má uživatel zakázán přístup k celým Zakázkám nebo všem jejich podkategoriím, hlavní položka v menu se skryje.
+- **Barevný systém (Design System)**: Sjednocena barevná paleta napříč celou aplikací:
+    - **Armáda**: Emerald/Green (#a5d6a7)
+    - **Servis**: Purple (#ce93d8)
+    - **Civil**: Blue (#90caf9)
+- **UI Kontinuita**: Detail zakázky nyní obsahuje barevný pruh nahoře signalizující kategorii. Navbar si barvu v detailu pamatuje pomocí asynchronní detekce typu projektu z DB.
+- **Login Design**: Modernizován nadpis na "PLÁNOVÁNÍ ZAKÁZEK" s důrazem na čistý korporátní styl.

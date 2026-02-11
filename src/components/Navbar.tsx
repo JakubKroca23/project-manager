@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase/client';
 import { ThemeToggle } from './ThemeToggle';
 
 const navItems = [
-    { name: 'TIMELINE', icon: Calendar, href: '/', color: '#ffcc80' },
+    { name: 'TIMELINE', icon: Calendar, href: '/', color: '#bae6fd' },
     {
         name: 'ZAKÁZKY',
         icon: Briefcase,
@@ -146,7 +146,10 @@ const Navbar = () => {
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'TIMELINE': return checkPerm('timeline');
-            case 'ZAKÁZKY': return checkPerm('projects');
+            case 'ZAKÁZKY':
+                const hasMainAccess = checkPerm('projects');
+                const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military') || checkPerm('service');
+                return hasMainAccess && hasAnySubAccess;
             case 'VÝROBA': return checkPerm('production');
             case 'NÁKUP': return checkPerm('purchasing');
             default: return true;

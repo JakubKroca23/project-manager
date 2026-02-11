@@ -85,7 +85,7 @@ const Timeline: React.FC = () => {
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-        phaseService: { color: '#ef4444', opacity: 0.2, label: 'Servis' },
+        phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
         milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
@@ -135,9 +135,9 @@ const Timeline: React.FC = () => {
             milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
-            phaseService: { color: '#ef4444', opacity: 0.2, label: 'Servis' },
-            milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu' },
-            milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu' },
+            phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
+            milestoneServiceStart: { color: '#ce93d8', opacity: 1, label: 'Zahájení servisu' },
+            milestoneServiceEnd: { color: '#7b1fa2', opacity: 1, label: 'Ukončení servisu' },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
@@ -434,9 +434,9 @@ const Timeline: React.FC = () => {
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVISY', projects: services, color: '#ef4444' },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
-            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#10b981' }
+            { id: 'service', label: 'SERVISY', projects: services, color: '#ce93d8' },
+            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
+            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
         ];
     }, [filteredProjects]);
 
