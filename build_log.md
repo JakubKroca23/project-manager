@@ -34,3 +34,13 @@
 ## [2026-02-06] - UI Polishing
 - **Změna**: Úprava podbarvení víkendů v Timeline.
 - **Detail**: Změna barvy sloupců `.weekend-col` z poloprůhledné na neprůhlednou `#e2e8f0` v `globals.css` pro lepší čitelnost.
+
+## [2026-02-11] - Časová osa: Servisní řádek a pokročilé filtry
+- **Změna**: Implementace multi-výběrového filtrování projektů.
+- **Detail**: Původní přepínač nahrazen barevnými checkboxy (Civilní - modrá, Armáda - zelená, Servis - indigo), které umožňují kombinovat filtry.
+- **Změna**: Redesign servisního řádku.
+- **Detail**: Všechny servisní výjezdy sjednoceny do jediného řádku v horní části časové osy. Řádek je nyní `sticky` (fixovaný) s výškou 42px, má indigo ohraničení (3px) a skleněný efekt (blur).
+- **Změna**: Vylepšení překryvů servisů.
+- **Detail**: Servisní fáze mají nyní průhlednost (`0.75`), aby byly viditelné i při souběhu více výjezdů v jednom řádku.
+- **Změna**: Oprava TypeScript chyb.
+- **Detail**: Vyřešeny typové chyby u `toggleType` a `serviceLanes` v `Timeline.tsx`.
