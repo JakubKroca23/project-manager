@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import AuthGuard from '@/components/AuthGuard';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import { Toaster } from 'sonner';
 
@@ -33,6 +34,7 @@ export default function RootLayout({
             </div>
           </AuthGuard>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
