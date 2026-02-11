@@ -5,8 +5,10 @@
   --timeline-weekend-bg: color-mix(in srgb, var(--muted), transparent 60%);
   --timeline-today-bg: rgba(239, 68, 68, 0.1);
   --timeline-today-line: #ef4444;
+  /* Default Value - overridden by React component */
+  --timeline-header-height: 66px;
+  --timeline-sector-height: 36px;
   --timeline-row-height: 32px;
-  --timeline-header-height: auto;
 
   /* Custom Colors - Phases */
   --phase-initial: rgba(186, 230, 253, 0.4);
@@ -86,7 +88,7 @@
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.8rem;
-  width: 160px;
+  width: 220px;
   transition: all 0.2s;
 }
 
@@ -184,10 +186,11 @@
   flex-direction: column;
   position: sticky;
   top: 0;
-  z-index: 50;
-  /* Z-index pro hlavičku */
+  z-index: 200;
+  /* Highest Z-index for time header */
   background: var(--background);
   border-bottom: 4px solid var(--muted-foreground);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .header-cell.day.is-month-start {
@@ -278,29 +281,72 @@
   pointer-events: none;
 }
 
-/* Sticky service row styling */
-.service-row-sticky {
-  position: sticky !important;
-  top: 66px !important;
-  z-index: 60 !important;
-  background: rgba(238, 242, 255, 0.98) !important;
-  backdrop-filter: blur(12px);
-  border-bottom: 3px solid #6366f1 !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-  transition: all 0.2s ease;
-  height: 42px !important;
-  /* Vyšší pro servisní řádek */
+/* Sector Header Styling */
+.timeline-sector-header-row {
+  display: flex;
+  height: var(--timeline-sector-height, 36px);
+  background: var(--muted)/30;
+  position: sticky;
+  top: 0;
+  z-index: 140;
+  /* Lower than main header (150) but higher than content */
+  border-bottom: 2px solid var(--border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.service-row-sticky:hover {
-  background: rgba(238, 242, 255, 1) !important;
+.timeline-sector-header-row:hover {
+  filter: brightness(0.96);
 }
 
-.service-row-sticky .project-info-sticky {
-  background: rgba(99, 102, 241, 0.08) !important;
-  border-right: 2px solid rgba(99, 102, 241, 0.2) !important;
-  height: 42px !important;
+.sector-header {
+  height: var(--timeline-sector-height, 36px) !important;
+  z-index: 100 !important;
+  border-right: 1px solid var(--border) !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important;
 }
+
+.sector-label {
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--foreground);
+}
+
+.sector-grid-line {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background: repeating-linear-gradient(90deg,
+      transparent,
+      transparent calc(var(--day-width) - 1px),
+      var(--timeline-grid-line) calc(var(--day-width) - 1px),
+      var(--timeline-grid-line) var(--day-width));
+}
+
+.hot-zones-container {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.timeline-sector-group.is-collapsed .timeline-sector-header-row {
+  background: color-mix(in srgb, var(--muted), transparent 40%);
+  border-bottom: 1px solid var(--border);
+}
+
+.is-service-row {
+  background: rgba(239, 68, 68, 0.02);
+  /* Light red for service rows */
+}
+
+.is-service-row:hover {
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
 
 .timeline-rows {
   display: flex;
@@ -346,8 +392,9 @@
 }
 
 .customer-name {
-  font-size: 0.65rem;
-  font-weight: 800;
+  font-size: 0.55rem;
+  /* Reduced from 0.62rem */
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--primary);
   opacity: 0.9;
@@ -355,17 +402,32 @@
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: 0.05em;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
+  /* Reduced padding */
 }
 
 .project-name {
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  /* Slightly smaller to fit better */
+  font-weight: 400;
+  /* Normal weight */
   color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.1;
+  transition: all 0.2s;
+}
+
+.project-name.is-wrapped {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  /* Standard property */
+  -webkit-box-orient: vertical;
+  height: auto;
+  max-height: 2.2em;
 }
 
 .mode-compact .project-name {

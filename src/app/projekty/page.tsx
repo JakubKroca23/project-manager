@@ -176,19 +176,43 @@ export default function ProjektyPage() {
     const tabProjects = projects.filter(p => p.project_type === activeTab);
 
     // Universal filter – searches across ALL fields and respects active tab
-    const filteredProjects = tabProjects.filter(p => {
-        // Search filter (Tags + Current Input)
-        const currentTerm = searchTerm.toLowerCase();
-        const allTerms = [...searchTags.map(t => t.toLowerCase()), currentTerm].filter(t => t);
+    const filteredProjects = useMemo(() => {
+        const normalize = (str: string) =>
+            str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-        if (allTerms.length === 0) return true;
+        return tabProjects.filter(p => {
+            // Search filter (Tags + Current Input)
+            const currentTerm = normalize(searchTerm);
+            const allTerms = [...searchTags.map(t => normalize(t)), currentTerm].filter(t => t);
 
-        return allTerms.every(term =>
-            Object.values(p).some(val =>
-                val !== null && val !== undefined && String(val).toLowerCase().includes(term)
-            )
-        );
-    });
+            if (allTerms.length === 0) return true;
+
+            const searchableFields = [
+                p.name,
+                p.customer,
+                p.id,
+                p.abra_project,
+                p.abra_order,
+                p.serial_number,
+                p.manager,
+                p.status,
+                p.category,
+                p.production_status,
+                p.mounting_company
+            ].map(val => normalize(val || ''));
+
+            // Check custom fields as well
+            if (p.custom_fields) {
+                Object.values(p.custom_fields).forEach(val => {
+                    if (typeof val === 'string') searchableFields.push(normalize(val));
+                });
+            }
+
+            const searchString = searchableFields.join(' ');
+
+            return allTerms.every(term => searchString.includes(term));
+        });
+    }, [tabProjects, searchTerm, searchTags]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if ((e.key === 'Enter' || e.key === ' ') && searchTerm.trim()) {

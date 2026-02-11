@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 export default function ProfilePage() {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, resetPasswordRequest, processUserRequest } = useAdmin();
+    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, resetPasswordRequest, processUserRequest } = useAdmin();
     const [showSettings, setShowSettings] = useState(false);
     const [notifications, setNotifications] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -30,6 +30,12 @@ export default function ProfilePage() {
     const [selectedRequest, setSelectedRequest] = useState<UserRequest | null>(null);
     const [newUserPassword, setNewUserPassword] = useState('');
     const [isProcessingApproval, setIsProcessingApproval] = useState(false);
+
+    // Permissions Modal State
+    const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+    const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<any>(null); // Using any temporarily for ease, or use UserProfile
+    const [editedPermissions, setEditedPermissions] = useState<{ [key: string]: boolean }>({});
+    const [isSavingPermissions, setIsSavingPermissions] = useState(false);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -97,7 +103,22 @@ export default function ProfilePage() {
         } finally {
             setIsProcessingApproval(false);
         }
+        setIsProcessingApproval(false);
     };
+
+    const openPermissionsModal = (user: any) => {
+        setSelectedUserForPermissions(user);
+        // Initialize with existing permissions or defaults (true if undefined)
+        setEditedPermissions({
+            timeline: user.permissions?.timeline !== false,
+            projects: user.permissions?.projects !== false,
+            service: user.permissions?.service !== false,
+            production: user.permissions?.production !== false,
+            purchasing: user.permissions?.purchasing !== false,
+        });
+        setPermissionsModalOpen(true);
+    };
+
 
     if (isLoading) {
         return (
@@ -320,6 +341,15 @@ export default function ProfilePage() {
                                                                     <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${profile.can_import ? 'translate-x-4' : 'translate-x-0'}`} />
                                                                 </button>
                                                             </div>
+
+                                                            <button
+                                                                onClick={() => openPermissionsModal(profile)}
+                                                                disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                                className={`p-2 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-colors border border-indigo-500/20 ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                                title="Spravovat oprávnění"
+                                                            >
+                                                                <Shield size={16} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ))
@@ -528,6 +558,68 @@ export default function ProfilePage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Permissions Modal */}
+            {permissionsModalOpen && selectedUserForPermissions && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between border-b border-border pb-4">
+                            <div>
+                                <h3 className="text-lg font-bold">Oprávnění uživatele</h3>
+                                <p className="text-xs text-muted-foreground font-mono mt-1">{selectedUserForPermissions.email}</p>
+                            </div>
+                            <button onClick={() => setPermissionsModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                                <X size={18} className="text-muted-foreground" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {[
+                                { key: 'timeline', label: 'Timeline (Kalendář)' },
+                                { key: 'projects', label: 'Zakázky (Projekty)' },
+                                { key: 'service', label: 'Servis' },
+                                { key: 'production', label: 'Výroba' },
+                                { key: 'purchasing', label: 'Nákup' },
+                            ].map(({ key, label }) => (
+                                <div key={key} className="flex items-center justify-between bg-muted/30 p-3 rounded-xl border border-border/30">
+                                    <span className="text-sm font-medium">{label}</span>
+                                    <button
+                                        onClick={() => setEditedPermissions(prev => ({ ...prev, [key]: !prev[key] }))}
+                                        className={`relative w-10 h-6 rounded-full transition-all duration-200 ${editedPermissions[key] ? 'bg-primary' : 'bg-gray-400'}`}
+                                    >
+                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${editedPermissions[key] ? 'translate-x-4' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2 border-t border-border mt-4">
+                            <button
+                                onClick={() => setPermissionsModalOpen(false)}
+                                className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
+                            >
+                                Zrušit
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (updateUserPermissions) {
+                                        setIsSavingPermissions(true);
+                                        const success = await updateUserPermissions(selectedUserForPermissions.id, editedPermissions);
+                                        if (success) {
+                                            setPermissionsModalOpen(false);
+                                        }
+                                        setIsSavingPermissions(false);
+                                    }
+                                }}
+                                disabled={isSavingPermissions}
+                                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 flex items-center gap-2"
+                            >
+                                {isSavingPermissions ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                Uložit změny
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

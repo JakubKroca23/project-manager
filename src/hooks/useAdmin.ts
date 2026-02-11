@@ -10,6 +10,13 @@ export interface UserProfile {
     access_requested?: boolean;
     password_reset_requested?: boolean;
     last_request_at?: string;
+    permissions?: {
+        timeline?: boolean;
+        projects?: boolean;
+        service?: boolean;
+        production?: boolean;
+        purchasing?: boolean;
+    };
 }
 
 export interface UserRequest {
@@ -105,6 +112,31 @@ export function useAdmin() {
         }
     };
 
+    const updateUserPermissions = async (userId: string, newPermissions: UserProfile['permissions']) => {
+        if (!isAdmin) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    permissions: newPermissions,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (!error) {
+                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, permissions: newPermissions } : p));
+                return true;
+            } else {
+                console.error('Failed to update user permissions:', error);
+                return false;
+            }
+        } catch (err) {
+            console.error('Error updating user permissions:', err);
+            return false;
+        }
+    };
+
     const resetPasswordRequest = async (userId: string) => {
         if (!isAdmin) return;
 
@@ -154,6 +186,7 @@ export function useAdmin() {
         isAdmin,
         isLoading,
         updatePermission,
+        updateUserPermissions,
         resetPasswordRequest,
         processUserRequest,
         refresh: fetchProfiles

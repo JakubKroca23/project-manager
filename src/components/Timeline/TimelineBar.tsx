@@ -28,6 +28,7 @@ interface ITimelineBarProps {
     dayWidth: number;
     topOffset?: number;
     isService?: boolean;
+    isCollapsed?: boolean;
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -50,7 +51,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     timelineStart,
     dayWidth,
     topOffset = 0,
-    isService = false
+    isService = false,
+    isCollapsed = false
 }: ITimelineBarProps) => {
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
@@ -158,14 +160,21 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         return diff * dayWidth;
     };
 
-    const containerStyle: React.CSSProperties = isService ? {
-        top: topOffset || 0,
-        height: 'var(--timeline-row-height)',
-        padding: '2px 0'
-    } : {};
+    const containerStyle: React.CSSProperties = {
+        ...(isService ? {
+            top: topOffset || 0,
+            height: 'var(--timeline-row-height)',
+            padding: '2px 0'
+        } : {}),
+        ...(isCollapsed ? {
+            opacity: 0.2, // Hot zones effect
+            pointerEvents: 'none',
+            zIndex: 1
+        } : {})
+    };
 
     return (
-        <div className="milestones-container" style={containerStyle}>
+        <div className={`milestones-container ${isCollapsed ? 'is-collapsed-bar' : ''}`} style={containerStyle}>
             {/* Vykreslení fází (podklad) */}
             {phases.map((p: IPhase) => {
                 const left = getDatePos(p.start);

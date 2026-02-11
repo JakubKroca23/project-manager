@@ -57,3 +57,8 @@
     - Implementována průhlednost (`0.75`) pro vizuální zvládnutí překryvů v jednom pruhu.
 - **TimelineBar**: Přidána logika pro zobrazení názvu projektu přímo v servisní liště, pokud to její šířka dovoluje.
 - **TypeScript**: Opraveny kritické typové chyby v `Timeline.tsx` související se stavem `activeTypes` a výpočtem `serviceLanes`.
+
+- **Navbar Update (11.2.)**:
+    - **Submenu Refactor**: Změna layoutu submenu z vertikálního na horizontální (`flex-row`) pro lepší kompaktnost.
+    - **Interakce**: Oprava zavírání submenu odstraněním mezery (`top-[90%]`) a zvýšením z-indexu (`z-50`).
+    - **Vizuál**: Přidány globální hover efekty (podbarvení, border) pro všechny položky menu, sjednocený design s podtržením submenu barvou kategorie.

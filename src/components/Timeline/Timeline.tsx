@@ -6,7 +6,15 @@ import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
-import { Search, Calendar, ZoomIn, ZoomOut, Palette, X, RotateCcw } from 'lucide-react';
+import {
+    Search, Calendar, ZoomIn,
+    ZoomOut,
+    Palette,
+    X,
+    RotateCcw,
+    ChevronDown,
+    ChevronRight
+} from 'lucide-react';
 import Link from 'next/link';
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -60,7 +68,12 @@ const Timeline: React.FC = () => {
         military: true,
         service: true
     });
+    const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
     const [isLoading, setIsLoading] = useState(true);
+
+    const toggleSectorCollapse = (sectorId: string) => {
+        setCollapsedSectors(prev => ({ ...prev, [sectorId]: !prev[sectorId] }));
+    };
 
     const toggleType = (type: string) => {
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
@@ -94,7 +107,11 @@ const Timeline: React.FC = () => {
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
 
+    const headerHeight = dayWidth > 12 ? 66 : 42;
+
     const customStyles = {
+        '--timeline-header-height': `${headerHeight}px`,
+        '--timeline-sector-height': '36px',
         '--phase-initial': hexToRgba(colors.phaseInitial.color, colors.phaseInitial.opacity),
         '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
@@ -107,7 +124,9 @@ const Timeline: React.FC = () => {
         '--milestone-service-start': colors.milestoneServiceStart.color,
         '--milestone-service-end': colors.milestoneServiceEnd.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
+        '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
+        '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
     } as React.CSSProperties;
 
     const resetColors = () => {
@@ -314,7 +333,7 @@ const Timeline: React.FC = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 const delta = e.deltaY > 0 ? -2 : 2;
-                setRowHeight((prev: number) => Math.min(Math.max(prev + delta, 22), 80));
+                setRowHeight((prev: number) => Math.min(Math.max(prev + delta, 14), 100));
                 return;
             }
 
@@ -414,13 +433,25 @@ const Timeline: React.FC = () => {
             return activeTypes[type] === true;
         });
 
-        const query = searchQuery.toLowerCase().trim();
+        // Helper pro normalizaci (odstranění diakritiky)
+        const normalize = (str: string) =>
+            str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+        const query = normalize(searchQuery.trim());
+
         if (query) {
             const terms = query.split(/\s+/);
             filtered = filtered.filter((p: Project) => {
-                const name = p.name?.toLowerCase() || '';
-                const customer = p.customer?.toLowerCase() || '';
-                const searchStr = `${name} ${customer}`;
+                const searchTerms = [
+                    p.name,
+                    p.customer,
+                    p.id,
+                    p.abra_project,
+                    p.abra_order,
+                    p.serial_number
+                ].map(term => normalize(term || ''));
+
+                const searchStr = searchTerms.join(' ');
                 return terms.every((term: string) => searchStr.includes(term));
             });
         }
@@ -436,16 +467,17 @@ const Timeline: React.FC = () => {
         });
     }, [projects, searchQuery, activeTypes]);
 
-    // Zjednodušený výpočet pro servisní výjezdy - vždy v jednom pruhu
-    const serviceLanes = useMemo((): IServiceLanesResult => {
-        const services = filteredProjects.filter((p: Project) => p.project_type === 'service');
-        const serviceMap = new Map<string, { lane: number }>();
+    // Grupa projektů do sektorů
+    const sectorizedProjects = useMemo(() => {
+        const services = filteredProjects.filter(p => p.project_type === 'service');
+        const civil = filteredProjects.filter(p => p.project_type === 'civil');
+        const military = filteredProjects.filter(p => p.project_type === 'military');
 
-        services.forEach((service: Project) => {
-            serviceMap.set(service.id, { lane: 0 });
-        });
-
-        return { lanes: services.length > 0 ? [services] : [], serviceMap };
+        return [
+            { id: 'service', label: 'SERVISY', projects: services, color: '#ef4444' },
+            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
+            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#10b981' }
+        ];
     }, [filteredProjects]);
 
     const jumpToToday = () => {
@@ -476,12 +508,10 @@ const Timeline: React.FC = () => {
             </div>
         );
     }
-
     return (
         <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
             <header className="timeline-header-actions relative">
                 <div className="header-left">
-                    <h1>Timeline</h1>
                     <div className="search-container">
                         <Search size={16} className="search-icon" />
                         <input
@@ -495,9 +525,9 @@ const Timeline: React.FC = () => {
 
                     <div className="type-filters flex items-center gap-4 ml-6">
                         {[
+                            { id: 'service', label: 'Servis', color: '#ef4444' }, // Red for Service
                             { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Armáda', color: '#10b981' },
-                            { id: 'service', label: 'Servis', color: '#6366f1' }
+                            { id: 'military', label: 'Armáda', color: '#10b981' }
                         ].map(({ id, label, color }) => (
                             <label
                                 key={id}
@@ -731,78 +761,136 @@ const Timeline: React.FC = () => {
                         dayWidth={dayWidth}
                     >
                         <div className="timeline-rows">
-                            {/* STICKY SERVICE ROW (Always 1 row height) */}
-                            {activeTypes.service && filteredProjects.some(p => p.project_type === 'service') && (
-                                <div
-                                    className="timeline-row service-row-sticky"
-                                    style={{ height: rowHeight }}
-                                >
-                                    <Link
-                                        href="/servis"
-                                        className="project-info-sticky bg-indigo-600/5 font-bold border-r border-indigo-200 hover:bg-indigo-600/10 transition-colors"
-                                    >
-                                        <div className="project-info-content p-2">
-                                            <span className="project-name text-primary uppercase text-[10px] tracking-wider">Servisní výjezdy</span>
-                                            <div className="text-xs text-muted-foreground font-normal flex items-center gap-1 mt-1">
-                                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                                {filteredProjects.filter(p => p.project_type === 'service').length} aktivních
-                                            </div>
-                                        </div>
-                                    </Link>
-                                    <div className="relative w-full h-full flex-1">
-                                        {filteredProjects
-                                            .filter(p => p.project_type === 'service')
-                                            .map(service => (
-                                                <TimelineBar
-                                                    key={service.id}
-                                                    id={service.id}
-                                                    name={service.name}
-                                                    project={service}
-                                                    status={service.status}
-                                                    startDate={parseDate(service.deadline) || new Date()}
-                                                    endDate={parseDate(service.customer_handover) || new Date()}
-                                                    timelineStart={timelineRange.start}
-                                                    dayWidth={dayWidth}
-                                                    isService={true}
-                                                    topOffset={0}
-                                                />
-                                            ))}
-                                    </div>
-                                </div>
-                            )}
+                            <div className="timeline-rows">
+                                {(() => {
+                                    const visibleSectors = sectorizedProjects.filter(
+                                        sector => activeTypes[sector.id] && sector.projects.length > 0
+                                    );
 
-                            {/* REGULAR PROJECTS */}
-                            {filteredProjects
-                                .filter(p => p.project_type !== 'service')
-                                .map((project) => (
-                                    <div key={project.id} className="timeline-row">
-                                        <Link
-                                            href={`/projekty/${project.id}`}
-                                            className="project-info-sticky hover:bg-muted/50 transition-colors group"
-                                        >
-                                            <div className="project-info-content">
-                                                {rowHeight >= 30 && (
-                                                    <span className="customer-name">
-                                                        {project.customer || 'Bez zákazníka'}
-                                                    </span>
-                                                )}
-                                                <span className="project-name">
-                                                    {project.name}
-                                                </span>
+                                    const renderSectorRecursively = (index: number): React.ReactNode => {
+                                        if (index >= visibleSectors.length) return null;
+
+                                        const sector = visibleSectors[index];
+                                        const isCollapsed = collapsedSectors[sector.id];
+                                        const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
+
+                                        return (
+                                            <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
+                                                {/* HEADER */}
+                                                <div
+                                                    className="timeline-sector-header-row cursor-pointer group/header"
+                                                    onClick={() => toggleSectorCollapse(sector.id)}
+                                                    style={{
+                                                        background: !isCollapsed ? `color-mix(in srgb, ${sector.color} 4%, white)` : undefined,
+                                                        top: topOffset,
+                                                        zIndex: 145 - index
+                                                    }}
+                                                >
+                                                    <div
+                                                        className="project-info-sticky sector-header"
+                                                        style={{
+                                                            borderLeft: `6px solid ${sector.color}`,
+                                                            background: `color-mix(in srgb, ${sector.color} 15%, white)`,
+                                                            height: 'var(--timeline-sector-height)'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
+                                                                    {sector.label}
+                                                                </span>
+                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
+                                                                    ({sector.projects.length})
+                                                                </span>
+                                                            </div>
+                                                            <div className={`transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`} style={{ display: 'flex', alignItems: 'center' }}>
+                                                                <ChevronRight size={14} className="text-muted-foreground group-hover/header:text-foreground" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="sector-grid-line" />
+
+                                                    {/* HOT ZONES */}
+                                                    {isCollapsed && (
+                                                        <div className="absolute inset-0 pointer-events-none hot-zones-container">
+                                                            {sector.projects.map(project => {
+                                                                const sDate = project.project_type === 'service'
+                                                                    ? (parseDate(project.deadline) || new Date())
+                                                                    : (parseDate(project.created_at) || new Date());
+                                                                const eDate = project.project_type === 'service'
+                                                                    ? (parseDate(project.customer_handover) || sDate)
+                                                                    : (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+
+                                                                return (
+                                                                    <TimelineBar
+                                                                        key={`hot-${project.id}`}
+                                                                        id={project.id}
+                                                                        name={project.name}
+                                                                        project={project}
+                                                                        status={project.status}
+                                                                        startDate={sDate}
+                                                                        endDate={eDate}
+                                                                        timelineStart={timelineRange.start}
+                                                                        dayWidth={dayWidth}
+                                                                        isService={project.project_type === 'service'}
+                                                                        isCollapsed={true}
+                                                                    />
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* ROWS */}
+                                                {!isCollapsed && sector.projects.map((project) => (
+                                                    <div key={project.id} className="timeline-row">
+                                                        <Link
+                                                            href={project.project_type === 'service' ? '/servis' : `/projekty/${project.id}`}
+                                                            className={`project-info-sticky hover:bg-muted/50 transition-colors group ${project.project_type === 'service' ? 'is-service-row' : ''}`}
+                                                        >
+                                                            <div className="project-info-content pr-2">
+                                                                {rowHeight >= 30 ? (
+                                                                    <>
+                                                                        <span
+                                                                            className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                                            style={{ textAlign: 'left', fontWeight: 400 }}
+                                                                        >
+                                                                            {project.name}
+                                                                        </span>
+                                                                        <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                                            {project.customer || 'Bez zákazníka'}
+                                                                        </span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                                        {project.customer || 'Bez zákazníka'}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </Link>
+                                                        <TimelineBar
+                                                            id={project.id}
+                                                            name={project.name}
+                                                            project={project}
+                                                            status={project.status}
+                                                            startDate={project.project_type === 'service' ? (parseDate(project.deadline) || new Date()) : new Date()}
+                                                            endDate={project.project_type === 'service' ? (parseDate(project.customer_handover) || new Date()) : new Date()}
+                                                            timelineStart={timelineRange.start}
+                                                            dayWidth={dayWidth}
+                                                            isService={project.project_type === 'service'}
+                                                        />
+                                                    </div>
+                                                ))}
+
+                                                {/* NESTED NEXT SECTOR */}
+                                                {renderSectorRecursively(index + 1)}
                                             </div>
-                                        </Link>
-                                        <TimelineBar
-                                            id={project.id}
-                                            name={project.name}
-                                            project={project}
-                                            status={project.status}
-                                            startDate={new Date()}
-                                            endDate={new Date()}
-                                            timelineStart={timelineRange.start}
-                                            dayWidth={dayWidth}
-                                        />
-                                    </div>
-                                ))}
+                                        );
+                                    };
+
+                                    return renderSectorRecursively(0);
+                                })()}
+                            </div>
                         </div>
                     </TimelineGrid>
                 </div>
