@@ -45,6 +45,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     id,
     name,
     project,
+    startDate,
+    endDate,
     timelineStart,
     dayWidth,
     topOffset = 0,
@@ -93,16 +95,16 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     // 2. Fáze (plochy v čase)
     const phases = useMemo((): IPhase[] => {
         if (project.project_type === 'service') {
-            const start = t_deadline;
-            let end = t_handover;
+            const start = startDate;
+            let end = endDate;
 
-            if (start && !end) {
-                // Výchozí délka 2 dny, pokud chybí konec
+            // Zajištění minimálního trvání pro viditelnost (pokud jsou data stejná nebo chybí)
+            if (start.getTime() === end.getTime()) {
                 end = new Date(start);
-                end.setDate(end.getDate() + 2);
+                end.setDate(end.getDate() + 1);
             }
 
-            if (start && end && start < end) {
+            if (start && end && start <= end) {
                 return [{ key: 'service-main', start, end, class: 'phase-service' }];
             }
             return [];
@@ -174,10 +176,16 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 return (
                     <div
                         key={`${id}-${p.key}`}
-                        className={`timeline-phase ${p.class}`}
+                        className={`timeline-phase ${p.class} flex items-center px-2 overflow-hidden`}
                         style={{ left, width }}
                         title={`${name}${p.key === 'service-main' ? ' (Servis)' : ''}`}
-                    />
+                    >
+                        {p.key === 'service-main' && width > 40 && (
+                            <span className="text-[9px] font-bold text-indigo-700 truncate drop-shadow-sm whitespace-nowrap">
+                                {name}
+                            </span>
+                        )}
+                    </div>
                 );
             })}
 

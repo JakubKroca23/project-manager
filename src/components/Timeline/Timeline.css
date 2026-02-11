@@ -19,9 +19,9 @@
   --milestone-body: #a855f7;
   --milestone-handover: #3b82f6;
   --milestone-deadline: #ef4444;
-  --phase-service: rgba(239, 68, 68, 0.2);
-  --milestone-service-start: #ef4444;
-  --milestone-service-end: #b91c1c;
+  --phase-service: rgba(99, 102, 241, 0.25);
+  --milestone-service-start: #6366f1;
+  --milestone-service-end: #4338ca;
 
   --element-border: none;
 }

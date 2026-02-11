@@ -399,9 +399,15 @@ const Timeline: React.FC = () => {
 
     const filteredProjects = useMemo((): Project[] => {
         let filtered = projects;
+
+        // Pokud je aktivní filtr, aplikujeme ho jen na neservisní projekty,
+        // nebo zobrazíme servisy vždy (aktuální preference uživatele)
         if (typeFilter !== 'all') {
-            filtered = filtered.filter((p: Project) => p.project_type === typeFilter);
+            filtered = filtered.filter((p: Project) =>
+                p.project_type === typeFilter || p.project_type === 'service'
+            );
         }
+
         const query = searchQuery.toLowerCase().trim();
         if (query) {
             const terms = query.split(/\s+/);
@@ -413,8 +419,12 @@ const Timeline: React.FC = () => {
             });
         }
 
-        // Řazení: Nejdále v budoucnosti nahoře
+        // Řazení: Servisy nahoru (v rámci svých sekcí je to jedno, ale pro filteredProjects.some),
+        // pak nejdále v budoucnosti nahoře.
         return filtered.sort((a: Project, b: Project) => {
+            if (a.project_type === 'service' && b.project_type !== 'service') return -1;
+            if (a.project_type !== 'service' && b.project_type === 'service') return 1;
+
             const dateA = getLatestMilestoneDate(a);
             const dateB = getLatestMilestoneDate(b);
             return dateB - dateA;
@@ -727,12 +737,12 @@ const Timeline: React.FC = () => {
                             {/* STICKY SERVICE ROW */}
                             {filteredProjects.some(p => p.project_type === 'service') && (
                                 <div
-                                    className="timeline-row bg-muted/60 sticky top-[66px] z-[60] backdrop-blur-md border-b-2 border-primary/20 shadow-sm"
+                                    className="timeline-row bg-indigo-50/80 sticky top-[66px] z-[60] backdrop-blur-xl border-b-2 border-indigo-200/50 shadow-sm"
                                     style={{ height: Math.max(1, serviceLanes.lanes.length) * rowHeight }}
                                 >
                                     <Link
                                         href="/servis"
-                                        className="project-info-sticky bg-primary/5 font-bold border-r border-border hover:bg-primary/10 transition-colors"
+                                        className="project-info-sticky bg-indigo-600/5 font-bold border-r border-indigo-200 hover:bg-indigo-600/10 transition-colors"
                                     >
                                         <div className="project-info-content p-2">
                                             <span className="project-name text-primary uppercase text-[10px] tracking-wider">Servisní výjezdy</span>
