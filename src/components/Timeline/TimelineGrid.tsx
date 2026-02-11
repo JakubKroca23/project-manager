@@ -18,6 +18,11 @@ const getWeekNumber = (d: Date) => {
 };
 
 const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children }) => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonthVal = today.getMonth();
+    const currentWeekVal = getWeekNumber(today);
+
     const days = useMemo(() => {
         const result: Date[] = [];
         const current = new Date(startDate);
@@ -29,7 +34,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
     }, [startDate, endDate]);
 
     const months = useMemo(() => {
-        const groups: { month: string; year: number; width: number; startDay: number }[] = [];
+        const groups: { month: string; year: number; monthIndex: number; width: number; startDay: number }[] = [];
         let currentMonth = -1;
         let currentGroup: any = null;
 
@@ -39,6 +44,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                 currentGroup = {
                     month: day.toLocaleDateString('cs-CZ', { month: 'long' }),
                     year: day.getFullYear(),
+                    monthIndex: day.getMonth(),
                     width: 0,
                     startDay: index
                 };
@@ -50,7 +56,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
     }, [days, dayWidth]);
 
     const weeks = useMemo(() => {
-        const groups: { weekNum: number; width: number; startDay: number }[] = [];
+        const groups: { weekNum: number; year: number; width: number; startDay: number }[] = [];
         let currentWeek = -1;
         let currentGroup: any = null;
 
@@ -60,6 +66,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                 currentWeek = w;
                 currentGroup = {
                     weekNum: w,
+                    year: day.getFullYear(),
                     width: 0,
                     startDay: index
                 };
@@ -71,7 +78,6 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
     }, [days, dayWidth]);
 
     const isToday = (date: Date) => {
-        const today = new Date();
         return date.getDate() === today.getDate() &&
             date.getMonth() === today.getMonth() &&
             date.getFullYear() === today.getFullYear();
@@ -90,7 +96,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                     {months.map((m, i) => (
                         <div
                             key={`m-${i}`}
-                            className="header-cell month"
+                            className={`header-cell month ${m.year === currentYear && m.monthIndex === currentMonthVal ? 'is-current' : ''}`}
                             style={{ width: m.width }}
                         >
                             {m.month} {m.year}
@@ -103,7 +109,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                     {weeks.map((w, i) => (
                         <div
                             key={`w-${i}`}
-                            className="header-cell week"
+                            className={`header-cell week ${w.year === currentYear && w.weekNum === currentWeekVal ? 'is-current' : ''}`}
                             style={{ width: w.width }}
                         >
                             {dayWidth > 15 ? `Týden ${w.weekNum}` : w.weekNum}

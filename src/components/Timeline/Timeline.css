@@ -3,8 +3,8 @@
   --timeline-border: var(--border);
   --timeline-grid-line: color-mix(in srgb, var(--border), transparent 40%);
   --timeline-weekend-bg: color-mix(in srgb, var(--muted), transparent 60%);
-  --timeline-today-bg: rgba(37, 99, 235, 0.05);
-  --timeline-today-line: var(--primary);
+  --timeline-today-bg: rgba(239, 68, 68, 0.1);
+  --timeline-today-line: #ef4444;
   --timeline-row-height: 32px;
   --timeline-header-height: auto;
 }
@@ -208,9 +208,21 @@
   color: var(--foreground);
 }
 
+.header-cell.month.is-current {
+  background: color-mix(in srgb, var(--primary), transparent 90%);
+  font-weight: 800;
+  color: var(--primary);
+}
+
 .header-cell.week {
   height: 18px;
   background: var(--secondary)/30;
+}
+
+.header-cell.week.is-current {
+  background: color-mix(in srgb, var(--primary), transparent 85%);
+  font-weight: 700;
+  color: var(--foreground);
 }
 
 .header-cell.day {
@@ -223,8 +235,11 @@
 }
 
 .header-cell.is-today {
-  color: var(--primary);
+  color: var(--timeline-today-line);
   background: var(--timeline-today-bg);
+  border: 2px solid var(--timeline-today-line);
+  z-index: 2;
+  /* Ensure border is visible above neighbors if needed */
 }
 
 .timeline-grid-body {
