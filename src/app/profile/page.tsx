@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useAdmin, type UserRequest } from '@/hooks/useAdmin';
+import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
 
 export default function ProfilePage() {
@@ -23,6 +24,12 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    // Approval Modal State
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState<UserRequest | null>(null);
+    const [newUserPassword, setNewUserPassword] = useState('');
+    const [isProcessingApproval, setIsProcessingApproval] = useState(false);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -62,6 +69,33 @@ export default function ProfilePage() {
             setPasswordStatus({ type: 'error', message: error.message || 'Chyba při změně hesla.' });
         } finally {
             setIsChangingPassword(false);
+        }
+    };
+
+    const openApproveModal = (request: UserRequest) => {
+        setSelectedRequest(request);
+        setNewUserPassword(Math.random().toString(36).slice(-8)); // Suggest random password
+        setApproveModalOpen(true);
+    };
+
+    const confirmApproval = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedRequest || !newUserPassword) return;
+
+        setIsProcessingApproval(true);
+        try {
+            const result = await approveAccessRequest(selectedRequest.id, selectedRequest.email, newUserPassword);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                setApproveModalOpen(false);
+                // Force reload to refresh data and clear request
+                window.location.reload();
+            }
+        } catch (err: any) {
+            alert(err.message || 'Chyba při schvalování.');
+        } finally {
+            setIsProcessingApproval(false);
         }
     };
 
@@ -205,11 +239,17 @@ export default function ProfilePage() {
 
                                                             <div className="flex items-center gap-2">
                                                                 <button
-                                                                    onClick={() => processUserRequest(request.id, 'processed')}
+                                                                    onClick={() => {
+                                                                        if (request.request_type === 'access') {
+                                                                            openApproveModal(request);
+                                                                        } else {
+                                                                            processUserRequest(request.id, 'processed');
+                                                                        }
+                                                                    }}
                                                                     className="text-[10px] font-bold text-emerald-500 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20"
                                                                 >
                                                                     <CheckCircle size={10} />
-                                                                    Vyřízeno
+                                                                    {request.request_type === 'access' ? 'Schválit' : 'Vyřízeno'}
                                                                 </button>
                                                                 <button
                                                                     onClick={() => processUserRequest(request.id, 'rejected')}
@@ -437,6 +477,60 @@ export default function ProfilePage() {
                 </div>
 
             </div>
+
+            {/* Approval Modal */}
+            {approveModalOpen && selectedRequest && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold">Schválit přístup</h3>
+                            <button onClick={() => setApproveModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                                <X size={18} className="text-muted-foreground" />
+                            </button>
+                        </div>
+
+                        <div className="text-sm text-muted-foreground">
+                            Vytvořte účet pro uživatele <strong>{selectedRequest.email}</strong>.
+                        </div>
+
+                        <form onSubmit={confirmApproval} className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Heslo pro uživatele</label>
+                                <div className="relative">
+                                    <KeyRound size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                    <input
+                                        type="text"
+                                        value={newUserPassword}
+                                        onChange={(e) => setNewUserPassword(e.target.value)}
+                                        className="w-full pl-9 pr-3 py-2 bg-muted/50 border border-border rounded-lg text-sm font-mono"
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-muted-foreground ml-1">Heslo sdělte uživateli bezpečně.</p>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setApproveModalOpen(false)}
+                                    className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
+                                >
+                                    Zrušit
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isProcessingApproval}
+                                    className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+                                >
+                                    {isProcessingApproval ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={14} />}
+                                    Vytvořit účet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
