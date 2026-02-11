@@ -8,28 +8,18 @@ import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2, K
 // --- SVG Logo Component (Refined to match image exactly) ---
 const ContSystemLogo = ({ className }: { className?: string }) => (
     <svg viewBox="0 0 500 160" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* The stylized "F" structure made of horizontal bars */}
-        <g transform="translate(60, 20)">
-            <rect x="0" y="0" width="110" height="4" fill="#d1d5db" />
-            <rect x="10" y="10" width="100" height="4" fill="#d1d5db" />
-            <rect x="20" y="20" width="90" height="4" fill="#d1d5db" />
-            <rect x="30" y="30" width="80" height="4" fill="#d1d5db" />
-            <rect x="40" y="40" width="70" height="4" fill="#d1d5db" />
-            <rect x="50" y="50" width="60" height="4" fill="#d1d5db" />
-            <rect x="60" y="60" width="50" height="4" fill="#d1d5db" />
+        <path d="M60 20 H180 L195 20 H75 Z" fill="#6b7280" />
+        <path d="M60 32 H170 L185 32 H75 Z" fill="#6b7280" />
+        <path d="M60 44 H160 L175 44 H75 Z" fill="#6b7280" />
 
-            {/* The vertical bar connector for the 'F' look */}
-            <rect x="30" y="68" width="50" height="4" fill="#d1d5db" />
-            <rect x="30" y="76" width="50" height="4" fill="#d1d5db" />
-        </g>
+        <path d="M60 80 H150 L165 80 H75 Z" fill="#6b7280" />
+        <path d="M60 92 H160 L175 92 H75 Z" fill="#6b7280" />
 
-        {/* "ContSystem" Text - Bold Italic Sans */}
-        <text x="30" y="115" fill="white" style={{ font: 'italic bold 82px sans-serif', letterSpacing: '-2px' }}>
+        <text x="30" y="105" fill="white" style={{ font: 'italic 900 86px sans-serif', fontFamily: 'Arial, Helvetica, sans-serif' }}>
             ContSystem
         </text>
 
-        {/* "SIMPLE HANDLING" Text - Blue Bold Italic */}
-        <text x="235" y="145" fill="#0ea5e9" style={{ font: 'italic bold 30px sans-serif' }}>
+        <text x="220" y="140" fill="#0099ff" style={{ font: 'italic 700 24px sans-serif', letterSpacing: '1px' }}>
             SIMPLE HANDLING
         </text>
     </svg>
@@ -174,7 +164,7 @@ export default function LoginPage() {
                 {/* Logo Area */}
                 <div className="flex flex-col items-center mb-8">
                     <ContSystemLogo className="w-80 h-auto drop-shadow-2xl mb-2" />
-                    <h2 className="text-xl font-medium text-white/70 tracking-tight">Přehled projektů</h2>
+                    <h2 className="text-xl font-medium text-white/70 tracking-tight">Plánování projektů Contsystem</h2>
                 </div>
 
                 <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-8">
