@@ -7,6 +7,18 @@
   --timeline-today-line: #ef4444;
   --timeline-row-height: 32px;
   --timeline-header-height: auto;
+
+  /* Custom Colors - Phases */
+  --phase-initial: rgba(186, 230, 253, 0.4);
+  --phase-mounting: rgba(74, 222, 128, 0.35);
+  --phase-buffer-yellow: rgba(250, 204, 21, 0.5);
+  --phase-buffer-orange: rgba(251, 146, 60, 0.55);
+
+  /* Custom Colors - Milestones */
+  --milestone-chassis: #f97316;
+  --milestone-body: #a855f7;
+  --milestone-handover: #3b82f6;
+  --milestone-deadline: #ef4444;
 }
 
 .timeline-container {
@@ -323,22 +335,22 @@
 
 /* PHASE COLORS - Full row backgrounds - Sytější odstíny */
 .phase-initial {
-  background-color: rgba(186, 230, 253, 0.4);
+  background-color: var(--phase-initial);
 }
 
 /* Light Blue - Zahájení */
 .phase-mounting {
-  background-color: rgba(74, 222, 128, 0.35);
+  background-color: var(--phase-mounting);
 }
 
 /* Green - Příprava */
 .phase-buffer-yellow {
-  background-color: rgba(250, 204, 21, 0.5);
+  background-color: var(--phase-buffer-yellow);
 }
 
 /* Yellow - Montáž */
 .phase-buffer-orange {
-  background-color: rgba(251, 146, 60, 0.55);
+  background-color: var(--phase-buffer-orange);
 }
 
 /* Orange - Revize */
@@ -382,22 +394,22 @@
 }
 
 .milestone-part.chassis {
-  background-color: #f97316;
+  background-color: var(--milestone-chassis);
 }
 
 /* Orange */
 .milestone-part.body {
-  background-color: #a855f7;
+  background-color: var(--milestone-body);
 }
 
 /* Purple */
 .milestone-part.handover {
-  background-color: #3b82f6;
+  background-color: var(--milestone-handover);
 }
 
 /* Blue */
 .milestone-part.deadline {
-  background-color: #ef4444;
+  background-color: var(--milestone-deadline);
 }
 
 /* Red */

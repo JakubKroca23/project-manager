@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
-import { Search, Calendar, ZoomIn, ZoomOut } from 'lucide-react';
+import { Search, Calendar, ZoomIn, ZoomOut, Palette, X, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -25,7 +25,52 @@ const Timeline: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState<'all' | 'civil' | 'military'>('all');
     const [isLoading, setIsLoading] = useState(true);
+
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
+
+    // Color Configuration State
+    const [showColorEditor, setShowColorEditor] = useState(false);
+    const [colors, setColors] = useState({
+        phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení' },
+        phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
+        phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
+        phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
+        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
+        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
+        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
+        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
+    });
+
+    const hexToRgba = (hex: string, alpha: number) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    const customStyles = {
+        '--phase-initial': hexToRgba(colors.phaseInitial.color, colors.phaseInitial.opacity),
+        '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
+        '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
+        '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange.color, colors.phaseBufferOrange.opacity),
+        '--milestone-chassis': colors.milestoneChassis.color,
+        '--milestone-body': colors.milestoneBody.color,
+        '--milestone-handover': colors.milestoneHandover.color,
+        '--milestone-deadline': colors.milestoneDeadline.color,
+    } as React.CSSProperties;
+
+    const resetColors = () => {
+        setColors({
+            phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení' },
+            phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
+            phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
+            phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
+            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
+            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
+            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
+            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
+        });
+    };
 
     // Ref pro aktuální dayWidth pro event listenery
     const dayWidthRef = useRef(dayWidth);
@@ -320,8 +365,8 @@ const Timeline: React.FC = () => {
     }
 
     return (
-        <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`}>
-            <header className="timeline-header-actions">
+        <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
+            <header className="timeline-header-actions relative">
                 <div className="header-left">
                     <h1>Timeline</h1>
                     <div className="search-container">
@@ -351,21 +396,92 @@ const Timeline: React.FC = () => {
                 <div className="timeline-legend">
                     <div className="legend-group">
                         <span className="legend-group-title">Milníky:</span>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#f97316' }}></div> Podvozek</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#a855f7' }}></div> Nástavba</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#3b82f6' }}></div> Předání</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: '#ef4444' }}></div> Deadline</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}></div> Podvozek</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}></div> Nástavba</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}></div> Předání</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}></div> Deadline</div>
                     </div>
                     <div className="legend-group">
                         <span className="legend-group-title">Fáze:</span>
-                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(186, 230, 253, 0.6)' }}></div> Zahájení</div>
-                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(74, 222, 128, 0.55)' }}></div> Příprava</div>
-                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(250, 204, 21, 0.7)' }}></div> Montáž</div>
-                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'rgba(251, 146, 60, 0.75)' }}></div> Revize</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
                     </div>
                 </div>
 
                 <div className="header-right flex items-center gap-4">
+                    <button
+                        className={`action-button ${showColorEditor ? 'active' : ''}`}
+                        onClick={() => setShowColorEditor(!showColorEditor)}
+                        title="Upravit barvy"
+                    >
+                        <Palette size={16} />
+                    </button>
+
+                    {showColorEditor && (
+                        <div className="absolute top-14 right-4 z-[100] w-80 bg-background border border-border shadow-xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
+                                <h3 className="font-bold text-sm">Nastavení barev</h3>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={resetColors} title="Resetovat" className="hover:bg-muted p-1 rounded">
+                                        <RotateCcw size={14} className="text-muted-foreground" />
+                                    </button>
+                                    <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                <div className="space-y-2">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
+                                    {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
+                                        <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs font-medium">{config.label}</span>
+                                                <input
+                                                    type="color"
+                                                    value={config.color}
+                                                    onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], color: e.target.value } }))}
+                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>Opacita:</span>
+                                                <input
+                                                    type="range"
+                                                    min="0.1"
+                                                    max="1"
+                                                    step="0.05"
+                                                    value={config.opacity}
+                                                    onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], opacity: parseFloat(e.target.value) } }))}
+                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                                <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
+                                    {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => (
+                                        <div key={key} className="flex justify-between items-center p-2 rounded bg-muted/30">
+                                            <span className="text-xs font-medium">{config.label}</span>
+                                            <input
+                                                type="color"
+                                                value={config.color}
+                                                onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], color: e.target.value } }))}
+                                                className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
                             className="action-button icon-only"
