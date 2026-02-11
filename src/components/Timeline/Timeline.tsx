@@ -233,7 +233,7 @@ const Timeline: React.FC = () => {
 
         container.addEventListener('wheel', handleWheel, { passive: false });
         return () => container.removeEventListener('wheel', handleWheel);
-    }, []);
+    }, [isLoading]);
 
     const fetchProjects = useCallback(async () => {
         try {
