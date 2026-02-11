@@ -363,10 +363,13 @@ const Timeline: React.FC = () => {
         }
         const query = searchQuery.toLowerCase().trim();
         if (query) {
-            filtered = filtered.filter(p =>
-                (p.name?.toLowerCase().includes(query)) ||
-                (p.customer?.toLowerCase().includes(query))
-            );
+            const terms = query.split(/\s+/);
+            filtered = filtered.filter(p => {
+                const name = p.name?.toLowerCase() || '';
+                const customer = p.customer?.toLowerCase() || '';
+                const searchStr = `${name} ${customer}`;
+                return terms.every(term => searchStr.includes(term));
+            });
         }
 
         // Řazení: Nejdále v budoucnosti nahoře
