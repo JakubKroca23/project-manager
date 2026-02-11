@@ -19,19 +19,28 @@ export default function ServicesPage() {
         order_number: ''
     });
 
-    // Fetch services
+    // Fetch services from projects table
     const fetchServices = async () => {
         setIsLoading(true);
         const { data, error } = await supabase
-            .from('services')
+            .from('projects')
             .select('*')
-            .order('date', { ascending: false });
+            .eq('project_type', 'service')
+            .order('deadline', { ascending: false });
 
         if (error) {
             console.error('Error loading services:', error);
-            // Fallback for demo if needed but error implies table is missing or connection issue
         } else {
-            setServices(data || []);
+            // Transform data if needed to match IService interface if it differs significantly
+            const transformed = (data || []).map((p: any) => ({
+                id: p.id,
+                date: p.deadline || p.created_at,
+                order_number: p.abra_order || '',
+                customer: p.customer || '',
+                description: p.note || p.name,
+                duration: '' // Tuto informaci projects defaultně nemá, lze přidat do custom_fields
+            }));
+            setServices(transformed as any);
         }
         setIsLoading(false);
     };
@@ -44,9 +53,23 @@ export default function ServicesPage() {
         e.preventDefault();
 
         try {
+            // Mapování polí ze servisního formuláře na tabulku projects
+            const projectData = {
+                name: newService.description?.substring(0, 50) || 'Servisní výjezd',
+                customer: newService.customer,
+                deadline: newService.date, // Datum zahájení servisu
+                project_type: 'service',
+                status: 'Aktívny',
+                abra_order: newService.order_number,
+                note: newService.description,
+                manager: 'Servisní tým',
+                quantity: 1,
+                action_needed_by: 'internal'
+            };
+
             const { error } = await supabase
-                .from('services')
-                .insert([newService]);
+                .from('projects')
+                .insert([projectData]);
 
             if (error) throw error;
 

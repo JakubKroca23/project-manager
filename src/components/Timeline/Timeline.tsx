@@ -724,20 +724,20 @@ const Timeline: React.FC = () => {
                         dayWidth={dayWidth}
                     >
                         <div className="timeline-rows">
-                            {/* SERVICE ROW */}
+                            {/* STICKY SERVICE ROW */}
                             {filteredProjects.some(p => p.project_type === 'service') && (
                                 <div
-                                    className="timeline-row bg-muted/30"
+                                    className="timeline-row bg-muted/60 sticky top-[66px] z-[60] backdrop-blur-md border-b-2 border-primary/20 shadow-sm"
                                     style={{ height: Math.max(1, serviceLanes.lanes.length) * rowHeight }}
                                 >
                                     <Link
-                                        href="/projekty?type=service"
-                                        className="project-info-sticky bg-muted/30 font-semibold border-r border-border hover:bg-muted/50 transition-colors"
+                                        href="/servis"
+                                        className="project-info-sticky bg-primary/5 font-bold border-r border-border hover:bg-primary/10 transition-colors"
                                     >
                                         <div className="project-info-content p-2">
-                                            <span className="project-name text-primary">Servisní výjezdy</span>
-                                            <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
-                                                <span className="w-2 h-2 rounded-full bg-primary/50"></span>
+                                            <span className="project-name text-primary uppercase text-[10px] tracking-wider">Servisní výjezdy</span>
+                                            <div className="text-xs text-muted-foreground font-normal flex items-center gap-1 mt-1">
+                                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                                                 {filteredProjects.filter(p => p.project_type === 'service').length} aktivních
                                             </div>
                                         </div>
@@ -752,8 +752,8 @@ const Timeline: React.FC = () => {
                                                     name={service.name}
                                                     project={service}
                                                     status={service.status}
-                                                    startDate={new Date()}
-                                                    endDate={new Date()}
+                                                    startDate={parseDate(service.deadline) || new Date()}
+                                                    endDate={parseDate(service.customer_handover) || new Date()}
                                                     timelineStart={timelineRange.start}
                                                     dayWidth={dayWidth}
                                                     isService={true}
