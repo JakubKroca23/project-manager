@@ -625,36 +625,73 @@ const Timeline: React.FC = () => {
                         dayWidth={dayWidth}
                     >
                         <div className="timeline-rows">
-                            {filteredProjects.map((project) => (
-                                <div key={project.id} className="timeline-row">
+                            {/* SERVICE ROW */}
+                            {filteredProjects.some(p => p.project_type === 'service') && (
+                                <div className="timeline-row bg-muted/30">
                                     <Link
-                                        href={`/projekty/${project.id}`}
-                                        className="project-info-sticky hover:bg-muted/50 transition-colors group"
+                                        href="/projekty?type=service"
+                                        className="project-info-sticky bg-muted/30 font-semibold border-r border-border hover:bg-muted/50 transition-colors"
                                     >
-
-                                        <div className="project-info-content">
-                                            {rowHeight >= 30 && (
-                                                <span className="customer-name">
-                                                    {project.customer || 'Bez zákazníka'}
-                                                </span>
-                                            )}
-                                            <span className="project-name">
-                                                {project.name}
-                                            </span>
+                                        <div className="project-info-content p-2">
+                                            <span className="project-name text-primary">Servisní výjezdy</span>
+                                            <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
+                                                <span className="w-2 h-2 rounded-full bg-primary/50"></span>
+                                                {filteredProjects.filter(p => p.project_type === 'service').length} aktivních
+                                            </div>
                                         </div>
                                     </Link>
-                                    <TimelineBar
-                                        id={project.id}
-                                        name={project.name}
-                                        project={project}
-                                        status={project.status}
-                                        startDate={new Date()}
-                                        endDate={new Date()}
-                                        timelineStart={timelineRange.start}
-                                        dayWidth={dayWidth}
-                                    />
+                                    <div className="relative w-full h-full flex-1">
+                                        {filteredProjects
+                                            .filter(p => p.project_type === 'service')
+                                            .map(service => (
+                                                <TimelineBar
+                                                    key={service.id}
+                                                    id={service.id}
+                                                    name={service.name}
+                                                    project={service}
+                                                    status={service.status}
+                                                    startDate={new Date()}
+                                                    endDate={new Date()}
+                                                    timelineStart={timelineRange.start}
+                                                    dayWidth={dayWidth}
+                                                />
+                                            ))}
+                                    </div>
                                 </div>
-                            ))}
+                            )}
+
+                            {/* REGULAR PROJECTS */}
+                            {filteredProjects
+                                .filter(p => p.project_type !== 'service')
+                                .map((project) => (
+                                    <div key={project.id} className="timeline-row">
+                                        <Link
+                                            href={`/projekty/${project.id}`}
+                                            className="project-info-sticky hover:bg-muted/50 transition-colors group"
+                                        >
+                                            <div className="project-info-content">
+                                                {rowHeight >= 30 && (
+                                                    <span className="customer-name">
+                                                        {project.customer || 'Bez zákazníka'}
+                                                    </span>
+                                                )}
+                                                <span className="project-name">
+                                                    {project.name}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                        <TimelineBar
+                                            id={project.id}
+                                            name={project.name}
+                                            project={project}
+                                            status={project.status}
+                                            startDate={new Date()}
+                                            endDate={new Date()}
+                                            timelineStart={timelineRange.start}
+                                            dayWidth={dayWidth}
+                                        />
+                                    </div>
+                                ))}
                         </div>
                     </TimelineGrid>
                 </div>
