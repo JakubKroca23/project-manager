@@ -19,6 +19,8 @@
   --milestone-body: #a855f7;
   --milestone-handover: #3b82f6;
   --milestone-deadline: #ef4444;
+
+  --element-border: none;
 }
 
 .timeline-container {
@@ -371,6 +373,8 @@
   z-index: 5;
   /* Nad mřížkou, pod milníky */
   pointer-events: none;
+  border: var(--element-border);
+  box-sizing: border-box;
 }
 
 .milestone-cell {
@@ -386,6 +390,8 @@
   flex: 1;
   width: 100%;
   transition: filter 0.1s;
+  border: var(--element-border);
+  box-sizing: border-box;
 }
 
 .milestone-part:hover {

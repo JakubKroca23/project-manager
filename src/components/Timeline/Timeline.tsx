@@ -41,6 +41,8 @@ const Timeline: React.FC = () => {
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
     });
 
+    const [outline, setOutline] = useState({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
+
     const hexToRgba = (hex: string, alpha: number) => {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
@@ -57,6 +59,7 @@ const Timeline: React.FC = () => {
         '--milestone-body': colors.milestoneBody.color,
         '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
+        '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
     } as React.CSSProperties;
 
     const resetColors = () => {
@@ -70,6 +73,7 @@ const Timeline: React.FC = () => {
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
         });
+        setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
 
     // Ref pro aktuální dayWidth pro event listenery
@@ -477,6 +481,59 @@ const Timeline: React.FC = () => {
                                             />
                                         </div>
                                     ))}
+                                </div>
+                                <div className="space-y-2 pt-4 mt-2 border-t border-border">
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
+                                        <input
+                                            type="checkbox"
+                                            checked={outline.enabled}
+                                            onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
+                                            className="accent-primary"
+                                        />
+                                    </div>
+
+                                    {outline.enabled && (
+                                        <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs font-medium">Barva</span>
+                                                <input
+                                                    type="color"
+                                                    value={outline.color}
+                                                    onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
+                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>Šířka:</span>
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="5"
+                                                    step="1"
+                                                    value={outline.width}
+                                                    onChange={(e) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
+                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                                <span className="w-8 text-right">{outline.width}px</span>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>Opacita:</span>
+                                                <input
+                                                    type="range"
+                                                    min="0.1"
+                                                    max="1"
+                                                    step="0.05"
+                                                    value={outline.opacity}
+                                                    onChange={(e) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
+                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                                <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
