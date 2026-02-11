@@ -14,7 +14,7 @@ import {
     VisibilityState,
     ColumnSizingState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Search, Maximize2 } from 'lucide-react';
+import { ArrowUpDown, Search, Maximize2, RefreshCcw } from 'lucide-react';
 import { ColumnToggle } from './ColumnToggle';
 
 // dnd-kit
@@ -60,7 +60,7 @@ function DraggableHeader({ header, children, isSorted }: { header: any; children
         <th
             ref={setNodeRef}
             style={style}
-            className={`h-8 px-2 text-left align-middle font-semibold relative group whitespace-nowrap uppercase tracking-wider text-[10px] border-r border-border last:border-r-0 ${isDragging ? 'bg-primary/10' : ''} ${isSorted ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}
+            className={`px-2 py-1.5 text-left align-middle font-semibold relative group uppercase tracking-wider text-[10px] border-r border-border last:border-r-0 ${isDragging ? 'bg-primary/10' : ''} ${isSorted ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}
             {...attributes}
             {...listeners}
         >
@@ -86,6 +86,7 @@ interface DataTableProps<TData, TValue> {
     columnSizing?: ColumnSizingState;
     onColumnSizingChange?: (sizing: ColumnSizingState) => void;
     onRowClick?: (row: TData) => void;
+    headerClassName?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -104,6 +105,7 @@ export function DataTable<TData, TValue>({
     columnSizing: externalColumnSizing,
     onColumnSizingChange,
     onRowClick,
+    headerClassName,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -237,6 +239,11 @@ export function DataTable<TData, TValue>({
         table.setColumnSizing(newSizing);
     }, [table]);
 
+    // Reset column sizing to defaults
+    const handleResetSizing = useCallback(() => {
+        table.resetColumnSizing();
+    }, [table]);
+
     return (
         <div className="flex flex-col h-full">
             <div className="flex-shrink-0 pb-3">
@@ -251,9 +258,17 @@ export function DataTable<TData, TValue>({
                         <button
                             onClick={handleAutoFit}
                             className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
-                            title="Obnovit zobrazení – přizpůsobí sloupce šířce okna"
+                            title="Přizpůsobit šířku sloupců aktuální velikosti okna"
                         >
                             <Maximize2 size={14} />
+                            <span className="hidden sm:inline">Přizpůsobit</span>
+                        </button>
+                        <button
+                            onClick={handleResetSizing}
+                            className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
+                            title="Obnovit výchozí šířky sloupců"
+                        >
+                            <RefreshCcw size={14} />
                             <span className="hidden sm:inline">Obnovit</span>
                         </button>
                         <ColumnToggle table={table} />
@@ -274,7 +289,7 @@ export function DataTable<TData, TValue>({
                             className="w-full text-xs text-left caption-bottom table-fixed"
                             style={{ width: table.getTotalSize() }}
                         >
-                            <thead className="bg-secondary/90 backdrop-blur-sm border-b-2 border-border sticky top-0 z-10 shadow-sm">
+                            <thead className={`backdrop-blur-sm border-b-2 border-border sticky top-0 z-10 shadow-sm ${headerClassName || 'bg-secondary/90'}`}>
                                 <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
                                     {table.getHeaderGroups().map((headerGroup) => (
                                         <tr key={headerGroup.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
@@ -316,6 +331,7 @@ export function DataTable<TData, TValue>({
                                                                 header.getResizeHandler()(e);
                                                             }}
                                                             onClick={(e) => e.stopPropagation()}
+                                                            onPointerDown={(e) => e.stopPropagation()} // Stop pointer events for dnd-kit
                                                             className={`absolute right-0 top-0 h-full w-1 bg-border cursor-col-resize select-none touch-none opacity-0 group-hover:opacity-100 hover:bg-primary ${header.column.getIsResizing() ? 'bg-primary opacity-100' : ''
                                                                 }`}
                                                         />

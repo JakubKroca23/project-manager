@@ -162,10 +162,10 @@ export default function ProjectDetailPage() {
     const isMilitary = project.project_type === 'military';
 
     return (
-        <div className="min-h-screen bg-background text-foreground pb-20 animate-in fade-in duration-500">
+        <div className="h-full overflow-y-auto bg-background text-foreground animate-in fade-in duration-500">
             {/* Top Navigation Bar */}
             <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40">
-                <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
+                <div className="max-w-[1600px] mx-auto px-4 h-11 flex items-center justify-between">
                     <button onClick={() => router.push('/projekty')} className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-xl hover:bg-muted/50">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         <span>Zpět</span>
@@ -194,10 +194,10 @@ export default function ProjectDetailPage() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <div className="max-w-[1600px] mx-auto px-4 py-4 space-y-4 pb-16">
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-border/40">
-                    <div className="space-y-4">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-border/40">
+                    <div className="space-y-2">
                         <div className="flex items-center gap-3 flex-wrap">
                             <ProjectBadge isMilitary={isMilitary} />
                             <span className="px-2.5 py-1 rounded-lg bg-muted/40 border border-border/60 text-[10px] font-mono text-muted-foreground">{project.id}</span>
@@ -210,22 +210,22 @@ export default function ProjectDetailPage() {
                             <textarea
                                 value={editedProject?.name}
                                 onChange={(e) => handleChange('name', e.target.value)}
-                                className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] w-full bg-muted/30 border border-primary/20 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 outline-none resize-none min-h-[100px]"
+                                className="text-xl sm:text-2xl font-black tracking-tight leading-snug w-full bg-muted/30 border border-primary/20 rounded-xl p-3 focus:ring-2 focus:ring-primary/20 outline-none resize-none min-h-[60px]"
                             />
                         ) : (
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.1] text-foreground max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            <h1 className="text-xl sm:text-2xl font-black tracking-tight leading-snug text-foreground max-w-4xl">
                                 {project.name}
                             </h1>
                         )}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
                     {/* Main Content - Left Column (8 cols) */}
-                    <div className="xl:col-span-8 space-y-6 lg:space-y-8">
+                    <div className="xl:col-span-8 space-y-4">
 
                         {/* Key Info Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <InfoCard
                                 icon={<User size={18} />}
                                 label="Manažer Projektu"
@@ -261,19 +261,17 @@ export default function ProjectDetailPage() {
                         </div>
 
                         {/* Timeline Section */}
-                        <div className="bg-card rounded-[2rem] border border-border/60 p-6 sm:p-8 shadow-xl shadow-black/[0.02] relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-[100%] z-0 pointer-events-none" />
-                            <div className="relative z-10 space-y-6">
-                                <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-card rounded-xl border border-border/60 p-4 shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-[100%] z-0 pointer-events-none" />
+                            <div className="relative z-10 space-y-3">
+                                <div className="flex items-center gap-2 mb-2">
                                     <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                                         <CalendarDays size={20} />
                                     </div>
                                     <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">Harmonogram</h3>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 relative">
-                                    {/* Vertical connecting line for desktop */}
-                                    <div className="hidden md:block absolute left-1/2 top-4 bottom-4 w-px bg-border/60 -translate-x-1/2 border-l border-dashed border-border" />
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                                     <TimelineItem
                                         side="left"
@@ -308,9 +306,9 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
 
-                        {/* Notes Section - Full Width */}
-                        <div className="bg-muted/10 rounded-[2rem] border border-border/60 p-6 sm:p-8">
-                            <div className="flex items-center gap-3 mb-4">
+                        {/* Notes Section */}
+                        <div className="bg-muted/10 rounded-xl border border-border/60 p-4">
+                            <div className="flex items-center gap-2 mb-2">
                                 <div className="p-2 bg-muted text-muted-foreground rounded-lg">
                                     <ClipboardList size={18} />
                                 </div>
@@ -332,10 +330,10 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Sidebar - Right Column (4 cols) */}
-                    <div className="xl:col-span-4 space-y-6">
+                    <div className="xl:col-span-4 space-y-4">
 
                         {/* Production Status Box */}
-                        <div className="bg-primary/5 rounded-[2rem] border border-primary/10 p-6 space-y-6 relative overflow-hidden">
+                        <div className="bg-primary/5 rounded-xl border border-primary/10 p-4 space-y-4 relative overflow-hidden">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-primary text-primary-foreground rounded-lg shadow-lg shadow-primary/20">
                                     <Truck size={18} />
@@ -351,7 +349,7 @@ export default function ProjectDetailPage() {
                         </div>
 
                         {/* Abra Info */}
-                        <div className="bg-card rounded-[2rem] border border-border/60 p-6 space-y-6">
+                        <div className="bg-card rounded-xl border border-border/60 p-4 space-y-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-amber-500/10 text-amber-600 rounded-lg">
                                     <Hash size={18} />
@@ -365,7 +363,7 @@ export default function ProjectDetailPage() {
                         </div>
 
                         {/* Custom Fields */}
-                        <div className="bg-card rounded-[2rem] border border-border/60 p-6 space-y-4">
+                        <div className="bg-card rounded-xl border border-border/60 p-4 space-y-3">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
@@ -454,16 +452,16 @@ function InfoCard({ icon, label, value, isEditing, onChange, accent = "primary" 
     };
 
     return (
-        <div className="bg-card border border-border/60 p-5 rounded-2xl flex items-start gap-4 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-1 group">
-            <div className={`p-2.5 bg-muted text-muted-foreground rounded-xl transition-colors duration-300 ${accents[accent]}`}>
+        <div className="bg-card border border-border/60 p-3 rounded-xl flex items-start gap-3 transition-all duration-300 hover:shadow-md hover:shadow-black/5 group">
+            <div className={`p-2 bg-muted text-muted-foreground rounded-lg transition-colors duration-300 ${accents[accent]}`}>
                 {icon}
             </div>
-            <div className="flex-1 space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{label}</p>
+            <div className="flex-1 space-y-0.5 min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">{label}</p>
                 {isEditing && onChange ? (
-                    <input type="text" value={String(value || '')} onChange={(e) => onChange(e.target.value)} className="w-full bg-muted/30 -ml-2 px-2 py-1 rounded-lg text-sm font-bold border-none focus:ring-2 focus:ring-primary/20" />
+                    <input type="text" value={String(value || '')} onChange={(e) => onChange(e.target.value)} className="w-full bg-muted/30 -ml-1 px-1.5 py-0.5 rounded-md text-xs font-bold border-none focus:ring-2 focus:ring-primary/20" />
                 ) : (
-                    <p className="text-sm font-bold text-foreground line-clamp-1" title={String(value || '')}>{value || '-'}</p>
+                    <p className="text-xs font-bold text-foreground truncate" title={String(value || '')}>{value || '-'}</p>
                 )}
             </div>
         </div>
@@ -481,18 +479,12 @@ interface TimelineItemProps {
 
 function TimelineItem({ side, label, date, isEditing, onChange, highlight }: TimelineItemProps) {
     return (
-        <div className={`flex flex-col gap-2 ${side === 'right' ? 'md:items-end md:text-right' : 'md:items-start'} relative`}>
-            {/* Dot on line */}
-            <div className={`hidden md:block absolute top-[6px] w-3 h-3 rounded-full border-2 bg-background z-10 
-                ${highlight ? 'border-primary shadow-[0_0_10px_rgba(var(--primary),0.3)]' : 'border-muted-foreground/30'}
-                ${side === 'right' ? '-left-[calc(1.5rem+7px)]' : '-right-[calc(1.5rem+5px)]'}
-            `} />
-
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+        <div className="flex flex-col gap-1">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
             {isEditing && onChange ? (
-                <input type="date" value={date || ''} onChange={(e) => onChange(e.target.value)} className="bg-muted/30 px-3 py-1.5 rounded-xl border border-border text-sm font-bold focus:outline-none focus:border-primary" />
+                <input type="date" value={date || ''} onChange={(e) => onChange(e.target.value)} className="bg-muted/30 px-2 py-1 rounded-lg border border-border text-xs font-bold focus:outline-none focus:border-primary" />
             ) : (
-                <div className={`text-xl font-black tracking-tight ${highlight ? 'text-primary' : 'text-foreground'}`}>
+                <div className={`text-sm font-black tracking-tight ${highlight ? 'text-primary' : 'text-foreground'}`}>
                     {date ? new Date(date).toLocaleDateString('cs-CZ') : '—'}
                 </div>
             )}

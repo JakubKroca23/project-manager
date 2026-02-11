@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
 import { Upload, Loader2, Search, Database, RefreshCcw, FileSpreadsheet, History, X } from 'lucide-react';
@@ -227,8 +227,34 @@ export default function ProjektyPage() {
         setSearchTags(searchTags.filter(tag => tag !== tagToRemove));
     };
 
+    // Memoize columns to include dynamic custom fields
+    const tableColumns = useMemo(() => {
+        const dynamicColumns: ColumnDef<Project>[] = [];
+        const customKeys = new Set<string>();
+
+        // Collect all custom keys from current project list
+        projects.forEach(p => {
+            if (p.custom_fields) {
+                Object.keys(p.custom_fields).forEach(key => customKeys.add(key));
+            }
+        });
+
+        // Create column definitions for each custom key
+        customKeys.forEach(key => {
+            dynamicColumns.push({
+                accessorFn: (row) => row.custom_fields?.[key] || '-',
+                id: `custom_${key}`,
+                header: key,
+                minSize: 100,
+                cell: ({ getValue }) => <span className="text-muted-foreground">{getValue() as string}</span>
+            });
+        });
+
+        return [...columns, ...dynamicColumns];
+    }, [projects]);
+
     return (
-        <div className="h-full flex flex-col pt-2 bg-background">
+        <div className="h-full flex flex-col bg-background">
             <div className="flex-1 overflow-hidden flex flex-col px-4">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -239,7 +265,7 @@ export default function ProjektyPage() {
                     </div>
                 ) : (
                     <DataTable
-                        columns={columns}
+                        columns={tableColumns}
                         data={filteredProjects}
                         leftToolbar={
                             <div className="flex items-center gap-6 w-full">
@@ -299,6 +325,7 @@ export default function ProjektyPage() {
                         onSortingChange={tableSettings.setSorting}
                         columnSizing={tableSettings.columnSizing}
                         onColumnSizingChange={tableSettings.setColumnSizing}
+                        headerClassName={activeTab === 'military' ? 'bg-emerald-900/40' : 'bg-blue-900/30'}
                     />
                 )}
             </div>

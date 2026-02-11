@@ -92,6 +92,16 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
     const [diffData, setDiffData] = useState<DiffItem[]>([]);
     const [preparedProjects, setPreparedProjects] = useState<any[]>([]);
 
+    // Duplicate handling
+    const [showDuplicates, setShowDuplicates] = useState(false);
+    const [duplicateGroups, setDuplicateGroups] = useState<Record<string, any[]>>({});
+    const [resolutionStrategy, setResolutionStrategy] = useState<'keepLast' | 'keepFirst' | 'manual'>('keepLast');
+
+    // Type Conflict handling
+    const [showTypeConflict, setShowTypeConflict] = useState(false);
+    const [typeConflictGroups, setTypeConflictGroups] = useState<any[]>([]);
+    const [typeConflictAction, setTypeConflictAction] = useState<'skip' | 'overwrite'>('skip');
+
     const { canImport, isLoading: permsLoading } = usePermissions();
 
     // Load last import info on mount
@@ -211,7 +221,9 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
     };
 
     const prepareAndAnalyzeImport = async () => {
-        const missingRequired = PROJECT_FIELDS.filter(f => f.required && !mapping[f.key]);
+        // Validation: Check required fields ONLY if they are not potentially auto-generated
+        // For ID, we now allow it to be missing -> we generate it.
+        const missingRequired = PROJECT_FIELDS.filter(f => f.required && !mapping[f.key] && f.key !== 'id');
         if (missingRequired.length > 0) {
             alert(`Chybí mapování pro povinná pole: ${missingRequired.map(f => f.label).join(', ')}`);
             return;
@@ -223,21 +235,43 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
             const userName = user?.email?.split('@')[0] || 'Neznámý';
 
             // Construct new projects
-            const newProjects = rawData.map((item: any) => {
+            const rawProjects = rawData.map((item: any, index: number) => {
+                const importNotes: string[] = [];
+
+                const getSafeDate = (val: any, fieldLabel: string) => {
+                    const parsed = parseDate(val);
+                    if (parsed && typeof parsed === 'string' && parsed.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        return parsed;
+                    }
+                    if (val && String(val).trim() !== '') {
+                        importNotes.push(`${fieldLabel}: ${val}`);
+                    }
+                    return null;
+                };
+
+                // Generate ID if missing
+                let projectId = item[mapping['id']]?.toString();
+                if (!projectId || projectId.trim() === '') {
+                    // Generate a unique ID: NO-OP-{Timestamp}-{RowIndex}
+                    const timestamp = new Date().getTime().toString().slice(-6);
+                    projectId = `NO-OP-${timestamp}-${index}`;
+                    importNotes.push(`ID vygenerováno automaticky (chybělo v importu)`);
+                }
+
                 const project: any = {
-                    id: item[mapping['id']]?.toString(),
+                    id: projectId,
                     name: item[mapping['name']],
                     customer: item[mapping['customer']] || "-",
                     manager: item[mapping['manager']] || "-",
                     status: "Aktivní",
                     deadline: "-",
-                    closed_at: parseDate(item[mapping['closed_at']]),
+                    closed_at: getSafeDate(item[mapping['closed_at']], "Uzavřeno"),
                     category: cleanNaN(item[mapping['category']]),
                     abra_order: cleanNaN(item[mapping['abra_order']]),
                     abra_project: cleanNaN(item[mapping['abra_project']]),
-                    body_delivery: parseDate(item[mapping['body_delivery']]),
-                    customer_handover: parseDate(item[mapping['customer_handover']]),
-                    chassis_delivery: parseDate(item[mapping['chassis_delivery']]),
+                    body_delivery: getSafeDate(item[mapping['body_delivery']], "Dodání nástavby"),
+                    customer_handover: getSafeDate(item[mapping['customer_handover']], "Předání zákazníkovi"),
+                    chassis_delivery: getSafeDate(item[mapping['chassis_delivery']], "Dodání podvozku"),
                     production_status: cleanNaN(item[mapping['production_status']]),
                     mounting_company: cleanNaN(item[mapping['mounting_company']]),
                     body_setup: cleanNaN(item[mapping['body_setup']]),
@@ -249,24 +283,140 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                     updated_at: new Date().toISOString()
                 };
 
+                if (importNotes.length > 0) {
+                    project.note = importNotes.join('\n');
+                }
+
                 customFields.forEach(col => {
                     const targetKey = renamedFields[col] || col;
                     project.custom_fields[targetKey] = item[col];
                 });
 
-                if (!project.id || !project.name) {
+                if (!project.name) {
                     return null;
                 }
 
                 return project;
-            }).filter((p): p is any => p !== null && p.name && p.id);
+            }).filter((p): p is any => p !== null && p.name); // Filter only by name, allow generated IDs
 
-            if (newProjects.length === 0) {
+            if (rawProjects.length === 0) {
                 throw new Error('Nepodařilo se načíst žádné platné projekty.');
             }
 
+            // Check for duplicates within the file
+            const idGroups: Record<string, any[]> = {};
+            const duplicates: Record<string, any[]> = {};
+            let hasDuplicates = false;
+
+            rawProjects.forEach(p => {
+                if (!idGroups[p.id]) idGroups[p.id] = [];
+                idGroups[p.id].push(p);
+                if (idGroups[p.id].length > 1) {
+                    duplicates[p.id] = idGroups[p.id];
+                    hasDuplicates = true;
+                }
+            });
+
+            if (hasDuplicates) {
+                setDuplicateGroups(duplicates);
+                setPreparedProjects(rawProjects); // Store raw for resolution
+                setShowDuplicates(true); // Show duplicate resolution UI
+                setShowMapping(false);
+                setLoading(false);
+                return; // Stop here, wait for user resolution
+            }
+
+            // --- Check for CROSS-TYPE conflicts ---
+            // We need to fetch existing projects by IDs and check their project_type
+            const ids = rawProjects.map(p => p.id);
+            const { data: existingData } = await supabase.from('projects').select('id, project_type, name').in('id', ids);
+
+            const conflictList: any[] = [];
+            if (existingData) {
+                existingData.forEach(existing => {
+                    // Check if project exists but has DIFFERENT project_type
+                    if (existing.project_type && existing.project_type !== projectType) {
+                        conflictList.push(existing);
+                    }
+                });
+            }
+
+            if (conflictList.length > 0) {
+                setTypeConflictGroups(conflictList);
+                setPreparedProjects(rawProjects);
+                setShowTypeConflict(true);
+                setShowMapping(false);
+                setLoading(false);
+                return;
+            }
+
+            // No duplicates or conflicts, proceed to diff analysis directly
+            await analyzeDiffs(rawProjects);
+
+        } catch (err: any) {
+            console.error('Import analysis error:', err);
+            alert(`Chyba při analýze: ${err.message}`);
+            setLoading(false);
+        }
+    };
+
+    const resolveDuplicates = async () => {
+        setLoading(true);
+        const resolvedProjects: any[] = [];
+
+        // Process all groups
+        // If an ID was unique, it's just one item in the list found by searching rawProjects or rebuilding map
+        // Easier: Iterate over preparedProjects (which contains all raw including duplicates)
+        // actually better to iterate over the unique IDs found in preparedProjects
+
+        const idGroups: Record<string, any[]> = {};
+        preparedProjects.forEach(p => {
+            if (!idGroups[p.id]) idGroups[p.id] = [];
+            idGroups[p.id].push(p);
+        });
+
+        Object.keys(idGroups).forEach(id => {
+            const group = idGroups[id];
+            if (group.length === 1) {
+                resolvedProjects.push(group[0]);
+            } else {
+                // Resolution strategy
+                if (resolutionStrategy === 'keepFirst') {
+                    resolvedProjects.push(group[0]);
+                } else if (resolutionStrategy === 'keepLast') {
+                    resolvedProjects.push(group[group.length - 1]);
+                } else {
+                    // Manual would need complex UI, fallback to keepLast for now if not implemented
+                    resolvedProjects.push(group[group.length - 1]);
+                }
+            }
+        });
+
+        setShowDuplicates(false);
+        await analyzeDiffs(resolvedProjects);
+    };
+
+    const resolveTypeConflicts = async () => {
+        // Filter preparedProjects based on action
+        let filtered = [...preparedProjects];
+
+        if (typeConflictAction === 'skip') {
+            const conflictIds = typeConflictGroups.map(c => c.id);
+            filtered = filtered.filter(p => !conflictIds.includes(p.id));
+        }
+        // If 'overwrite', we keep them. The upsert logic simply takes the object.
+        // However, the object in preparedProjects has project_type = currentType (set during map).
+        // So upsert WILL change the type to the current type. This is "overwrite/move".
+
+        setShowTypeConflict(false);
+        await analyzeDiffs(filtered);
+    };
+
+
+    const analyzeDiffs = async (projectsToAnalyze: any[]) => {
+        try {
             // Fetch existing projects for comparison
-            const ids = newProjects.map(p => p.id);
+            const ids = projectsToAnalyze.map(p => p.id);
             const { data: existingData } = await supabase
                 .from('projects')
                 .select('*')
@@ -277,7 +427,7 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
             // Calculate Diffs
             const diffs: DiffItem[] = [];
 
-            newProjects.forEach(newP => {
+            projectsToAnalyze.forEach(newP => {
                 const oldP = existingMap.get(newP.id);
                 if (!oldP) {
                     diffs.push({ id: newP.id, name: newP.name, changes: [], isNew: true });
@@ -285,14 +435,13 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                     const changes: { field: string; old: any; new: any }[] = [];
 
                     // Compare standard fields
-                    ['name', 'customer', 'manager', 'status', 'production_status'].forEach(key => {
+                    ['name', 'customer', 'manager', 'status', 'production_status', 'project_type'].forEach(key => {
                         if (String(newP[key] || '') !== String(oldP[key] || '')) {
                             changes.push({ field: key, old: oldP[key], new: newP[key] });
                         }
                     });
 
                     // Compare custom fields
-                    // Compare custom fields (Detailed)
                     const oldCustom = oldP.custom_fields || {};
                     const newCustom = newP.custom_fields || {};
                     const allKeys = Array.from(new Set([...Object.keys(oldCustom), ...Object.keys(newCustom)]));
@@ -302,7 +451,6 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                         const newVal = newCustom[key] ?? "-";
 
                         if (String(oldVal) !== String(newVal)) {
-                            // Helper to format object/array if somehow stored there, though usually string/number
                             const fmtOld = typeof oldVal === 'object' ? JSON.stringify(oldVal) : String(oldVal);
                             const fmtNew = typeof newVal === 'object' ? JSON.stringify(newVal) : String(newVal);
                             changes.push({ field: `[EXT] ${key}`, old: fmtOld, new: fmtNew });
@@ -315,18 +463,22 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                 }
             });
 
-            setPreparedProjects(newProjects);
+            setPreparedProjects(projectsToAnalyze);
             setDiffData(diffs);
-            setShowDiff(true); // Open Diff Modal
-            setShowMapping(false); // Close Mapping
+            setShowDiff(true);
             setLoading(false);
-
         } catch (err: any) {
-            console.error('Import analysis error:', err);
-            alert(`Chyba při analýze: ${err.message}`);
+            console.error('Diff analysis error:', err);
+            alert(`Chyba při porovnávání: ${err.message}`);
             setLoading(false);
         }
-    };
+    }
+
+
+
+    // ... existing UI return ...
+    // Need to insert Duplicate Resolution Modal
+
 
     const confirmImport = async () => {
         setLoading(true);
@@ -589,6 +741,128 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                             <button onClick={prepareAndAnalyzeImport} disabled={loading} className="flex items-center justify-center gap-2 px-8 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all">
                                 {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                                 <span>Analyzovat změny</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Duplicate Resolution Modal */}
+            {showDuplicates && (
+                <div className="fixed inset-0 z-[115] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300" />
+                    <div className="relative w-full max-w-2xl bg-card border border-border rounded-3xl shadow-2xl p-8 animate-in zoom-in-95 duration-300">
+                        <div className="text-center mb-6">
+                            <div className="mx-auto w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-4">
+                                <AlertTriangle size={24} />
+                            </div>
+                            <h3 className="text-2xl font-bold text-foreground">Nalezeny duplicity</h3>
+                            <p className="text-sm text-muted-foreground">V importovaném souboru jsou záznamy se stejným ID.</p>
+                        </div>
+
+                        <div className="bg-muted/30 rounded-xl p-4 mb-6 border border-border/50 max-h-60 overflow-y-auto">
+                            {Object.entries(duplicateGroups).map(([id, items]) => (
+                                <div key={id} className="mb-2 last:mb-0 text-xs">
+                                    <div className="font-bold mb-1">ID: {id} <span className="opacity-50">({items.length}x)</span></div>
+                                    <ul className="pl-4 list-disc text-muted-foreground">
+                                        {items.map((item, idx) => (
+                                            <li key={idx}>
+                                                {item.name} <span className="opacity-50 text-[10px]">({item.customer})</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Jak řešit kolize?</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                <button
+                                    onClick={() => setResolutionStrategy('keepLast')}
+                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${resolutionStrategy === 'keepLast' ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border hover:bg-muted'}`}
+                                >
+                                    <span className="font-bold text-xs">Použít poslední výskyt (Doporučeno)</span>
+                                    {resolutionStrategy === 'keepLast' && <CheckCircle size={16} />}
+                                </button>
+                                <button
+                                    onClick={() => setResolutionStrategy('keepFirst')}
+                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${resolutionStrategy === 'keepFirst' ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border hover:bg-muted'}`}
+                                >
+                                    <span className="font-bold text-xs">Použít první výskyt</span>
+                                    {resolutionStrategy === 'keepFirst' && <CheckCircle size={16} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => { setShowDuplicates(false); setLoading(false); }} className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-muted rounded-2xl transition-all border border-border">Zrušit Import</button>
+                            <button onClick={resolveDuplicates} className="px-8 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest rounded-2xl shadow-xl hover:opacity-90 active:scale-[0.98] transition-all">
+                                Vyřešit a Pokračovat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Type Conflict Modal */}
+            {showTypeConflict && (
+                <div className="fixed inset-0 z-[115] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300" />
+                    <div className="relative w-full max-w-2xl bg-card border border-border rounded-3xl shadow-2xl p-8 animate-in zoom-in-95 duration-300">
+                        <div className="text-center mb-6">
+                            <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mb-4">
+                                <AlertTriangle size={24} />
+                            </div>
+                            <h3 className="text-2xl font-bold text-foreground">Konflikt typů projektů</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Nalezeno <span className="font-bold text-foreground">{typeConflictGroups.length}</span> projektů, které již existují v druhé sekci ({projectType === 'civil' ? 'Armáda' : 'Civilní'}).
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                                importem do této sekce dojde k jejich <span className="font-bold text-red-500">PŘESUNU A PŘEPSÁNÍ</span> typu.
+                            </p>
+                        </div>
+
+                        <div className="bg-muted/30 rounded-xl p-4 mb-6 border border-border/50 max-h-60 overflow-y-auto">
+                            {typeConflictGroups.map((item) => (
+                                <div key={item.id} className="mb-2 last:mb-0 text-xs flex justify-between items-center border-b border-border/40 pb-1 last:border-0">
+                                    <span className="font-bold">{item.id}</span>
+                                    <span className="text-muted-foreground">{item.name}</span>
+                                    <span className="text-[10px] bg-muted px-2 py-0.5 rounded uppercase">{item.project_type}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Jak řešit konflikty?</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                <button
+                                    onClick={() => setTypeConflictAction('skip')}
+                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${typeConflictAction === 'skip' ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border hover:bg-muted'}`}
+                                >
+                                    <div className="text-left">
+                                        <div className="font-bold text-xs">Přeskočit konfliktní projekty (Doporučeno)</div>
+                                        <div className="text-[10px] opacity-70">Projekty zůstanou v původní sekci beze změny.</div>
+                                    </div>
+                                    {typeConflictAction === 'skip' && <CheckCircle size={16} />}
+                                </button>
+                                <button
+                                    onClick={() => setTypeConflictAction('overwrite')}
+                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${typeConflictAction === 'overwrite' ? 'bg-red-500/10 border-red-500 text-red-600' : 'bg-background border-border hover:bg-muted'}`}
+                                >
+                                    <div className="text-left">
+                                        <div className="font-bold text-xs">Přepsat a přesunout</div>
+                                        <div className="text-[10px] opacity-70">Projekty se přesunou do aktuální sekce ({projectType === 'civil' ? 'Civil' : 'Armáda'}).</div>
+                                    </div>
+                                    {typeConflictAction === 'overwrite' && <CheckCircle size={16} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => { setShowTypeConflict(false); setLoading(false); }} className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-muted rounded-2xl transition-all border border-border">Zrušit Import</button>
+                            <button onClick={resolveTypeConflicts} className="px-8 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest rounded-2xl shadow-xl hover:opacity-90 active:scale-[0.98] transition-all">
+                                Potvrdit výběr
                             </button>
                         </div>
                     </div>

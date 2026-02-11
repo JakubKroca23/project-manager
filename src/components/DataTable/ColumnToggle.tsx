@@ -43,6 +43,20 @@ export function ColumnToggle<TData>({
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
                             Viditelnost sloupců
                         </div>
+                        <div className="flex px-2 pb-2 gap-2 border-b border-border/50 mb-1">
+                            <button
+                                onClick={() => table.toggleAllColumnsVisible(true)}
+                                className="text-[10px] bg-primary/10 text-primary hover:bg-primary/20 px-2 py-1 rounded font-bold uppercase tracking-wider flex-1"
+                            >
+                                Vše
+                            </button>
+                            <button
+                                onClick={() => table.toggleAllColumnsVisible(false)}
+                                className="text-[10px] bg-muted text-muted-foreground hover:bg-muted/80 px-2 py-1 rounded font-bold uppercase tracking-wider flex-1"
+                            >
+                                Žádné
+                            </button>
+                        </div>
                         {table
                             .getAllColumns()
                             .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
