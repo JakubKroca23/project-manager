@@ -4,25 +4,18 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2, KeyRound } from 'lucide-react';
+import Image from 'next/image';
 
 // --- SVG Logo Component (Refined to match image exactly) ---
 const ContSystemLogo = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 500 160" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M60 20 H180 L195 20 H75 Z" fill="#6b7280" />
-        <path d="M60 32 H170 L185 32 H75 Z" fill="#6b7280" />
-        <path d="M60 44 H160 L175 44 H75 Z" fill="#6b7280" />
-
-        <path d="M60 80 H150 L165 80 H75 Z" fill="#6b7280" />
-        <path d="M60 92 H160 L175 92 H75 Z" fill="#6b7280" />
-
-        <text x="30" y="105" fill="white" style={{ font: 'italic 900 86px sans-serif', fontFamily: 'Arial, Helvetica, sans-serif' }}>
-            ContSystem
-        </text>
-
-        <text x="220" y="140" fill="#0099ff" style={{ font: 'italic 700 24px sans-serif', letterSpacing: '1px' }}>
-            SIMPLE HANDLING
-        </text>
-    </svg>
+    <Image
+        src="/logo.png"
+        alt="ContSystem Logo"
+        width={320}
+        height={85}
+        className={className}
+        priority
+    />
 );
 
 export default function LoginPage() {
