@@ -11,6 +11,8 @@ interface TimelineBarProps {
     endDate: Date;
     timelineStart: Date;
     dayWidth: number;
+    topOffset?: number;
+    isService?: boolean;
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -22,9 +24,12 @@ const parseDate = (dateStr: string | undefined): Date | null => {
 
 const TimelineBar: React.FC<TimelineBarProps> = ({
     id,
+    name,
     project,
     timelineStart,
-    dayWidth
+    dayWidth,
+    topOffset = 0,
+    isService = false
 }) => {
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
@@ -35,6 +40,21 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
 
     // 1. Milníky (body v čase)
     const groupedMilestones = useMemo(() => {
+        if (project.project_type === 'service') {
+            const raw = [
+                { key: 'service_start', date: t_deadline, label: 'Zahájení servisu', class: 'service-start' },
+                { key: 'service_end', date: t_handover, label: 'Ukončení servisu', class: 'service-end' },
+            ].filter(m => m.date !== null);
+
+            const groups: Record<string, any> = {};
+            raw.forEach(m => {
+                const dateKey = m.date!.toISOString().split('T')[0];
+                if (!groups[dateKey]) groups[dateKey] = [];
+                groups[dateKey].push(m);
+            });
+            return groups;
+        }
+
         const raw = [
             { key: 'chassis', date: t_chassis, label: 'Podvozek', class: 'chassis' },
             { key: 'body', date: t_body, label: 'Nástavba', class: 'body' },
@@ -42,17 +62,33 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
             { key: 'deadline', date: t_deadline, label: 'Deadline', class: 'deadline' },
         ].filter(m => m.date !== null);
 
-        const groups: Record<string, typeof raw> = {};
+        const groups: Record<string, any> = {};
         raw.forEach(m => {
             const dateKey = m.date!.toISOString().split('T')[0];
             if (!groups[dateKey]) groups[dateKey] = [];
             groups[dateKey].push(m);
         });
         return groups;
-    }, [t_chassis, t_body, t_handover, t_deadline]);
+    }, [t_chassis, t_body, t_handover, t_deadline, project.project_type]);
 
     // 2. Fáze (plochy v čase)
     const phases = useMemo(() => {
+        if (project.project_type === 'service') {
+            const start = t_deadline;
+            let end = t_handover;
+
+            if (start && !end) {
+                // Výchozí délka 2 dny, pokud chybí konec
+                end = new Date(start);
+                end.setDate(end.getDate() + 2);
+            }
+
+            if (start && end && start < end) {
+                return [{ key: 'service-main', start, end, class: 'phase-service' }];
+            }
+            return [];
+        }
+
         const list: { key: string; start: Date; end: Date; class: string }[] = [];
         const mDates = [t_chassis, t_body, t_handover, t_deadline].filter((d): d is Date => d !== null);
 
@@ -91,15 +127,21 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
 
 
         return list;
-    }, [t_closed, t_chassis, t_body, t_handover, t_deadline]);
+    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type]);
 
     const getDatePos = (date: Date) => {
-        const diff = Math.floor((date.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
+        const diff = (date.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
         return diff * dayWidth;
     };
 
+    const containerStyle: React.CSSProperties = isService ? {
+        top: topOffset || 0,
+        height: 'var(--timeline-row-height)',
+        padding: '2px 0'
+    } : {};
+
     return (
-        <div className="milestones-container">
+        <div className="milestones-container" style={containerStyle}>
             {/* Vykreslení fází (podklad) */}
             {phases.map(p => {
                 const left = getDatePos(p.start);
@@ -112,6 +154,7 @@ const TimelineBar: React.FC<TimelineBarProps> = ({
                         key={`${id}-${p.key}`}
                         className={`timeline-phase ${p.class}`}
                         style={{ left, width }}
+                        title={`${name}${p.key === 'service-main' ? ' (Servis)' : ''}`}
                     />
                 );
             })}

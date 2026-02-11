@@ -36,10 +36,13 @@ const Timeline: React.FC = () => {
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
+        phaseService: { color: '#ef4444', opacity: 0.2, label: 'Servis' },
         milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
+        milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu' },
+        milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu' },
     });
 
     const [outline, setOutline] = useState({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
@@ -56,10 +59,13 @@ const Timeline: React.FC = () => {
         '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
         '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange.color, colors.phaseBufferOrange.opacity),
+        '--phase-service': hexToRgba(colors.phaseService.color, colors.phaseService.opacity),
         '--milestone-chassis': colors.milestoneChassis.color,
         '--milestone-body': colors.milestoneBody.color,
         '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
+        '--milestone-service-start': colors.milestoneServiceStart.color,
+        '--milestone-service-end': colors.milestoneServiceEnd.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--timeline-row-height': `${rowHeight}px`,
     } as React.CSSProperties;
@@ -74,6 +80,9 @@ const Timeline: React.FC = () => {
             milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
+            phaseService: { color: '#ef4444', opacity: 0.2, label: 'Servis' },
+            milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu' },
+            milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu' },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
@@ -380,6 +389,51 @@ const Timeline: React.FC = () => {
         });
     }, [projects, searchQuery, typeFilter]);
 
+    // Výpočet "pruhů" pro servisní výjezdy k automatickému rozbalení při překryvu
+    const serviceLanes = useMemo(() => {
+        const services = filteredProjects.filter(p => p.project_type === 'service');
+        const sorted = [...services].sort((a, b) => {
+            const startA = parseDate(a.deadline)?.getTime() || 0;
+            const startB = parseDate(b.deadline)?.getTime() || 0;
+            return startA - startB;
+        });
+
+        const lanes: any[][] = [];
+        const serviceMap = new Map<string, { lane: number }>();
+
+        sorted.forEach(service => {
+            const start = parseDate(service.deadline)?.getTime() || 0;
+            let end = parseDate(service.customer_handover)?.getTime();
+            if (start && !end) {
+                end = start + 2 * 24 * 60 * 60 * 1000;
+            }
+
+            let laneIdx = -1;
+            for (let i = 0; i < lanes.length; i++) {
+                const lastInLane = lanes[i][lanes[i].length - 1];
+                const lastStart = parseDate(lastInLane.deadline)?.getTime() || 0;
+                let lastEnd = parseDate(lastInLane.customer_handover)?.getTime();
+                if (lastStart && !lastEnd) lastEnd = lastStart + 2 * 24 * 60 * 60 * 1000;
+
+                // Přidáme malou mezeru (12h) mezi projekty v jednom pruhu
+                if (start > (lastEnd || 0) + (12 * 60 * 60 * 1000)) {
+                    laneIdx = i;
+                    break;
+                }
+            }
+
+            if (laneIdx === -1) {
+                laneIdx = lanes.length;
+                lanes.push([service]);
+            } else {
+                lanes[laneIdx].push(service);
+            }
+            serviceMap.set(service.id, { lane: laneIdx });
+        });
+
+        return { lanes, serviceMap };
+    }, [filteredProjects]);
+
     const jumpToToday = () => {
         if (scrollContainerRef.current) {
             const today = new Date();
@@ -452,6 +506,7 @@ const Timeline: React.FC = () => {
                         <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
                         <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
                         <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-service)', border: '1px dashed rgba(59, 130, 246, 0.4)' }}></div> Servis</div>
                     </div>
                 </div>
 
@@ -627,7 +682,10 @@ const Timeline: React.FC = () => {
                         <div className="timeline-rows">
                             {/* SERVICE ROW */}
                             {filteredProjects.some(p => p.project_type === 'service') && (
-                                <div className="timeline-row bg-muted/30">
+                                <div
+                                    className="timeline-row bg-muted/30"
+                                    style={{ height: Math.max(1, serviceLanes.lanes.length) * rowHeight }}
+                                >
                                     <Link
                                         href="/projekty?type=service"
                                         className="project-info-sticky bg-muted/30 font-semibold border-r border-border hover:bg-muted/50 transition-colors"
@@ -654,6 +712,8 @@ const Timeline: React.FC = () => {
                                                     endDate={new Date()}
                                                     timelineStart={timelineRange.start}
                                                     dayWidth={dayWidth}
+                                                    isService={true}
+                                                    topOffset={(serviceLanes.serviceMap.get(service.id)?.lane || 0) * rowHeight}
                                                 />
                                             ))}
                                     </div>

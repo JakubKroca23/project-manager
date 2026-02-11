@@ -19,6 +19,9 @@
   --milestone-body: #a855f7;
   --milestone-handover: #3b82f6;
   --milestone-deadline: #ef4444;
+  --phase-service: rgba(239, 68, 68, 0.2);
+  --milestone-service-start: #ef4444;
+  --milestone-service-end: #b91c1c;
 
   --element-border: none;
 }
@@ -365,6 +368,11 @@
   background-color: var(--phase-buffer-orange);
 }
 
+.phase-service {
+  background-color: var(--phase-service);
+  border: 1px dashed rgba(59, 130, 246, 0.4);
+}
+
 /* Orange - Revize */
 
 /* MILESTONES AS FULL BLOCKS */
@@ -426,6 +434,18 @@
 /* Blue */
 .milestone-part.deadline {
   background-color: var(--milestone-deadline);
+}
+
+.milestone-part.service-start {
+  background-color: var(--milestone-service-start);
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  /* Triangle pointing down */
+}
+
+.milestone-part.service-end {
+  background-color: var(--milestone-service-end);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  /* Triangle pointing up */
 }
 
 /* Red */
