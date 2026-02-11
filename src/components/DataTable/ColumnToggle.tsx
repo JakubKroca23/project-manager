@@ -31,9 +31,9 @@ export function ColumnToggle<TData>({
         <div className="relative inline-block text-left" ref={ref}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
             >
-                <Settings2 size={14} />
+                <Settings2 size={12} />
                 <span>Sloupce</span>
             </button>
 

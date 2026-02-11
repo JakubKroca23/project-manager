@@ -217,24 +217,20 @@ export function DataTable<TData, TValue>({
         const container = tableContainerRef.current;
         if (!container) return;
 
-        const availableWidth = container.clientWidth;
         const visibleColumns = table.getVisibleLeafColumns();
         const columnCount = visibleColumns.length;
-
         if (columnCount === 0) return;
 
-        const perColumnWidth = Math.max(
-            60,
-            Math.floor(availableWidth / columnCount)
-        );
+        // Get the actual available width (subtract borders: 1px per column + 1px table border)
+        const availableWidth = container.clientWidth - (columnCount + 1);
+        const perColumnWidth = Math.max(50, Math.floor(availableWidth / columnCount));
 
-        // Reset all column sizes
-        table.resetColumnSizing();
+        // Distribute any remaining pixels to the first columns
+        const remainder = availableWidth - (perColumnWidth * columnCount);
 
-        // Set each column to equal width
         const newSizing: Record<string, number> = {};
-        visibleColumns.forEach(col => {
-            newSizing[col.id] = perColumnWidth;
+        visibleColumns.forEach((col, i) => {
+            newSizing[col.id] = perColumnWidth + (i < remainder ? 1 : 0);
         });
         table.setColumnSizing(newSizing);
     }, [table]);
@@ -246,29 +242,29 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 pb-3">
-                <div className="flex flex-wrap items-center justify-between gap-4 px-1">
+            <div className="flex-shrink-0 pb-2">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                     {/* Left: Search + Metadata */}
-                    <div className="flex-1 flex items-center gap-4">
+                    <div className="flex-1 flex items-center gap-3">
                         {leftToolbar}
                     </div>
 
                     {/* Right: Action Group */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         <button
                             onClick={handleAutoFit}
-                            className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
-                            title="Přizpůsobit šířku sloupců aktuální velikosti okna"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
+                            title="Přizpůsobit šířku sloupců"
                         >
-                            <Maximize2 size={14} />
+                            <Maximize2 size={12} />
                             <span className="hidden sm:inline">Přizpůsobit</span>
                         </button>
                         <button
                             onClick={handleResetSizing}
-                            className="flex items-center gap-2 px-4 py-2 bg-background/50 hover:bg-accent border border-border rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98] backdrop-blur-sm"
-                            title="Obnovit výchozí šířky sloupců"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
+                            title="Obnovit výchozí šířky"
                         >
-                            <RefreshCcw size={14} />
+                            <RefreshCcw size={12} />
                             <span className="hidden sm:inline">Obnovit</span>
                         </button>
                         <ColumnToggle table={table} />
@@ -300,7 +296,7 @@ export function DataTable<TData, TValue>({
                                                     <DraggableHeader key={header.id} header={header} isSorted={!!sortDir}>
                                                         {header.isPlaceholder ? null : (
                                                             <div
-                                                                className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1 hover:text-foreground transition-colors whitespace-nowrap' : 'whitespace-nowrap'}
+                                                                className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1 hover:text-foreground transition-colors break-words leading-tight' : 'break-words leading-tight'}
                                                                 onClick={header.column.getToggleSortingHandler()}
                                                             >
                                                                 {flexRender(
@@ -349,15 +345,17 @@ export function DataTable<TData, TValue>({
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
                                             onClick={() => onRowClick?.(row.original)}
-                                            className={`border-b transition-all duration-200 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] active:scale-[0.998]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted`}
+                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted`}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <td
                                                     key={cell.id}
-                                                    className="px-3 py-2.5 align-middle truncate border-r border-border/50 last:border-r-0 group-hover/row:border-primary/10 transition-colors"
+                                                    className="px-3 py-1.5 align-middle border-r border-border/30 last:border-r-0 group-hover/row:border-primary/10 transition-colors text-[13px]"
                                                     style={{ width: cell.column.getSize(), maxWidth: cell.column.getSize() }}
                                                 >
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    <div className="line-clamp-2 break-words">
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </div>
                                                 </td>
                                             ))}
                                         </tr>

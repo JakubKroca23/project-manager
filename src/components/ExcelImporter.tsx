@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
-import { Upload, Loader2, CheckCircle, AlertCircle, Lock, X, Table as TableIcon, Settings2, Save, FileSpreadsheet, PlusCircle, AlertTriangle, ArrowRight, Edit2 } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertCircle, Lock, X, Table as TableIcon, Settings2, Save, FileSpreadsheet, PlusCircle, AlertTriangle, ArrowRight, Edit2, Clock } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const cleanNaN = (val: any) => val === "NaN" || val === null || val === undefined ? undefined : val;
@@ -64,10 +64,9 @@ const PROJECT_FIELDS: ProjectField[] = [
 
 type ImportSource = 'raynet' | 'group' | 'custom';
 
-export default function ExcelImporter({ onImportSuccess, projectType }: { onImportSuccess: () => void, projectType: 'civil' | 'military' }) {
+export default function ExcelImporter({ onImportSuccess, projectType, lastImport }: { onImportSuccess: () => void, projectType: 'civil' | 'military', lastImport?: { date: string; user: string } | null }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
 
     // Mapping state
     const [showMapping, setShowMapping] = useState(false);
@@ -104,15 +103,6 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
 
     const { canImport, isLoading: permsLoading } = usePermissions();
 
-    // Load last import info on mount
-    useEffect(() => {
-        const stored = localStorage.getItem('lastImportInfo');
-        if (stored) {
-            try {
-                setLastImport(JSON.parse(stored));
-            } catch { /* ignore */ }
-        }
-    }, []);
 
     const findBestMatch = (field: ProjectField, columns: string[]) => {
         const normalizedAliases = field.defaultAliases.map(a => a.toLowerCase().replace(/[^\w\s]/gi, ''));
@@ -532,8 +522,7 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
                 });
             }
 
-            localStorage.setItem('lastImportInfo', JSON.stringify(importInfo));
-            setLastImport(importInfo);
+
 
             setMessage({ type: 'success', text: `Importováno ${preparedProjects.length} projektů.` });
             setImportSuccess(true);
@@ -568,32 +557,37 @@ export default function ExcelImporter({ onImportSuccess, projectType }: { onImpo
     if (permsLoading) return <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />;
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-                {canImport ? (
-                    <button
-                        onClick={() => setShowSourceSelect(true)}
-                        className={`flex items-center gap-2 px-4 py-2 border border-blue-500/20 rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-blue-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all bg-[#0099ee] hover:bg-[#00aaff] text-white
-                        ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loading}
-                    >
-                        {loading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                        <span>{loading ? 'Zpracovávám...' : 'Importovat Excel'}</span>
-                    </button>
-                ) : (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-muted-foreground text-[10px] border border-dashed border-border opacity-60">
-                        <Lock size={14} />
-                        <span className="font-bold uppercase tracking-widest">Import uzamčen</span>
-                    </div>
-                )}
+        <div className="flex items-center gap-2">
+            {canImport ? (
+                <button
+                    onClick={() => setShowSourceSelect(true)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all active:scale-[0.97] hover:shadow-md bg-[#0099ee] hover:bg-[#00aaff] text-white
+                    ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={loading}
+                >
+                    {loading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                    <span>{loading ? 'Import...' : 'Import'}</span>
+                </button>
+            ) : (
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-lg text-muted-foreground text-[9px] border border-dashed border-border opacity-50">
+                    <Lock size={10} />
+                    <span className="font-bold uppercase tracking-widest">Uzamčeno</span>
+                </div>
+            )}
 
-                {message && (
-                    <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}>
-                        {message.type === 'success' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
-                        {message.text}
-                    </span>
-                )}
-            </div>
+            {lastImport && (
+                <span className="hidden lg:flex items-center gap-1 text-[9px] text-muted-foreground/60">
+                    <Clock size={9} />
+                    Poslední import: {lastImport.date} · {lastImport.user}
+                </span>
+            )}
+
+            {message && (
+                <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}>
+                    {message.type === 'success' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                    {message.text}
+                </span>
+            )}
 
             {/* Source Selection Modal */}
             {showSourceSelect && (
