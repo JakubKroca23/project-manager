@@ -19,6 +19,10 @@ export default function ProfilePage() {
         }
         return true;
     });
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -30,6 +34,35 @@ export default function ProfilePage() {
         const newVal = !notifications;
         setNotifications(newVal);
         localStorage.setItem('notifications_enabled', String(newVal));
+    };
+
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordStatus({ type: null, message: '' });
+
+        if (newPassword !== confirmPassword) {
+            setPasswordStatus({ type: 'error', message: 'Hesla se neshodují.' });
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setPasswordStatus({ type: 'error', message: 'Heslo musí mít alespoň 6 znaků.' });
+            return;
+        }
+
+        setIsChangingPassword(true);
+
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            setPasswordStatus({ type: 'success', message: 'Heslo bylo úspěšně změněno.' });
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error: any) {
+            setPasswordStatus({ type: 'error', message: error.message || 'Chyba při změně hesla.' });
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
     if (isLoading) {
@@ -315,6 +348,65 @@ export default function ProfilePage() {
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Zabezpečení - Změna hesla */}
+                                <div className="bg-muted/10 border border-border rounded-2xl p-5 space-y-5">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-widest">
+                                        <Shield size={16} className="text-primary" />
+                                        <span>Zabezpečení</span>
+                                    </div>
+
+                                    <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+                                        <div className="space-y-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Nové heslo</label>
+                                                <div className="relative">
+                                                    <KeyRound size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                                    <input
+                                                        type="password"
+                                                        value={newPassword}
+                                                        onChange={(e) => setNewPassword(e.target.value)}
+                                                        className="w-full bg-muted/50 border border-border/40 rounded-xl px-9 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/30"
+                                                        placeholder="Zadejte nové heslo"
+                                                        minLength={6}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Potvrzení hesla</label>
+                                                <div className="relative">
+                                                    <CheckCircle size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                                    <input
+                                                        type="password"
+                                                        value={confirmPassword}
+                                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                                        className="w-full bg-muted/50 border border-border/40 rounded-xl px-9 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/30"
+                                                        placeholder="Zadejte heslo znovu"
+                                                        minLength={6}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {passwordStatus.message && (
+                                            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${passwordStatus.type === 'success' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'}`}>
+                                                {passwordStatus.type === 'success' ? <CheckCircle size={12} /> : <AlertTriangle size={12} />}
+                                                {passwordStatus.message}
+                                            </div>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={isChangingPassword || !newPassword || !confirmPassword}
+                                            className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {isChangingPassword ? <Loader2 size={12} className="animate-spin" /> : <Shield size={12} />}
+                                            Změnit heslo
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
 

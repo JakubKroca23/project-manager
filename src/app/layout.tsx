@@ -8,7 +8,7 @@ import AuthGuard from '@/components/AuthGuard';
 const inter = Inter({ subsets: ['latin', 'latin-ext'] });
 
 export const metadata = {
-  title: 'Nexus Project Manager',
+  title: 'Plánování projektů Contsystem',
   description: 'Profi Project Management Dashboard',
 }
 
