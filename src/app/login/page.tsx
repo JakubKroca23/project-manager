@@ -73,11 +73,11 @@ export default function LoginPage() {
 
             if (loginError) throw loginError;
 
-            router.push('/');
-            router.refresh();
+            // Use hard navigation to ensure session cookies are properly set
+            // router.push + router.refresh can cause race conditions on Vercel
+            window.location.href = '/';
         } catch (err: any) {
             setError(err.message || 'Chyba při přihlašování');
-        } finally {
             setLoading(false);
         }
     };
