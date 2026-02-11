@@ -27,11 +27,22 @@ export function ColumnToggle<TData>({
         };
     }, [ref]);
 
+    // Calculate column groups
+    const allColumns = table.getAllColumns();
+
+    const basicColumns = allColumns.filter(
+        (column) => typeof column.accessorFn !== "undefined" && column.getCanHide() && !column.id.startsWith('custom_')
+    );
+
+    const customColumns = allColumns.filter(
+        (column) => typeof column.accessorFn !== "undefined" && column.getCanHide() && column.id.startsWith('custom_')
+    );
+
     return (
         <div className="relative inline-block text-left" ref={ref}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 hover:text-blue-700 border border-blue-500/20 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
             >
                 <Settings2 size={12} />
                 <span>Sloupce</span>
@@ -43,6 +54,8 @@ export function ColumnToggle<TData>({
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
                             Viditelnost sloupců
                         </div>
+
+                        {/* Global Toggles */}
                         <div className="flex px-2 pb-2 gap-2 border-b border-border/50 mb-1">
                             <button
                                 onClick={() => table.toggleAllColumnsVisible(true)}
@@ -57,29 +70,106 @@ export function ColumnToggle<TData>({
                                 Žádné
                             </button>
                         </div>
-                        {table
-                            .getAllColumns()
-                            .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-                            .map((column) => {
-                                return (
+
+                        {/* Basic Columns Group */}
+                        {basicColumns.length > 0 && (
+                            <>
+                                <div className="flex items-center justify-between px-2 py-1.5 bg-muted/20">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        Základní
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                                        checked={basicColumns.every(c => c.getIsVisible())}
+                                        ref={input => {
+                                            if (input) {
+                                                const all = basicColumns.every(c => c.getIsVisible());
+                                                const some = basicColumns.some(c => c.getIsVisible());
+                                                input.indeterminate = !all && some;
+                                            }
+                                        }}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            const currentVisibility = table.getState().columnVisibility;
+                                            const newVisibility = { ...currentVisibility };
+                                            basicColumns.forEach(c => {
+                                                newVisibility[c.id] = checked;
+                                            });
+                                            table.setColumnVisibility(newVisibility);
+                                        }}
+                                    />
+                                </div>
+                                {basicColumns.map((column) => (
                                     <label
                                         key={column.id}
-                                        className="flex items-center px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm"
+                                        className="flex items-center px-2 py-1.5 text-xs cursor-pointer hover:bg-accent rounded-sm pl-4"
                                     >
                                         <input
                                             type="checkbox"
                                             checked={column.getIsVisible()}
                                             onChange={(e) => column.toggleVisibility(!!e.target.checked)}
-                                            className="mr-2 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                            className="mr-2 h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
                                         />
                                         <span className="capitalize text-popover-foreground">
-                                            {/* Try to get header title or fallback to ID */}
-                                            {/* @ts-ignore */}
-                                            {column.columnDef.header as string || column.id}
+                                            {typeof column.columnDef.header === 'string'
+                                                ? column.columnDef.header
+                                                : column.id}
                                         </span>
                                     </label>
-                                );
-                            })}
+                                ))}
+                            </>
+                        )}
+
+                        {/* Additional Columns Group */}
+                        {customColumns.length > 0 && (
+                            <>
+                                <div className="flex items-center justify-between px-2 py-1.5 mt-2 bg-muted/20 border-t border-border/50">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        Dodatečné
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                                        checked={customColumns.every(c => c.getIsVisible())}
+                                        ref={input => {
+                                            if (input) {
+                                                const all = customColumns.every(c => c.getIsVisible());
+                                                const some = customColumns.some(c => c.getIsVisible());
+                                                input.indeterminate = !all && some;
+                                            }
+                                        }}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            const currentVisibility = table.getState().columnVisibility;
+                                            const newVisibility = { ...currentVisibility };
+                                            customColumns.forEach(c => {
+                                                newVisibility[c.id] = checked;
+                                            });
+                                            table.setColumnVisibility(newVisibility);
+                                        }}
+                                    />
+                                </div>
+                                {customColumns.map((column) => (
+                                    <label
+                                        key={column.id}
+                                        className="flex items-center px-2 py-1.5 text-xs cursor-pointer hover:bg-accent rounded-sm pl-4"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={column.getIsVisible()}
+                                            onChange={(e) => column.toggleVisibility(!!e.target.checked)}
+                                            className="mr-2 h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                        <span className="capitalize text-popover-foreground truncate" title={column.id}>
+                                            {typeof column.columnDef.header === 'string'
+                                                ? column.columnDef.header
+                                                : column.id.replace('custom_', '')}
+                                        </span>
+                                    </label>
+                                ))}
+                            </>
+                        )}
                     </div>
                 </div>
             )}

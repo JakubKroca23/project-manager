@@ -437,22 +437,66 @@
 /* PHASE COLORS - Full row backgrounds - Sytější odstíny */
 .phase-initial {
   background-color: var(--phase-initial);
+  position: relative;
+}
+
+/* Gradient transition: Initial -> Mounting (Right side of Initial) */
+.phase-initial::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(3 * var(--day-width));
+  background: linear-gradient(to right, transparent, var(--phase-mounting));
+  pointer-events: none;
 }
 
 /* Light Blue - Zahájení */
+/* Light Blue - Zahájení */
 .phase-mounting {
   background-color: var(--phase-mounting);
+  position: relative;
+}
+
+/* Gradient transition: Mounting -> Buffer Yellow (Right side of Mounting) */
+.phase-mounting::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(3 * var(--day-width));
+  background: linear-gradient(to right, transparent, var(--phase-buffer-yellow));
+  pointer-events: none;
 }
 
 /* Green - Příprava */
+/* Green - Příprava */
 .phase-buffer-yellow {
   background-color: var(--phase-buffer-yellow);
+  position: relative;
+}
+
+/* Gradient transition: Yellow -> Orange (Right side of Yellow) */
+.phase-buffer-yellow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(3 * var(--day-width));
+  background: linear-gradient(to right, transparent, var(--phase-buffer-orange));
+  pointer-events: none;
 }
 
 /* Yellow - Montáž */
 .phase-buffer-orange {
   background-color: var(--phase-buffer-orange);
+  position: relative;
 }
+
+
 
 .phase-service {
   background-color: var(--phase-service);

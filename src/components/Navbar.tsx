@@ -51,13 +51,39 @@ const Navbar = () => {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
 
-    // Determine current active category label
-    const activeCategory =
-        typeParam === 'military' ? 'ARMÁDNÍ' :
-            (typeParam === 'civil' ? 'CIVILNÍ' :
-                (pathname === '/servis' ? 'SERVIS' : null));
-
     const [userProfile, setUserProfile] = useState<any>(null);
+    const [inferredType, setInferredType] = useState<string | null>(null);
+
+    // Determine current active category label
+    const activeType = typeParam || inferredType;
+    const activeCategory =
+        activeType === 'military' ? 'ARMÁDNÍ' :
+            (activeType === 'civil' ? 'CIVILNÍ' :
+                (activeType === 'service' || pathname === '/servis' ? 'SERVIS' : null));
+
+    useEffect(() => {
+        const fetchInferredType = async () => {
+            const projectDetailMatch = pathname?.match(/^\/projekty\/([^\/?]+)/);
+            const isProjectDetail = !!projectDetailMatch && pathname !== '/projekty';
+
+            if (isProjectDetail) {
+                const projectId = projectDetailMatch[1];
+                const { data } = await supabase
+                    .from('projects')
+                    .select('project_type')
+                    .eq('id', projectId)
+                    .single();
+
+                if (data?.project_type) {
+                    setInferredType(data.project_type);
+                }
+            } else {
+                setInferredType(null);
+            }
+        };
+
+        fetchInferredType();
+    }, [pathname]);
 
     useEffect(() => {
         const getUser = async () => {
@@ -137,9 +163,9 @@ const Navbar = () => {
                     {/* Navigation Items - Left/Center */}
                     <div className="flex items-center gap-1">
                         {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname === '/servis');
-                            const isMilitary = item.name === 'ZAKÁZKY' && typeParam === 'military';
-                            const isService = item.name === 'ZAKÁZKY' && pathname === '/servis';
+                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && (pathname === '/servis' || pathname?.startsWith('/projekty/')));
+                            const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
+                            const isService = item.name === 'ZAKÁZKY' && (pathname === '/servis' || activeType === 'service');
 
                             // Determine active color based on type
                             let activeColor = item.color;
@@ -170,9 +196,9 @@ const Navbar = () => {
                                                 <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : undefined }} />
                                             </div>
                                             {activeCategory && isActive && (
-                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-10 flex justify-center pointer-events-none">
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-4px] z-10 flex justify-center pointer-events-none">
                                                     <span
-                                                        className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-2 py-1 rounded-md bg-[#1a1a1a] border shadow-xl whitespace-nowrap"
+                                                        className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-full bg-[#1a1a1a] border shadow-xl whitespace-nowrap"
                                                         style={{
                                                             color: activeColor,
                                                             borderColor: `${activeColor}33`,
@@ -213,9 +239,9 @@ const Navbar = () => {
                                                     if (isSubService && item.serviceColor) subActiveColor = item.serviceColor;
 
                                                     const isSubActive =
-                                                        (sub.href === '/servis' && pathname === '/servis') ||
-                                                        (sub.href.includes('type=military') && typeParam === 'military') ||
-                                                        (sub.href.includes('type=civil') && typeParam === 'civil');
+                                                        (sub.href === '/servis' && (pathname === '/servis' || activeType === 'service')) ||
+                                                        (sub.href.includes('type=military') && activeType === 'military') ||
+                                                        (sub.href.includes('type=civil') && activeType === 'civil');
 
                                                     return (
                                                         <Link

@@ -68,18 +68,14 @@ const Timeline: React.FC = () => {
         military: true,
         service: true
     });
-    const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
-    const [isLoading, setIsLoading] = useState(true);
 
-    const toggleSectorCollapse = (sectorId: string) => {
-        setCollapsedSectors(prev => ({ ...prev, [sectorId]: !prev[sectorId] }));
-    };
 
     const toggleType = (type: string) => {
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
     };
 
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
+    const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
 
     // Color Configuration State
@@ -200,15 +196,9 @@ const Timeline: React.FC = () => {
         setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
         setStartY(e.pageY - scrollContainerRef.current.offsetTop);
         setScrollLeft(scrollContainerRef.current.scrollLeft);
-        setScrollTop(scrollContainerRef.current.scrollTop);
-
-        // Init physics tracking
-        lastPos.current = { x: e.pageX, y: e.pageY };
-        lastTime.current = performance.now();
-        velocity.current = { x: 0, y: 0 };
-
         scrollContainerRef.current.classList.add('is-dragging');
     };
+
 
     const handleMouseLeave = () => {
         if (isDragging) {
@@ -229,8 +219,18 @@ const Timeline: React.FC = () => {
             scrollContainerRef.current.classList.remove('is-dragging');
         }
 
-        // Start inertia if velocity is significant
-        startInertia();
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.classList.remove('is-dragging');
+        }
+    };
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        // Update scrollTop for animations
+        // Use rAF to avoid thrashing
+        const top = e.currentTarget.scrollTop;
+        requestAnimationFrame(() => {
+            setScrollTop(top);
+        });
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -238,55 +238,13 @@ const Timeline: React.FC = () => {
         e.preventDefault();
 
         const x = e.pageX - scrollContainerRef.current.offsetLeft;
-        const y = e.pageY - scrollContainerRef.current.offsetTop;
         const walkX = (x - startX);
-        const walkY = (y - startY);
 
         scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        scrollContainerRef.current.scrollTop = scrollTop - walkY;
-
-        // Calculate velocity
-        const now = performance.now();
-        const dt = now - lastTime.current;
-        if (dt > 0) {
-            const vX = (e.pageX - lastPos.current.x) / dt;
-            const vY = (e.pageY - lastPos.current.y) / dt;
-
-            // Smooth velocity a bit
-            velocity.current = {
-                x: vX, // * 0.8 + velocity.current.x * 0.2, // Simple exponential smoothing if needed
-                y: vY
-            };
-
-            lastPos.current = { x: e.pageX, y: e.pageY };
-            lastTime.current = now;
-        }
+        // scrollContainerRef.current.scrollTop = scrollTop - walkY; // Disabled vertical drag
     };
 
-    const startInertia = () => {
-        const FRICTION = 0.95;
-        const STOP_THRESHOLD = 0.1;
 
-        const animate = () => {
-            if (isDraggingRef.current || !scrollContainerRef.current) return;
-
-            // Apply friction
-            velocity.current.x *= FRICTION;
-            velocity.current.y *= FRICTION;
-
-            // Apply movement
-            scrollContainerRef.current.scrollLeft -= velocity.current.x * 16; // approx 16ms frame
-            scrollContainerRef.current.scrollTop -= velocity.current.y * 16;
-
-            // Check if we should stop
-            if (Math.abs(velocity.current.x) > STOP_THRESHOLD || Math.abs(velocity.current.y) > STOP_THRESHOLD) {
-                requestRef.current = requestAnimationFrame(animate);
-            }
-        };
-
-        cancelAnimationFrame(requestRef.current);
-        requestRef.current = requestAnimationFrame(animate);
-    };
 
     // Cleanup on unmount
     useEffect(() => {
@@ -328,8 +286,10 @@ const Timeline: React.FC = () => {
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
+            const target = e.target as Element;
+
             // Handle vertical zoom on left column
-            if ((e.target as Element).closest('.project-info-sticky')) {
+            if (target.closest('.project-info-sticky')) {
                 e.preventDefault();
                 e.stopPropagation();
                 const delta = e.deltaY > 0 ? -2 : 2;
@@ -337,53 +297,53 @@ const Timeline: React.FC = () => {
                 return;
             }
 
-            if (e.ctrlKey) {
+            // Check if hovering over the timeline header area (months/weeks/days)
+            const isOverHeader = target.closest('.timeline-grid-header-multi') || target.closest('.timeline-header-actions');
+
+            if (e.ctrlKey || isOverHeader) {
+                // If Ctrl is pressed OR we are over the header -> ZOOM
                 e.preventDefault();
 
-                // NATIVE ZOOM (Day Width)
-                const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, dayWidthRef.current * delta));
+                // NATIVE ZOOM (Day Width) - logic shared
+                const delta = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out/in
+
+                // Jemnější faktor zoomu pokud jsme jen nad headerem bez Ctrl
+                const effectiveDelta = !e.ctrlKey && isOverHeader ? (e.deltaY > 0 ? 0.95 : 1.05) : delta;
+
+                const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, dayWidthRef.current * effectiveDelta));
 
                 // Calculate mouse position relative to timeline start for centering zoom
                 const rect = container.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left - 250; // 250 is sticky column width
+                // If zooming via header, we might want to center on mouse X
+                // But we need to account for sticky column width (250px) if we are in the scrollable area
+                // Actually, the mouseX relative to container content is what matters.
+
+                let mouseX = e.clientX - rect.left;
+
+                // Adjust for sticky column if we are not over it
+                // Container scrollLeft starts after the sticky column visually, but logically includes it?
+                // No, the sticky column is inside the container. 
+                // Let's rely on scrollLeft + offset.
+
                 const scrollLeft = container.scrollLeft;
-                const dateAtMouse = (scrollLeft + mouseX) / dayWidthRef.current;
+                const pointDays = (scrollLeft + mouseX) / dayWidthRef.current;
 
                 setDayWidth(newWidth);
 
                 // Prepare restore scroll
                 zoomFocus.current = {
-                    pointDays: dateAtMouse,
+                    pointDays: pointDays,
                     pixelOffset: mouseX
                 };
                 return;
             }
 
-
-
-            // Pokud uživatel drží Shift, necháme nativní horizontální scroll
+            // Otherwise, default scrolling behavior (Vertical Scroll)
+            // Shift = Horizontal Scroll (Native)
             if (e.shiftKey) return;
 
-            e.preventDefault();
-
-            const currentWidth = dayWidthRef.current;
-
-            // Jemný faktor zoomu
-            const zoomFactor = 1.1;
-            const direction = e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
-            const next = Math.min(Math.max(currentWidth * direction, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
-
-            if (next !== currentWidth) {
-                const rect = container.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-
-                // Pozice myši v timeline (včetně scrollu)
-                const pointDays = (container.scrollLeft + mouseX) / currentWidth;
-
-                zoomFocus.current = { pointDays, pixelOffset: mouseX };
-                setDayWidth(next);
-            }
+            // Allow default vertical scroll
+            return;
         };
 
         container.addEventListener('wheel', handleWheel, { passive: false });
@@ -753,6 +713,7 @@ const Timeline: React.FC = () => {
                 onMouseLeave={handleMouseLeave}
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
+                onScroll={handleScroll}
             >
                 <div className="timeline-content">
                     <TimelineGrid
@@ -771,17 +732,14 @@ const Timeline: React.FC = () => {
                                         if (index >= visibleSectors.length) return null;
 
                                         const sector = visibleSectors[index];
-                                        const isCollapsed = collapsedSectors[sector.id];
                                         const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
-
                                         return (
                                             <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
                                                 {/* HEADER */}
                                                 <div
-                                                    className="timeline-sector-header-row cursor-pointer group/header"
-                                                    onClick={() => toggleSectorCollapse(sector.id)}
+                                                    className="timeline-sector-header-row group/header"
                                                     style={{
-                                                        background: !isCollapsed ? `color-mix(in srgb, ${sector.color} 4%, white)` : undefined,
+                                                        background: `color-mix(in srgb, ${sector.color} 4%, white)`, // Opaque background to hide scrolling content
                                                         top: topOffset,
                                                         zIndex: 145 - index
                                                     }}
@@ -803,25 +761,73 @@ const Timeline: React.FC = () => {
                                                                     ({sector.projects.length})
                                                                 </span>
                                                             </div>
-                                                            <div className={`transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`} style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <ChevronRight size={14} className="text-muted-foreground group-hover/header:text-foreground" />
-                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="sector-grid-line" />
 
-                                                    {/* HOT ZONES */}
-                                                    {isCollapsed && (
-                                                        <div className="absolute inset-0 pointer-events-none hot-zones-container">
-                                                            {sector.projects.map(project => {
-                                                                const sDate = project.project_type === 'service'
-                                                                    ? (parseDate(project.deadline) || new Date())
-                                                                    : (parseDate(project.created_at) || new Date());
-                                                                const eDate = project.project_type === 'service'
-                                                                    ? (parseDate(project.customer_handover) || sDate)
-                                                                    : (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+                                                    {/* HOT ZONES - CONDITIONAL VISIBILITY */}
+                                                    <div className="absolute inset-0 pointer-events-none hot-zones-container">
+                                                        {sector.projects.map(project => {
+                                                            // Calculate Threshold:
+                                                            // StartY of this row (relative to content top)
+                                                            // - StickyBottom position
 
-                                                                return (
+                                                            // We basically need to know the index of this project in the global list of rows? 
+                                                            // No, we can calculate it relative to this sector.
+                                                            // Flow Y position:
+                                                            // MainHeader (H_main)
+                                                            // + Sum of previous sectors (Header + Rows) -> Let's approximate or compute.
+
+                                                            // Computing "global index" is expensive inside map. 
+                                                            // Let's rely on sector index and project index.
+
+                                                            // GlobalY of Row = H_main + H_sec + (rows_before_in_sector * H_row) + (previous_sectors_height)
+                                                            // But recursion makes "previous_sectors_height" simply the current flow Y passed down?
+
+                                                            // Let's create a helper that computes offsets roughly or precise?
+                                                            // Precise is best.
+                                                            // We know:
+                                                            // Header Height = headerHeight
+                                                            // Sector Header = 36
+                                                            // Row = rowHeight
+
+                                                            // Previous sectors: 0 to index-1
+                                                            let previousRowsCount = 0;
+                                                            for (let k = 0; k < index; k++) {
+                                                                previousRowsCount += visibleSectors[k].projects.length;
+                                                            }
+
+                                                            // Current project index in this sector
+                                                            const pIndex = sector.projects.findIndex(p => p.id === project.id);
+
+                                                            // Total Headers before this row: (index + 1) sector headers + Main Header
+                                                            const yComponents = headerHeight + ((index + 1) * 36) + (previousRowsCount * rowHeight) + (pIndex * rowHeight);
+
+                                                            // Sticky Bottom of THIS sector header:
+                                                            const myHeaderBottom = headerHeight + ((index + 1) * 36);
+
+                                                            // Trigger when Row Top < Header Bottom
+                                                            // Row Visual Top = yComponents - scrollTop
+                                                            // Trigger: yComponents - scrollTop < myHeaderBottom
+                                                            // scrollTop > yComponents - myHeaderBottom
+                                                            // scrollTop > (previousRowsCount * rowHeight) + (pIndex * rowHeight)
+
+                                                            const triggerScroll = (previousRowsCount * rowHeight) + (pIndex * rowHeight);
+                                                            const isVisible = scrollTop > triggerScroll;
+
+                                                            const sDate = project.project_type === 'service'
+                                                                ? (parseDate(project.deadline) || new Date())
+                                                                : (parseDate(project.created_at) || new Date());
+                                                            const eDate = project.project_type === 'service'
+                                                                ? (parseDate(project.customer_handover) || sDate)
+                                                                : (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+
+                                                            return (
+                                                                <div
+                                                                    key={`hot-wrapper-${project.id}`}
+                                                                    className="absolute inset-0 transition-opacity duration-300"
+                                                                    style={{ opacity: isVisible ? 1 : 0 }}
+                                                                >
                                                                     <TimelineBar
                                                                         key={`hot-${project.id}`}
                                                                         id={project.id}
@@ -835,14 +841,14 @@ const Timeline: React.FC = () => {
                                                                         isService={project.project_type === 'service'}
                                                                         isCollapsed={true}
                                                                     />
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
 
                                                 {/* ROWS */}
-                                                {!isCollapsed && sector.projects.map((project) => (
+                                                {sector.projects.map((project) => (
                                                     <div key={project.id} className="timeline-row">
                                                         <Link
                                                             href={project.project_type === 'service' ? '/servis' : `/projekty/${project.id}`}

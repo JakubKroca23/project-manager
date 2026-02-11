@@ -112,6 +112,8 @@ export default function ProfilePage() {
         setEditedPermissions({
             timeline: user.permissions?.timeline !== false,
             projects: user.permissions?.projects !== false,
+            projects_civil: user.permissions?.projects_civil !== false,
+            projects_military: user.permissions?.projects_military !== false,
             service: user.permissions?.service !== false,
             production: user.permissions?.production !== false,
             purchasing: user.permissions?.purchasing !== false,
@@ -578,13 +580,31 @@ export default function ProfilePage() {
                         <div className="space-y-3">
                             {[
                                 { key: 'timeline', label: 'Timeline (Kalendář)' },
-                                { key: 'projects', label: 'Zakázky (Projekty)' },
-                                { key: 'service', label: 'Servis' },
+                                { key: 'projects', label: 'Zakázky (Projekty)', isParent: true },
+                                { key: 'projects_civil', label: 'Civilní projekty', isSub: true },
+                                { key: 'projects_military', label: 'Armádní projekty', isSub: true },
+                                { key: 'service', label: 'Servisní projekty', isSub: true },
                                 { key: 'production', label: 'Výroba' },
                                 { key: 'purchasing', label: 'Nákup' },
-                            ].map(({ key, label }) => (
-                                <div key={key} className="flex items-center justify-between bg-muted/30 p-3 rounded-xl border border-border/30">
-                                    <span className="text-sm font-medium">{label}</span>
+                            ].map(({ key, label, isParent, isSub }) => (
+                                <div
+                                    key={key}
+                                    className={cn(
+                                        "flex items-center justify-between p-3 rounded-xl border transition-all",
+                                        isParent ? "bg-primary/5 border-primary/20 mt-2" :
+                                            isSub ? "bg-muted/10 border-border/10 ml-6 scale-[0.98]" :
+                                                "bg-muted/30 border-border/30"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        {isSub && <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />}
+                                        <span className={cn(
+                                            "text-sm",
+                                            isParent ? "font-bold text-primary" : "font-medium"
+                                        )}>
+                                            {label}
+                                        </span>
+                                    </div>
                                     <button
                                         onClick={() => setEditedPermissions(prev => ({ ...prev, [key]: !prev[key] }))}
                                         className={`relative w-10 h-6 rounded-full transition-all duration-200 ${editedPermissions[key] ? 'bg-primary' : 'bg-gray-400'}`}

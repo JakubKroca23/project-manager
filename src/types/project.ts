@@ -22,6 +22,7 @@ export interface Project {
     mounting_company?: string;      // Montážní společnost
     body_setup?: string;            // Nástavba nastavení
     serial_number?: string;         // Výrobní číslo
+    service_duration?: string;      // Délka servisu (dny)
 
     // Interní pole systému
     quantity: number;

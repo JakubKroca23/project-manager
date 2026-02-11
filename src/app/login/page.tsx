@@ -160,7 +160,7 @@ export default function LoginPage() {
                 {/* Logo Area */}
                 <div className="flex flex-col items-center mb-8">
                     <ContSystemLogo className="w-80 h-auto drop-shadow-2xl mb-2" />
-                    <h2 className="text-xl font-medium text-white/70 tracking-tight">Plánování projektů Contsystem</h2>
+                    <h2 className="text-xl font-black text-white/90 tracking-[0.2em] uppercase">Plánování zakázek</h2>
                 </div>
 
                 <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-8">

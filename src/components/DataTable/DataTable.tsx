@@ -245,22 +245,17 @@ export function DataTable<TData, TValue>({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-shrink-0 pb-2">
-                {toolbarSubtext && (
-                    <div className="flex justify-end px-1 mb-1">
-                        {toolbarSubtext}
-                    </div>
-                )}
-                <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                <div className="flex flex-wrap items-center gap-3 px-1">
                     {/* Left: Search + Metadata */}
-                    <div className="flex-1 flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                         {leftToolbar}
                     </div>
 
-                    {/* Right: Action buttons */}
-                    <div className="flex items-center gap-1.5">
+                    {/* Left-Aligned Actions */}
+                    <div className="flex items-center gap-1.5 ml-0">
                         <button
                             onClick={handleAutoFit}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 hover:text-emerald-700 border border-emerald-500/20 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
                             title="Přizpůsobit šířku sloupců"
                         >
                             <Maximize2 size={12} />
@@ -268,7 +263,7 @@ export function DataTable<TData, TValue>({
                         </button>
                         <button
                             onClick={handleResetSizing}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 hover:text-rose-700 border border-rose-500/20 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
                             title="Obnovit výchozí šířky"
                         >
                             <RefreshCcw size={12} />
@@ -276,6 +271,11 @@ export function DataTable<TData, TValue>({
                         </button>
                         <ColumnToggle table={table} />
                         {toolbar}
+                        {toolbarSubtext && (
+                            <div className="ml-2 flex items-center">
+                                {toolbarSubtext}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -379,6 +379,6 @@ export function DataTable<TData, TValue>({
                     </DndContext>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

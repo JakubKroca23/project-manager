@@ -10,6 +10,7 @@ import { useTableSettings } from '@/hooks/useTableSettings';
 
 import { Project } from '@/types/project';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 
 interface ImportInfo {
@@ -270,8 +271,27 @@ export default function ProjektyPage() {
                         data={filteredProjects}
                         leftToolbar={
                             <div className="flex items-center gap-3 w-full">
+                                {/* Compact Count - Styled like Navbar Active Pill */}
+                                <div className="hidden md:flex items-center gap-1" title="Zobrazeno / Celkem projektů">
+                                    <span
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all",
+                                            activeTab === 'military'
+                                                ? "bg-[#1a1a1a] text-emerald-500 border-emerald-500/20 shadow-emerald-500/10"
+                                                : "bg-[#1a1a1a] text-blue-500 border-blue-500/20 shadow-blue-500/10"
+                                        )}
+                                    >
+                                        <Database size={10} className="opacity-80" />
+                                        <span>
+                                            {filteredProjects.length}
+                                            <span className="opacity-50 mx-0.5">/</span>
+                                            {tabProjects.length}
+                                        </span>
+                                    </span>
+                                </div>
+
                                 {/* Search */}
-                                <div className="relative group max-w-xs flex-1">
+                                <div className="relative group max-w-xs flex-1" title="Hledat lze podle: Názvu, ID, Zákazníka, Manažera, Stavu, Výrobního čísla, Abra kódů a dalších vlastních polí.">
                                     <div className="flex items-center gap-1.5 w-full min-h-[30px] px-2.5 py-0.5 bg-muted/20 border border-border/60 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 focus-within:border-primary/40 transition-all flex-wrap">
                                         <Search className="text-muted-foreground/50 group-focus-within:text-primary transition-colors flex-shrink-0" size={12} />
 
@@ -293,15 +313,6 @@ export default function ProjektyPage() {
                                             onKeyDown={handleKeyDown}
                                         />
                                     </div>
-                                </div>
-
-                                {/* Compact Count */}
-                                <div className="hidden md:flex items-center gap-1 text-[10px]">
-                                    <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50 border border-border/40 text-muted-foreground font-semibold">
-                                        <Database size={10} />
-                                        {filteredProjects.length}
-                                        <span className="opacity-50">/ {tabProjects.length}</span>
-                                    </span>
                                 </div>
                             </div>
                         }

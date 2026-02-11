@@ -100,10 +100,11 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             const start = startDate;
             let end = endDate;
 
-            // Zajištění minimálního trvání pro viditelnost (pokud jsou data stejná nebo chybí)
-            if (start.getTime() === end.getTime()) {
+            // Pokud máme start, vypočteme konec podle délky trvání (pokud není zadán handover)
+            if (start && (!end || start.getTime() === end.getTime())) {
+                const duration = project.service_duration ? parseInt(project.service_duration) : 1;
                 end = new Date(start);
-                end.setDate(end.getDate() + 1);
+                end.setDate(end.getDate() + duration);
             }
 
             if (start && end && start <= end) {
@@ -167,7 +168,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             padding: '2px 0'
         } : {}),
         ...(isCollapsed ? {
-            opacity: 0.2, // Hot zones effect
+            // opacity: 0.2, // Removed global opacity
             pointerEvents: 'none',
             zIndex: 1
         } : {})
@@ -181,12 +182,28 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const right = getDatePos(p.end);
                 const width = right - left;
                 if (width <= 0) return null;
+                if (isCollapsed && p.class === 'phase-initial') return null; // Hide initial phase in hot zones
+
+                // Specific opacity for stacked view
+                let opacityStyle: React.CSSProperties = {};
+                if (isCollapsed) {
+                    if (p.class === 'phase-mounting') opacityStyle = { opacity: 0.2, zIndex: 1 }; // Příprava: 20%, vespod
+                    if (p.class === 'phase-buffer-yellow') opacityStyle = { opacity: 0.5, zIndex: 2 }; // Montáž: 50%, střední vrstva
+                    if (p.class === 'phase-buffer-orange') {
+                        opacityStyle = {
+                            opacity: 0.5,
+                            zIndex: 3, // Revize: 50%, nejvyšší vrstva fází
+                            background: 'linear-gradient(to right, #facc15, #fb923c)' // Gradient Yellow -> Orange
+                        };
+                    }
+                    if (p.class === 'phase-service') opacityStyle = { opacity: 0.5, zIndex: 2 }; // Servis: 50%
+                }
 
                 return (
                     <div
                         key={`${id}-${p.key}`}
                         className={`timeline-phase ${p.class} flex items-center px-2 overflow-hidden`}
-                        style={{ left, width }}
+                        style={{ left, width, ...opacityStyle }}
                         title={`${name}${p.key === 'service-main' ? ' (Servis)' : ''}`}
                     >
                         {p.key === 'service-main' && width > 40 && (
@@ -209,7 +226,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         className="milestone-cell"
                         style={{
                             left: mLeft,
-                            width: dayWidth
+                            width: dayWidth,
+                            opacity: isCollapsed ? 1 : 1 // Milníky: 100%
                         }}
                     >
                         {ms.map((m: IMilestone) => (
