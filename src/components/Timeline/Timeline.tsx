@@ -60,7 +60,6 @@ const Timeline: React.FC = () => {
         '--milestone-body': colors.milestoneBody.color,
         '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
-        '--milestone-deadline': colors.milestoneDeadline.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--timeline-row-height': `${rowHeight}px`,
     } as React.CSSProperties;
