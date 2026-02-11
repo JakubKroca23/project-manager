@@ -557,7 +557,7 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
     if (permsLoading) return <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />;
 
     return (
-        <div className="flex items-center gap-2">
+        <>
             {canImport ? (
                 <button
                     onClick={() => setShowSourceSelect(true)}
@@ -573,13 +573,6 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                     <Lock size={10} />
                     <span className="font-bold uppercase tracking-widest">Uzamčeno</span>
                 </div>
-            )}
-
-            {lastImport && (
-                <span className="hidden lg:flex items-center gap-1 text-[9px] text-muted-foreground/60">
-                    <Clock size={9} />
-                    Poslední import: {lastImport.date} · {lastImport.user}
-                </span>
             )}
 
             {message && (
@@ -925,6 +918,6 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

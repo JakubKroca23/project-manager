@@ -23,29 +23,29 @@ const columns: ColumnDef<Project>[] = [
     {
         accessorKey: 'id',
         header: 'Kód',
-        minSize: 60,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('id')}</span>,
     },
     {
         accessorKey: 'name',
         header: 'Název',
-        minSize: 120,
+        minSize: 30,
         cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
         accessorKey: 'customer',
         header: 'Klient',
-        minSize: 100,
+        minSize: 30,
     },
     {
         accessorKey: 'manager',
         header: 'Manažer',
-        minSize: 100,
+        minSize: 30,
     },
     {
         accessorKey: 'status',
         header: 'Status',
-        minSize: 80,
+        minSize: 30,
         cell: ({ row }) => (
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
                 {row.getValue('status')}
@@ -55,57 +55,57 @@ const columns: ColumnDef<Project>[] = [
     {
         accessorKey: 'production_status',
         header: 'Status Výroby',
-        minSize: 120,
+        minSize: 30,
     },
     {
         accessorKey: 'chassis_delivery',
         header: 'Dodání Podvozku',
-        minSize: 130,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('chassis_delivery') || '-'}</span>,
     },
     {
         accessorKey: 'body_delivery',
         header: 'Dodání Nástavby',
-        minSize: 130,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('body_delivery') || '-'}</span>,
     },
     {
         accessorKey: 'customer_handover',
         header: 'Předání',
-        minSize: 100,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('customer_handover') || '-'}</span>,
     },
     {
         accessorKey: 'abra_project',
         header: 'ABRA Zakázka',
-        minSize: 120,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('abra_project') || '-'}</span>,
     },
     {
         accessorKey: 'mounting_company',
         header: 'Montáž',
-        minSize: 100,
+        minSize: 30,
     },
     {
         accessorKey: 'category',
         header: 'Kategorie',
-        minSize: 100,
+        minSize: 30,
     },
     {
         accessorKey: 'body_setup',
         header: 'Nastavení Nástavby',
-        minSize: 150,
+        minSize: 30,
     },
     {
         accessorKey: 'closed_at',
         header: 'Uzavřeno',
-        minSize: 50,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('closed_at') || '-'}</span>,
     },
     {
         accessorKey: 'serial_number',
         header: 'VIN / VČ',
-        minSize: 50,
+        minSize: 30,
         cell: ({ row }) => <span>{row.getValue('serial_number') || '-'}</span>,
     },
 ];
@@ -222,7 +222,7 @@ export default function ProjektyPage() {
                 accessorFn: (row) => row.custom_fields?.[key] || '-',
                 id: `custom_${key}`,
                 header: key,
-                minSize: 100,
+                minSize: 30,
                 cell: ({ getValue }) => <span className="text-muted-foreground">{getValue() as string}</span>
             });
         });
@@ -281,7 +281,13 @@ export default function ProjektyPage() {
                                 </div>
                             </div>
                         }
-                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} projectType={activeTab} lastImport={lastImport} />}
+                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} projectType={activeTab} />}
+                        toolbarSubtext={lastImport ? (
+                            <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium">
+                                <Database size={10} />
+                                Poslední import: {lastImport.date} · {lastImport.user}
+                            </span>
+                        ) : null}
                         onRowClick={(row) => router.push(`/projekty/${row.id}`)}
                         searchValue={searchTerm}
                         columnOrder={tableSettings.columnOrder}
@@ -292,7 +298,7 @@ export default function ProjektyPage() {
                         onSortingChange={tableSettings.setSorting}
                         columnSizing={tableSettings.columnSizing}
                         onColumnSizingChange={tableSettings.setColumnSizing}
-                        headerClassName={activeTab === 'military' ? 'bg-emerald-900/40' : 'bg-blue-900/30'}
+                        headerClassName={activeTab === 'military' ? 'bg-emerald-100 text-emerald-900' : 'bg-blue-100 text-blue-900'}
                     />
                 )}
             </div>

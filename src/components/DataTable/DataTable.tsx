@@ -87,6 +87,7 @@ interface DataTableProps<TData, TValue> {
     onColumnSizingChange?: (sizing: ColumnSizingState) => void;
     onRowClick?: (row: TData) => void;
     headerClassName?: string;
+    toolbarSubtext?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -106,6 +107,7 @@ export function DataTable<TData, TValue>({
     onColumnSizingChange,
     onRowClick,
     headerClassName,
+    toolbarSubtext,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -243,13 +245,18 @@ export function DataTable<TData, TValue>({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-shrink-0 pb-2">
+                {toolbarSubtext && (
+                    <div className="flex justify-end px-1 mb-1">
+                        {toolbarSubtext}
+                    </div>
+                )}
                 <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                     {/* Left: Search + Metadata */}
                     <div className="flex-1 flex items-center gap-3">
                         {leftToolbar}
                     </div>
 
-                    {/* Right: Action Group */}
+                    {/* Right: Action buttons */}
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={handleAutoFit}
@@ -285,7 +292,7 @@ export function DataTable<TData, TValue>({
                             className="w-full text-xs text-left caption-bottom table-fixed"
                             style={{ width: table.getTotalSize() }}
                         >
-                            <thead className={`backdrop-blur-sm border-b-2 border-border sticky top-0 z-10 shadow-sm ${headerClassName || 'bg-secondary/90'}`}>
+                            <thead className={`border-b-2 border-border sticky top-0 z-10 shadow-sm ${headerClassName || 'bg-secondary'}`}>
                                 <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
                                     {table.getHeaderGroups().map((headerGroup) => (
                                         <tr key={headerGroup.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
