@@ -163,7 +163,18 @@
   z-index: 50;
   /* Z-index pro hlavičku */
   background: var(--background);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 4px solid var(--muted-foreground);
+}
+
+.header-cell.day.is-month-start {
+  border-left: 2px solid var(--foreground);
+  font-weight: 800;
+  background-color: color-mix(in srgb, var(--muted), transparent 50%);
+}
+
+.timeline-grid-column.is-month-start {
+  border-left: 2px solid var(--border);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.02), transparent 5px);
 }
 
 .timeline-grid-content {
@@ -389,7 +400,8 @@
   flex: 1;
   align-items: center;
   overflow-x: auto;
-  scrollbar-width: none; /* hide scrollbar for cleaner look */
+  scrollbar-width: none;
+  /* hide scrollbar for cleaner look */
 }
 
 .timeline-legend::-webkit-scrollbar {

@@ -121,7 +121,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                             return (
                                 <div
                                     key={`d-${idx}`}
-                                    className={`header-cell day ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''}`}
+                                    className={`header-cell day ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''}`}
                                     style={{
                                         width: dayWidth,
                                         fontSize: dayWidth < 20 ? '0.55rem' : '0.65rem'
@@ -141,7 +141,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                     {days.map((day, idx) => (
                         <div
                             key={idx}
-                            className={`timeline-grid-column ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''}`}
+                            className={`timeline-grid-column ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''}`}
                             style={{ width: dayWidth }}
                         />
                     ))}
