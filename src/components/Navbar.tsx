@@ -15,11 +15,11 @@ const navItems = [
         name: 'ZAKÁZKY',
         icon: Briefcase,
         href: '/projekty',
-        color: '#90caf9',
-        militaryColor: '#a5d6a7',
-        serviceColor: '#ce93d8', // Added specific color for service submenu
+        color: '#0277bd', // Saturated Civil Blue
+        militaryColor: '#2e7d32', // Deep Military Green
+        serviceColor: '#8e24aa', // Saturated Service Purple
         submenu: [
-            { name: 'SERVIS', href: '/servis' }, // Moved here
+            { name: 'SERVIS', href: '/servis' },
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
             { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
         ]
@@ -131,13 +131,18 @@ const Navbar = () => {
         <nav className="sticky top-0 z-50 w-full">
             <div className="mx-auto max-w-5xl px-4">
                 <div
-                    className="flex h-12 items-center justify-between gap-1 rounded-b-xl px-4 shadow-xl"
-                    style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #333' }}
+                    className="flex h-12 items-center justify-between gap-1 rounded-b-xl px-4 shadow-xl bg-[#1a1a1a] border-b border-[#333]"
                 >
                     {/* Navigation Items - Left/Center */}
-                    <div className="flex items-center gap-1">
-                        {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && (pathname === '/servis' || pathname?.startsWith('/projekty/')));
+                    <div className="flex h-full items-center mr-auto">
+                        {navItems.filter(item => {
+                            if (item.name === 'TIMELINE') return checkPerm('timeline') !== false;
+                            if (item.name === 'ZAKÁZKY') return checkPerm('projects') !== false || checkPerm('service') !== false;
+                            if (item.name === 'VÝROBA') return checkPerm('production') !== false;
+                            if (item.name === 'NÁKUP') return checkPerm('nakup') !== false;
+                            return true;
+                        }).map((item) => {
+                            const isActive = pathname === item.href || (item.submenu && item.submenu.some(sub => pathname === sub.href || (searchParams.get('type') && sub.href.includes(searchParams.get('type')!)))) || (item.name === 'ZAKÁZKY' && inferredType);
                             const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
                             const isService = item.name === 'ZAKÁZKY' && (pathname === '/servis' || activeType === 'service');
 
@@ -197,16 +202,14 @@ const Navbar = () => {
                                                 className="bg-[#1a1a1a] rounded-md shadow-2xl px-1.5 py-1 flex flex-row items-center gap-0.5 whitespace-nowrap min-w-max border border-[#333] mt-[-1px]"
                                             >
                                                 {item.submenu.map((sub) => {
-                                                    // Check submenu permissions if needed. 
-                                                    // For now, if user has access to Parent 'ZAKÁZKY' (projects), they see the submenu.
-                                                    // But we might want granular control: 'service' inside submenu might link to permission 'service'.
-
                                                     const isSubMilitary = sub.name === 'ARMÁDNÍ';
                                                     const isSubService = sub.name === 'SERVIS';
+                                                    const isSubCivil = sub.name === 'CIVILNÍ';
 
                                                     // Logic to hide specific submenu items based on permissions
                                                     if (isSubService && checkPerm('service') === false) return null;
-                                                    // We could add 'military' / 'civil' permissions later if needed
+                                                    if (isSubMilitary && checkPerm('projects_military') === false) return null;
+                                                    if (isSubCivil && checkPerm('projects_civil') === false) return null;
 
                                                     let subActiveColor = item.color;
                                                     if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;

@@ -201,7 +201,6 @@
 
 .timeline-grid-column.is-month-start {
   border-left: 2px solid var(--border);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.02), transparent 5px);
 }
 
 .timeline-grid-content {
@@ -441,16 +440,7 @@
 }
 
 /* Gradient transition: Initial -> Mounting (Right side of Initial) */
-.phase-initial::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-mounting));
-  pointer-events: none;
-}
+
 
 /* Light Blue - Zahájení */
 /* Light Blue - Zahájení */
@@ -460,16 +450,7 @@
 }
 
 /* Gradient transition: Mounting -> Buffer Yellow (Right side of Mounting) */
-.phase-mounting::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-buffer-yellow));
-  pointer-events: none;
-}
+
 
 /* Green - Příprava */
 /* Green - Příprava */
@@ -479,16 +460,7 @@
 }
 
 /* Gradient transition: Yellow -> Orange (Right side of Yellow) */
-.phase-buffer-yellow::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-buffer-orange));
-  pointer-events: none;
-}
+
 
 /* Yellow - Montáž */
 .phase-buffer-orange {

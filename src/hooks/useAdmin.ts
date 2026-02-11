@@ -28,14 +28,40 @@ export interface UserRequest {
     metadata?: any;
 }
 
+export interface AdminLog {
+    id: string;
+    admin_id: string;
+    admin_email: string;
+    action: string;
+    target_user_id?: string;
+    target_user_email?: string;
+    details?: string;
+    created_at: string;
+}
+
 const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
 
 export function useAdmin() {
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
     const [userRequests, setUserRequests] = useState<UserRequest[]>([]);
+    const [adminLogs, setAdminLogs] = useState<AdminLog[]>([]);
     const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+
+    const logAdminAction = useCallback(async (action: string, targetUser?: { id: string, email: string }, details?: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        await supabase.from('admin_logs').insert({
+            admin_id: user.id,
+            admin_email: user.email,
+            action,
+            target_user_id: targetUser?.id,
+            target_user_email: targetUser?.email,
+            details: details || ''
+        });
+    }, []);
 
     const fetchProfiles = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -59,7 +85,7 @@ export function useAdmin() {
             setCurrentUserProfile(currentProfile);
         }
 
-        // If admin, fetch all profiles and user_requests
+        // If admin, fetch all profiles, user_requests, and logs
         if (isUserAdmin) {
             // Profiles
             const { data: allProfiles, error: profileError } = await supabase
@@ -81,9 +107,33 @@ export function useAdmin() {
             if (requests && !requestError) {
                 setUserRequests(requests);
             }
+
+            // Admin Logs Initial Load
+            const { data: logs, error: logError } = await supabase
+                .from('admin_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (logs && !logError) {
+                setAdminLogs(logs);
+            }
+
+            // Set up Realtime Subscription for Logs
+            const subscription = supabase
+                .channel('admin_logs_changes')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'admin_logs' }, (payload) => {
+                    const newLog = payload.new as AdminLog;
+                    setAdminLogs(prev => [newLog, ...prev].slice(0, 50));
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(subscription);
+            };
         }
         setIsLoading(false);
-    }, []);
+    }, [isAdmin]); // Added isAdmin as dependency or check how it's used
 
     useEffect(() => {
         fetchProfiles();
@@ -93,6 +143,7 @@ export function useAdmin() {
         if (!isAdmin) return;
 
         try {
+            const targetUser = profiles.find(p => p.id === userId);
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -104,6 +155,11 @@ export function useAdmin() {
 
             if (!error) {
                 setProfiles(prev => prev.map(p => p.id === userId ? { ...p, can_import: canImport, access_requested: false } : p));
+                await logAdminAction(
+                    'Změna import oprávnění',
+                    targetUser ? { id: targetUser.id, email: targetUser.email } : undefined,
+                    `Nový stav: ${canImport ? 'Povoleno' : 'Zakázáno'}`
+                );
             } else {
                 console.error('Failed to update permission:', error);
             }
@@ -116,6 +172,7 @@ export function useAdmin() {
         if (!isAdmin) return;
 
         try {
+            const targetUser = profiles.find(p => p.id === userId);
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -126,6 +183,11 @@ export function useAdmin() {
 
             if (!error) {
                 setProfiles(prev => prev.map(p => p.id === userId ? { ...p, permissions: newPermissions } : p));
+                await logAdminAction(
+                    'Změna systémových oprávnění',
+                    targetUser ? { id: targetUser.id, email: targetUser.email } : undefined,
+                    `Změněna práva v modulu Oprávnění`
+                );
                 return true;
             } else {
                 console.error('Failed to update user permissions:', error);
@@ -141,6 +203,7 @@ export function useAdmin() {
         if (!isAdmin) return;
 
         try {
+            const targetUser = profiles.find(p => p.id === userId);
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -151,6 +214,10 @@ export function useAdmin() {
 
             if (!error) {
                 setProfiles(prev => prev.map(p => p.id === userId ? { ...p, password_reset_requested: false } : p));
+                await logAdminAction(
+                    'Resetování hesla hotovo',
+                    targetUser ? { id: targetUser.id, email: targetUser.email } : undefined
+                );
             } else {
                 console.error('Failed to reset password request:', error);
             }
@@ -163,6 +230,7 @@ export function useAdmin() {
         if (!isAdmin) return;
 
         try {
+            const request = userRequests.find(r => r.id === requestId);
             const { error } = await supabase
                 .from('user_requests')
                 .update({
@@ -173,6 +241,10 @@ export function useAdmin() {
 
             if (!error) {
                 setUserRequests(prev => prev.filter(r => r.id !== requestId));
+                await logAdminAction(
+                    status === 'processed' ? 'Schválení žádosti' : 'Zamítnutí žádosti',
+                    request ? { id: request.id, email: request.email } : undefined
+                );
             }
         } catch (err) {
             console.error('Error processing user request:', err);
@@ -182,6 +254,7 @@ export function useAdmin() {
     return {
         profiles,
         userRequests,
+        adminLogs,
         currentUserProfile,
         isAdmin,
         isLoading,
@@ -189,6 +262,7 @@ export function useAdmin() {
         updateUserPermissions,
         resetPasswordRequest,
         processUserRequest,
+        fetchProfiles, // Export fetchProfiles directly
         refresh: fetchProfiles
     };
 }

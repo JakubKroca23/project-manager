@@ -13,9 +13,13 @@ import {
     X,
     RotateCcw,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Loader2,
+    ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from 'sonner';
 
 // Rozsah plynulého zoomu (šířka dne v px)
 const MIN_DAY_WIDTH = 2;   // Roční přehled
@@ -70,9 +74,33 @@ const Timeline: React.FC = () => {
     });
 
 
+    const { checkPerm, isLoading: permsLoading } = usePermissions();
+
     const toggleType = (type: string) => {
+        // Prevent toggling if user doesn't have permission
+        let hasPerm = true;
+        if (type === 'civil') hasPerm = checkPerm('projects_civil');
+        if (type === 'military') hasPerm = checkPerm('projects_military');
+        if (type === 'service') hasPerm = checkPerm('service');
+
+        if (!hasPerm) {
+            toast.error(`Nemáte oprávnění pro přístup k teto sekci.`);
+            return;
+        }
+
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
     };
+
+    // Initialize activeTypes based on permissions
+    useEffect(() => {
+        if (!permsLoading) {
+            setActiveTypes({
+                civil: checkPerm('projects_civil'),
+                military: checkPerm('projects_military'),
+                service: checkPerm('service')
+            });
+        }
+    }, [permsLoading, checkPerm]);
 
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
     const [isLoading, setIsLoading] = useState(true);
@@ -107,7 +135,7 @@ const Timeline: React.FC = () => {
 
     const customStyles = {
         '--timeline-header-height': `${headerHeight}px`,
-        '--timeline-sector-height': '36px',
+        '--timeline-sector-height': `${rowHeight + 4}px`,
         '--phase-initial': hexToRgba(colors.phaseInitial.color, colors.phaseInitial.opacity),
         '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
@@ -196,6 +224,7 @@ const Timeline: React.FC = () => {
         setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
         setStartY(e.pageY - scrollContainerRef.current.offsetTop);
         setScrollLeft(scrollContainerRef.current.scrollLeft);
+        setScrollTop(scrollContainerRef.current.scrollTop);
         scrollContainerRef.current.classList.add('is-dragging');
     };
 
@@ -238,10 +267,12 @@ const Timeline: React.FC = () => {
         e.preventDefault();
 
         const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const y = e.pageY - scrollContainerRef.current.offsetTop;
         const walkX = (x - startX);
+        const walkY = (y - startY);
 
         scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        // scrollContainerRef.current.scrollTop = scrollTop - walkY; // Disabled vertical drag
+        scrollContainerRef.current.scrollTop = scrollTop - walkY;
     };
 
 
@@ -387,9 +418,17 @@ const Timeline: React.FC = () => {
     const filteredProjects = useMemo((): Project[] => {
         let filtered = projects;
 
-        // Filtr podle aktivních typů
+        // Filtr podle aktivních typů A OPRÁVNĚNÍ
         filtered = filtered.filter((p: Project) => {
             const type = p.project_type || 'civil';
+
+            // Hard check against permissions first
+            let hasPerm = true;
+            if (type === 'civil') hasPerm = checkPerm('projects_civil');
+            else if (type === 'military') hasPerm = checkPerm('projects_military');
+            else if (type === 'service') hasPerm = checkPerm('service');
+
+            if (!hasPerm) return false;
             return activeTypes[type] === true;
         });
 
@@ -461,10 +500,27 @@ const Timeline: React.FC = () => {
 
     const isCompact = dayWidth < 18;
 
-    if (isLoading) {
+    if (isLoading || permsLoading) {
         return (
-            <div className="timeline-container">
-                <div className="timeline-loading-spinner">Načítám časovou osu...</div>
+            <div className="timeline-container loading-state">
+                <div className="timeline-loading-spinner flex flex-col items-center gap-3">
+                    <Loader2 className="animate-spin text-primary" size={32} />
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Sestavuji časovou osu...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!checkPerm('timeline')) {
+        return (
+            <div className="timeline-container flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-3xl border border-border/40 shadow-inner">
+                <div className="flex flex-col items-center gap-4 max-w-sm text-center p-12">
+                    <ShieldAlert size={64} className="text-red-500 opacity-20" />
+                    <div className="space-y-2">
+                        <h3 className="text-xl font-black text-foreground uppercase tracking-widest">Přístup odepřen</h3>
+                        <p className="text-sm italic text-muted-foreground">Nemáte oprávnění k prohlížení časové osy. Kontaktujte prosím administrátora.</p>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -485,10 +541,10 @@ const Timeline: React.FC = () => {
 
                     <div className="type-filters flex items-center gap-4 ml-6">
                         {[
-                            { id: 'service', label: 'Servis', color: '#ef4444' }, // Red for Service
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Armáda', color: '#10b981' }
-                        ].map(({ id, label, color }) => (
+                            { id: 'service', label: 'Servis', color: '#ef4444', perm: 'service' },
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6', perm: 'projects_civil' },
+                            { id: 'military', label: 'Armáda', color: '#10b981', perm: 'projects_military' }
+                        ].filter(t => checkPerm(t.perm)).map(({ id, label, color }) => (
                             <label
                                 key={id}
                                 className="flex items-center gap-2 cursor-pointer group select-none"
@@ -504,7 +560,7 @@ const Timeline: React.FC = () => {
                                             backgroundColor: activeTypes[id] ? color : 'transparent'
                                         }}
                                     />
-                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                    <div className={`absolute w - 2.5 h - 2.5 text - white flex items - center justify - center transition - all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} `}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
@@ -541,7 +597,7 @@ const Timeline: React.FC = () => {
 
                 <div className="header-right flex items-center gap-4">
                     <button
-                        className={`action-button ${showColorEditor ? 'active' : ''}`}
+                        className={`action - button ${showColorEditor ? 'active' : ''} `}
                         onClick={() => setShowColorEditor(!showColorEditor)}
                         title="Upravit barvy"
                     >
@@ -732,14 +788,14 @@ const Timeline: React.FC = () => {
                                         if (index >= visibleSectors.length) return null;
 
                                         const sector = visibleSectors[index];
-                                        const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
+                                        const topOffset = `calc(var(--timeline - header - height) + (${index} * var(--timeline - sector - height)))`;
                                         return (
                                             <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
                                                 {/* HEADER */}
                                                 <div
                                                     className="timeline-sector-header-row group/header"
                                                     style={{
-                                                        background: `color-mix(in srgb, ${sector.color} 4%, white)`, // Opaque background to hide scrolling content
+                                                        background: `color - mix(in srgb, ${sector.color} 4 %, white)`, // Opaque background to hide scrolling content
                                                         top: topOffset,
                                                         zIndex: 145 - index
                                                     }}
@@ -747,8 +803,8 @@ const Timeline: React.FC = () => {
                                                     <div
                                                         className="project-info-sticky sector-header"
                                                         style={{
-                                                            borderLeft: `6px solid ${sector.color}`,
-                                                            background: `color-mix(in srgb, ${sector.color} 15%, white)`,
+                                                            borderLeft: `6px solid ${sector.color} `,
+                                                            background: `color - mix(in srgb, ${sector.color} 15 %, white)`,
                                                             height: 'var(--timeline-sector-height)'
                                                         }}
                                                     >
@@ -824,12 +880,12 @@ const Timeline: React.FC = () => {
 
                                                             return (
                                                                 <div
-                                                                    key={`hot-wrapper-${project.id}`}
+                                                                    key={`hot - wrapper - ${project.id} `}
                                                                     className="absolute inset-0 transition-opacity duration-300"
                                                                     style={{ opacity: isVisible ? 1 : 0 }}
                                                                 >
                                                                     <TimelineBar
-                                                                        key={`hot-${project.id}`}
+                                                                        key={`hot - ${project.id} `}
                                                                         id={project.id}
                                                                         name={project.name}
                                                                         project={project}
@@ -858,7 +914,7 @@ const Timeline: React.FC = () => {
                                                                 {rowHeight >= 30 ? (
                                                                     <>
                                                                         <span
-                                                                            className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                                            className={`project-name w-full text-left font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
                                                                             style={{ textAlign: 'left', fontWeight: 400 }}
                                                                         >
                                                                             {project.name}

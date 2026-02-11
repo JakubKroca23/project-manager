@@ -192,8 +192,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     if (p.class === 'phase-buffer-orange') {
                         opacityStyle = {
                             opacity: 0.5,
-                            zIndex: 3, // Revize: 50%, nejvyšší vrstva fází
-                            background: 'linear-gradient(to right, #facc15, #fb923c)' // Gradient Yellow -> Orange
+                            zIndex: 3 // Revize: 50%, nejvyšší vrstva fází
                         };
                     }
                     if (p.class === 'phase-service') opacityStyle = { opacity: 0.5, zIndex: 2 }; // Servis: 50%

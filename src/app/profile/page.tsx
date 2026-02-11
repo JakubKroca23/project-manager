@@ -5,16 +5,18 @@ import { useRouter } from 'next/navigation';
 import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-import { useAdmin, type UserRequest } from '@/hooks/useAdmin';
+import { useAdmin, type UserRequest, type AdminLog } from '@/hooks/useAdmin';
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
+import { ScrollText, Search as SearchIcon } from 'lucide-react';
 
 export default function ProfilePage() {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, resetPasswordRequest, processUserRequest } = useAdmin();
+    const { profiles, userRequests, adminLogs, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, resetPasswordRequest, processUserRequest, refresh } = useAdmin();
     const [showSettings, setShowSettings] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [adminHistorySearch, setAdminHistorySearch] = useState('');
     const [notifications, setNotifications] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('notifications_enabled') !== 'false';
@@ -25,6 +27,10 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [adminActiveTab, setAdminActiveTab] = useState<'users' | 'history'>('users');
+    const [logFilter, setLogFilter] = useState<'all' | 'access' | 'permissions' | 'passwords'>('all');
+    const [lastLogId, setLastLogId] = useState<string | null>(null);
+    const [showNewLogToast, setShowNewLogToast] = useState(false);
 
     // Approval Modal State
     const [approveModalOpen, setApproveModalOpen] = useState(false);
@@ -96,15 +102,14 @@ export default function ProfilePage() {
                 alert(result.error);
             } else {
                 setApproveModalOpen(false);
-                // Force reload to refresh data and clear request
-                window.location.reload();
+                // We'll trust the refresh or realtime update
+                await refresh();
             }
         } catch (err: any) {
             alert(err.message || 'Chyba při schvalování.');
         } finally {
             setIsProcessingApproval(false);
         }
-        setIsProcessingApproval(false);
     };
 
     const openPermissionsModal = (user: any) => {
@@ -225,6 +230,7 @@ export default function ProfilePage() {
                                 <button
                                     onClick={() => setShowSettings(false)}
                                     className="p-2 hover:bg-muted rounded-full transition-colors group"
+                                    title="Zavřít nastavení"
                                 >
                                     <X size={20} className="text-muted-foreground group-hover:text-foreground" />
                                 </button>
@@ -285,6 +291,7 @@ export default function ProfilePage() {
                                             <button
                                                 onClick={toggleNotifications}
                                                 className={`relative w-11 h-6 rounded-full transition-all duration-300 ${notifications ? 'bg-primary' : 'bg-gray-400'}`}
+                                                title={notifications ? "Deaktivovat notifikace" : "Aktivovat notifikace"}
                                             >
                                                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${notifications ? 'translate-x-5' : 'translate-x-0'}`} />
                                             </button>
@@ -373,159 +380,294 @@ export default function ProfilePage() {
                             onClick={() => setShowAdminPanel(false)}
                         />
                         <div className="relative w-full max-w-4xl bg-card border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-300">
-                            {/* Modal Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-border bg-indigo-500/[0.03]">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-indigo-500/10 rounded-2xl text-indigo-600">
-                                        <Shield size={22} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-foreground">Administrační panel</h3>
-                                        <p className="text-xs text-muted-foreground">Správa registrovaných uživatelů a přístupů</p>
-                                    </div>
-                                </div>
+                            {/* Modal Header Tabs */}
+                            <div className="flex h-12 border-b border-border bg-muted/5 shrink-0">
                                 <button
-                                    onClick={() => setShowAdminPanel(false)}
-                                    className="p-2 hover:bg-muted rounded-full transition-colors group"
+                                    onClick={() => setAdminActiveTab('users')}
+                                    className={cn(
+                                        "px-6 text-[10px] font-black uppercase tracking-widest transition-all",
+                                        adminActiveTab === 'users' ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-500/[0.03]" : "text-muted-foreground hover:text-foreground hover:bg-muted/10"
+                                    )}
+                                    title="Zobrazit správu uživatelů"
                                 >
-                                    <X size={20} className="text-muted-foreground group-hover:text-foreground" />
+                                    Uživatelé
                                 </button>
+                                <button
+                                    onClick={() => setAdminActiveTab('history')}
+                                    className={cn(
+                                        "px-6 text-[10px] font-black uppercase tracking-widest transition-all",
+                                        adminActiveTab === 'history' ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-500/[0.03]" : "text-muted-foreground hover:text-foreground hover:bg-muted/10"
+                                    )}
+                                    title="Zobrazit historii aktivit"
+                                >
+                                    Historie aktivit
+                                </button>
+                                {showNewLogToast && (
+                                    <div className="ml-auto flex items-center px-4 animate-bounce">
+                                        <div className="bg-indigo-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-lg shadow-indigo-600/30">Nový záznam!</div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Modal Body - Scrollable */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                {/* --- GUEST REQUESTS --- */}
-                                {userRequests.length > 0 && (
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 text-[11px] font-bold text-amber-500 uppercase tracking-widest pl-1">
-                                            <UserPlus size={14} />
-                                            <span>Nové žádosti o přístup</span>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                                {adminActiveTab === 'history' ? (
+                                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2 text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] pl-1">
+                                                <ScrollText size={16} />
+                                                <span>Log aktivit v reálném čase</span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <div className="flex bg-muted/50 p-1 rounded-xl border border-border/40 mr-2">
+                                                    {(['all', 'access', 'permissions', 'passwords'] as const).map((f) => (
+                                                        <button
+                                                            key={f}
+                                                            onClick={() => setLogFilter(f)}
+                                                            className={cn(
+                                                                "px-3 py-1 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all",
+                                                                logFilter === f ? "bg-white text-indigo-600 shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                                            )}
+                                                            title={`Filtrovat: ${f}`}
+                                                        >
+                                                            {f === 'all' ? 'Vše' : f === 'access' ? 'Přístup' : f === 'permissions' ? 'Práva' : 'Hesla'}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <div className="relative">
+                                                    <SearchIcon size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Hledat..."
+                                                        value={adminHistorySearch}
+                                                        onChange={(e) => setAdminHistorySearch(e.target.value)}
+                                                        className="bg-muted px-8 py-1.5 rounded-xl text-[10px] w-48 border-none outline-none focus:ring-1 focus:ring-indigo-500/30"
+                                                        title="Hledat v historii"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-amber-500/[0.02] border-amber-500/20">
-                                            {userRequests.map((request) => (
-                                                <div key={request.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-amber-500/[0.05] transition-colors">
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-bold text-foreground">{request.email}</span>
-                                                            <span className={cn(
-                                                                "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase",
-                                                                request.request_type === 'access' ? "bg-amber-500 text-white" : "bg-blue-500 text-white"
-                                                            )}>
-                                                                {request.request_type === 'access' ? 'Přístup' : 'Reset'}
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-medium italic">
-                                                            <Clock size={10} />
-                                                            {new Date(request.created_at).toLocaleString('cs-CZ')}
-                                                        </span>
-                                                    </div>
+                                        <div className="border border-border/60 rounded-2xl overflow-hidden bg-card shadow-inner max-h-[500px] overflow-y-auto">
+                                            {(adminLogs || [])
+                                                .filter(log => {
+                                                    const matchesSearch = log.admin_email?.toLowerCase().includes(adminHistorySearch.toLowerCase()) ||
+                                                        log.action.toLowerCase().includes(adminHistorySearch.toLowerCase()) ||
+                                                        log.target_user_email?.toLowerCase().includes(adminHistorySearch.toLowerCase());
 
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                if (request.request_type === 'access') {
-                                                                    openApproveModal(request);
-                                                                } else {
-                                                                    processUserRequest(request.id, 'processed');
-                                                                }
-                                                            }}
-                                                            className="text-[10px] font-bold text-emerald-600 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 px-4 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20"
-                                                        >
-                                                            <CheckCircle size={10} />
-                                                            Schválit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => processUserRequest(request.id, 'rejected')}
-                                                            className="text-[10px] font-bold text-rose-500 hover:text-white bg-rose-500/10 hover:bg-rose-500 px-4 py-1.5 rounded-xl transition-all border border-rose-500/20"
-                                                        >
-                                                            Smazat
-                                                        </button>
+                                                    const matchesFilter = logFilter === 'all' ||
+                                                        (logFilter === 'access' && (log.action.includes('žádost') || log.action.includes('Schválení'))) ||
+                                                        (logFilter === 'permissions' && log.action.includes('oprávnění')) ||
+                                                        (logFilter === 'passwords' && log.action.includes('hesla'));
+
+                                                    return matchesSearch && matchesFilter;
+                                                })
+                                                .length > 0 ? (
+                                                adminLogs
+                                                    .filter(log => {
+                                                        const matchesSearch = log.admin_email?.toLowerCase().includes(adminHistorySearch.toLowerCase()) ||
+                                                            log.action.toLowerCase().includes(adminHistorySearch.toLowerCase()) ||
+                                                            log.target_user_email?.toLowerCase().includes(adminHistorySearch.toLowerCase());
+
+                                                        const matchesFilter = logFilter === 'all' ||
+                                                            (logFilter === 'access' && (log.action.includes('žádost') || log.action.includes('Schválení'))) ||
+                                                            (logFilter === 'permissions' && log.action.includes('oprávnění')) ||
+                                                            (logFilter === 'passwords' && log.action.includes('hesla'));
+
+                                                        return matchesSearch && matchesFilter;
+                                                    })
+                                                    .map(log => {
+                                                        const isAccess = log.action.includes('žádost') || log.action.includes('Schválení');
+                                                        const isPerms = log.action.includes('oprávnění');
+                                                        const isPass = log.action.includes('hesla');
+
+                                                        return (
+                                                            <div key={log.id} className="p-3 border-b border-border/40 hover:bg-muted/[0.04] flex items-center justify-between gap-4 last:border-0 group transition-colors">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={cn(
+                                                                        "w-8 h-8 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm",
+                                                                        isAccess ? "bg-amber-500/10 text-amber-600" :
+                                                                            isPerms ? "bg-indigo-500/10 text-indigo-600" :
+                                                                                isPass ? "bg-blue-500/10 text-blue-600" : "bg-muted text-muted-foreground"
+                                                                    )}>
+                                                                        <Clock size={14} />
+                                                                    </div>
+                                                                    <div className="space-y-0.5">
+                                                                        <div className="text-xs font-bold text-foreground">
+                                                                            {log.action}
+                                                                            <span className="text-muted-foreground mx-2 font-normal">→</span>
+                                                                            <span className={cn(
+                                                                                "font-black uppercase tracking-tighter text-[10px]",
+                                                                                isAccess ? "text-amber-600" :
+                                                                                    isPerms ? "text-indigo-600" :
+                                                                                        isPass ? "text-blue-600" : "text-muted-foreground"
+                                                                            )}>
+                                                                                {log.target_user_email || 'Systém'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="text-[10px] text-muted-foreground flex items-center gap-2">
+                                                                            <span className="font-bold text-muted-foreground/60">{log.admin_email?.split('@')[0]}</span>
+                                                                            <span className="w-1 h-1 rounded-full bg-border" />
+                                                                            {new Date(log.created_at).toLocaleString('cs-CZ', { dateStyle: 'short', timeStyle: 'short' })}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {log.details && (
+                                                                    <div className="text-[9px] font-mono bg-muted/70 px-2 py-1 rounded text-muted-foreground/80 max-w-[200px] truncate border border-border/20">
+                                                                        {log.details}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })
+                                            ) : (
+                                                <div className="p-16 text-center text-muted-foreground space-y-3">
+                                                    <ScrollText size={40} className="mx-auto opacity-10" />
+                                                    <div className="space-y-1">
+                                                        <p className="text-xs font-bold text-foreground opacity-50 uppercase tracking-widest">Žádné záznamy</p>
+                                                        <p className="text-[10px] italic">Zkuste změnit kritéria vyhledávání nebo filtr.</p>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8 animate-in fade-in duration-300">
+                                        {/* --- GUEST REQUESTS --- */}
+                                        {userRequests.length > 0 && (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-2 text-[11px] font-bold text-amber-500 uppercase tracking-widest pl-1">
+                                                    <UserPlus size={14} />
+                                                    <span>Nové žádosti o přístup</span>
+                                                </div>
+
+                                                <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-amber-500/[0.02] border-amber-500/20">
+                                                    {userRequests.map((request) => (
+                                                        <div key={request.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-amber-500/[0.05] transition-colors">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-sm font-bold text-foreground">{request.email}</span>
+                                                                    <span className={cn(
+                                                                        "text-[9px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-md",
+                                                                        request.request_type === 'access' ? 'bg-indigo-500/10 text-indigo-600' : 'bg-amber-500/10 text-amber-600'
+                                                                    )}>
+                                                                        {request.request_type === 'access' ? 'Přístup' : 'Reset hesla'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                                                                    <Clock size={10} />
+                                                                    {new Date(request.created_at).toLocaleDateString('cs-CZ')}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                <button
+                                                                    onClick={() => request.request_type === 'access' ? openApproveModal(request) : processUserRequest(request.id, 'processed')}
+                                                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md shadow-amber-500/20 active:scale-95"
+                                                                    title="Schválit žádost"
+                                                                >
+                                                                    <CheckCircle size={12} />
+                                                                    <span>Schválit</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => processUserRequest(request.id, 'rejected')}
+                                                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-muted hover:bg-red-500/10 hover:text-red-500 text-muted-foreground rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-border/50"
+                                                                    title="Zamítnout žádost"
+                                                                >
+                                                                    <X size={12} />
+                                                                    <span>Odmítnout</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* --- USER LIST --- */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between px-1">
+                                                <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                                                    <Users size={14} />
+                                                    <span>Registrovaní uživatelé</span>
+                                                </div>
+                                                <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">CELKEM: {profiles.length}</span>
+                                            </div>
+
+                                            <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-muted/5">
+                                                {profiles.length > 0 ? (
+                                                    profiles.map((profile) => (
+                                                        <div key={profile.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/10 transition-colors ${(profile.access_requested || profile.password_reset_requested) ? 'bg-amber-500/[0.03] border-l-4 border-l-amber-500' : ''}`}>
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className="text-sm font-bold text-foreground">
+                                                                        {profile.email}
+                                                                    </span>
+                                                                    {profile.email === 'jakub.kroca@contsystem.cz' && (
+                                                                        <span className="text-[9px] text-primary font-black bg-primary/10 px-1.5 py-0.5 rounded tracking-tighter">MAIN ADMIN</span>
+                                                                    )}
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {profile.access_requested && (
+                                                                            <span className="text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Request</span>
+                                                                        )}
+                                                                        {profile.password_reset_requested && (
+                                                                            <span className="text-[9px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Reset</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <span className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-tighter">ID: {profile.id.slice(0, 18)}...</span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-6 justify-between sm:justify-end">
+                                                                {profile.password_reset_requested && (
+                                                                    <button
+                                                                        onClick={() => resetPasswordRequest(profile.id)}
+                                                                        className="text-[10px] font-bold text-blue-600 hover:text-white bg-blue-600/10 hover:bg-blue-600 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-blue-600/20"
+                                                                        title="Potvrdit dokončení resetu hesla"
+                                                                    >
+                                                                        <CheckCircle size={10} />
+                                                                        Reset hotov
+                                                                    </button>
+                                                                )}
+
+                                                                <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
+                                                                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Import</span>
+                                                                    <button
+                                                                        onClick={() => updatePermission(profile.id, !profile.can_import)}
+                                                                        disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                                        className={`relative w-8 h-4.5 rounded-full transition-all duration-300 ${profile.can_import ? 'bg-emerald-500' : 'bg-gray-300'} ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'}`}
+                                                                        title={`Oprávnění k importu: ${profile.can_import ? 'Povoleno' : 'Zakázáno'}`}
+                                                                    >
+                                                                        <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform duration-300 ${profile.can_import ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                                                                    </button>
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={() => openPermissionsModal(profile)}
+                                                                    disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                                    className={`p-2 rounded-lg bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-500/20 ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'active:scale-95'}`}
+                                                                    title="Upravit systémová oprávnění"
+                                                                >
+                                                                    <Shield size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-8 text-center text-sm text-muted-foreground italic">Žádní uživatelé k zobrazení.</div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-
-                                {/* --- USER LIST --- */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between px-1">
-                                        <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                                            <Users size={14} />
-                                            <span>Registrovaní uživatelé</span>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">CELKEM: {profiles.length}</span>
-                                    </div>
-
-                                    <div className="divide-y divide-border border rounded-2xl overflow-hidden bg-muted/5">
-                                        {profiles.length > 0 ? (
-                                            profiles.map((profile) => (
-                                                <div key={profile.id} className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/10 transition-colors ${(profile.access_requested || profile.password_reset_requested) ? 'bg-amber-500/[0.03] border-l-4 border-l-amber-500' : ''}`}>
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="flex flex-wrap items-center gap-2">
-                                                            <span className="text-sm font-bold text-foreground">
-                                                                {profile.email}
-                                                            </span>
-                                                            {profile.email === 'jakub.kroca@contsystem.cz' && (
-                                                                <span className="text-[9px] text-primary font-black bg-primary/10 px-1.5 py-0.5 rounded tracking-tighter">MAIN ADMIN</span>
-                                                            )}
-                                                            <div className="flex items-center gap-1.5">
-                                                                {profile.access_requested && (
-                                                                    <span className="text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Request</span>
-                                                                )}
-                                                                {profile.password_reset_requested && (
-                                                                    <span className="text-[9px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full uppercase animate-pulse">Reset</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <span className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-tighter">ID: {profile.id.slice(0, 18)}...</span>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-6 justify-between sm:justify-end">
-                                                        {profile.password_reset_requested && (
-                                                            <button
-                                                                onClick={() => resetPasswordRequest(profile.id)}
-                                                                className="text-[10px] font-bold text-blue-600 hover:text-white bg-blue-600/10 hover:bg-blue-600 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-blue-600/20"
-                                                            >
-                                                                <CheckCircle size={10} />
-                                                                Reset hotov
-                                                            </button>
-                                                        )}
-
-                                                        <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
-                                                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Import</span>
-                                                            <button
-                                                                onClick={() => updatePermission(profile.id, !profile.can_import)}
-                                                                disabled={profile.email === 'jakub.kroca@contsystem.cz'}
-                                                                className={`relative w-8 h-4.5 rounded-full transition-all duration-300 ${profile.can_import ? 'bg-emerald-500' : 'bg-gray-300'} ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'}`}
-                                                            >
-                                                                <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform duration-300 ${profile.can_import ? 'translate-x-3.5' : 'translate-x-0'}`} />
-                                                            </button>
-                                                        </div>
-
-                                                        <button
-                                                            onClick={() => openPermissionsModal(profile)}
-                                                            disabled={profile.email === 'jakub.kroca@contsystem.cz'}
-                                                            className={`p-2 rounded-lg bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-500/20 ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'active:scale-95'}`}
-                                                        >
-                                                            <Shield size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="p-8 text-center text-sm text-muted-foreground italic">Žádní uživatelé k zobrazení.</div>
-                                        )}
-                                    </div>
-                                </div>
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="p-6 border-t border-border bg-muted/5 flex justify-end">
+                            <div className="p-6 border-t border-border bg-muted/5 flex justify-end shrink-0">
                                 <button
                                     onClick={() => setShowAdminPanel(false)}
                                     className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.98] transition-all text-sm uppercase tracking-widest"
+                                    title="Zavřít administrátorský panel"
                                 >
                                     Zavřít panel
                                 </button>
@@ -534,19 +676,30 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Main Content Area - Future Tasks overview */}
-                <div className="flex-1 flex flex-col items-center justify-center p-20 bg-muted/5 rounded-3xl border border-dashed border-border/60 text-center space-y-4">
-                    <div className="p-4 bg-muted/20 rounded-full text-muted-foreground/40">
-                        <Clock size={48} />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-foreground/80">Přehled úkolů</h3>
-                        <p className="text-sm text-muted-foreground italic max-w-xs mx-auto">
-                            Zde se v budoucnu zobrazí detailní přehled vašich přiřazených úkolů a aktivit.
-                        </p>
+                {/* Dashboard Stats / Future overview (outside the main container for aesthetic) */}
+                <div className="max-w-2xl mx-auto w-full pb-20">
+                    <div className="flex flex-col items-center justify-center p-16 bg-card/40 backdrop-blur-md rounded-[2.5rem] border border-border/40 text-center space-y-5 shadow-xl">
+                        <div className="p-5 bg-primary/5 rounded-3xl text-primary/30 ring-1 ring-primary/10">
+                            <Clock size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-black text-foreground uppercase tracking-widest">Přehled aktivit</h3>
+                            <p className="text-sm text-muted-foreground/60 italic max-w-xs mx-auto font-medium">
+                                Zde se brzy zobrazí detailní přehled vašich přiřazených úkolů a projektů.
+                            </p>
+                        </div>
+                        <div className="pt-4 flex gap-4">
+                            <div className="px-4 py-2 bg-muted/30 rounded-2xl border border-border/40">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Projekty</p>
+                                <p className="text-2xl font-black text-foreground">--</p>
+                            </div>
+                            <div className="px-4 py-2 bg-muted/30 rounded-2xl border border-border/40">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Úkoly</p>
+                                <p className="text-2xl font-black text-foreground">--</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
 
             {/* Approval Modal */}
@@ -555,7 +708,7 @@ export default function ProfilePage() {
                     <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-bold">Schválit přístup</h3>
-                            <button onClick={() => setApproveModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                            <button onClick={() => setApproveModalOpen(false)} className="p-1 hover:bg-muted rounded-full" title="Zavřít okno">
                                 <X size={18} className="text-muted-foreground" />
                             </button>
                         </div>
@@ -573,9 +726,11 @@ export default function ProfilePage() {
                                         type="text"
                                         value={newUserPassword}
                                         onChange={(e) => setNewUserPassword(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 bg-muted/50 border border-border rounded-lg text-sm font-mono"
+                                        className="w-full pl-9 pr-3 py-2 bg-muted/50 border border-border rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                         required
                                         minLength={6}
+                                        title="Zadejte heslo pro nového uživatele"
+                                        placeholder="Nové heslo"
                                     />
                                 </div>
                                 <p className="text-[10px] text-muted-foreground ml-1">Heslo sdělte uživateli bezpečně.</p>
@@ -586,13 +741,15 @@ export default function ProfilePage() {
                                     type="button"
                                     onClick={() => setApproveModalOpen(false)}
                                     className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
+                                    title="Zrušit schvalování"
                                 >
                                     Zrušit
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isProcessingApproval}
-                                    className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+                                    className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
+                                    title="Vytvořit účet a schválit přístup"
                                 >
                                     {isProcessingApproval ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={14} />}
                                     Vytvořit účet
@@ -611,7 +768,7 @@ export default function ProfilePage() {
                                 <h3 className="text-lg font-bold">Oprávnění uživatele</h3>
                                 <p className="text-xs text-muted-foreground font-mono mt-1">{selectedUserForPermissions.email}</p>
                             </div>
-                            <button onClick={() => setPermissionsModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                            <button onClick={() => setPermissionsModalOpen(false)} className="p-1 hover:bg-muted rounded-full" title="Zavřít okno">
                                 <X size={18} className="text-muted-foreground" />
                             </button>
                         </div>
@@ -647,6 +804,7 @@ export default function ProfilePage() {
                                     <button
                                         onClick={() => setEditedPermissions(prev => ({ ...prev, [key]: !prev[key] }))}
                                         className={`relative w-10 h-6 rounded-full transition-all duration-200 ${editedPermissions[key] ? 'bg-primary' : 'bg-gray-400'}`}
+                                        title={`Přepnout oprávnění: ${label}`}
                                     >
                                         <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${editedPermissions[key] ? 'translate-x-4' : 'translate-x-0'}`} />
                                     </button>
@@ -658,6 +816,7 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => setPermissionsModalOpen(false)}
                                 className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
+                                title="Zrušit změny"
                             >
                                 Zrušit
                             </button>
@@ -673,9 +832,10 @@ export default function ProfilePage() {
                                     }
                                 }}
                                 disabled={isSavingPermissions}
-                                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 flex items-center gap-2"
+                                className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 flex items-center gap-2 shadow-md shadow-indigo-600/20 active:scale-95 transition-all disabled:opacity-50"
+                                title="Uložit změny oprávnění"
                             >
-                                {isSavingPermissions ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                {isSavingPermissions ? <Loader2 size={12} className="animate-spin" /> : <Shield size={14} />}
                                 Uložit změny
                             </button>
                         </div>

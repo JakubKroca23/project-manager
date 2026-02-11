@@ -24,9 +24,13 @@ import {
     Factory,
     CalendarDays,
     Wrench,
-    FileText
+    FileText,
+    Users,
+    Clock,
+    Briefcase
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from 'sonner';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -36,7 +40,7 @@ export default function ProjectDetailPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedProject, setEditedProject] = useState<Project | null>(null);
     const [saving, setSaving] = useState(false);
-    const { canEdit } = usePermissions();
+    const { canEdit, checkPerm, isLoading: permsLoading } = usePermissions();
 
     useEffect(() => {
         async function fetchProject() {
@@ -58,6 +62,24 @@ export default function ProjectDetailPage() {
 
         if (id) fetchProject();
     }, [id]);
+
+    // Permissions check
+    useEffect(() => {
+        if (!permsLoading && project) {
+            const hasGeneralAccess = checkPerm('projects');
+            // Check specific project type access
+            let hasTypeAccess = false;
+            if (project.project_type === 'civil') hasTypeAccess = checkPerm('projects_civil');
+            else if (project.project_type === 'military') hasTypeAccess = checkPerm('projects_military');
+            else if (project.project_type === 'service') hasTypeAccess = checkPerm('service');
+            else hasTypeAccess = true; // Other types? default to allow if general projects is true? 
+
+            if (!hasGeneralAccess || !hasTypeAccess) {
+                toast.error(`Nemáte oprávnění k prohlížení tohoto ${project.project_type === 'service' ? 'servisu' : 'projektu'}.`);
+                router.push(hasGeneralAccess ? '/projekty' : '/');
+            }
+        }
+    }, [permsLoading, project, checkPerm, router]);
 
     const handleSave = async () => {
         if (!editedProject) return;
@@ -125,12 +147,14 @@ export default function ProjectDetailPage() {
     };
 
     // --- Loading State ---
-    if (loading) {
+    if (loading || permsLoading) {
         return (
-            <div className="flex h-full items-center justify-center bg-background">
+            <div className="flex bg-background h-screen items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 size={28} className="animate-spin text-primary" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Načítám detail projektu...</p>
+                    <Loader2 className="animate-spin text-primary" size={40} />
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">
+                        Načítám detaily projektu...
+                    </p>
                 </div>
             </div>
         );
@@ -155,7 +179,7 @@ export default function ProjectDetailPage() {
     const isMilitary = project.project_type === 'military';
     const isService = project.project_type === 'service';
     const isCivil = project.project_type === 'civil';
-    const typeColor = isMilitary ? '#a5d6a7' : isService ? '#ce93d8' : isCivil ? '#90caf9' : '#94a3b8';
+    const typeColor = isMilitary ? '#2e7d32' : isService ? '#8e24aa' : isCivil ? '#0277bd' : '#64748b';
 
     const p = isEditing ? editedProject! : project;
 
@@ -165,38 +189,73 @@ export default function ProjectDetailPage() {
     };
 
     return (
-        <div className="h-full overflow-y-auto bg-background text-foreground">
-            {/* ── Sticky Top Bar ── */}
-            <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50">
+        <div className="h-full overflow-y-auto bg-background text-foreground scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+            {/* ── Modern Premium Header ── */}
+            <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 overflow-hidden">
+                {/* Dynamic Background Glow */}
                 <div
-                    className="absolute top-0 left-0 right-0 h-[3px] transition-colors duration-500"
-                    style={{ backgroundColor: typeColor, boxShadow: `0 0 10px ${typeColor}44` }}
+                    className="absolute -top-[100px] left-1/2 -translate-x-1/2 w-[600px] h-[200px] blur-[120px] opacity-20 pointer-events-none transition-colors duration-1000"
+                    style={{ backgroundColor: typeColor }}
                 />
-                <div className="max-w-[1400px] mx-auto px-4 h-11 flex items-center justify-between">
-                    <button
-                        onClick={() => router.push('/projekty')}
-                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
-                        style={{ color: typeColor }}
-                    >
-                        <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                        Zpět
-                    </button>
 
-                    <div className="flex items-center gap-2">
+                <div className="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between relative">
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={() => router.push('/projekty')}
+                            className="group flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:bg-muted active:scale-95"
+                            style={{ color: typeColor }}
+                        >
+                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                            <span>Zpět</span>
+                        </button>
+
+                        <div className="h-6 w-px bg-border/60" />
+
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-sm font-black tracking-tight text-foreground truncate max-w-[300px] lg:max-w-[500px]">
+                                {project.id} <span className="text-muted-foreground/60 mx-1">|</span> {project.name}
+                            </h2>
+                            <div
+                                className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border backdrop-blur-md shadow-lg transition-all duration-500"
+                                style={{
+                                    backgroundColor: `${typeColor}15`,
+                                    borderColor: `${typeColor}33`,
+                                    color: typeColor,
+                                    boxShadow: `0 4px 12px ${typeColor}15`
+                                }}
+                            >
+                                {isMilitary ? 'Armádní' : isService ? 'Servis' : isCivil ? 'Civilní' : 'Neznámý'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
                         {isEditing ? (
-                            <>
-                                <button onClick={handleCancel} disabled={saving} className="px-4 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
-                                    <X size={12} /> Zrušit
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleCancel()}
+                                    className="px-4 py-1.5 rounded-xl text-xs font-bold text-muted-foreground hover:bg-muted transition-all"
+                                >
+                                    Zrušit
                                 </button>
-                                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-90">
-                                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-                                    Uložit
+                                <button
+                                    onClick={handleSave}
+                                    className="px-6 py-1.5 rounded-xl text-xs font-black text-white shadow-lg active:scale-95 transition-all"
+                                    style={{ backgroundColor: typeColor, boxShadow: `0 4px 15px ${typeColor}44` }}
+                                >
+                                    Uložit změny
                                 </button>
-                            </>
+                            </div>
                         ) : (
                             canEdit && (
-                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-muted hover:bg-primary/10 hover:text-primary text-[10px] font-bold uppercase tracking-wider transition-all">
-                                    <Edit2 size={12} /> Upravit
+                                <button
+                                    onClick={() => {
+                                        setEditedProject({ ...project });
+                                        setIsEditing(true);
+                                    }}
+                                    className="px-5 py-1.5 rounded-xl text-xs font-black bg-foreground text-background hover:opacity-90 active:scale-95 transition-all shadow-md"
+                                >
+                                    Upravit zakázku
                                 </button>
                             )
                         )}
@@ -204,158 +263,162 @@ export default function ProjectDetailPage() {
                 </div>
             </div>
 
-            {/* ── Main Content ── */}
-            <div className="max-w-[1400px] mx-auto px-4 py-4 pb-16 space-y-4">
-
-                {/* ── HEADER ── */}
-                <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : p.project_type === 'service'
-                                    ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                                    : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                                }`}>
-                                {p.project_type === 'military' ? 'Armáda' : p.project_type === 'service' ? 'Servis' : 'Civil'}
-                            </span>
-                            {isEditing && (
-                                <select
-                                    value={p.project_type}
-                                    onChange={(e) => handleChange('project_type', e.target.value)}
-                                    className="text-[10px] bg-muted border border-border rounded px-2 py-0.5 outline-none"
-                                >
-                                    <option value="civil">Civil</option>
-                                    <option value="military">Armáda</option>
-                                    <option value="service">Servis</option>
-                                </select>
-                            )}
-                            <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{project.id}</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-                                <span className={`w-1.5 h-1.5 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
-                                {project.status}
-                            </span>
-                        </div>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                value={p.name}
-                                onChange={(e) => handleChange('name', e.target.value)}
-                                className="text-lg font-bold w-full bg-muted/30 border border-border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary/20 outline-none"
+            <div className="max-w-[1400px] mx-auto p-4 lg:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Project Info Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column - Main Details */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Highlights Row */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <StatCard
+                                label="Zákazník"
+                                value={p.customer || '-'}
+                                icon={<Users size={16} />}
+                                color={typeColor}
                             />
-                        ) : (
-                            <h1 className="text-lg font-bold text-foreground leading-snug">{project.name}</h1>
+                            <StatCard
+                                label="Status"
+                                value={p.status || 'Probíhá'}
+                                icon={<Clock size={16} />}
+                                color={typeColor}
+                                isStatus
+                            />
+                            <StatCard
+                                label="Množství"
+                                value={p.quantity?.toString() || '-'}
+                                icon={<Briefcase size={16} />}
+                                color={typeColor}
+                            />
+                            <StatCard
+                                label="ID Zakázky"
+                                value={p.id}
+                                icon={<Hash size={16} />}
+                                color={typeColor}
+                            />
+                        </div>
+
+                        {/* ── SECTIONS GRID ── */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                            {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
+                            <Section icon={<FileText size={18} />} title="Základní informace" color="blue">
+                                <FieldGrid>
+                                    <Field label="Manažer" icon={<User size={16} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Zákazník" icon={<Building2 size={16} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Kategorie" icon={<Tag size={16} />} value={p.category} field="category" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Výrobní číslo" icon={<Hash size={16} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
+                                </FieldGrid>
+                            </Section>
+
+                            {/* ═══ 2. HARMONOGRAM ═══ */}
+                            <Section icon={<CalendarDays size={18} />} title="Harmonogram" color="amber">
+                                {p.project_type === 'service' ? (
+                                    <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+                                        <DateField label="Zahájení servisu" value={p.deadline} field="deadline" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                                        <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+                                        <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                                        <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                                    </div>
+                                )}
+                            </Section>
+
+                            {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
+                            <Section icon={<Truck size={18} />} title="Výroba a nástavba" color="emerald">
+                                <FieldGrid>
+                                    <Field label="Stav výroby" icon={<Factory size={16} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
+                                    <Field label="Montážní společnost" icon={<Wrench size={16} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Konfigurace nástavby" icon={<Shield size={16} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
+                                </FieldGrid>
+                            </Section>
+
+                            {/* ═══ 4. ABRA PROPOJENÍ ═══ */}
+                            <Section icon={<Globe size={18} />} title="ABRA propojení" color="purple">
+                                <FieldGrid>
+                                    <Field label="Číslo zakázky" icon={<Hash size={16} />} value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Číslo objednávky" icon={<Hash size={16} />} value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={handleChange} />
+                                </FieldGrid>
+                            </Section>
+                        </div>
+                    </div>
+
+                    {/* Right Column - Description & Custom Fields */}
+                    <div className="lg:col-span-1 space-y-8">
+                        {/* ═══ 5. POPIS ZAKÁZKY / POZNÁMKY ═══ */}
+                        <Section icon={<ClipboardList size={18} />} title="Popis zakázky" color="indigo" fullWidth>
+                            {isEditing ? (
+                                <textarea
+                                    value={p.note || ''}
+                                    onChange={(e) => handleChange('note', e.target.value)}
+                                    className="w-full h-32 bg-background/50 border border-border/60 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed resize-none shadow-inner"
+                                    placeholder="Zde můžete připsat popis zakázky nebo poznámky..."
+                                    title="Poznámka k zakázce"
+                                />
+                            ) : (
+                                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap min-h-[2rem]">
+                                    {project.note || 'Žádný popis nebyl přidán.'}
+                                </p>
+                            )}
+                        </Section>
+
+                        {/* ═══ 6. OSTATNÍ DATA (Custom Fields) ═══ */}
+                        {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
+                            <Section
+                                icon={<Globe size={18} />}
+                                title="Ostatní data"
+                                color="rose"
+                                fullWidth
+                                action={isEditing ? (
+                                    <button
+                                        onClick={addCustomField}
+                                        className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1"
+                                        title="Přidat vlastní pole"
+                                    >
+                                        <PlusCircle size={11} /> Přidat
+                                    </button>
+                                ) : undefined}
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {(isEditing
+                                        ? Object.entries(p.custom_fields || {})
+                                        : Object.entries(project.custom_fields || {})
+                                    ).map(([key, val]) => (
+                                        <div key={key} className="group relative bg-background/50 border border-border/60 p-3 rounded-xl shadow-sm hover:shadow-md transition-all">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">{key}</p>
+                                                {isEditing && (
+                                                    <button
+                                                        onClick={() => removeCustomField(key)}
+                                                        className="text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive/10 p-0.5 rounded transition-all"
+                                                        title={`Odstranit pole: ${key}`}
+                                                    >
+                                                        <Trash2 size={10} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={val as string}
+                                                    onChange={(e) => handleCustomFieldChange(key, e.target.value)}
+                                                    className="w-full bg-transparent border-none text-sm font-medium text-foreground focus:ring-0 p-0"
+                                                    title={`Hodnota pro pole: ${key}`}
+                                                />
+                                            ) : (
+                                                <p className="text-sm font-medium text-foreground">{val?.toString() || '-'}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </Section>
                         )}
                     </div>
                 </div>
-
-                {/* ── SECTIONS GRID ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-
-                    {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
-                    <Section icon={<FileText size={15} />} title="Základní informace" color="blue">
-                        <FieldGrid>
-                            <Field label="Manažer" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Kategorie" icon={<Tag size={13} />} value={p.category} field="category" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Výrobní číslo" icon={<Hash size={13} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
-                        </FieldGrid>
-                    </Section>
-
-                    {/* ═══ 2. HARMONOGRAM ═══ */}
-                    <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
-                        {p.project_type === 'service' ? (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                <DateField label="Zahájení servisu" value={p.deadline} field="deadline" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
-                            </div>
-                        )}
-                    </Section>
-
-                    {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
-                    <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
-                        <FieldGrid>
-                            <Field label="Stav výroby" icon={<Factory size={13} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
-                            <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
-                        </FieldGrid>
-                    </Section>
-
-                    {/* ═══ 4. ABRA PROPOJENÍ ═══ */}
-                    <Section icon={<Globe size={15} />} title="ABRA propojení" color="purple">
-                        <FieldGrid>
-                            <Field label="Číslo zakázky" icon={<Hash size={13} />} value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Číslo objednávky" icon={<Hash size={13} />} value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={handleChange} />
-                        </FieldGrid>
-                    </Section>
-                </div>
-
-                {/* ═══ 5. POPIS ZAKÁZKY / POZNÁMKY ═══ */}
-                <Section icon={<ClipboardList size={15} />} title="Popis zakázky" color="slate" fullWidth>
-                    {isEditing ? (
-                        <textarea
-                            value={p.note || ''}
-                            onChange={(e) => handleChange('note', e.target.value)}
-                            className="w-full h-28 bg-muted/20 border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed resize-none"
-                            placeholder="Zde můžete připsat popis zakázky nebo poznámky..."
-                        />
-                    ) : (
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap min-h-[2rem]">
-                            {project.note || 'Žádný popis nebyl přidán.'}
-                        </p>
-                    )}
-                </Section>
-
-                {/* ═══ 6. OSTATNÍ DATA (Custom Fields) ═══ */}
-                {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
-                    <Section
-                        icon={<Globe size={15} />}
-                        title="Ostatní data"
-                        color="slate"
-                        fullWidth
-                        action={isEditing ? (
-                            <button onClick={addCustomField} className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1">
-                                <PlusCircle size={11} /> Přidat
-                            </button>
-                        ) : undefined}
-                    >
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                            {(isEditing
-                                ? Object.entries(p.custom_fields || {})
-                                : Object.entries(project.custom_fields || {})
-                            ).map(([key, val]) => (
-                                <div key={key} className="group relative bg-muted/20 hover:bg-muted/30 p-2.5 rounded-lg border border-transparent hover:border-border/50 transition-all">
-                                    <div className="flex justify-between items-start mb-0.5">
-                                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">{key}</p>
-                                        {isEditing && (
-                                            <button onClick={() => removeCustomField(key)} className="text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive/10 p-0.5 rounded transition-all">
-                                                <Trash2 size={10} />
-                                            </button>
-                                        )}
-                                    </div>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={val as string}
-                                            onChange={(e) => handleCustomFieldChange(key, e.target.value)}
-                                            className="w-full bg-transparent border-none text-xs font-medium text-foreground focus:ring-0 p-0"
-                                        />
-                                    ) : (
-                                        <p className="text-xs font-medium text-foreground">{val?.toString() || '-'}</p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </Section>
-                )}
             </div>
         </div>
     );
@@ -363,14 +426,30 @@ export default function ProjectDetailPage() {
 
 // ─── SUBCOMPONENTS ───────────────────────────────────────────────
 
-// Color accent maps
-const colorMap: Record<string, { border: string; bg: string; icon: string; text: string }> = {
-    blue: { border: 'border-blue-500/20', bg: 'bg-blue-500/5', icon: 'text-blue-500', text: 'text-blue-600' },
-    amber: { border: 'border-amber-500/20', bg: 'bg-amber-500/5', icon: 'text-amber-500', text: 'text-amber-600' },
-    emerald: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/5', icon: 'text-emerald-500', text: 'text-emerald-600' },
-    purple: { border: 'border-purple-500/20', bg: 'bg-purple-500/5', icon: 'text-purple-500', text: 'text-purple-600' },
-    slate: { border: 'border-border/60', bg: 'bg-muted/5', icon: 'text-muted-foreground', text: 'text-muted-foreground' },
-};
+//// ── Helper Components for Premium UI ──
+
+function StatCard({ label, value, icon, color, isStatus }: { label: string; value: string; icon: React.ReactNode; color: string; isStatus?: boolean }) {
+    return (
+        <div className="bg-card border border-border/60 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+            <div
+                className="absolute top-0 right-0 p-3 opacity-[0.03] group-hover:scale-110 transition-transform"
+                style={{ color }}
+            >
+                {React.cloneElement(icon as React.ReactElement, { size: 40 })}
+            </div>
+            <div className="relative z-10 space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <div style={{ color }}>{icon}</div>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+                </div>
+                <div className={`text-sm font-black truncate ${isStatus ? 'text-primary' : 'text-foreground'}`}>
+                    {isStatus && <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />}
+                    {value}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 interface SectionProps {
     icon: React.ReactNode;
@@ -382,23 +461,43 @@ interface SectionProps {
 }
 
 function Section({ icon, title, color, children, fullWidth, action }: SectionProps) {
+    const colorMap: Record<string, { border: string; bg: string; icon: string; text: string; accent: string }> = {
+        blue: { border: 'border-blue-500/10', bg: 'bg-blue-500/[0.02]', icon: 'text-blue-600', text: 'text-blue-700', accent: 'bg-blue-600' },
+        emerald: { border: 'border-emerald-500/10', bg: 'bg-emerald-500/[0.02]', icon: 'text-emerald-600', text: 'text-emerald-700', accent: 'bg-emerald-600' },
+        purple: { border: 'border-purple-500/10', bg: 'bg-purple-500/[0.02]', icon: 'text-purple-600', text: 'text-purple-700', accent: 'bg-purple-600' },
+        amber: { border: 'border-amber-500/10', bg: 'bg-amber-500/[0.02]', icon: 'text-amber-600', text: 'text-amber-700', accent: 'bg-amber-600' },
+        rose: { border: 'border-rose-500/10', bg: 'bg-rose-500/[0.02]', icon: 'text-rose-600', text: 'text-rose-700', accent: 'bg-rose-600' },
+        indigo: { border: 'border-indigo-500/10', bg: 'bg-indigo-500/[0.02]', icon: 'text-indigo-600', text: 'text-indigo-700', accent: 'bg-indigo-600' },
+        slate: { border: 'border-slate-500/10', bg: 'bg-slate-500/[0.02]', icon: 'text-slate-600', text: 'text-slate-700', accent: 'bg-slate-600' },
+    };
+
     const c = colorMap[color] || colorMap.slate;
+
     return (
-        <div className={`rounded-xl border ${c.border} ${c.bg} p-4 ${fullWidth ? '' : ''}`}>
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <div className={`${c.icon}`}>{icon}</div>
-                    <h3 className={`text-[11px] font-bold uppercase tracking-widest ${c.text}`}>{title}</h3>
+        <div className={`rounded-3xl border ${c.border} ${c.bg} p-6 shadow-sm relative overflow-hidden group ${fullWidth ? '' : ''}`}>
+            {/* Saturated accent line */}
+            <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${c.accent} opacity-80 group-hover:opacity-100 transition-opacity`} />
+
+            <div className="flex items-center justify-between mb-6 pl-2">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-2xl ${c.bg} ${c.icon} border ${c.border} shadow-sm group-hover:scale-105 transition-transform`}>
+                        {icon}
+                    </div>
+                    <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${c.text}`}>
+                        {title}
+                    </h3>
                 </div>
                 {action}
             </div>
-            {children}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 pl-2">
+                {children}
+            </div>
         </div>
     );
 }
 
 function FieldGrid({ children }: { children: React.ReactNode }) {
-    return <div className="grid grid-cols-2 gap-x-4 gap-y-2">{children}</div>;
+    return <div className="grid grid-cols-1 gap-x-12 gap-y-6">{children}</div>;
 }
 
 interface FieldProps {
@@ -423,6 +522,7 @@ function Field({ label, icon, value, field, isEditing, onChange, highlight }: Fi
                         value={String(value || '')}
                         onChange={(e) => onChange(field, e.target.value)}
                         className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                        title={`Upravit: ${label}`}
                     />
                 ) : (
                     <p className={`text-xs font-semibold truncate ${highlight ? 'text-primary' : 'text-foreground'}`} title={String(value || '')}>
@@ -454,6 +554,7 @@ function DateField({ label, value, field, isEditing, onChange, highlight }: Date
                     value={value || ''}
                     onChange={(e) => onChange(field, e.target.value)}
                     className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
+                    title={`Upravit datum: ${label}`}
                 />
             ) : (
                 <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>

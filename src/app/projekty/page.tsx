@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Loader2, Search, Database, X } from 'lucide-react';
+import { Loader2, Search, Database, X, ShieldAlert } from 'lucide-react';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
+import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from 'sonner';
 
 import { Project } from '@/types/project';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -123,6 +125,32 @@ export default function ProjektyPage() {
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
     const tableSettings = useTableSettings(`projects-${activeTab}`);
     const router = useRouter();
+    const { checkPerm, isLoading: permsLoading } = usePermissions();
+
+    // Permissions check
+    useEffect(() => {
+        if (!permsLoading) {
+            const hasGeneralAccess = checkPerm('projects');
+            const hasTypeAccess = activeTab === 'civil' ? checkPerm('projects_civil') : checkPerm('projects_military');
+
+            if (!hasGeneralAccess) {
+                toast.error('Přístup odepřen: Nemáte oprávnění k prohlížení projektů.');
+                router.push('/');
+            } else if (!hasTypeAccess) {
+                toast.error(`Přístup odepřen: Nemáte oprávnění pro ${activeTab === 'civil' ? 'civilní' : 'armádní'} projekty.`);
+                // If they have civil but are on military, or vice-versa, redirect to the one they HAVE
+                if (activeTab === 'military' && checkPerm('projects_civil')) {
+                    router.push('/projekty?type=civil');
+                } else if (activeTab === 'civil' && checkPerm('projects_military')) {
+                    router.push('/projekty?type=military');
+                } else if (checkPerm('service')) {
+                    router.push('/servis');
+                } else {
+                    router.push('/');
+                }
+            }
+        }
+    }, [permsLoading, activeTab, checkPerm, router]);
 
     const fetchProjects = useCallback(async () => {
         setIsLoading(true);
@@ -257,15 +285,15 @@ export default function ProjektyPage() {
 
     return (
         <div className="h-full flex flex-col bg-background">
-            <div className="flex-1 overflow-hidden flex flex-col px-4">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="animate-spin text-primary" size={24} />
-                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Načítám prostředí...</span>
-                        </div>
+            {(isLoading || permsLoading) ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="animate-spin text-primary" size={24} />
+                        <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Načítám prostředí...</span>
                     </div>
-                ) : (
+                </div>
+            ) : (
+                <div className="flex-1 overflow-hidden flex flex-col px-4">
                     <DataTable
                         columns={tableColumns}
                         data={filteredProjects}
@@ -298,7 +326,11 @@ export default function ProjektyPage() {
                                         {searchTags.map((tag, idx) => (
                                             <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold animate-in zoom-in-50 duration-200">
                                                 <span>{tag}</span>
-                                                <button onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors">
+                                                <button
+                                                    onClick={() => removeTag(tag)}
+                                                    className="hover:text-destructive transition-colors"
+                                                    title={`Odstranit filtr: ${tag}`}
+                                                >
                                                     <X size={8} />
                                                 </button>
                                             </div>
@@ -311,6 +343,7 @@ export default function ProjektyPage() {
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             onKeyDown={handleKeyDown}
+                                            title="Zadejte text pro vyhledávání"
                                         />
                                     </div>
                                 </div>
@@ -341,8 +374,8 @@ export default function ProjektyPage() {
                             return '';
                         }}
                     />
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -80,5 +80,15 @@ export async function approveAccessRequest(requestId: string, email: string, pas
         return { error: 'User created but failed to update request status.' };
     }
 
+    // 4. Log the action
+    await adminClient.from('admin_logs').insert({
+        admin_id: user.id,
+        admin_email: user.email,
+        action: 'Schválení přístupu a vytvoření účtu',
+        target_user_id: newUser.user.id,
+        target_user_email: email,
+        details: `Vytvořen účet pro ${email}`
+    });
+
     return { success: true, userId: newUser.user.id };
 }

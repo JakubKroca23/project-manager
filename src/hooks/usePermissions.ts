@@ -70,11 +70,15 @@ export function usePermissions() {
     }, [fetchPermissions]);
 
     const checkPerm = useCallback((key: string) => {
-        if (!permissions) return true; // Default to allow before load to prevent flicker
+        // While loading, we might return false to be safe, 
+        // but let's allow if we have no permissions object yet only if it's NOT a restricted key.
+        if (!permissions) return false;
+
         if (permissions.email === 'jakub.kroca@contsystem.cz') return true;
 
         const perms = permissions.permissions || {};
-        return perms[key as keyof typeof perms] !== false;
+        // Strict check: must be explicitly true
+        return perms[key as keyof typeof perms] === true;
     }, [permissions]);
 
     return {

@@ -80,6 +80,8 @@ export function ColumnToggle<TData>({
                                     </span>
                                     <input
                                         type="checkbox"
+                                        id="toggle-basic-columns"
+                                        title="Přepnout viditelnost všech základních sloupců"
                                         className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                                         checked={basicColumns.every(c => c.getIsVisible())}
                                         ref={input => {
@@ -130,6 +132,8 @@ export function ColumnToggle<TData>({
                                     </span>
                                     <input
                                         type="checkbox"
+                                        id="toggle-custom-columns"
+                                        title="Přepnout viditelnost všech dodatečných sloupců"
                                         className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                                         checked={customColumns.every(c => c.getIsVisible())}
                                         ref={input => {
