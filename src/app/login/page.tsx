@@ -8,14 +8,17 @@ import Image from 'next/image';
 
 // --- SVG Logo Component (Refined to match image exactly) ---
 const ContSystemLogo = ({ className }: { className?: string }) => (
-    <Image
-        src="/logo.png"
-        alt="ContSystem Logo"
-        width={320}
-        height={85}
-        className={className}
-        priority
-    />
+    <div className={`relative ${className}`}>
+        <Image
+            src="/logo.png"
+            alt="ContSystem Logo"
+            width={400}
+            height={100}
+            className="w-full h-auto"
+            priority
+            unoptimized
+        />
+    </div>
 );
 
 export default function LoginPage() {
