@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
 import './Timeline.css';
 import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
@@ -27,6 +27,15 @@ const Timeline: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
 
+    // Ref pro aktuální dayWidth pro event listenery
+    const dayWidthRef = useRef(dayWidth);
+    useEffect(() => {
+        dayWidthRef.current = dayWidth;
+    }, [dayWidth]);
+
+    // Ref pro uchování pozice pro zoom
+    const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
+
     // Časový rozsah 2025 - 2027
     const timelineRange = useMemo(() => {
         const start = new Date(2025, 0, 1); // 1. 1. 2025
@@ -35,6 +44,16 @@ const Timeline: React.FC = () => {
     }, []);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    // Restore scroll position after zoom
+    useLayoutEffect(() => {
+        if (zoomFocus.current && scrollContainerRef.current) {
+            const { pointDays, pixelOffset } = zoomFocus.current;
+            const newScrollLeft = pointDays * dayWidth - pixelOffset;
+            scrollContainerRef.current.scrollLeft = newScrollLeft;
+            zoomFocus.current = null;
+        }
+    }, [dayWidth]);
 
     // DRAG SCROLL & INERTIA LOGIC
     const [isDragging, setIsDragging] = useState(false);
@@ -157,11 +176,29 @@ const Timeline: React.FC = () => {
 
     // Zoom handlers
     const handleZoomIn = () => {
-        setDayWidth(prev => Math.min(prev * 1.2, MAX_DAY_WIDTH));
+        const currentWidth = dayWidth;
+        const next = Math.min(currentWidth * 1.2, MAX_DAY_WIDTH);
+
+        if (next !== currentWidth && scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const offset = container.clientWidth / 2;
+            const pointDays = (container.scrollLeft + offset) / currentWidth;
+            zoomFocus.current = { pointDays, pixelOffset: offset };
+            setDayWidth(next);
+        }
     };
 
     const handleZoomOut = () => {
-        setDayWidth(prev => Math.max(prev / 1.2, MIN_DAY_WIDTH));
+        const currentWidth = dayWidth;
+        const next = Math.max(currentWidth / 1.2, MIN_DAY_WIDTH);
+
+        if (next !== currentWidth && scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const offset = container.clientWidth / 2;
+            const pointDays = (container.scrollLeft + offset) / currentWidth;
+            zoomFocus.current = { pointDays, pixelOffset: offset };
+            setDayWidth(next);
+        }
     };
 
     // SMOTTH WHEEL ZOOM LOGIC (Ctrl + Mouse Wheel)
@@ -173,14 +210,23 @@ const Timeline: React.FC = () => {
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
 
+                const currentWidth = dayWidthRef.current;
+
                 // Jemný faktor zoomu
                 const zoomFactor = 1.1;
                 const direction = e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
+                const next = Math.min(Math.max(currentWidth * direction, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
 
-                setDayWidth(prev => {
-                    const next = prev * direction;
-                    return Math.min(Math.max(next, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
-                });
+                if (next !== currentWidth) {
+                    const rect = container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+
+                    // Pozice myši v timeline (včetně scrollu)
+                    const pointDays = (container.scrollLeft + mouseX) / currentWidth;
+
+                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
+                    setDayWidth(next);
+                }
             }
         };
 
