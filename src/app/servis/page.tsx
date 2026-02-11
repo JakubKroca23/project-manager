@@ -112,9 +112,13 @@ export default function ServicesPage() {
                     .eq('id', editingServiceId);
                 if (error) throw error;
             } else {
+                // Generate a unique ID for new service record
+                // Simple pattern: SRV-Timestamp-Random
+                const uniqueId = `SRV-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
                 const { error } = await supabase
                     .from('projects')
-                    .insert([projectData]);
+                    .insert([{ ...projectData, id: uniqueId }]);
                 if (error) throw error;
             }
 
