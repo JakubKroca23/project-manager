@@ -267,13 +267,35 @@ const Timeline: React.FC = () => {
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                // Vertical zoom (row height)
-                const delta = e.deltaY > 0 ? -2 : 2;
-                setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
+            // Ignore wheel events from the left column (sticky project info)
+            if ((e.target as Element).closest('.project-info-sticky')) {
                 return;
             }
+
+            if (e.ctrlKey) {
+                e.preventDefault();
+
+                // NATIVE ZOOM (Day Width)
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, dayWidthRef.current * delta));
+
+                // Calculate mouse position relative to timeline start for centering zoom
+                const rect = container.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left - 250; // 250 is sticky column width
+                const scrollLeft = container.scrollLeft;
+                const dateAtMouse = (scrollLeft + mouseX) / dayWidthRef.current;
+
+                setDayWidth(newWidth);
+
+                // Prepare restore scroll
+                zoomFocus.current = {
+                    pointDays: dateAtMouse,
+                    pixelOffset: mouseX
+                };
+                return;
+            }
+
+
 
             // Pokud uživatel drží Shift, necháme nativní horizontální scroll
             if (e.shiftKey) return;
@@ -610,8 +632,9 @@ const Timeline: React.FC = () => {
                                         className="project-info-sticky hover:bg-muted/50 transition-colors group"
                                         onWheel={handleVerticalZoom}
                                     >
+
                                         <div className="project-info-content">
-                                            {!isCompact && (
+                                            {rowHeight >= 40 && (
                                                 <span className="customer-name">
                                                     {project.customer || 'Bez zákazníka'}
                                                 </span>
