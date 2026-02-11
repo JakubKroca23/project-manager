@@ -27,6 +27,7 @@ const Timeline: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
+    const [rowHeight, setRowHeight] = useState(32);
 
     // Color Configuration State
     const [showColorEditor, setShowColorEditor] = useState(false);
@@ -59,7 +60,9 @@ const Timeline: React.FC = () => {
         '--milestone-body': colors.milestoneBody.color,
         '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
+        '--milestone-deadline': colors.milestoneDeadline.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
+        '--timeline-row-height': `${rowHeight}px`,
     } as React.CSSProperties;
 
     const resetColors = () => {
@@ -250,12 +253,29 @@ const Timeline: React.FC = () => {
         }
     };
 
+    const handleVerticalZoom = useCallback((e: React.WheelEvent) => {
+        // Prevent default scroll behavior
+        e.preventDefault();
+        e.stopPropagation();
+
+        const delta = e.deltaY > 0 ? -2 : 2;
+        setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
+    }, []);
+
     // SMOOTH WHEEL ZOOM LOGIC (Mouse Wheel)
     useEffect(() => {
         const container = scrollContainerRef.current;
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                // Vertical zoom (row height)
+                const delta = e.deltaY > 0 ? -2 : 2;
+                setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
+                return;
+            }
+
             // Pokud uživatel drží Shift, necháme nativní horizontální scroll
             if (e.shiftKey) return;
 
@@ -586,7 +606,11 @@ const Timeline: React.FC = () => {
                         <div className="timeline-rows">
                             {filteredProjects.map((project) => (
                                 <div key={project.id} className="timeline-row">
-                                    <Link href={`/projekty/${project.id}`} className="project-info-sticky hover:bg-muted/50 transition-colors group">
+                                    <Link
+                                        href={`/projekty/${project.id}`}
+                                        className="project-info-sticky hover:bg-muted/50 transition-colors group"
+                                        onWheel={handleVerticalZoom}
+                                    >
                                         <div className="project-info-content">
                                             {!isCompact && (
                                                 <span className="customer-name">
