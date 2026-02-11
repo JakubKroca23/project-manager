@@ -201,32 +201,33 @@ const Timeline: React.FC = () => {
         }
     };
 
-    // SMOTTH WHEEL ZOOM LOGIC (Ctrl + Mouse Wheel)
+    // SMOOTH WHEEL ZOOM LOGIC (Mouse Wheel)
     useEffect(() => {
         const container = scrollContainerRef.current;
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
+            // Pokud uživatel drží Shift, necháme nativní horizontální scroll
+            if (e.shiftKey) return;
 
-                const currentWidth = dayWidthRef.current;
+            e.preventDefault();
 
-                // Jemný faktor zoomu
-                const zoomFactor = 1.1;
-                const direction = e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
-                const next = Math.min(Math.max(currentWidth * direction, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
+            const currentWidth = dayWidthRef.current;
 
-                if (next !== currentWidth) {
-                    const rect = container.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
+            // Jemný faktor zoomu
+            const zoomFactor = 1.1;
+            const direction = e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
+            const next = Math.min(Math.max(currentWidth * direction, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
 
-                    // Pozice myši v timeline (včetně scrollu)
-                    const pointDays = (container.scrollLeft + mouseX) / currentWidth;
+            if (next !== currentWidth) {
+                const rect = container.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
 
-                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
-                    setDayWidth(next);
-                }
+                // Pozice myši v timeline (včetně scrollu)
+                const pointDays = (container.scrollLeft + mouseX) / currentWidth;
+
+                zoomFocus.current = { pointDays, pixelOffset: mouseX };
+                setDayWidth(next);
             }
         };
 
