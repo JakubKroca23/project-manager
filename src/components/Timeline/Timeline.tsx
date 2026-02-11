@@ -252,14 +252,7 @@ const Timeline: React.FC = () => {
         }
     };
 
-    const handleVerticalZoom = useCallback((e: React.WheelEvent) => {
-        // Prevent default scroll behavior
-        e.preventDefault();
-        e.stopPropagation();
 
-        const delta = e.deltaY > 0 ? -2 : 2;
-        setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
-    }, []);
 
     // SMOOTH WHEEL ZOOM LOGIC (Mouse Wheel)
     useEffect(() => {
@@ -267,8 +260,12 @@ const Timeline: React.FC = () => {
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            // Ignore wheel events from the left column (sticky project info)
+            // Handle vertical zoom on left column
             if ((e.target as Element).closest('.project-info-sticky')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const delta = e.deltaY > 0 ? -2 : 2;
+                setRowHeight(prev => Math.min(Math.max(prev + delta, 22), 80));
                 return;
             }
 
@@ -630,11 +627,10 @@ const Timeline: React.FC = () => {
                                     <Link
                                         href={`/projekty/${project.id}`}
                                         className="project-info-sticky hover:bg-muted/50 transition-colors group"
-                                        onWheel={handleVerticalZoom}
                                     >
 
                                         <div className="project-info-content">
-                                            {rowHeight >= 40 && (
+                                            {rowHeight >= 30 && (
                                                 <span className="customer-name">
                                                     {project.customer || 'Bez zákazníka'}
                                                 </span>
