@@ -570,14 +570,10 @@
 
 .milestone-part.service-start {
   background-color: var(--milestone-service-start);
-  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
-  /* Triangle pointing down */
 }
 
 .milestone-part.service-end {
   background-color: var(--milestone-service-end);
-  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-  /* Triangle pointing up */
 }
 
 /* Red */
