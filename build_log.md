@@ -80,10 +80,20 @@
 - **Změna**: Rozšíření oprávnění administrátorů.
 - **Detail**: Každý uživatel s rolí `admin` má nyní právo schvalovat nové registrace a měnit role ostatním (s výjimkou hlavního administrátora).
 
+## [2026-02-12] - Oprava a vylepšení milníků v Timeline
+- **Změna**: Fix posunu milníků o jeden den.
+- **Detail**: Původní logika využívala `toISOString()`, což způsobovalo posun termínů do předchozího dne kvůli časovým pásmům. Opraveno na striktní používání lokálních komponent data (`getFullYear`, `getMonth`, `getDate`).
+- **Změna**: Dynamická velikost ikon.
+- **Detail**: Implementována adaptivní velikost ikon milníků. Při horizontálním zmenšení (zoom-out) se ikony agresivně zmenšují (až na 14px), aby graf zůstal přehledný.
+- **Změna**: Interaktivní tooltipy s editací.
+- **Detail**: Do tooltipů přidán `<input type="date">` umožňující přímou změnu termínu v DB (Supabase projects). Tooltip nyní popupuje přímo z ikony s novou animací.
+- **Změna**: Multitooltip a vylepšení "Stacked" řádků.
+- **Detail**: V souhrnných řádcích se nyní při nahromadění milníků zobrazují všechny tooltipy najednou pod sebou. Odstraněna mřížka v těchto řádcích pro větší čistotu.
+- **Změna**: Oprava visibility tooltipů.
+- **Detail**: Nastaven `z-index: 10000` a `overflow: visible` pro souhrnné řádky, čímž bylo vyřešeno schovávání tooltipů pod zakázkami.
+
 ## [2026-02-12] - Implementace sekcí Výroba a Nákup
 - **Nové stránky**: Vytvořeny routy `/vyroba` a `/nakup`.
 - **UI Komponenta**: Vytvořena `ConstructionSection.tsx` pro elegantní "Under Construction" stavy.
 - **Vizuální styl**: Implementována "výstavbová animace" pomocí CSS keyframes (float, swing, lift) a ikon `lucide-react`.
 - **Konzistence**: Sekce jsou plně integrovány do Navbaru a respektují oprávnění uživatele.
-
-

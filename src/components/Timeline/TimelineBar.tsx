@@ -207,10 +207,27 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
     /**
      * Vypočítá vodorovnou pozici data v pixelech vzhledem k začátku časové osy.
+     * DST-safe calculation by counting days.
      */
     const getDatePos = (date: Date): number => {
-        const diff = (date.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
-        return diff * dayWidth;
+        const d1 = new Date(timelineStart.getFullYear(), timelineStart.getMonth(), timelineStart.getDate());
+        const d2 = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+
+        const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+        return diffDays * dayWidth;
+    };
+
+    /**
+     * Formátuje datum pro <input type="date"> v lokálním čase.
+     */
+    const formatLocalDate = (date: Date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     };
 
     const containerStyle: React.CSSProperties = {
@@ -366,11 +383,11 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                 <input
                                                     type="date"
                                                     className="tooltip-date-input"
-                                                    defaultValue={m.date.toISOString().split('T')[0]}
+                                                    defaultValue={formatLocalDate(m.date)}
                                                     onChange={(e) => handleDateUpdate(m.class, e.target.value)}
                                                     disabled={isUpdating}
                                                 />
-                                                <div className="tooltip-project truncate max-w-[140px]">{name}</div>
+                                                <div className="tooltip-project">{name}</div>
                                             </div>
                                         </div>
                                     );

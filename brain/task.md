@@ -13,7 +13,10 @@
 - [x] Rozšíření administrátorských práv pro operace v Admin Panelu.
 - [x] Fallback na ADMIN_EMAIL pro hlavního admina.
 - [x] Vytvoření sekce Výroba s animací výstavby.
-- [x] Vytvoření sekce Nákup s animací výstavby.
+- [x] Oprava posunu data milníků (Timezone fix).
+- [x] Implementace adaptivní velikosti ikon v Timeline.
+- [x] Editace termínů milníků přímo v tooltipu.
+- [x] Vylepšení vizuálu a chování "Stacked" řádků v hlavičkách sektorů.
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

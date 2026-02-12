@@ -423,6 +423,16 @@
   transition: all 0.2s;
 }
 
+.tooltip-project {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  margin-top: 4px;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 180px;
+  line-height: 1.2;
+}
+
 .project-name.is-wrapped {
   white-space: normal;
   display: -webkit-box;

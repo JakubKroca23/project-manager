@@ -1049,9 +1049,6 @@ const Timeline: React.FC = () => {
                                                             // scrollTop > yComponents - myHeaderBottom
                                                             // scrollTop > (previousRowsCount * rowHeight) + (pIndex * rowHeight)
 
-                                                            const triggerScroll = (previousRowsCount * rowHeight) + (pIndex * rowHeight);
-                                                            const isVisible = scrollTop > triggerScroll;
-
                                                             const sDate = project.project_type === 'service'
                                                                 ? (parseDate(project.deadline) || new Date())
                                                                 : (parseDate(project.created_at) || new Date());
@@ -1062,8 +1059,7 @@ const Timeline: React.FC = () => {
                                                             return (
                                                                 <div
                                                                     key={`hot-wrapper-${project.id}`}
-                                                                    className="absolute inset-0 transition-opacity duration-300"
-                                                                    style={{ opacity: isVisible ? 1 : 0 }}
+                                                                    className="absolute inset-0"
                                                                 >
                                                                     <TimelineBar
                                                                         key={`hot-${project.id}`}

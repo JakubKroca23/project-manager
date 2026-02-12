@@ -78,4 +78,13 @@
 - **Construction UI**: Zavedena zástupná komponenta `ConstructionSection`, která sjednocuje vzhled rozpracovaných částí aplikace. Obsahuje komplexní CSS animace (levitace ikon, pohyb jeřábu, indikátor průběhu).
 - **Routování**: Aktivovány stránky `/vyroba` a `/nakup` s dedikovanými popisy funkcionalit, které se připravují.
 
+## 2026-02-12: Timeline Milestones & UX Refinements
+- **Date Handling**: Opraven kritický posun termínů o jeden den. Timeline nyní využívá lokální časové komponenty namísto UTC (`toISOString`), což zajišťuje konzistenci s databází a volbou uživatele.
+- **Adaptive Sizing**: Milníky v Timeline mají nyní dynamickou velikost ikon (14px až 26px) založenou na zoomu (`dayWidth`). Tím je zajištěna čitelnost i při zobrazení celého roku.
+- **Interaktivní Tooltipy**: Implementována možnost přímé editace všech milníků projektu (Podvozek, Nástavba, Předání, Deadline) skrze tooltip. Změna se okamžitě propisuje do Supabase a reflektuje v grafu.
+- **Stacked Layout Architecture**: 
+    - Souhrnné řádky v hlavičkách sektorů mají nyní odstraněnou mřížku pro lepší vizuální separaci.
+    - Při souběhu více milníků v jeden den se tooltipy v "stacked" řádcích řadí vertikálně pod sebe, aby byly všechny čitelné.
+    - Visibility fix: Použití `z-index: 10000` a `overflow: visible` pro kontejner souhrnných řádků zajišťuje, že tooltipy nejsou překryty projekty při scrollování.
+
 

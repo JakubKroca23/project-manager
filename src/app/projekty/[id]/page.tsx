@@ -356,6 +356,11 @@ export default function ProjectDetailPage() {
                         </div>
                     </Section>
                 )}
+
+                {/* ═══ 7. HISTORIE ZMĚN ═══ */}
+                <Section icon={<ClipboardList size={15} />} title="Historie změn" color="slate" fullWidth>
+                    <ProjectHistory projectId={project.id} />
+                </Section>
             </div>
         </div>
     );
@@ -460,6 +465,77 @@ function DateField({ label, value, field, isEditing, onChange, highlight }: Date
                     {formatted}
                 </p>
             )}
+        </div>
+    );
+}
+
+function ProjectHistory({ projectId }: { projectId: string }) {
+    const [logs, setLogs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchLogs() {
+            const { data, error } = await supabase
+                .from('project_action_logs')
+                .select('*')
+                .eq('project_id', projectId)
+                .order('performed_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching logs:', error);
+            } else {
+                setLogs(data || []);
+            }
+            setLoading(false);
+        }
+        fetchLogs();
+    }, [projectId]);
+
+    if (loading) return <div className="text-[10px] text-muted-foreground animate-pulse px-4 py-2">Načítám historii...</div>;
+    if (logs.length === 0) return <div className="text-[10px] text-muted-foreground px-4 py-2">Žádné záznamy o změnách.</div>;
+
+    return (
+        <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
+            {logs.map((log) => (
+                <div key={log.id} className="p-2.5 bg-background/40 rounded-lg border border-border/40 text-[10px] hover:bg-background/60 transition-colors">
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${log.action_type === 'create' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
+                                log.action_type === 'delete' ? 'bg-destructive/10 text-destructive border border-destructive/20' :
+                                    'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                            }`}>
+                            {log.action_type === 'create' ? 'Vytvořeno' : log.action_type === 'delete' ? 'Smazáno' : 'Změna'}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground font-mono opacity-60">
+                            {new Date(log.performed_at).toLocaleString('cs-CZ')}
+                        </span>
+                    </div>
+                    <div className="text-foreground/70 mb-2 flex items-center gap-1.5 italic">
+                        <span className="opacity-50">Provedl:</span>
+                        <span className="font-bold underline decoration-primary/30 underline-offset-2">{log.performed_by || 'Systém'}</span>
+                    </div>
+                    {log.action_type === 'update' && log.old_value && log.new_value && (
+                        <div className="mt-2 space-y-1.5 border-t border-border/30 pt-1.5">
+                            {Object.keys(log.new_value).map(key => {
+                                const oldVal = log.old_value[key];
+                                const newVal = log.new_value[key];
+                                if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+                                    if (['updated_at', 'last_modified_by', 'id', 'created_at'].includes(key)) return null;
+                                    return (
+                                        <div key={key} className="flex gap-2 items-baseline border-b border-border/10 pb-1 last:border-0 hover:bg-primary/5 px-1 rounded transition-colors group">
+                                            <span className="font-black text-muted-foreground/80 uppercase text-[8px] min-w-[60px]">{key}:</span>
+                                            <div className="flex flex-col gap-0.5 flex-1">
+                                                <span className="text-destructive line-through opacity-40 italic">{String(oldVal === null || oldVal === undefined ? '—' : (typeof oldVal === 'object' ? JSON.stringify(oldVal) : oldVal))}</span>
+                                                <span className="text-emerald-600 font-bold bg-emerald-500/5 px-1 rounded">{String(newVal === null || newVal === undefined ? '—' : (typeof newVal === 'object' ? JSON.stringify(newVal) : newVal))}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })}
+                        </div>
+                    )}
+                </div>
+            ))}
         </div>
     );
 }
