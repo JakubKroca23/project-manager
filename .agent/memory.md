@@ -67,3 +67,10 @@
     - **Civil**: Blue (#90caf9)
 - **UI Kontinuita**: Detail zakázky nyní obsahuje barevný pruh nahoře signalizující kategorii. Navbar si barvu v detailu pamatuje pomocí asynchronní detekce typu projektu z DB.
 - **Login Design**: Modernizován nadpis na "PLÁNOVÁNÍ ZAKÁZEK" s důrazem na čistý korporátní styl.
+
+## 2026-02-12: RBAC a Audit Logging
+- **Role-based Access Control (RBAC)**: Detekce administrátora byla oddělena od e-mailové adresy a přesunuta na úroveň databáze (`profiles.role`). Toto umožňuje škálování administrátorského týmu bez zásahu do kódu.
+- **Real-time UX**: Implementována synchronizace rolí v reálném čase pomocí Supabase Channels. Změna role se projeví okamžitě i u právě přihlášeného uživatele (např. odemknutí Admin Panelu).
+- **Audit Trail (Architektura)**: Zaveden systém automatického logování změn v uživatelských profilech (`user_action_logs`). Logování probíhá na úrovni databáze (triggery), což zajišťuje integritu záznamů i při přímém zásahu do DB.
+- **UI Integrace**: Administrační funkce byly plně integrovány do modálního okna "Nastavení", čímž se snížil počet prvků v prvním plánu profilu a zlepšila se navigace pro běžné uživatele.
+

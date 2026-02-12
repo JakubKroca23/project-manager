@@ -35,7 +35,18 @@ export async function approveAccessRequest(requestId: string, email: string, pas
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !user || user.email !== ADMIN_EMAIL) {
+    if (userError || !user) {
+        return { error: 'Unauthorized: User not found.' };
+    }
+
+    // Check if user is admin in database
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin' && user.email !== ADMIN_EMAIL) {
         return { error: 'Unauthorized: Only admin can perform this action.' };
     }
 

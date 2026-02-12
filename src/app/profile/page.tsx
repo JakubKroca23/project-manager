@@ -198,15 +198,6 @@ export default function ProfilePage() {
                                 <Settings size={14} />
                                 <span>Nastavení</span>
                             </button>
-                            {isAdmin && (
-                                <button
-                                    onClick={() => setShowAdminPanel(true)}
-                                    className="flex items-center justify-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all font-bold text-[11px] active:scale-[0.98] uppercase tracking-wider shadow-md shadow-indigo-600/20"
-                                >
-                                    <Shield size={14} />
-                                    <span>Admin Panel</span>
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -299,6 +290,32 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Administrace */}
+                                {isAdmin && (
+                                    <div className="bg-indigo-500/[0.03] border border-indigo-500/20 rounded-2xl p-5 space-y-5">
+                                        <div className="flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                                            <Shield size={16} />
+                                            <span>Administrace</span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between bg-white dark:bg-muted/30 px-4 py-3 rounded-xl border border-indigo-500/10">
+                                            <div className="space-y-0.5">
+                                                <p className="text-[11px] font-bold text-foreground">Správa systému</p>
+                                                <p className="text-[10px] text-muted-foreground">Uživatelé a oprávnění</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setShowSettings(false);
+                                                    setShowAdminPanel(true);
+                                                }}
+                                                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md shadow-indigo-600/20 transition-all active:scale-95"
+                                            >
+                                                Otevřít Panel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Zabezpečení - Změna hesla */}
                                 <div className="bg-muted/10 border border-border rounded-2xl p-5 space-y-5">
@@ -504,6 +521,7 @@ export default function ProfilePage() {
                                                         <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
                                                             <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Role</span>
                                                             <select
+                                                                value={profile.role || 'user'}
                                                                 onChange={async (e) => {
                                                                     const success = await updateRole(profile.id, e.target.value);
                                                                     if (success) showToast('Role byla úspěšně změněna');

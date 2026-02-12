@@ -45,16 +45,15 @@ export function useAdmin() {
             return;
         }
 
-        const email = user.email || '';
-        const isUserAdmin = email === ADMIN_EMAIL;
-        setIsAdmin(isUserAdmin);
-
         // Fetch current user's profile
         const { data: currentProfile } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
             .single();
+
+        const isUserAdmin = currentProfile?.role === 'admin' || user.email === ADMIN_EMAIL;
+        setIsAdmin(isUserAdmin);
 
         if (currentProfile) {
             setCurrentUserProfile(currentProfile);
@@ -88,6 +87,41 @@ export function useAdmin() {
 
     useEffect(() => {
         fetchProfiles();
+
+        // Listen for current user role changes
+        const setupRealtime = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const channel = supabase
+                .channel(`profile-role-sync-${user.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'profiles',
+                        filter: `id=eq.${user.id}`
+                    },
+                    (payload) => {
+                        const newProfile = payload.new as UserProfile;
+                        if (newProfile) {
+                            setCurrentUserProfile(newProfile);
+                            setIsAdmin(newProfile.role === 'admin' || user.email === ADMIN_EMAIL);
+                        }
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        };
+
+        const cleanupPromise = setupRealtime();
+        return () => {
+            cleanupPromise.then(cleanup => cleanup?.());
+        };
     }, [fetchProfiles]);
 
     const updatePermission = async (userId: string, canImport: boolean) => {

@@ -67,3 +67,16 @@
 - **Detail**: V detailu projektu přidán horní indikační pruh a tlačítko "Zpět" nyní dynamicky přebírá barvu kategorie projektu.
 - **Změna**: Separace Admin Panelu v profilu.
 - **Detail**: Administrační nástroje byly vyjmuty z obecného nastavení a přesunuty pod samostatné tlačítko "Admin Panel" s vlastním dedikovaným popupem pro lepší přehlednost.
+
+## [2026-02-12] - Oprava Admin Panelu a Role-based Access Control
+- **Změna**: Oprava detekce administrátora.
+- **Detail**: `isAdmin` check v hooks (`useAdmin`, `usePermissions`) a v serverových akcích nyní primárně kontroluje roli `admin` v tabulce `profiles` namísto spoléhání se na hardcoded e-mail.
+- **Změna**: Reaktivní správa rolí.
+- **Detail**: Přidán real-time listener do `useAdmin`, který okamžitě reaguje na změnu role přihlášeného uživatele a zpřístupňuje/skrývá admin funkce bez refreshu stránky.
+- **Změna**: UI optimalizace – integrace do Nastavení.
+- **Detail**: Tlačítko "Admin Panel" přesunuto z hlavní karty profilu do modálního okna "Nastavení" pro čistší vizuál.
+- **Změna**: Implementace Audit Loggingu.
+- **Detail**: Vytvořena migrace `20240212_user_action_logs.sql`, která zavádí tabulku `user_action_logs` a triggery pro automatické logování změn v rolích a oprávněních v DB.
+- **Změna**: Rozšíření oprávnění administrátorů.
+- **Detail**: Každý uživatel s rolí `admin` má nyní právo schvalovat nové registrace a měnit role ostatním (s výjimkou hlavního administrátora).
+

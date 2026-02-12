@@ -7,6 +7,7 @@ export interface UserPermissions {
     id: string;
     email: string;
     can_import: boolean;
+    role: string;
     permissions?: {
         timeline?: boolean;
         projects?: boolean;
@@ -70,8 +71,8 @@ export function usePermissions() {
     }, [fetchPermissions]);
 
     const checkPerm = useCallback((key: string) => {
-        if (!permissions) return true; // Default to allow before load to prevent flicker
-        if (permissions.email === 'jakub.kroca@contsystem.cz') return true;
+        if (!permissions) return true;
+        if (permissions.role === 'admin' || permissions.email === 'jakub.kroca@contsystem.cz') return true;
 
         const perms = permissions.permissions || {};
         return perms[key as keyof typeof perms] !== false;
@@ -81,8 +82,8 @@ export function usePermissions() {
         permissions,
         isLoading,
         canImport: permissions?.can_import || false,
-        canEdit: permissions?.can_import || (permissions?.email === 'jakub.kroca@contsystem.cz'),
-        isAdmin: permissions?.email === 'jakub.kroca@contsystem.cz',
+        canEdit: permissions?.can_import || permissions?.role === 'admin' || permissions?.email === 'jakub.kroca@contsystem.cz',
+        isAdmin: permissions?.role === 'admin' || permissions?.email === 'jakub.kroca@contsystem.cz',
         checkPerm
     };
 }
