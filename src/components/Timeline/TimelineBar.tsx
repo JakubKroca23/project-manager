@@ -244,9 +244,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         }}
                     >
                         {ms.map((m: IMilestone) => {
-                            const iconSize = Math.max(8, Math.min(dayWidth * 0.7, 14));
-
-                            // Map milestone class to config key
                             const configMap: Record<string, string> = {
                                 'chassis': 'milestoneChassis',
                                 'body': 'milestoneBody',
@@ -261,13 +258,23 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
                             const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
+                            // Fixed larger icon size
+                            const iconSize = 22;
+                            const milestoneColor = milestoneConfig?.color || '#888';
+
                             return (
                                 <div
                                     key={m.key}
-                                    className={`milestone-part ${m.class} flex items-center justify-center`}
+                                    className={`milestone-icon flex items-center justify-center transition-transform hover:scale-125`}
+                                    style={{ width: '100%', height: '100%', cursor: 'help' }}
                                     title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
                                 >
-                                    <Icon size={iconSize} color="white" fill={IconKey === 'Play' ? 'white' : 'none'} strokeWidth={IconKey === 'Check' ? 3 : 2} />
+                                    <Icon
+                                        size={iconSize}
+                                        color={milestoneColor}
+                                        fill={IconKey === 'Play' ? milestoneColor : 'none'}
+                                        strokeWidth={IconKey === 'Check' ? 3 : 2}
+                                    />
                                 </div>
                             );
                         })}

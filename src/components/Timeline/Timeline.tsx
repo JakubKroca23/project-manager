@@ -708,10 +708,22 @@ const Timeline: React.FC = () => {
                 <div className="timeline-legend">
                     <div className="legend-group">
                         <span className="legend-group-title">Milníky:</span>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneChassis.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Podvozek</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneBody.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Nástavba</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneHandover.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Předání</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneDeadline.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Deadline</div>
+                        <div className="legend-item">
+                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneChassis.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneChassis.color} strokeWidth={2.5} />; })()}
+                            <span className="ml-1">Podvozek</span>
+                        </div>
+                        <div className="legend-item">
+                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneBody.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneBody.color} strokeWidth={2.5} />; })()}
+                            <span className="ml-1">Nástavba</span>
+                        </div>
+                        <div className="legend-item">
+                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneHandover.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneHandover.color} strokeWidth={2.5} />; })()}
+                            <span className="ml-1">Předání</span>
+                        </div>
+                        <div className="legend-item">
+                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneDeadline.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneDeadline.color} strokeWidth={2.5} />; })()}
+                            <span className="ml-1">Deadline</span>
+                        </div>
                     </div>
                     <div className="legend-group">
                         <span className="legend-group-title">Fáze:</span>
