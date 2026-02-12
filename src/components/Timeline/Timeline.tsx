@@ -17,9 +17,23 @@ import {
     Truck,
     Hammer,
     ThumbsUp,
-    AlertTriangle
+    AlertTriangle,
+    Play,
+    Check,
+    Save,
+    Milestone
 } from 'lucide-react';
 import Link from 'next/link';
+
+const ICON_OPTIONS = {
+    Truck: Truck,
+    Hammer: Hammer,
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Play: Play,
+    Check: Check,
+    Milestone: Milestone
+};
 
 // Rozsah plynulého zoomu (šířka dne v px)
 const MIN_DAY_WIDTH = 2;   // Roční přehled
@@ -36,6 +50,7 @@ interface IColorConfig {
     color: string;
     opacity: number;
     label: string;
+    icon?: keyof typeof ICON_OPTIONS;
 }
 
 interface IColorsState {
@@ -66,6 +81,8 @@ interface IServiceLanesResult {
 
 const Timeline: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
         civil: true,
@@ -90,15 +107,76 @@ const Timeline: React.FC = () => {
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
         phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
-        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
-        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
-        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
-        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
-        milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu' },
-        milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu' },
+        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
+        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
+        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
+        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
+        milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu', icon: 'Play' },
+        milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu', icon: 'Check' },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
+
+    const fetchSettings = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'timeline_config')
+                .single();
+
+            if (data?.settings) {
+                const s = data.settings;
+                if (s.colors) setColors(s.colors);
+                if (s.outline) setOutline(s.outline);
+            }
+        } catch (err) {
+            console.error('Error fetching settings:', err);
+        }
+    }, []);
+
+    const saveSettings = async () => {
+        if (!isAdmin) return;
+        setIsSaving(true);
+        try {
+            const { error } = await supabase
+                .from('app_settings')
+                .upsert({
+                    id: 'timeline_config',
+                    settings: { colors, outline },
+                    updated_at: new Date().toISOString()
+                });
+            if (error) throw error;
+            setShowColorEditor(false);
+        } catch (err) {
+            console.error('Error saving settings:', err);
+            alert('Chyba při ukládání nastavení.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const checkAdmin = useCallback(async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            setIsAdmin(profile?.role === 'admin');
+        } catch (err) {
+            console.error('Error checking admin role:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        checkAdmin();
+        fetchSettings();
+    }, [checkAdmin, fetchSettings]);
 
     const hexToRgba = (hex: string, alpha: number) => {
         const r = parseInt(hex.slice(1, 3), 16);
@@ -135,13 +213,13 @@ const Timeline: React.FC = () => {
             phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
             phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
             phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek' },
-            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba' },
-            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání' },
-            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline' },
             phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
-            milestoneServiceStart: { color: '#ce93d8', opacity: 1, label: 'Zahájení servisu' },
-            milestoneServiceEnd: { color: '#7b1fa2', opacity: 1, label: 'Ukončení servisu' },
+            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
+            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
+            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
+            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
+            milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu', icon: 'Play' },
+            milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu', icon: 'Check' },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
@@ -528,10 +606,10 @@ const Timeline: React.FC = () => {
                 <div className="timeline-legend">
                     <div className="legend-group">
                         <span className="legend-group-title">Milníky:</span>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}><Truck size={8} /></div> Podvozek</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}><Hammer size={8} /></div> Nástavba</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}><ThumbsUp size={8} /></div> Předání</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}><AlertTriangle size={8} /></div> Deadline</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneChassis.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Podvozek</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneBody.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Nástavba</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneHandover.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Předání</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}>{(() => { const Icon = ICON_OPTIONS[colors.milestoneDeadline.icon || 'Milestone']; return <Icon size={8} />; })()}</div> Deadline</div>
                     </div>
                     <div className="legend-group">
                         <span className="legend-group-title">Fáze:</span>
@@ -544,18 +622,20 @@ const Timeline: React.FC = () => {
                 </div>
 
                 <div className="header-right flex items-center gap-4">
-                    <button
-                        className={`action-button ${showColorEditor ? 'active' : ''}`}
-                        onClick={() => setShowColorEditor(!showColorEditor)}
-                        title="Upravit barvy"
-                    >
-                        <Palette size={16} />
-                    </button>
+                    {isAdmin && (
+                        <button
+                            className={`action-button ${showColorEditor ? 'active' : ''}`}
+                            onClick={() => setShowColorEditor(!showColorEditor)}
+                            title="Upravit barvy a milníky"
+                        >
+                            <Palette size={16} />
+                        </button>
+                    )}
 
                     {showColorEditor && (
                         <div className="absolute top-14 right-4 z-[100] w-80 bg-background border border-border shadow-xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
                             <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
-                                <h3 className="font-bold text-sm">Nastavení barev</h3>
+                                <h3 className="font-bold text-sm">Vzhled časové osy</h3>
                                 <div className="flex items-center gap-2">
                                     <button onClick={resetColors} title="Resetovat" className="hover:bg-muted p-1 rounded">
                                         <RotateCcw size={14} className="text-muted-foreground" />
@@ -612,14 +692,43 @@ const Timeline: React.FC = () => {
                                 <div className="space-y-2">
                                     <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
                                     {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => (
-                                        <div key={key} className="flex justify-between items-center p-2 rounded bg-muted/30">
-                                            <span className="text-xs font-medium">{config.label}</span>
-                                            <input
-                                                type="color"
-                                                value={config.color}
-                                                onChange={(e) => setColors(prev => ({ ...prev, [key]: { ...prev[key as keyof typeof colors], color: e.target.value } }))}
-                                                className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-                                            />
+                                        <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs font-medium">{config.label}</span>
+                                                <input
+                                                    type="color"
+                                                    value={config.color}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                        const newVal = e.target.value;
+                                                        setColors((prev: IColorsState) => ({
+                                                            ...prev,
+                                                            [key]: { ...config, color: newVal }
+                                                        }));
+                                                    }}
+                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-muted-foreground">Ikona:</span>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {(Object.keys(ICON_OPTIONS) as Array<keyof typeof ICON_OPTIONS>).map((iconName) => {
+                                                        const Icon = ICON_OPTIONS[iconName];
+                                                        return (
+                                                            <button
+                                                                key={iconName}
+                                                                onClick={() => setColors(prev => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, icon: iconName }
+                                                                }))}
+                                                                className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
+                                                                title={iconName}
+                                                            >
+                                                                <Icon size={12} />
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -676,6 +785,16 @@ const Timeline: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-border">
+                                <button
+                                    onClick={saveSettings}
+                                    disabled={isSaving}
+                                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                >
+                                    <Save size={16} />
+                                    {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
+                                </button>
                             </div>
                         </div>
                     )}
@@ -844,6 +963,7 @@ const Timeline: React.FC = () => {
                                                                         dayWidth={dayWidth}
                                                                         isService={project.project_type === 'service'}
                                                                         isCollapsed={true}
+                                                                        config={colors}
                                                                     />
                                                                 </div>
                                                             );
@@ -888,6 +1008,7 @@ const Timeline: React.FC = () => {
                                                             timelineStart={timelineRange.start}
                                                             dayWidth={dayWidth}
                                                             isService={project.project_type === 'service'}
+                                                            config={colors}
                                                         />
                                                     </div>
                                                 ))}

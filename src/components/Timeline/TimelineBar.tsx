@@ -2,7 +2,17 @@
 
 import React, { useMemo } from 'react';
 import { Project } from '@/types/project';
-import { Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check } from 'lucide-react';
+import { Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone } from 'lucide-react';
+
+const ICON_OPTIONS = {
+    Truck: Truck,
+    Hammer: Hammer,
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Play: Play,
+    Check: Check,
+    Milestone: Milestone
+};
 
 interface IPhase {
     key: string;
@@ -30,6 +40,7 @@ interface ITimelineBarProps {
     topOffset?: number;
     isService?: boolean;
     isCollapsed?: boolean;
+    config?: any;
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -53,7 +64,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     dayWidth,
     topOffset = 0,
     isService = false,
-    isCollapsed = false
+    isCollapsed = false,
+    config
 }: ITimelineBarProps) => {
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
@@ -233,18 +245,29 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     >
                         {ms.map((m: IMilestone) => {
                             const iconSize = Math.max(8, Math.min(dayWidth * 0.7, 14));
+
+                            // Map milestone class to config key
+                            const configMap: Record<string, string> = {
+                                'chassis': 'milestoneChassis',
+                                'body': 'milestoneBody',
+                                'handover': 'milestoneHandover',
+                                'deadline': 'milestoneDeadline',
+                                'service-start': 'milestoneServiceStart',
+                                'service-end': 'milestoneServiceEnd'
+                            };
+
+                            const configKey = configMap[m.class];
+                            const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
+                            const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                            const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
+
                             return (
                                 <div
                                     key={m.key}
                                     className={`milestone-part ${m.class} flex items-center justify-center`}
                                     title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
                                 >
-                                    {m.class === 'chassis' && <Truck size={iconSize} color="white" />}
-                                    {m.class === 'body' && <Hammer size={iconSize} color="white" />}
-                                    {m.class === 'handover' && <ThumbsUp size={iconSize} color="white" />}
-                                    {m.class === 'deadline' && <AlertTriangle size={iconSize} color="white" />}
-                                    {m.class === 'service-start' && <Play size={iconSize} color="white" fill="white" />}
-                                    {m.class === 'service-end' && <Check size={iconSize} color="white" strokeWidth={3} />}
+                                    <Icon size={iconSize} color="white" fill={IconKey === 'Play' ? 'white' : 'none'} strokeWidth={IconKey === 'Check' ? 3 : 2} />
                                 </div>
                             );
                         })}
