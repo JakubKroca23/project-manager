@@ -7,6 +7,7 @@ export interface UserProfile {
     id: string;
     email: string;
     can_import: boolean;
+    role: string;
     access_requested?: boolean;
     password_reset_requested?: boolean;
     last_request_at?: string;
@@ -179,6 +180,31 @@ export function useAdmin() {
         }
     };
 
+    const updateRole = async (userId: string, newRole: string) => {
+        if (!isAdmin) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    role: newRole,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (!error) {
+                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, role: newRole } : p));
+                return true;
+            } else {
+                console.error('Failed to update role:', error);
+                return false;
+            }
+        } catch (err) {
+            console.error('Error updating role:', err);
+            return false;
+        }
+    };
+
     return {
         profiles,
         userRequests,
@@ -187,6 +213,7 @@ export function useAdmin() {
         isLoading,
         updatePermission,
         updateUserPermissions,
+        updateRole,
         resetPasswordRequest,
         processUserRequest,
         refresh: fetchProfiles

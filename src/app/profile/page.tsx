@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 export default function ProfilePage() {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, resetPasswordRequest, processUserRequest } = useAdmin();
+    const { profiles, userRequests, currentUserProfile, isAdmin, isLoading, updatePermission, updateUserPermissions, updateRole, resetPasswordRequest, processUserRequest } = useAdmin();
     const [showSettings, setShowSettings] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
     const [notifications, setNotifications] = useState(() => {
@@ -37,6 +37,14 @@ export default function ProfilePage() {
     const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<any>(null); // Using any temporarily for ease, or use UserProfile
     const [editedPermissions, setEditedPermissions] = useState<{ [key: string]: boolean }>({});
     const [isSavingPermissions, setIsSavingPermissions] = useState(false);
+
+    // Toast State
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' | null }>({ message: '', type: null });
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast({ message: '', type: null }), 3000);
+    };
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -494,9 +502,29 @@ export default function ProfilePage() {
                                                         )}
 
                                                         <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
+                                                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Role</span>
+                                                            <select
+                                                                onChange={async (e) => {
+                                                                    const success = await updateRole(profile.id, e.target.value);
+                                                                    if (success) showToast('Role byla úspěšně změněna');
+                                                                    else showToast('Chyba při změně role', 'error');
+                                                                }}
+                                                                disabled={profile.email === 'jakub.kroca@contsystem.cz'}
+                                                                className="bg-transparent text-[10px] font-bold outline-none cursor-pointer disabled:cursor-not-allowed"
+                                                            >
+                                                                <option value="user" className="bg-card">USER</option>
+                                                                <option value="admin" className="bg-card">ADMIN</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3 bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">
                                                             <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Import</span>
                                                             <button
-                                                                onClick={() => updatePermission(profile.id, !profile.can_import)}
+                                                                onClick={async () => {
+                                                                    const success = await updatePermission(profile.id, !profile.can_import);
+                                                                    // updatePermission doesn't return anything currently, let's assume it works or update useAdmin
+                                                                    showToast(`Import byl ${!profile.can_import ? 'povolena' : 'zakázán'}`);
+                                                                }}
                                                                 disabled={profile.email === 'jakub.kroca@contsystem.cz'}
                                                                 className={`relative w-8 h-4.5 rounded-full transition-all duration-300 ${profile.can_import ? 'bg-emerald-500' : 'bg-gray-300'} ${profile.email === 'jakub.kroca@contsystem.cz' ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'}`}
                                                             >
@@ -680,6 +708,23 @@ export default function ProfilePage() {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+            {/* Toast Notification */}
+            {toast.type && (
+                <div className={cn(
+                    "fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl border transition-all duration-500 animate-in fade-in slide-in-from-bottom-5",
+                    toast.type === 'success' ? "bg-emerald-500 border-emerald-400/20 text-white" :
+                        toast.type === 'error' ? "bg-red-500 border-red-400/20 text-white" :
+                            "bg-blue-500 border-blue-400/20 text-white"
+                )}>
+                    {toast.type === 'success' && <CheckCircle size={18} />}
+                    {toast.type === 'error' && <AlertTriangle size={18} />}
+                    {toast.type === 'info' && <Clock size={18} />}
+                    <span className="text-sm font-bold tracking-wide">{toast.message}</span>
+                    <button onClick={() => setToast({ message: '', type: null })} className="ml-2 hover:opacity-70">
+                        <X size={14} />
+                    </button>
                 </div>
             )}
         </div>
