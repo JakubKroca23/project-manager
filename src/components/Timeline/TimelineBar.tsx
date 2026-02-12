@@ -286,12 +286,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     {isHovered && (
                                         <div className="milestone-tooltip">
                                             <div className="tooltip-header" style={{ color: milestoneColor }}>
-                                                <Icon size={14} className="mr-2" />
+                                                <Icon size={12} className="mr-2" />
                                                 <strong>{m.label}</strong>
                                             </div>
                                             <div className="tooltip-body">
                                                 <div className="tooltip-date">{m.date.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                                                <div className="tooltip-project" style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '2px' }}>{name}</div>
+                                                <div className="tooltip-project">{name}</div>
                                             </div>
                                         </div>
                                     )}

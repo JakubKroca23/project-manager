@@ -365,6 +365,8 @@
 
 .timeline-row:hover {
   background: var(--muted)/30;
+  z-index: 500;
+  /* Higher than sticky header (200) to allow tooltips to show over it */
 }
 
 /* STICKY PANEL S PROJEKTY */
@@ -605,18 +607,19 @@
 /* DETAILED TOOLTIP */
 .milestone-tooltip {
   position: absolute;
-  bottom: 120%;
+  bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  min-width: 160px;
-  z-index: 100;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  width: max-content;
+  max-width: 180px;
+  z-index: 9999;
   pointer-events: none;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  animation: tooltipFadeIn 0.2s ease-out;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: tooltipFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .milestone-tooltip::after {
@@ -633,27 +636,29 @@
 .tooltip-header {
   display: flex;
   align-items: center;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  padding-bottom: 4px;
+  padding-bottom: 2px;
+  white-space: nowrap;
 }
 
 .tooltip-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 }
 
 .tooltip-date {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: #1a1a1a;
 }
 
 .tooltip-project {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #666;
+  line-height: 1.2;
 }
 
 @keyframes tooltipFadeIn {
