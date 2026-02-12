@@ -243,7 +243,6 @@ const Timeline: React.FC = () => {
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
-        '--timeline-row-height': `${rowHeight}px`,
         '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
         cursor: isMiddleDragging ? 'move' : 'auto',
     } as React.CSSProperties;
