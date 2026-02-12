@@ -10,11 +10,70 @@ import {
     Container, Anchor, Component, Drill, Settings
 } from 'lucide-react';
 
+// ─── CUSTOM ICONS ────────────────────────────────────────────────
+const HookLoader = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M2 17h2v-4h4v4h2" />
+        <path d="M18 17h4v-6h-4z" />
+        <path d="M13 14l5-5h3" />
+    </svg>
+);
+
+const HydraulicCrane = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M2 17h2v-4h4v4h2" />
+        <path d="M12 13l4-7 5 1" />
+    </svg>
+);
+
+const HydraulicPlatform = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M3 17v-3h4v3" />
+        <path d="M10 17l3-6 3 6" />
+        <path d="M11 11l2-4 2 4" />
+        <path d="M11 7h4" />
+    </svg>
+);
+
+const TruckCrane = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 17h20" />
+        <circle cx="6" cy="18" r="2" />
+        <circle cx="14" cy="18" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <path d="M2 17v-4h4l3 3h5v-3l7-5" />
+    </svg>
+);
+
 const ICON_OPTIONS = {
-    Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
-    Cog, Wrench, Zap, Cpu, Activity, Package, Box, HardHat,
-    Construction, Factory, Pickaxe, Settings2, ShieldCheck,
-    Container, Anchor, Component, Drill, Settings
+    Truck: Truck,
+    Hammer: Hammer,
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Check: Check,
+    Wrench: Wrench,
+    Zap: Zap,
+    Package: Package,
+    Factory: Factory,
+    ShieldCheck: ShieldCheck,
+    Box: Box,
+    Drill: Drill,
+    Settings: Settings,
+    HookLoader: HookLoader,
+    HydraulicCrane: HydraulicCrane,
+    HydraulicPlatform: HydraulicPlatform,
+    TruckCrane: TruckCrane,
+    Play: Play,
+    Milestone: Milestone
 };
 
 interface IPhase {

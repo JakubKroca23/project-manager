@@ -43,33 +43,79 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+// ─── CUSTOM ICONS ────────────────────────────────────────────────
+const HookLoader = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M2 17h2v-4h4v4h2" />
+        <path d="M18 17h4v-6h-4z" />
+        <path d="M13 14l5-5h3" />
+    </svg>
+);
+
+const HydraulicCrane = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M2 17h2v-4h4v4h2" />
+        <path d="M12 13l4-7 5 1" />
+    </svg>
+);
+
+const HydraulicPlatform = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 17h18" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+        <path d="M3 17v-3h4v3" />
+        <path d="M10 17l3-6 3 6" />
+        <path d="M11 11l2-4 2 4" />
+        <path d="M11 7h4" />
+    </svg>
+);
+
+const TruckCrane = (props: any) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 17h20" />
+        <circle cx="6" cy="18" r="2" />
+        <circle cx="14" cy="18" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <path d="M2 17v-4h4l3 3h5v-3l7-5" />
+    </svg>
+);
+
 const ICON_OPTIONS = {
     Truck: Truck,
     Hammer: Hammer,
     ThumbsUp: ThumbsUp,
     AlertTriangle: AlertTriangle,
-    Play: Play,
     Check: Check,
-    Milestone: Milestone,
-    Cog: Cog,
     Wrench: Wrench,
     Zap: Zap,
-    Cpu: Cpu,
-    Activity: Activity,
     Package: Package,
-    Box: Box,
-    HardHat: HardHat,
-    Construction: Construction,
     Factory: Factory,
-    Pickaxe: Pickaxe,
-    Settings2: Settings2,
     ShieldCheck: ShieldCheck,
-    Container: Container,
-    Anchor: Anchor,
-    Component: Component,
+    Box: Box,
     Drill: Drill,
-    Settings: Settings
+    Settings: Settings,
+    HookLoader: HookLoader,
+    HydraulicCrane: HydraulicCrane,
+    HydraulicPlatform: HydraulicPlatform,
+    TruckCrane: TruckCrane,
+    Play: Play,
+    Milestone: Milestone
 };
+
+// Seznam ikon pro výběr v editoru (dle požadavku uživatele - ty co jsou vidět + nové)
+const VISIBLE_ICONS = [
+    'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
+    'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
+    'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
+    'HydraulicPlatform', 'TruckCrane'
+];
 
 // Rozsah plynulého zoomu (šířka dne v px)
 const MIN_DAY_WIDTH = 2;   // Roční přehled
@@ -709,19 +755,19 @@ const Timeline: React.FC = () => {
                     <div className="legend-group">
                         <span className="legend-group-title">Milníky:</span>
                         <div className="legend-item">
-                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneChassis.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneChassis.color} strokeWidth={2.5} />; })()}
+                            {(() => { const Icon = ICON_OPTIONS[(colors.milestoneChassis.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={18} color={colors.milestoneChassis.color} strokeWidth={2.5} />; })()}
                             <span className="ml-1">Podvozek</span>
                         </div>
                         <div className="legend-item">
-                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneBody.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneBody.color} strokeWidth={2.5} />; })()}
+                            {(() => { const Icon = ICON_OPTIONS[(colors.milestoneBody.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={18} color={colors.milestoneBody.color} strokeWidth={2.5} />; })()}
                             <span className="ml-1">Nástavba</span>
                         </div>
                         <div className="legend-item">
-                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneHandover.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneHandover.color} strokeWidth={2.5} />; })()}
+                            {(() => { const Icon = ICON_OPTIONS[(colors.milestoneHandover.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={18} color={colors.milestoneHandover.color} strokeWidth={2.5} />; })()}
                             <span className="ml-1">Předání</span>
                         </div>
                         <div className="legend-item">
-                            {(() => { const Icon = ICON_OPTIONS[colors.milestoneDeadline.icon || 'Milestone']; return <Icon size={18} color={colors.milestoneDeadline.color} strokeWidth={2.5} />; })()}
+                            {(() => { const Icon = ICON_OPTIONS[(colors.milestoneDeadline.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={18} color={colors.milestoneDeadline.color} strokeWidth={2.5} />; })()}
                             <span className="ml-1">Deadline</span>
                         </div>
                     </div>
@@ -825,14 +871,14 @@ const Timeline: React.FC = () => {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[10px] text-muted-foreground">Ikona:</span>
                                                 <div className="flex flex-wrap gap-1">
-                                                    {(Object.keys(ICON_OPTIONS) as Array<keyof typeof ICON_OPTIONS>).map((iconName) => {
-                                                        const Icon = ICON_OPTIONS[iconName];
+                                                    {VISIBLE_ICONS.map((iconName) => {
+                                                        const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
                                                         return (
                                                             <button
                                                                 key={iconName}
                                                                 onClick={() => setColors(prev => ({
                                                                     ...prev,
-                                                                    [key]: { ...config, icon: iconName }
+                                                                    [key]: { ...config, icon: iconName as any }
                                                                 }))}
                                                                 className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
                                                                 title={iconName}

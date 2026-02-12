@@ -27,6 +27,7 @@ import {
     FileText
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useAdmin } from '@/hooks/useAdmin';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -472,6 +473,7 @@ function DateField({ label, value, field, isEditing, onChange, highlight }: Date
 function ProjectHistory({ projectId }: { projectId: string }) {
     const [logs, setLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { profiles } = useAdmin();
 
     useEffect(() => {
         async function fetchLogs() {
@@ -491,6 +493,12 @@ function ProjectHistory({ projectId }: { projectId: string }) {
         fetchLogs();
     }, [projectId]);
 
+    const resolveUser = (id: string) => {
+        if (!id) return 'Systém';
+        const profile = profiles.find(p => p.id === id);
+        return profile?.email || id;
+    };
+
     if (loading) return <div className="text-[10px] text-muted-foreground animate-pulse px-4 py-2">Načítám historii...</div>;
     if (logs.length === 0) return <div className="text-[10px] text-muted-foreground px-4 py-2">Žádné záznamy o změnách.</div>;
 
@@ -500,8 +508,8 @@ function ProjectHistory({ projectId }: { projectId: string }) {
                 <div key={log.id} className="p-2.5 bg-background/40 rounded-lg border border-border/40 text-[10px] hover:bg-background/60 transition-colors">
                     <div className="flex justify-between items-center mb-1.5">
                         <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${log.action_type === 'create' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                                log.action_type === 'delete' ? 'bg-destructive/10 text-destructive border border-destructive/20' :
-                                    'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                            log.action_type === 'delete' ? 'bg-destructive/10 text-destructive border border-destructive/20' :
+                                'bg-blue-500/10 text-blue-600 border border-blue-500/20'
                             }`}>
                             {log.action_type === 'create' ? 'Vytvořeno' : log.action_type === 'delete' ? 'Smazáno' : 'Změna'}
                         </span>
@@ -511,7 +519,9 @@ function ProjectHistory({ projectId }: { projectId: string }) {
                     </div>
                     <div className="text-foreground/70 mb-2 flex items-center gap-1.5 italic">
                         <span className="opacity-50">Provedl:</span>
-                        <span className="font-bold underline decoration-primary/30 underline-offset-2">{log.performed_by || 'Systém'}</span>
+                        <span className="font-bold underline decoration-primary/30 underline-offset-2">
+                            {resolveUser(log.performed_by)}
+                        </span>
                     </div>
                     {log.action_type === 'update' && log.old_value && log.new_value && (
                         <div className="mt-2 space-y-1.5 border-t border-border/30 pt-1.5">
