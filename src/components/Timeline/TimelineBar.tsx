@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
@@ -69,7 +70,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     isCollapsed = false,
     config
 }: ITimelineBarProps) => {
-    const [activeTooltip, setActiveTooltip] = React.useState<string | null>(null);
+    const [activeCell, setActiveCell] = useState<string | null>(null);
+    const [isUpdating, setIsUpdating] = useState(false);
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
@@ -111,6 +113,38 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         });
         return groups;
     }, [t_chassis, t_body, t_handover, t_deadline, project.project_type]);
+
+    const handleDateUpdate = async (milestoneClass: string, newDateStr: string) => {
+        setIsUpdating(true);
+        try {
+            const fieldMap: Record<string, string> = {
+                'chassis': 'chassis_delivery',
+                'body': 'body_delivery',
+                'handover': 'customer_handover',
+                'deadline': 'deadline',
+                'service-start': 'deadline',
+                'service-end': 'customer_handover'
+            };
+
+            const field = fieldMap[milestoneClass];
+            if (!field) return;
+
+            const { error } = await supabase
+                .from('projects')
+                .update({ [field]: newDateStr })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Refresh page to see changes
+            window.location.reload();
+        } catch (err) {
+            console.error('Error updating milestone date:', err);
+            alert('Chyba při ukládání data.');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     // 2. Fáze (plochy v čase)
     const phases = useMemo((): IPhase[] => {
@@ -238,69 +272,102 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const [y, m_idx, d] = dateKey.split('-').map(Number);
                 const date = new Date(y, m_idx - 1, d);
                 const mLeft = getDatePos(date);
+                const isHovered = activeCell === dateKey;
+
+                // Dynamic icon size: larger when zooming out (small dayWidth)
+                const baseSize = 26;
+                const iconSize = dayWidth < 15 ? 32 : (dayWidth < 25 ? 28 : baseSize);
 
                 return (
                     <div
                         key={`${id}-${dateKey}`}
-                        className="milestone-cell"
+                        className={`milestone-cell ${isHovered ? 'is-active' : ''}`}
                         style={{
                             left: mLeft,
                             width: dayWidth,
-                            opacity: isCollapsed ? 1 : 1 // Milníky: 100%
+                            zIndex: isHovered ? 1000 : (isCollapsed ? 10 : 20),
+                            pointerEvents: 'auto'
                         }}
+                        onMouseEnter={() => setActiveCell(dateKey)}
+                        onMouseLeave={() => setActiveCell(null)}
                     >
-                        {ms.map((m: IMilestone) => {
-                            const configMap: Record<string, string> = {
-                                'chassis': 'milestoneChassis',
-                                'body': 'milestoneBody',
-                                'handover': 'milestoneHandover',
-                                'deadline': 'milestoneDeadline',
-                                'service-start': 'milestoneServiceStart',
-                                'service-end': 'milestoneServiceEnd'
-                            };
+                        <div className="milestone-icons-stack flex items-center justify-center relative w-full h-full">
+                            {ms.map((m: IMilestone, idx) => {
+                                const configMap: Record<string, string> = {
+                                    'chassis': 'milestoneChassis',
+                                    'body': 'milestoneBody',
+                                    'handover': 'milestoneHandover',
+                                    'deadline': 'milestoneDeadline',
+                                    'service-start': 'milestoneServiceStart',
+                                    'service-end': 'milestoneServiceEnd'
+                                };
 
-                            const configKey = configMap[m.class];
-                            const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
-                            const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
-                            const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
+                                const configKey = configMap[m.class];
+                                const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
+                                const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                                const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
+                                const milestoneColor = milestoneConfig?.color || '#888';
 
-                            // Fixed larger icon size
-                            const iconSize = 26;
-                            const milestoneColor = milestoneConfig?.color || '#888';
-                            const milestoneId = `${id}-${m.key}-${dateKey}`;
-                            const isHovered = activeTooltip === milestoneId;
+                                return (
+                                    <div
+                                        key={m.key}
+                                        className={`milestone-icon absolute transition-all duration-300 ${isHovered ? 'is-hovering' : ''}`}
+                                        style={{
+                                            color: milestoneColor,
+                                            transform: `scale(${isHovered ? 1.6 : 1.1})`,
+                                            zIndex: idx
+                                        }}
+                                    >
+                                        <Icon
+                                            size={iconSize}
+                                            color={milestoneColor}
+                                            fill={IconKey === 'Play' ? milestoneColor : 'none'}
+                                            strokeWidth={isHovered ? 3 : 2.5}
+                                            className="milestone-svg"
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                            return (
-                                <div
-                                    key={m.key}
-                                    className={`milestone-icon flex items-center justify-center transition-transform ${isHovered ? 'is-hovering' : ''}`}
-                                    style={{ width: '100%', height: '100%', pointerEvents: 'auto', cursor: 'pointer' }}
-                                    onMouseEnter={() => setActiveTooltip(milestoneId)}
-                                    onMouseLeave={() => setActiveTooltip(null)}
-                                >
-                                    <Icon
-                                        size={iconSize}
-                                        color={milestoneColor}
-                                        fill={IconKey === 'Play' ? milestoneColor : 'none'}
-                                        strokeWidth={isHovered ? 3 : 2.5}
-                                        className="milestone-svg"
-                                    />
+                        {isHovered && (
+                            <div className="milestone-tooltip-container">
+                                {ms.map((m: IMilestone) => {
+                                    const configMap: Record<string, string> = {
+                                        'chassis': 'milestoneChassis',
+                                        'body': 'milestoneBody',
+                                        'handover': 'milestoneHandover',
+                                        'deadline': 'milestoneDeadline',
+                                        'service-start': 'milestoneServiceStart',
+                                        'service-end': 'milestoneServiceEnd'
+                                    };
+                                    const configKey = configMap[m.class];
+                                    const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
+                                    const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                                    const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
+                                    const milestoneColor = milestoneConfig?.color || '#888';
 
-                                    {isHovered && (
-                                        <div className="milestone-tooltip">
+                                    return (
+                                        <div key={m.key} className="milestone-tooltip">
                                             <div className="tooltip-header" style={{ color: milestoneColor }}>
                                                 <Icon size={12} className="mr-2" />
                                                 <strong>{m.label}</strong>
                                             </div>
                                             <div className="tooltip-body">
-                                                <div className="tooltip-date">{m.date.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                                                <div className="tooltip-project">{name}</div>
+                                                <input
+                                                    type="date"
+                                                    className="tooltip-date-input"
+                                                    defaultValue={m.date.toISOString().split('T')[0]}
+                                                    onChange={(e) => handleDateUpdate(m.class, e.target.value)}
+                                                    disabled={isUpdating}
+                                                />
+                                                <div className="tooltip-project truncate max-w-[140px]">{name}</div>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 );
             })}
