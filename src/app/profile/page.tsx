@@ -226,7 +226,7 @@ export default function ProfilePage() {
 
                 {/* Activity History */}
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                    <ActivityLogSection />
+                    <ActivityLogSection isAdmin={isAdmin} profiles={profiles} />
                 </div>
 
                 {/* Settings Popup Modal */}

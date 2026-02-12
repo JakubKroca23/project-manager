@@ -21,7 +21,25 @@ import {
     Play,
     Check,
     Save,
-    Milestone
+    Milestone,
+    Cog,
+    Wrench,
+    Zap,
+    Cpu,
+    Activity,
+    Package,
+    Box,
+    HardHat,
+    Construction,
+    Factory,
+    Pickaxe,
+    Settings2,
+    ShieldCheck,
+    Container,
+    Anchor,
+    Component,
+    Drill,
+    Settings
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,7 +50,25 @@ const ICON_OPTIONS = {
     AlertTriangle: AlertTriangle,
     Play: Play,
     Check: Check,
-    Milestone: Milestone
+    Milestone: Milestone,
+    Cog: Cog,
+    Wrench: Wrench,
+    Zap: Zap,
+    Cpu: Cpu,
+    Activity: Activity,
+    Package: Package,
+    Box: Box,
+    HardHat: HardHat,
+    Construction: Construction,
+    Factory: Factory,
+    Pickaxe: Pickaxe,
+    Settings2: Settings2,
+    ShieldCheck: ShieldCheck,
+    Container: Container,
+    Anchor: Anchor,
+    Component: Component,
+    Drill: Drill,
+    Settings: Settings
 };
 
 // Rozsah plynulého zoomu (šířka dne v px)

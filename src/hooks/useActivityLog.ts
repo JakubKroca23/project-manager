@@ -3,16 +3,19 @@ import { supabase } from '@/lib/supabase/client';
 
 export interface ActivityItem {
     id: string;
-    type: 'import' | 'settings' | 'user_management';
+    type: 'import' | 'settings' | 'user_management' | 'project';
     description: string;
     timestamp: string;
+    performedBy?: string;
     details?: any;
 }
 
 /**
- * Hook to fetch activity logs for the current user.
+ * Hook to fetch activity logs.
+ * If isAdmin is true, it fetches logs for all users.
+ * Otherwise, it fetches only for the current user.
  */
-export function useActivityLog() {
+export function useActivityLog(isAdmin: boolean) {
     const [activities, setActivities] = useState<ActivityItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -25,40 +28,62 @@ export function useActivityLog() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            // Fetch import logs
-            // Note: import_logs.performed_by is text (email), so we match by user email
-            const { data: imports, error: importError } = await supabase
+            // 1. Fetch import logs
+            let importQuery = supabase
                 .from('import_logs')
                 .select('*')
-                .eq('performed_by', user.email)
                 .order('created_at', { ascending: false })
                 .limit(10);
 
+            if (!isAdmin) {
+                importQuery = importQuery.eq('performed_by', user.email);
+            }
+            const { data: imports, error: importError } = await importQuery;
             if (importError) throw importError;
 
-            // Fetch settings logs
-            const { data: settingsLogs, error: settingsError } = await supabase
+            // 2. Fetch settings logs
+            let settingsQuery = supabase
                 .from('app_settings_logs')
                 .select('*')
-                .eq('changed_by', user.id)
                 .order('changed_at', { ascending: false })
                 .limit(10);
 
+            if (!isAdmin) {
+                settingsQuery = settingsQuery.eq('changed_by', user.id);
+            }
+            const { data: settingsLogs, error: settingsError } = await settingsQuery;
             if (settingsError && settingsError.code !== 'PGRST116') {
-                // Silently ignore if table doesn't exist or RLS denies
                 console.warn('Settings logs fetch error:', settingsError);
             }
 
-            // Fetch user action logs (actions performed BY this user)
-            const { data: actionLogs, error: actionError } = await supabase
+            // 3. Fetch user action logs
+            let actionQuery = supabase
                 .from('user_action_logs')
                 .select('*')
-                .eq('performed_by', user.id)
                 .order('performed_at', { ascending: false })
                 .limit(10);
 
+            if (!isAdmin) {
+                actionQuery = actionQuery.eq('performed_by', user.id);
+            }
+            const { data: actionLogs, error: actionError } = await actionQuery;
             if (actionError && actionError.code !== 'PGRST116') {
                 console.warn('Action logs fetch error:', actionError);
+            }
+
+            // 4. Fetch project action logs
+            let projectLogQuery = supabase
+                .from('project_action_logs')
+                .select('*')
+                .order('performed_at', { ascending: false })
+                .limit(20);
+
+            if (!isAdmin) {
+                projectLogQuery = projectLogQuery.eq('performed_by', user.id);
+            }
+            const { data: projectLogs, error: projectLogError } = await projectLogQuery;
+            if (projectLogError && projectLogError.code !== 'PGRST116') {
+                console.warn('Project logs fetch error:', projectLogError);
             }
 
             // Consolidate logs
@@ -68,6 +93,7 @@ export function useActivityLog() {
                     type: 'import' as const,
                     description: `Import dat (${log.project_type}) - ${log.row_count} řádků`,
                     timestamp: log.created_at,
+                    performedBy: log.performed_by,
                     details: log.changes_summary
                 })),
                 ...(settingsLogs || []).map((log: any) => ({
@@ -75,6 +101,7 @@ export function useActivityLog() {
                     type: 'settings' as const,
                     description: `Změna systémového nastavení: ${log.settings_id}`,
                     timestamp: log.changed_at,
+                    performedBy: log.changed_by,
                     details: { old: log.old_settings, new: log.new_settings }
                 })),
                 ...(actionLogs || []).map((log: any) => ({
@@ -82,20 +109,39 @@ export function useActivityLog() {
                     type: 'user_management' as const,
                     description: `Změna oprávnění/role u uživatele`,
                     timestamp: log.performed_at,
-                    details: { action: log.action_type, target: log.target_user_id }
-                }))
+                    performedBy: log.performed_by,
+                    details: { action: log.action_type, target: log.target_user_id, old: log.old_value, new: log.new_value }
+                })),
+                ...(projectLogs || []).map((log: any) => {
+                    let desc = 'Úprava projektu';
+                    const projectName = log.new_value?.name || log.old_value?.name || log.project_id;
+
+                    if (log.action_type === 'create') desc = `Nový projekt: ${projectName}`;
+                    else if (log.action_type === 'delete') desc = `Smazání projektu: ${projectName}`;
+                    else desc = `Úprava projektu: ${projectName}`;
+
+                    return {
+                        id: log.id,
+                        type: 'project' as const,
+                        description: desc,
+                        timestamp: log.performed_at,
+                        performedBy: log.performed_by,
+                        details: { old: log.old_value, new: log.new_value, action: log.action_type }
+                    };
+                })
             ];
 
             // Sort by time descending
             combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-            setActivities(combined.slice(0, 15));
+            // Support scrolling or just show more for admins
+            setActivities(combined.slice(0, isAdmin ? 50 : 20));
         } catch (err: any) {
             setError(err.message || 'Chyba při načítání aktivit');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isAdmin]);
 
     useEffect(() => {
         fetchActivities();

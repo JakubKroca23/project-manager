@@ -12,11 +12,11 @@ interface IConstructionSectionProps {
 /**
  * Component for displaying an 'Under Construction' state with animations.
  */
-export const ConstructionSection: React.FC<IConstructionSectionProps> = ({ title, description }) => {
+export const ConstructionSection: React.FC<IConstructionSectionProps> = () => {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] w-full px-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 text-center">
             {/* Animation Container */}
-            <div className="relative w-64 h-64 mb-12">
+            <div className="relative w-64 h-64 mb-16">
                 {/* Background pulsing ring */}
                 <div className="absolute inset-0 bg-primary/10 rounded-full animate-pulse scale-110" />
                 <div className="absolute inset-0 bg-primary/5 rounded-full animate-pulse delay-700 scale-150" />
@@ -49,29 +49,13 @@ export const ConstructionSection: React.FC<IConstructionSectionProps> = ({ title
             </div>
 
             {/* Text Content */}
-            <div className="space-y-6 max-w-2xl">
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground uppercase italic underline decoration-primary decoration-4 underline-offset-8">
-                    {title}
+            <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic underline decoration-primary decoration-8 underline-offset-8">
+                    Stránka ve výstavbě
                 </h1>
-
-                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-                    <p className="text-xl font-bold text-primary mb-2 uppercase tracking-widest">Sekce je ve vývoji</p>
-                    <p className="text-muted-foreground leading-relaxed">
-                        {description || 'Na této části aplikace usilovně pracujeme. Brzy zde najdete plnohodnotné nástroje pro správu vašich procesů.'}
-                    </p>
-                </div>
-
-                {/* Progress Bar Mockup */}
-                <div className="w-full max-w-md mx-auto space-y-2 pt-4">
-                    <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        <span>Stav výstavby</span>
-                        <span>70%</span>
-                    </div>
-                    <div className="h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700">
-                        <div className="h-full bg-gradient-to-r from-primary to-indigo-500 rounded-full animate-construction-progress" style={{ width: '70%' }} />
-                    </div>
-                    <p className="text-[11px] text-muted-foreground italic">Probíhá pokládka základů a instalace modulů...</p>
-                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-50">
+                    Hard work in progress
+                </p>
             </div>
         </div>
     );
