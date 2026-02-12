@@ -6,6 +6,15 @@ import { createClient } from '@supabase/supabase-js';
 
 const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
 
+/**
+ * Server action to approve a user's access request.
+ * Creates a new user account using the Supabase Admin API and updates the request status.
+ * 
+ * @param requestId The ID of the pending request.
+ * @param email User's email address.
+ * @param password Initial password for the new user.
+ * @returns Result object with success status or error message.
+ */
 export async function approveAccessRequest(requestId: string, email: string, password: string) {
     const cookieStore = await cookies();
 
@@ -25,8 +34,6 @@ export async function approveAccessRequest(requestId: string, email: string, pas
                         );
                     } catch {
                         // The `setAll` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
                     }
                 },
             },
@@ -77,8 +84,8 @@ export async function approveAccessRequest(requestId: string, email: string, pas
         }
     });
 
-    if (createError) {
-        return { error: `Failed to create user: ${createError.message}` };
+    if (createError || !newUser?.user) {
+        return { error: `Failed to create user: ${createError?.message || 'Unknown error'}` };
     }
 
     // 3. Mark request as processed
@@ -93,3 +100,4 @@ export async function approveAccessRequest(requestId: string, email: string, pas
 
     return { success: true, userId: newUser.user.id };
 }
+

@@ -31,6 +31,12 @@ export interface UserRequest {
 
 const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
 
+/**
+ * Custom hook for administrative operations and real-time profile synchronization.
+ * Handles fetching profiles, user requests, and managing permissions/roles.
+ * 
+ * @returns Object containing state and administrative action functions.
+ */
 export function useAdmin() {
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
     const [userRequests, setUserRequests] = useState<UserRequest[]>([]);
@@ -38,6 +44,9 @@ export function useAdmin() {
     const [isLoading, setIsLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
+    /**
+     * Fetches all user profiles and pending requests if the current user is an admin.
+     */
     const fetchProfiles = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
@@ -103,8 +112,8 @@ export function useAdmin() {
                         table: 'profiles',
                         filter: `id=eq.${user.id}`
                     },
-                    (payload) => {
-                        const newProfile = payload.new as UserProfile;
+                    (payload: { new: UserProfile }) => {
+                        const newProfile = payload.new;
                         if (newProfile) {
                             setCurrentUserProfile(newProfile);
                             setIsAdmin(newProfile.role === 'admin' || user.email === ADMIN_EMAIL);
@@ -124,6 +133,11 @@ export function useAdmin() {
         };
     }, [fetchProfiles]);
 
+    /**
+     * Updates the can_import permission for a user.
+     * @param userId The ID of the user to update.
+     * @param canImport The new value for can_import.
+     */
     const updatePermission = async (userId: string, canImport: boolean) => {
         if (!isAdmin) return;
 
@@ -138,7 +152,7 @@ export function useAdmin() {
                 .eq('id', userId);
 
             if (!error) {
-                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, can_import: canImport, access_requested: false } : p));
+                setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, can_import: canImport, access_requested: false } : p));
             } else {
                 console.error('Failed to update permission:', error);
             }
@@ -147,6 +161,12 @@ export function useAdmin() {
         }
     };
 
+    /**
+     * Updates granular user permissions.
+     * @param userId The ID of the user to update.
+     * @param newPermissions The new permissions object.
+     * @returns Promise resolving to true on success.
+     */
     const updateUserPermissions = async (userId: string, newPermissions: UserProfile['permissions']) => {
         if (!isAdmin) return;
 
@@ -160,7 +180,7 @@ export function useAdmin() {
                 .eq('id', userId);
 
             if (!error) {
-                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, permissions: newPermissions } : p));
+                setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, permissions: newPermissions } : p));
                 return true;
             } else {
                 console.error('Failed to update user permissions:', error);
@@ -172,6 +192,10 @@ export function useAdmin() {
         }
     };
 
+    /**
+     * Resets a user's password reset request status.
+     * @param userId The ID of the user.
+     */
     const resetPasswordRequest = async (userId: string) => {
         if (!isAdmin) return;
 
@@ -185,7 +209,7 @@ export function useAdmin() {
                 .eq('id', userId);
 
             if (!error) {
-                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, password_reset_requested: false } : p));
+                setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, password_reset_requested: false } : p));
             } else {
                 console.error('Failed to reset password request:', error);
             }
@@ -194,6 +218,11 @@ export function useAdmin() {
         }
     };
 
+    /**
+     * Processes a user access or password reset request.
+     * @param requestId The ID of the request.
+     * @param status The new status ('processed' | 'rejected').
+     */
     const processUserRequest = async (requestId: string, status: 'processed' | 'rejected') => {
         if (!isAdmin) return;
 
@@ -207,13 +236,19 @@ export function useAdmin() {
                 .eq('id', requestId);
 
             if (!error) {
-                setUserRequests(prev => prev.filter(r => r.id !== requestId));
+                setUserRequests((prev: UserRequest[]) => prev.filter((r: UserRequest) => r.id !== requestId));
             }
         } catch (err) {
             console.error('Error processing user request:', err);
         }
     };
 
+    /**
+     * Updates a user's role.
+     * @param userId The ID of the user to update.
+     * @param newRole The new role string.
+     * @returns Promise resolving to true on success.
+     */
     const updateRole = async (userId: string, newRole: string) => {
         if (!isAdmin) return;
 
@@ -227,7 +262,7 @@ export function useAdmin() {
                 .eq('id', userId);
 
             if (!error) {
-                setProfiles(prev => prev.map(p => p.id === userId ? { ...p, role: newRole } : p));
+                setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, role: newRole } : p));
                 return true;
             } else {
                 console.error('Failed to update role:', error);
@@ -253,3 +288,4 @@ export function useAdmin() {
         refresh: fetchProfiles
     };
 }
+

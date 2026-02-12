@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-import { useAdmin, type UserRequest } from '@/hooks/useAdmin';
+import { useAdmin, type UserRequest, type UserProfile } from '@/hooks/useAdmin';
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
+import { ActivityLogSection } from '@/components/profile/ActivityLogSection';
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -34,30 +35,42 @@ export default function ProfilePage() {
 
     // Permissions Modal State
     const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
-    const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<any>(null); // Using any temporarily for ease, or use UserProfile
+    const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<UserProfile | null>(null);
     const [editedPermissions, setEditedPermissions] = useState<{ [key: string]: boolean }>({});
     const [isSavingPermissions, setIsSavingPermissions] = useState(false);
 
     // Toast State
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' | null }>({ message: '', type: null });
 
+    /**
+     * Display a temporary toast message.
+     */
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setToast({ message, type });
         setTimeout(() => setToast({ message: '', type: null }), 3000);
     };
 
+    /**
+     * Sign out the current user.
+     */
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.push('/login');
         router.refresh();
     };
 
+    /**
+     * Toggle browser notifications setting.
+     */
     const toggleNotifications = () => {
         const newVal = !notifications;
         setNotifications(newVal);
         localStorage.setItem('notifications_enabled', String(newVal));
     };
 
+    /**
+     * Handle user password change.
+     */
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         setPasswordStatus({ type: null, message: '' });
@@ -81,18 +94,24 @@ export default function ProfilePage() {
             setNewPassword('');
             setConfirmPassword('');
         } catch (error: any) {
-            setPasswordStatus({ type: 'error', message: error.message || 'Chyba při změně hesla.' });
+            setPasswordStatus({ type: 'error', message: (error as Error).message || 'Chyba při změně hesla.' });
         } finally {
             setIsChangingPassword(false);
         }
     };
 
+    /**
+     * Open modal to approve a user request.
+     */
     const openApproveModal = (request: UserRequest) => {
         setSelectedRequest(request);
         setNewUserPassword(Math.random().toString(36).slice(-8)); // Suggest random password
         setApproveModalOpen(true);
     };
 
+    /**
+     * Submit user approval request.
+     */
     const confirmApproval = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedRequest || !newUserPassword) return;
@@ -108,21 +127,24 @@ export default function ProfilePage() {
                 window.location.reload();
             }
         } catch (err: any) {
-            alert(err.message || 'Chyba při schvalování.');
+            alert((err as Error).message || 'Chyba při schvalování.');
         } finally {
             setIsProcessingApproval(false);
         }
         setIsProcessingApproval(false);
     };
 
-    const openPermissionsModal = (user: any) => {
+    /**
+     * Open permissions management modal for a specific user.
+     */
+    const openPermissionsModal = (user: UserProfile) => {
         setSelectedUserForPermissions(user);
         // Initialize with existing permissions or defaults (true if undefined)
         setEditedPermissions({
             timeline: user.permissions?.timeline !== false,
             projects: user.permissions?.projects !== false,
-            projects_civil: user.permissions?.projects_civil !== false,
-            projects_military: user.permissions?.projects_military !== false,
+            projects_civil: (user.permissions as any)?.projects_civil !== false,
+            projects_military: (user.permissions as any)?.projects_military !== false,
             service: user.permissions?.service !== false,
             production: user.permissions?.production !== false,
             purchasing: user.permissions?.purchasing !== false,
@@ -200,6 +222,11 @@ export default function ProfilePage() {
                             </button>
                         </div>
                     </div>
+                </div>
+
+                {/* Activity History */}
+                <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                    <ActivityLogSection />
                 </div>
 
                 {/* Settings Popup Modal */}
