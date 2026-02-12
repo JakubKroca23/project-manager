@@ -495,7 +495,7 @@ function ProjectHistory({ projectId }: { projectId: string }) {
 
     const resolveUser = (id: string) => {
         if (!id) return 'Systém';
-        const profile = profiles.find(p => p.id === id);
+        const profile = profiles.find((p: any) => p.id === id);
         return profile?.email || id;
     };
 
