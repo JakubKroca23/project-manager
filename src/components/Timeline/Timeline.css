@@ -590,6 +590,8 @@
   pointer-events: auto !important;
   cursor: pointer;
   z-index: 10;
+  transform: scale(1.1);
+  /* Base scale slightly larger */
 }
 
 .milestone-icon.is-hovering {
@@ -607,39 +609,42 @@
 /* DETAILED TOOLTIP */
 .milestone-tooltip {
   position: absolute;
-  bottom: 125%;
+  top: 110%;
+  /* Show below the icon */
   left: 50%;
   transform: translateX(-50%);
   background: white;
-  border-radius: 6px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  padding: 4px 8px;
   width: max-content;
-  max-width: 180px;
+  max-width: 150px;
   z-index: 9999;
   pointer-events: none;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  animation: tooltipFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: tooltipFadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .milestone-tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
+  bottom: 100%;
+  /* Arrow at the top of tooltip */
   left: 50%;
-  margin-left: -6px;
-  border-width: 6px;
+  margin-left: -5px;
+  border-width: 5px;
   border-style: solid;
-  border-color: white transparent transparent transparent;
+  border-color: transparent transparent white transparent;
 }
 
 .tooltip-header {
   display: flex;
   align-items: center;
-  font-size: 0.75rem;
-  margin-bottom: 4px;
+  font-size: 0.65rem;
+  /* Razantně zmenšeno */
+  margin-bottom: 2px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  padding-bottom: 2px;
+  padding-bottom: 1px;
   white-space: nowrap;
 }
 
@@ -650,21 +655,23 @@
 }
 
 .tooltip-date {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
+  /* Razantně zmenšeno */
   font-weight: 700;
   color: #1a1a1a;
 }
 
 .tooltip-project {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
+  /* Razantně zmenšeno */
   color: #666;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
-@keyframes tooltipFadeIn {
+@keyframes tooltipFadeInDown {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(10px);
+    transform: translateX(-50%) translateY(-5px);
   }
 
   to {

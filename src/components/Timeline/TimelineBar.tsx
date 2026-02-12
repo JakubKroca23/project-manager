@@ -262,7 +262,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
                             // Fixed larger icon size
-                            const iconSize = 22;
+                            const iconSize = 26;
                             const milestoneColor = milestoneConfig?.color || '#888';
                             const milestoneId = `${id}-${m.key}-${dateKey}`;
                             const isHovered = activeTooltip === milestoneId;
