@@ -87,7 +87,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
             const groups: Record<string, IMilestone[]> = {};
             raw.forEach(m => {
-                const dateKey = m.date.toISOString().split('T')[0];
+                const d = m.date;
+                const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 if (!groups[dateKey]) groups[dateKey] = [];
                 groups[dateKey].push(m);
             });
@@ -103,7 +104,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
         const groups: Record<string, IMilestone[]> = {};
         raw.forEach(m => {
-            const dateKey = m.date.toISOString().split('T')[0];
+            const d = m.date;
+            const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             if (!groups[dateKey]) groups[dateKey] = [];
             groups[dateKey].push(m);
         });
@@ -233,7 +235,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
             {/* Vykreslení milníků (body) */}
             {(Object.entries(groupedMilestones) as [string, IMilestone[]][]).map(([dateKey, ms]) => {
-                const date = new Date(dateKey);
+                const [y, m_idx, d] = dateKey.split('-').map(Number);
+                const date = new Date(y, m_idx - 1, d);
                 const mLeft = getDatePos(date);
 
                 return (
