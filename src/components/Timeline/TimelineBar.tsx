@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
-const HookLoader = (props: any) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const HookLoader = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 17h18" />
         <circle cx="7" cy="18" r="2" />
         <circle cx="17" cy="18" r="2" />
@@ -22,8 +22,8 @@ const HookLoader = (props: any) => (
     </svg>
 );
 
-const HydraulicCrane = (props: any) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const HydraulicCrane = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 17h18" />
         <circle cx="7" cy="18" r="2" />
         <circle cx="17" cy="18" r="2" />
@@ -32,8 +32,8 @@ const HydraulicCrane = (props: any) => (
     </svg>
 );
 
-const HydraulicPlatform = (props: any) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const HydraulicPlatform = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 17h18" />
         <circle cx="7" cy="18" r="2" />
         <circle cx="17" cy="18" r="2" />
@@ -44,8 +44,8 @@ const HydraulicPlatform = (props: any) => (
     </svg>
 );
 
-const TruckCrane = (props: any) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const TruckCrane = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 17h20" />
         <circle cx="6" cy="18" r="2" />
         <circle cx="14" cy="18" r="2" />
