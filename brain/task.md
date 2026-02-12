@@ -12,6 +12,8 @@
 - [x] Implementace SQL migrace pro Audit Logging.
 - [x] Rozšíření administrátorských práv pro operace v Admin Panelu.
 - [x] Fallback na ADMIN_EMAIL pro hlavního admina.
+- [x] Vytvoření sekce Výroba s animací výstavby.
+- [x] Vytvoření sekce Nákup s animací výstavby.
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

@@ -80,3 +80,10 @@
 - **Změna**: Rozšíření oprávnění administrátorů.
 - **Detail**: Každý uživatel s rolí `admin` má nyní právo schvalovat nové registrace a měnit role ostatním (s výjimkou hlavního administrátora).
 
+## [2026-02-12] - Implementace sekcí Výroba a Nákup
+- **Nové stránky**: Vytvořeny routy `/vyroba` a `/nakup`.
+- **UI Komponenta**: Vytvořena `ConstructionSection.tsx` pro elegantní "Under Construction" stavy.
+- **Vizuální styl**: Implementována "výstavbová animace" pomocí CSS keyframes (float, swing, lift) a ikon `lucide-react`.
+- **Konzistence**: Sekce jsou plně integrovány do Navbaru a respektují oprávnění uživatele.
+
+

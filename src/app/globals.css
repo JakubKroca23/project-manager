@@ -173,3 +173,77 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400 dark:bg-slate-600;
 }
+
+/* Construction Animations */
+@keyframes construction-float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes construction-swing {
+  0% {
+    transform: rotate(-5deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
+
+  100% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes construction-lift {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes construction-progress {
+  0% {
+    width: 0%;
+  }
+
+  50% {
+    width: 70%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-construction-float {
+  animation: construction-float 4s ease-in-out infinite;
+}
+
+.animate-construction-swing {
+  animation: construction-swing 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.animate-construction-lift {
+  animation: construction-lift 5s ease-in-out infinite;
+}
+
+.animate-construction-progress {
+  animation: construction-progress 3s ease-in-out infinite;
+}

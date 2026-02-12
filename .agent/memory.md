@@ -74,3 +74,8 @@
 - **Audit Trail (Architektura)**: Zaveden systém automatického logování změn v uživatelských profilech (`user_action_logs`). Logování probíhá na úrovni databáze (triggery), což zajišťuje integritu záznamů i při přímém zásahu do DB.
 - **UI Integrace**: Administrační funkce byly plně integrovány do modálního okna "Nastavení", čímž se snížil počet prvků v prvním plánu profilu a zlepšila se navigace pro běžné uživatele.
 
+## 2026-02-12: Placeholder sekce Výroba a Nákup
+- **Construction UI**: Zavedena zástupná komponenta `ConstructionSection`, která sjednocuje vzhled rozpracovaných částí aplikace. Obsahuje komplexní CSS animace (levitace ikon, pohyb jeřábu, indikátor průběhu).
+- **Routování**: Aktivovány stránky `/vyroba` a `/nakup` s dedikovanými popisy funkcionalit, které se připravují.
+
+
