@@ -288,7 +288,11 @@ const Timeline: React.FC = () => {
             const { pointDays, pixelOffset } = zoomFocus.current;
             const newScrollLeft = pointDays * dayWidth - pixelOffset;
             scrollContainerRef.current.scrollLeft = newScrollLeft;
-            zoomFocus.current = null;
+
+            // Keep focus during drag operations
+            if (!isMiddleDraggingRef.current) {
+                zoomFocus.current = null;
+            }
         }
     }, [dayWidth]);
 
@@ -377,6 +381,9 @@ const Timeline: React.FC = () => {
             scrollContainerRef.current.classList.remove('is-dragging');
             scrollContainerRef.current.classList.remove('is-row-resize');
         }
+
+        // Clear zoom focus when drag ends
+        zoomFocus.current = null;
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -469,12 +476,8 @@ const Timeline: React.FC = () => {
         const handleWheel = (e: WheelEvent) => {
             const target = e.target as Element;
 
-            // Handle vertical zoom on left column
+            // Handle vertical zoom on left column - DISABLED (allow default scroll)
             if (target.closest('.project-info-sticky')) {
-                e.preventDefault();
-                e.stopPropagation();
-                const delta = e.deltaY > 0 ? -2 : 2;
-                setRowHeight((prev: number) => Math.min(Math.max(prev + delta, 14), 100));
                 return;
             }
 
