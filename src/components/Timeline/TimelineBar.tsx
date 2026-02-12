@@ -254,27 +254,50 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             };
 
                             const configKey = configMap[m.class];
+                            // Handle both nested colors object and flat config structure
                             const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
-                            const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+
+                            // Default to Milestone icon if not found
+                            const IconKey = (milestoneConfig?.icon || 'Milestone') as keyof typeof ICON_OPTIONS;
                             const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
                             // Fixed larger icon size
-                            const iconSize = 22;
+                            const iconSize = 24; // Slightly larger as requested
                             const milestoneColor = milestoneConfig?.color || '#888';
+
+                            // Unique ID for tooltip
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
+                            const [isHovered, setIsHovered] = React.useState(false);
 
                             return (
                                 <div
                                     key={m.key}
-                                    className={`milestone-icon flex items-center justify-center transition-transform hover:scale-125`}
-                                    style={{ width: '100%', height: '100%', cursor: 'help' }}
-                                    title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
+                                    className="milestone-icon-wrapper relative flex items-center justify-center"
+                                    style={{ width: '30px', height: '30px', cursor: 'pointer', zIndex: isHovered ? 100 : 10 }} // Wrapper validation
+                                    onMouseEnter={() => setIsHovered(true)}
+                                    onMouseLeave={() => setIsHovered(false)}
                                 >
-                                    <Icon
-                                        size={iconSize}
-                                        color={milestoneColor}
-                                        fill={IconKey === 'Play' ? milestoneColor : 'none'}
-                                        strokeWidth={IconKey === 'Check' ? 3 : 2}
-                                    />
+                                    <div className={`transition-all duration-200 ${isHovered ? 'scale-150 drop-shadow-md' : 'drop-shadow-sm'}`}>
+                                        <Icon
+                                            size={iconSize}
+                                            color={milestoneColor}
+                                            fill={IconKey === 'Play' ? milestoneColor : 'none'}
+                                            strokeWidth={2.5} // Bolder stroke
+                                            style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.3))' }} // Extra visual pop
+                                        />
+                                    </div>
+
+                                    {isHovered && (
+                                        <div
+                                            className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded shadow-lg z-[100] whitespace-nowrap flex flex-col items-center pointer-events-none"
+                                            style={{ minWidth: '120px' }}
+                                        >
+                                            <span className="font-bold mb-0.5">{m.label}</span>
+                                            <span className="opacity-90">{m.date.toLocaleDateString('cs-CZ')}</span>
+                                            {/* Little arrow */}
+                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
