@@ -13,7 +13,11 @@ import {
     X,
     RotateCcw,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Truck,
+    Hammer,
+    ThumbsUp,
+    AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -524,10 +528,10 @@ const Timeline: React.FC = () => {
                 <div className="timeline-legend">
                     <div className="legend-group">
                         <span className="legend-group-title">Milníky:</span>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}></div> Podvozek</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}></div> Nástavba</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}></div> Předání</div>
-                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}></div> Deadline</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-chassis)' }}><Truck size={8} /></div> Podvozek</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-body)' }}><Hammer size={8} /></div> Nástavba</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-handover)' }}><ThumbsUp size={8} /></div> Předání</div>
+                        <div className="legend-item"><div className="legend-color dot" style={{ backgroundColor: 'var(--milestone-deadline)' }}><AlertTriangle size={8} /></div> Deadline</div>
                     </div>
                     <div className="legend-group">
                         <span className="legend-group-title">Fáze:</span>

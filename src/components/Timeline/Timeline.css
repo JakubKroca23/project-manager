@@ -539,31 +539,33 @@
 .milestone-part {
   flex: 1;
   width: 100%;
-  transition: filter 0.1s;
+  transition: all 0.2s;
   border: var(--element-border);
   box-sizing: border-box;
+  border-radius: 50%;
+  /* Make circles */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .milestone-part:hover {
   filter: brightness(0.85);
+  transform: scale(1.1);
   cursor: help;
+  z-index: 20;
 }
 
 .milestone-part.chassis {
   background-color: var(--milestone-chassis);
 }
 
-/* Orange */
 .milestone-part.body {
   background-color: var(--milestone-body);
 }
 
-/* Purple */
 .milestone-part.handover {
   background-color: var(--milestone-handover);
 }
 
-/* Blue */
 .milestone-part.deadline {
   background-color: var(--milestone-deadline);
 }
@@ -627,6 +629,11 @@
 
 .legend-color.dot {
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 8px;
 }
 
 /* GRID COLUMNS */

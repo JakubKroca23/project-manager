@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { Project } from '@/types/project';
+import { Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check } from 'lucide-react';
 
 interface IPhase {
     key: string;
@@ -230,13 +231,23 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             opacity: isCollapsed ? 1 : 1 // Milníky: 100%
                         }}
                     >
-                        {ms.map((m: IMilestone) => (
-                            <div
-                                key={m.key}
-                                className={`milestone-part ${m.class}`}
-                                title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
-                            />
-                        ))}
+                        {ms.map((m: IMilestone) => {
+                            const iconSize = Math.max(8, Math.min(dayWidth * 0.7, 14));
+                            return (
+                                <div
+                                    key={m.key}
+                                    className={`milestone-part ${m.class} flex items-center justify-center`}
+                                    title={`${m.label}: ${m.date.toLocaleDateString('cs-CZ')}`}
+                                >
+                                    {m.class === 'chassis' && <Truck size={iconSize} color="white" />}
+                                    {m.class === 'body' && <Hammer size={iconSize} color="white" />}
+                                    {m.class === 'handover' && <ThumbsUp size={iconSize} color="white" />}
+                                    {m.class === 'deadline' && <AlertTriangle size={iconSize} color="white" />}
+                                    {m.class === 'service-start' && <Play size={iconSize} color="white" fill="white" />}
+                                    {m.class === 'service-end' && <Check size={iconSize} color="white" strokeWidth={3} />}
+                                </div>
+                            );
+                        })}
                     </div>
                 );
             })}
