@@ -134,6 +134,9 @@ const Timeline: React.FC = () => {
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
     const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
+    const [isMiddleDragging, setIsMiddleDragging] = useState(false);
+    const startRowHeight = useRef(32);
+    const startDayWidth = useRef(DEFAULT_DAY_WIDTH);
 
     // Color Configuration State
     const [showColorEditor, setShowColorEditor] = useState(false);
@@ -240,7 +243,9 @@ const Timeline: React.FC = () => {
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
+        '--timeline-row-height': `${rowHeight}px`,
         '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
+        cursor: isMiddleDragging ? 'move' : 'auto',
     } as React.CSSProperties;
 
     const resetColors = () => {
@@ -300,13 +305,47 @@ const Timeline: React.FC = () => {
     const lastPos = useRef({ x: 0, y: 0 });
     const lastTime = useRef(0);
     const requestRef = useRef<number>(0);
+    const requestRef = useRef<number>(0);
     const isDraggingRef = useRef(false); // Ref for immediate access in loop
+    const isMiddleDraggingRef = useRef(false);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (!scrollContainerRef.current) return;
 
         // Stop any current inertia
         cancelAnimationFrame(requestRef.current);
+
+        const target = e.target as Element;
+        const isSticky = !!target.closest('.project-info-sticky');
+
+        // Middle button (wheel) drag for row height (Y) and zoom (X)
+        if (e.button === 1) {
+            if (!isSticky) {
+                e.preventDefault();
+                setIsMiddleDragging(true);
+                isMiddleDraggingRef.current = true;
+                setStartX(e.pageX);
+                setStartY(e.pageY);
+                startRowHeight.current = rowHeight;
+                startDayWidth.current = dayWidth;
+
+                // For zoom centering
+                const container = scrollContainerRef.current;
+                const rect = container.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+
+                // Day 0 starts at STICKY_COLUMN_WIDTH
+                // We need to know where the mouse is pointing in terms of days
+                // Similar logic to wheel zoom
+                zoomFocus.current = {
+                    pointDays: (container.scrollLeft + mouseX) / dayWidth,
+                    pixelOffset: mouseX
+                };
+
+                container.classList.add('is-row-resize');
+            }
+            return;
+        }
 
         setIsDragging(true);
         isDraggingRef.current = true;
@@ -329,16 +368,16 @@ const Timeline: React.FC = () => {
     };
 
     const endDrag = () => {
-        if (!isDragging) return;
+        if (!isDragging && !isMiddleDraggingRef.current) return;
 
         setIsDragging(false);
         isDraggingRef.current = false;
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.classList.remove('is-dragging');
-        }
+        setIsMiddleDragging(false);
+        isMiddleDraggingRef.current = false;
 
         if (scrollContainerRef.current) {
             scrollContainerRef.current.classList.remove('is-dragging');
+            scrollContainerRef.current.classList.remove('is-row-resize');
         }
     };
 
@@ -352,7 +391,33 @@ const Timeline: React.FC = () => {
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isDragging || !scrollContainerRef.current) return;
+        if (!scrollContainerRef.current) return;
+
+        // Middle button dragging (Row height & Zoom)
+        if (isMiddleDraggingRef.current) {
+            e.preventDefault();
+
+            // 1. Row Height (Y)
+            const walkY = e.pageY - startY;
+            const newHeight = Math.min(Math.max(startRowHeight.current + Math.floor(walkY / 2), 14), 100);
+            if (newHeight !== rowHeight) {
+                setRowHeight(newHeight);
+            }
+
+            // 2. Zoom (X)
+            const walkX = e.pageX - startX;
+            // walkX > 0 -> zoom in, walkX < 0 -> zoom out
+            // We use an exponential factor for smooth feeling
+            const zoomFactor = Math.pow(1.005, walkX);
+            const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, startDayWidth.current * zoomFactor));
+
+            if (newWidth !== dayWidth) {
+                setDayWidth(newWidth);
+            }
+            return;
+        }
+
+        if (!isDragging) return;
         e.preventDefault();
 
         const x = e.pageX - scrollContainerRef.current.offsetLeft;
