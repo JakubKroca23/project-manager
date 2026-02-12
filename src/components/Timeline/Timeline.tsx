@@ -305,7 +305,6 @@ const Timeline: React.FC = () => {
     const lastPos = useRef({ x: 0, y: 0 });
     const lastTime = useRef(0);
     const requestRef = useRef<number>(0);
-    const requestRef = useRef<number>(0);
     const isDraggingRef = useRef(false); // Ref for immediate access in loop
     const isMiddleDraggingRef = useRef(false);
 
