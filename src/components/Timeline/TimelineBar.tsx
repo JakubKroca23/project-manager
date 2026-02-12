@@ -220,9 +220,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             padding: '2px 0'
         } : {}),
         ...(isCollapsed ? {
-            // opacity: 0.2, // Removed global opacity
-            pointerEvents: 'none',
-            zIndex: 1
+            pointerEvents: 'auto', // Enable hover for stacked rows
+            zIndex: activeCell ? 10002 : 30, // Stacked rows on top, much higher on active tooltip
+            background: 'var(--background)', // Solid background to hide grid
+            boxShadow: '0 1px 0 rgba(0,0,0,0.05)'
         } : {})
     };
 
@@ -274,9 +275,17 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const mLeft = getDatePos(date);
                 const isHovered = activeCell === dateKey;
 
-                // Dynamic icon size: larger when zooming out (small dayWidth)
+                // Dynamic icon size: adjust more reasonably at extreme zoom
                 const baseSize = 26;
-                const iconSize = dayWidth < 15 ? 32 : (dayWidth < 25 ? 28 : baseSize);
+                let iconSize = baseSize;
+
+                if (dayWidth < 5) {
+                    iconSize = 14; // Much smaller at max zoom out
+                } else if (dayWidth < 10) {
+                    iconSize = 18;
+                } else if (dayWidth < 20) {
+                    iconSize = 24;
+                }
 
                 return (
                     <div
@@ -285,7 +294,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         style={{
                             left: mLeft,
                             width: dayWidth,
-                            zIndex: isHovered ? 1000 : (isCollapsed ? 10 : 20),
+                            zIndex: isHovered ? 1000 : (isCollapsed ? 30 : 20),
                             pointerEvents: 'auto'
                         }}
                         onMouseEnter={() => setActiveCell(dateKey)}

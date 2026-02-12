@@ -1000,10 +1000,10 @@ const Timeline: React.FC = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="sector-grid-line" />
+                                                    {/* GRID REMOVED */}
 
                                                     {/* HOT ZONES - CONDITIONAL VISIBILITY */}
-                                                    <div className="absolute inset-0 pointer-events-none hot-zones-container">
+                                                    <div className="absolute inset-0 hot-zones-container">
                                                         {sector.projects.map(project => {
                                                             // Calculate Threshold:
                                                             // StartY of this row (relative to content top)

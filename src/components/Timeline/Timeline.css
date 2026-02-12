@@ -326,11 +326,13 @@
 }
 
 .hot-zones-container {
-  overflow: hidden;
+  overflow: visible;
+  /* Show tooltips! */
   height: 100%;
   width: 100%;
-  pointer-events: none;
-  z-index: 10;
+  pointer-events: auto;
+  /* Allow interaction with summary icons */
+  z-index: 20;
 }
 
 .timeline-sector-group.is-collapsed .timeline-sector-header-row {
