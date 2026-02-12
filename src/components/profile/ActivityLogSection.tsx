@@ -12,8 +12,6 @@ import {
     AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 
 /**
  * Component to display user activity history.
@@ -96,7 +94,10 @@ export const ActivityLogSection: React.FC = () => {
                                         <p className="text-xs font-bold text-foreground line-clamp-1">{activity.description}</p>
                                     </div>
                                     <p className="text-[10px] text-muted-foreground font-medium">
-                                        {format(new Date(activity.timestamp), "d. MMMM yyyy 'v' HH:mm", { locale: cs })}
+                                        {(() => {
+                                            const d = new Date(activity.timestamp);
+                                            return `${d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })} v ${d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}`;
+                                        })()}
                                     </p>
                                 </div>
                                 <ChevronRight size={14} className="text-muted-foreground/30 mt-1" />
