@@ -393,6 +393,7 @@ const Timeline: React.FC = () => {
         setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
         setStartY(e.pageY - scrollContainerRef.current.offsetTop);
         setScrollLeft(scrollContainerRef.current.scrollLeft);
+        setScrollTop(scrollContainerRef.current.scrollTop);
         scrollContainerRef.current.classList.add('is-dragging');
     };
 
@@ -445,10 +446,12 @@ const Timeline: React.FC = () => {
         e.preventDefault();
 
         const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const y = e.pageY - scrollContainerRef.current.offsetTop;
         const walkX = (x - startX);
+        const walkY = (y - startY);
 
         scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        // scrollContainerRef.current.scrollTop = scrollTop - walkY; // Disabled vertical drag
+        scrollContainerRef.current.scrollTop = scrollTop - walkY;
     };
 
 
