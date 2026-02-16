@@ -196,6 +196,12 @@ const Timeline: React.FC = () => {
     const startRowHeight = useRef(32);
     const startDayWidth = useRef(DEFAULT_DAY_WIDTH);
 
+    // Ref for accessing current dayWidth in event listeners
+    const dayWidthRef = useRef(dayWidth);
+    useEffect(() => {
+        dayWidthRef.current = dayWidth;
+    }, [dayWidth]);
+
     // Color Configuration State
     const [showColorEditor, setShowColorEditor] = useState(false);
     const [colors, setColors] = useState<IColorsState>({
@@ -313,11 +319,7 @@ const Timeline: React.FC = () => {
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
 
-    // Ref pro aktuální dayWidth pro event listenery
-    const dayWidthRef = useRef(dayWidth);
-    useEffect(() => {
-        dayWidthRef.current = dayWidth;
-    }, [dayWidth]);
+
 
     // Ref pro uchování pozice pro zoom
     const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
@@ -475,6 +477,53 @@ const Timeline: React.FC = () => {
             setDayWidth(next);
         }
     };
+
+    // Wheel Zoom Logic
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const onWheel = (e: WheelEvent) => {
+            // IF CTRL IS PRESSED -> Vertical Zoom
+            if (e.ctrlKey) {
+                e.preventDefault();
+                // Scroll UP (negative) -> Zoom IN (increase height)
+                const delta = e.deltaY < 0 ? 4 : -4;
+                setRowHeight(prev => Math.min(100, Math.max(14, prev + delta)));
+                return;
+            }
+
+            // IF NO MODIFIER (and not Shift/Alt/Meta) -> Horizontal Zoom
+            if (!e.shiftKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                // Scroll UP (negative) -> Zoom IN (increase width)
+                // Scroll DOWN (positive) -> Zoom OUT (decrease width)
+                const currentWidth = dayWidthRef.current;
+                const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+                let nextWidth = currentWidth * zoomFactor;
+
+                // Clamp values
+                nextWidth = Math.min(Math.max(nextWidth, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
+
+                if (Math.abs(nextWidth - currentWidth) > 0.01) {
+                    // Calculate cursor position to zoom towards mouse
+                    const rect = container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const scrollL = container.scrollLeft;
+
+                    // Time point under mouse (in days from start)
+                    const pointDays = (scrollL + mouseX) / currentWidth;
+
+                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
+                    setDayWidth(nextWidth);
+                }
+            }
+        };
+
+        // Passive: false is crucial to be able to preventDefault
+        container.addEventListener('wheel', onWheel, { passive: false });
+        return () => container.removeEventListener('wheel', onWheel);
+    }, []);
 
 
 
