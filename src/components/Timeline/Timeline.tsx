@@ -673,6 +673,10 @@ const Timeline: React.FC = () => {
                         </div>
                     </div>
 
+
+                </div>
+
+                <div className="header-right flex items-center gap-4">
                     {isAdmin && (
                         <div style={{ position: 'relative' }}>
                             <button
@@ -683,7 +687,7 @@ const Timeline: React.FC = () => {
                                 <Settings size={16} />
                             </button>
                             {showColorEditor && (
-                                <div className="absolute top-full left-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute top-full right-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
                                     <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
                                         <h3 className="font-bold text-sm">Vzhled časové osy</h3>
                                         <div className="flex items-center gap-2">
@@ -845,9 +849,6 @@ const Timeline: React.FC = () => {
                             )}
                         </div>
                     )}
-                </div>
-
-                <div className="header-right flex items-center gap-4">
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
                             className="action-button icon-only"
@@ -930,7 +931,8 @@ const Timeline: React.FC = () => {
                                                 <div
                                                     className="timeline-sector-header-row group/header"
                                                     style={{
-                                                        background: 'transparent',
+                                                        background: 'var(--background)',
+                                                        borderBottom: 'none',
                                                         top: topOffset,
                                                         zIndex: 145 - index
                                                     }}
