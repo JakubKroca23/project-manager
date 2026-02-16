@@ -936,17 +936,20 @@ const Timeline: React.FC = () => {
                                                 <div
                                                     className="timeline-sector-header-row group/header"
                                                     style={{
-                                                        background: `color-mix(in srgb, ${sector.color} 4%, white)`, // Opaque background to hide scrolling content
+                                                        background: 'transparent',
                                                         top: topOffset,
-                                                        zIndex: 145 - index
+                                                        zIndex: 145 - index,
+                                                        height: '20px'
                                                     }}
                                                 >
                                                     <div
                                                         className="project-info-sticky sector-header"
                                                         style={{
-                                                            borderLeft: `6px solid ${sector.color}`,
-                                                            background: `color-mix(in srgb, ${sector.color} 15%, white)`,
-                                                            height: 'var(--timeline-sector-height)'
+                                                            borderLeft: `2px solid ${sector.color}`,
+                                                            background: 'transparent',
+                                                            height: '20px',
+                                                            borderRight: 'none',
+                                                            boxShadow: 'none'
                                                         }}
                                                     >
                                                         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>

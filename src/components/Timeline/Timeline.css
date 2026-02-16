@@ -372,7 +372,7 @@
 }
 
 .timeline-row:hover .project-info-sticky {
-  background: color-mix(in srgb, var(--primary), transparent 92%);
+  background: color-mix(in srgb, var(--primary) 8%, var(--background));
   border-right: 2px solid color-mix(in srgb, var(--primary), transparent 50%);
 }
 
