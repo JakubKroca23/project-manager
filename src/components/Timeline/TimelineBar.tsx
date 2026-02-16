@@ -314,8 +314,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         ...(isCollapsed ? {
             pointerEvents: 'auto', // Enable hover for stacked rows
             zIndex: activeCell ? 10002 : 30, // Stacked rows on top, much higher on active tooltip
-            background: 'var(--background)', // Solid background to hide grid
-            boxShadow: '0 1px 0 rgba(0,0,0,0.05)'
+            background: 'transparent', // Was var(--background)
+            boxShadow: 'none'
         } : {})
     };
 
