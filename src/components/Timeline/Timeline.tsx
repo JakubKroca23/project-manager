@@ -917,7 +917,7 @@ const Timeline: React.FC = () => {
                                                         background: 'var(--background)',
                                                         borderBottom: 'none',
                                                         top: topOffset,
-                                                        zIndex: 145 - index
+                                                        zIndex: 3400 - index
                                                     }}
                                                 >
                                                     <div
@@ -1021,7 +1021,7 @@ const Timeline: React.FC = () => {
                                                     <div key={project.id} className="timeline-row">
                                                         <Link
                                                             href={`/projekty/${project.id}`}
-                                                            className={`project-info-sticky hover:bg-muted/50 transition-colors group`}
+                                                            className={`project-info-sticky transition-colors group`}
                                                         >
                                                             <div className="project-info-content pr-2">
                                                                 {rowHeight >= 30 ? (
@@ -1069,7 +1069,7 @@ const Timeline: React.FC = () => {
                         </div>
                     </TimelineGrid>
                 </div>
-            </div>
+            </div >
         </div >
     );
 };
