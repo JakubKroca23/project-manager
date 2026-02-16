@@ -674,185 +674,180 @@ const Timeline: React.FC = () => {
                     </div>
 
                     {isAdmin && (
-                        <button
-                            className={`action-button ${showColorEditor ? 'active' : ''}`}
-                            onClick={() => setShowColorEditor(!showColorEditor)}
-                            title="Nastavení Timeline"
-                        >
-                            <Settings size={16} />
-                        </button>
+                        <div style={{ position: 'relative' }}>
+                            <button
+                                className={`action-button ${showColorEditor ? 'active' : ''}`}
+                                onClick={() => setShowColorEditor(!showColorEditor)}
+                                title="Nastavení Timeline"
+                            >
+                                <Settings size={16} />
+                            </button>
+                            {showColorEditor && (
+                                <div className="absolute top-full left-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
+                                        <h3 className="font-bold text-sm">Vzhled časové osy</h3>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={resetColors} title="Resetovat" className="hover:bg-muted p-1 rounded">
+                                                <RotateCcw size={14} className="text-muted-foreground" />
+                                            </button>
+                                            <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                        <div className="space-y-2">
+                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
+                                            {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
+                                                <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-xs font-medium">{config.label}</span>
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                const newVal = e.target.value;
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, color: newVal }
+                                                                }));
+                                                            }}
+                                                            className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <span>Opacita:</span>
+                                                        <input
+                                                            type="range"
+                                                            min="0.1"
+                                                            max="1"
+                                                            step="0.05"
+                                                            value={config.opacity}
+                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                const newVal = parseFloat(e.target.value);
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, opacity: newVal }
+                                                                }));
+                                                            }}
+                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
+                                            {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => (
+                                                <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-xs font-medium">{config.label}</span>
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                const newVal = e.target.value;
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, color: newVal }
+                                                                }));
+                                                            }}
+                                                            className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] text-muted-foreground">Ikona:</span>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {VISIBLE_ICONS.map((iconName) => {
+                                                                const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                                                return (
+                                                                    <button
+                                                                        key={iconName}
+                                                                        onClick={() => setColors(prev => ({
+                                                                            ...prev,
+                                                                            [key]: { ...config, icon: iconName as any }
+                                                                        }))}
+                                                                        className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
+                                                                        title={iconName}
+                                                                    >
+                                                                        <Icon size={12} />
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="space-y-2 pt-4 mt-2 border-t border-border">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={outline.enabled}
+                                                    onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
+                                                    className="accent-primary"
+                                                />
+                                            </div>
+                                            {outline.enabled && (
+                                                <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-xs font-medium">Barva</span>
+                                                        <input
+                                                            type="color"
+                                                            value={outline.color}
+                                                            onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
+                                                            className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <span>Šířka:</span>
+                                                        <input
+                                                            type="range"
+                                                            min="1"
+                                                            max="5"
+                                                            step="1"
+                                                            value={outline.width}
+                                                            onChange={(e) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
+                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <span className="w-8 text-right">{outline.width}px</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <span>Opacita:</span>
+                                                        <input
+                                                            type="range"
+                                                            min="0.1"
+                                                            max="1"
+                                                            step="0.05"
+                                                            value={outline.opacity}
+                                                            onChange={(e) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
+                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-border">
+                                        <button
+                                            onClick={saveSettings}
+                                            disabled={isSaving}
+                                            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                        >
+                                            <Save size={16} />
+                                            {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 
                 <div className="header-right flex items-center gap-4">
-
-                    {showColorEditor && (
-                        <div className="absolute top-14 right-4 z-[100] w-80 bg-background border border-border shadow-xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
-                            <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
-                                <h3 className="font-bold text-sm">Vzhled časové osy</h3>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={resetColors} title="Resetovat" className="hover:bg-muted p-1 rounded">
-                                        <RotateCcw size={14} className="text-muted-foreground" />
-                                    </button>
-                                    <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                                <div className="space-y-2">
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
-                                    {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
-                                        <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-xs font-medium">{config.label}</span>
-                                                <input
-                                                    type="color"
-                                                    value={config.color}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                        const newVal = e.target.value;
-                                                        setColors((prev: IColorsState) => ({
-                                                            ...prev,
-                                                            [key]: { ...config, color: newVal }
-                                                        }));
-                                                    }}
-                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span>Opacita:</span>
-                                                <input
-                                                    type="range"
-                                                    min="0.1"
-                                                    max="1"
-                                                    step="0.05"
-                                                    value={config.opacity}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                        const newVal = parseFloat(e.target.value);
-                                                        setColors((prev: IColorsState) => ({
-                                                            ...prev,
-                                                            [key]: { ...config, opacity: newVal }
-                                                        }));
-                                                    }}
-                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                />
-                                                <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
-                                    {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => (
-                                        <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-xs font-medium">{config.label}</span>
-                                                <input
-                                                    type="color"
-                                                    value={config.color}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                        const newVal = e.target.value;
-                                                        setColors((prev: IColorsState) => ({
-                                                            ...prev,
-                                                            [key]: { ...config, color: newVal }
-                                                        }));
-                                                    }}
-                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] text-muted-foreground">Ikona:</span>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {VISIBLE_ICONS.map((iconName) => {
-                                                        const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
-                                                        return (
-                                                            <button
-                                                                key={iconName}
-                                                                onClick={() => setColors(prev => ({
-                                                                    ...prev,
-                                                                    [key]: { ...config, icon: iconName as any }
-                                                                }))}
-                                                                className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
-                                                                title={iconName}
-                                                            >
-                                                                <Icon size={12} />
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="space-y-2 pt-4 mt-2 border-t border-border">
-                                    <div className="flex justify-between items-center">
-                                        <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
-                                        <input
-                                            type="checkbox"
-                                            checked={outline.enabled}
-                                            onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
-                                            className="accent-primary"
-                                        />
-                                    </div>
-
-                                    {outline.enabled && (
-                                        <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-xs font-medium">Barva</span>
-                                                <input
-                                                    type="color"
-                                                    value={outline.color}
-                                                    onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
-                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-                                                />
-                                            </div>
-
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span>Šířka:</span>
-                                                <input
-                                                    type="range"
-                                                    min="1"
-                                                    max="5"
-                                                    step="1"
-                                                    value={outline.width}
-                                                    onChange={(e) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
-                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                />
-                                                <span className="w-8 text-right">{outline.width}px</span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span>Opacita:</span>
-                                                <input
-                                                    type="range"
-                                                    min="0.1"
-                                                    max="1"
-                                                    step="0.05"
-                                                    value={outline.opacity}
-                                                    onChange={(e) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
-                                                    className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                />
-                                                <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="mt-4 pt-4 border-t border-border">
-                                <button
-                                    onClick={saveSettings}
-                                    disabled={isSaving}
-                                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
-                                    <Save size={16} />
-                                    {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
                             className="action-button icon-only"
@@ -900,7 +895,7 @@ const Timeline: React.FC = () => {
                         <span className="hidden lg:inline">Dnešek</span>
                     </button>
                 </div>
-            </header>
+            </header >
 
             <div
                 className="timeline-scroll-wrapper"
@@ -1097,7 +1092,7 @@ const Timeline: React.FC = () => {
                     </TimelineGrid>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
