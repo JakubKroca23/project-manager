@@ -938,8 +938,7 @@ const Timeline: React.FC = () => {
                                                     style={{
                                                         background: 'transparent',
                                                         top: topOffset,
-                                                        zIndex: 145 - index,
-                                                        height: '20px'
+                                                        zIndex: 145 - index
                                                     }}
                                                 >
                                                     <div
@@ -947,7 +946,7 @@ const Timeline: React.FC = () => {
                                                         style={{
                                                             borderLeft: `2px solid ${sector.color}`,
                                                             background: 'transparent',
-                                                            height: '20px',
+                                                            height: 'var(--timeline-sector-height)',
                                                             borderRight: 'none',
                                                             boxShadow: 'none'
                                                         }}
