@@ -154,9 +154,8 @@ export default function ProjectDetailPage() {
     }
 
     const isMilitary = project.project_type === 'military';
-    const isService = project.project_type === 'service';
     const isCivil = project.project_type === 'civil';
-    const typeColor = isMilitary ? '#a5d6a7' : isService ? '#ce93d8' : isCivil ? '#90caf9' : '#94a3b8';
+    const typeColor = isMilitary ? '#a5d6a7' : isCivil ? '#90caf9' : '#94a3b8';
 
     const p = isEditing ? editedProject! : project;
 
@@ -214,11 +213,9 @@ export default function ProjectDetailPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
                                 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : p.project_type === 'service'
-                                    ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                                    : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                                : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 }`}>
-                                {p.project_type === 'military' ? 'Armáda' : p.project_type === 'service' ? 'Servis' : 'Civil'}
+                                {p.project_type === 'military' ? 'Armáda' : 'Civil'}
                             </span>
                             {isEditing && (
                                 <select
@@ -228,7 +225,6 @@ export default function ProjectDetailPage() {
                                 >
                                     <option value="civil">Civil</option>
                                     <option value="military">Armáda</option>
-                                    <option value="service">Servis</option>
                                 </select>
                             )}
                             <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{project.id}</span>
@@ -265,20 +261,12 @@ export default function ProjectDetailPage() {
 
                     {/* ═══ 2. HARMONOGRAM ═══ */}
                     <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
-                        {p.project_type === 'service' ? (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                <DateField label="Zahájení servisu" value={p.deadline} field="deadline" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
-                                <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
-                            </div>
-                        )}
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                            <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                        </div>
                     </Section>
 
                     {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
