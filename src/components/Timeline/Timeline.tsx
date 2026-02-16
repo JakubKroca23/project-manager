@@ -451,7 +451,7 @@ const Timeline: React.FC = () => {
         const walkY = (y - startY);
 
         scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        scrollContainerRef.current.scrollTop = scrollTop - walkY;
+        scrollContainerRef.current.scrollTop = scrollTop - walkY * 0.4;
     };
 
 
