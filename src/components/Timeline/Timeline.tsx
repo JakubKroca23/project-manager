@@ -149,6 +149,7 @@ interface IColorConfig {
     opacity: number;
     label: string;
     icon?: keyof typeof ICON_OPTIONS;
+    showInStack?: boolean;
 }
 
 interface IColorsState {
@@ -205,14 +206,14 @@ const Timeline: React.FC = () => {
     // Color Configuration State
     const [showColorEditor, setShowColorEditor] = useState(false);
     const [colors, setColors] = useState<IColorsState>({
-        phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení' },
-        phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
-        phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
-        phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
-        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
-        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
-        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
+        phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
+        phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
+        phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
+        phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
+        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
+        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer', showInStack: true },
+        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
+        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
@@ -307,14 +308,14 @@ const Timeline: React.FC = () => {
 
     const resetColors = () => {
         setColors({
-            phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení' },
-            phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
-            phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
-            phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
-            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
-            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
-            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
+            phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
+            phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
+            phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
+            phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
+            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
+            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer', showInStack: true },
+            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
+            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
@@ -770,6 +771,21 @@ const Timeline: React.FC = () => {
                                                         />
                                                         <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
                                                     </div>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={config.showInStack !== false}
+                                                            onChange={(e) => {
+                                                                const newVal = e.target.checked;
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, showInStack: newVal }
+                                                                }));
+                                                            }}
+                                                            className="rounded border-muted w-3 h-3"
+                                                        />
+                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -812,6 +828,21 @@ const Timeline: React.FC = () => {
                                                                 );
                                                             })}
                                                         </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={config.showInStack !== false}
+                                                            onChange={(e) => {
+                                                                const newVal = e.target.checked;
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, showInStack: newVal }
+                                                                }));
+                                                            }}
+                                                            className="rounded border-muted w-3 h-3"
+                                                        />
+                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
                                                     </div>
                                                 </div>
                                             ))}

@@ -285,7 +285,17 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const right = getDatePos(p.end);
                 const width = right - left;
                 if (width <= 0) return null;
-                if (isCollapsed && p.class === 'phase-initial') return null; // Hide initial phase in hot zones
+                if (isCollapsed) {
+                    // Check if stack visibility is enabled for this phase type
+                    let configKey = '';
+                    if (p.class === 'phase-initial') configKey = 'phaseInitial';
+                    if (p.class === 'phase-mounting') configKey = 'phaseMounting';
+                    if (p.class === 'phase-buffer-yellow') configKey = 'phaseBufferYellow';
+                    if (p.class === 'phase-buffer-orange') configKey = 'phaseBufferOrange';
+
+                    const phaseConfig = config?.colors?.[configKey] || config?.[configKey];
+                    if (phaseConfig?.showInStack === false) return null;
+                }
 
                 // Specific opacity for stacked view
                 let opacityStyle: React.CSSProperties = {};
@@ -355,6 +365,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                                 const configKey = configMap[m.class];
                                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
+
+                                // Check stack visibility
+                                if (isCollapsed && milestoneConfig?.showInStack === false) return null;
+
                                 const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
                                 const milestoneColor = milestoneConfig?.color || '#888';
