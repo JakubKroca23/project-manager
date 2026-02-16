@@ -17,6 +17,8 @@
 - [x] Implementace adaptivní velikosti ikon v Timeline.
 - [x] Editace termínů milníků přímo v tooltipu.
 - [x] Vylepšení vizuálu a chování "Stacked" řádků v hlavičkách sektorů.
+- [x] Přidání ikony `Crane` (jeřáb) do Timeline.
+- [x] Fix překryvu stacked řádků bílým pozadím (transparent fix).
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

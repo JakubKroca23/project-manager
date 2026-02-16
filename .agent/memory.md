@@ -88,3 +88,8 @@
     - Visibility fix: Použití `z-index: 10000` a `overflow: visible` pro kontejner souhrnných řádků zajišťuje, že tooltipy nejsou překryty projekty při scrollování.
 
 
+
+## 2026-02-16: Timeline Visual Fixes (Crane & Stacked Rows)
+- **Ikony**: Do sady ikon přidána `Crane` (jeřáb) pro specifické vizualizace v Timeline.
+- **Stacked Layout Fix**: Opraveno vykreslování souhrnných řádků (hot zones) v hlavičkách sektorů. Původní nastavení pozadí (`var(--background)`) způsobovalo překryv obsahu.
+- **Transparentní Stack**: V `TimelineBar` komponentě nastaveno `background: 'transparent'` pro režim `isCollapsed`. Tím se zajistila správná "vrstevnatost" indikátorů bez vzájemného zakrývání blokem barvy.

@@ -97,3 +97,8 @@
 - **UI Komponenta**: Vytvořena `ConstructionSection.tsx` pro elegantní "Under Construction" stavy.
 - **Vizuální styl**: Implementována "výstavbová animace" pomocí CSS keyframes (float, swing, lift) a ikon `lucide-react`.
 - **Konzistence**: Sekce jsou plně integrovány do Navbaru a respektují oprávnění uživatele.
+
+## [2026-02-16] - Timeline Visual Fixes (Crane & Stacked Rows)
+- **Ikony**: Přidání ikony `Crane` (jeřáb) do `ICON_OPTIONS` v `Timeline.tsx` a `TimelineBar.tsx`.
+- **Stacked Rows Visibility**: Oprava problému, kdy bílé pozadí souhrnných řádků ("stacked" hot zones) v hlavičkách sektorů zakrývalo obsah. 
+- **Detail**: V `TimelineBar.tsx` nastaveno `background: 'transparent'` (místo `var(--background)`) pro komponenty v režimu `isCollapsed`. Tím je zajištěno, že při překryvu více projektů v jednom řádku (summary) jsou viditelné všechny indikátory.
