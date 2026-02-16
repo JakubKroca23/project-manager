@@ -87,29 +87,7 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
-const Multilift = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 17h18" />
-        <circle cx="21" cy="17" r="1.5" />
-        <path d="M5 17V8l4-2" />
-        <path d="M9 6l-1 2" />
-        <path d="M5 13l8-3" />
-        <path d="M13 10l5 2" />
-    </svg>
-);
 
-const Hiab = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20h16" />
-        <path d="M4 16v4" />
-        <path d="M20 16v4" />
-        <rect x="9" y="15" width="6" height="3" rx="1" />
-        <path d="M12 15V9" />
-        <path d="M12 9l5-4" />
-        <path d="M17 5l-2 5 4 2" />
-        <path d="M19 12l2 2" />
-    </svg>
-);
 
 const ICON_OPTIONS = {
     Truck: Truck,
@@ -129,8 +107,6 @@ const ICON_OPTIONS = {
     HydraulicCrane: HydraulicCrane,
     HydraulicPlatform: HydraulicPlatform,
     TruckCrane: TruckCrane,
-    Multilift: Multilift,
-    Hiab: Hiab,
     Play: Play,
     Milestone: Milestone
 };
@@ -140,7 +116,7 @@ const VISIBLE_ICONS = [
     'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Multilift', 'Hiab', 'Milestone'
+    'HydraulicPlatform', 'TruckCrane', 'Milestone'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
