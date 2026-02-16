@@ -1017,7 +1017,8 @@ const Timeline: React.FC = () => {
                                                             background: 'var(--background)',
                                                             height: 'var(--row-height)',
                                                             borderRight: 'none',
-                                                            boxShadow: 'none'
+                                                            boxShadow: 'none',
+                                                            zIndex: 50
                                                         }}
                                                     >
                                                         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
@@ -1042,7 +1043,7 @@ const Timeline: React.FC = () => {
                                                     </div>
 
                                                     {/* STACKED CONTENT (Always visible) */}
-                                                    <div className="absolute inset-0 left-[250px] overflow-hidden pointer-events-none">
+                                                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
                                                         {sector.projects.map(project => {
                                                             const sDate = (parseDate(project.created_at) || new Date());
                                                             const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
