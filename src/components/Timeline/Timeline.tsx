@@ -728,66 +728,64 @@ const Timeline: React.FC = () => {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div className="type-filters flex items-center gap-4">
-                            {[
-                                { id: 'service', label: 'Servis', color: '#ef4444' },
-                                { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                                { id: 'military', label: 'Armáda', color: '#10b981' }
-                            ].map(({ id, label, color }) => (
-                                <label
-                                    key={id}
-                                    className="flex items-center gap-2 cursor-pointer group select-none"
-                                >
-                                    <div className="relative flex items-center justify-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={activeTypes[id]}
-                                            onChange={() => toggleType(id)}
-                                            className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
-                                            style={{
-                                                borderColor: activeTypes[id] ? color : 'var(--border)',
-                                                backgroundColor: activeTypes[id] ? color : 'transparent'
-                                            }}
-                                        />
-                                        <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <span
-                                        className="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                        style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
-                                    >
-                                        {label}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-
-                        <div className="timeline-legend">
-                            <div className="legend-group">
-                                <span className="legend-group-title">Fáze:</span>
-                                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
-                                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
-                                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
-                                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
-                                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-service)', border: '1px dashed rgba(59, 130, 246, 0.4)' }}></div> Servis</div>
-                            </div>
-                        </div>
-
-                        {isAdmin && (
-                            <button
-                                className={`action-button ${showColorEditor ? 'active' : ''}`}
-                                onClick={() => setShowColorEditor(!showColorEditor)}
-                                title="Nastavení Timeline"
+                    <div className="type-filters flex items-center gap-4">
+                        {[
+                            { id: 'service', label: 'Servis', color: '#ef4444' },
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
+                            { id: 'military', label: 'Armáda', color: '#10b981' }
+                        ].map(({ id, label, color }) => (
+                            <label
+                                key={id}
+                                className="flex items-center gap-2 cursor-pointer group select-none"
                             >
-                                <Settings size={16} />
-                                <span className="text-xs">Nastavení Timeline</span>
-                            </button>
-                        )}
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={activeTypes[id]}
+                                        onChange={() => toggleType(id)}
+                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
+                                        style={{
+                                            borderColor: activeTypes[id] ? color : 'var(--border)',
+                                            backgroundColor: activeTypes[id] ? color : 'transparent'
+                                        }}
+                                    />
+                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span
+                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
+                                >
+                                    {label}
+                                </span>
+                            </label>
+                        ))}
                     </div>
+
+                    <div className="timeline-legend">
+                        <div className="legend-group">
+                            <span className="legend-group-title">Fáze:</span>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-service)', border: '1px dashed rgba(59, 130, 246, 0.4)' }}></div> Servis</div>
+                        </div>
+                    </div>
+
+                    {isAdmin && (
+                        <button
+                            className={`action-button ${showColorEditor ? 'active' : ''}`}
+                            onClick={() => setShowColorEditor(!showColorEditor)}
+                            title="Nastavení Timeline"
+                        >
+                            <Settings size={16} />
+                            <span className="text-xs">Nastavení Timeline</span>
+                        </button>
+                    )}
                 </div>
 
                 <div className="header-right flex items-center gap-4">
