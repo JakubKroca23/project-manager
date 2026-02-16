@@ -89,6 +89,19 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
 
 
 
+
+const Crane = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 21h16" />
+        <path d="M12 21V3" />
+        <path d="M12 3l8 4" />
+        <path d="M12 3H4" />
+        <path d="M4 3v4" />
+        <path d="M12 7H8" />
+        <path d="M8 3v4" />
+    </svg>
+);
+
 const ICON_OPTIONS = {
     Truck: Truck,
     Hammer: Hammer,
@@ -107,6 +120,7 @@ const ICON_OPTIONS = {
     HydraulicCrane: HydraulicCrane,
     HydraulicPlatform: HydraulicPlatform,
     TruckCrane: TruckCrane,
+    Crane: Crane,
     Play: Play,
     Milestone: Milestone
 };
@@ -116,7 +130,7 @@ const VISIBLE_ICONS = [
     'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Milestone'
+    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Milestone'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
