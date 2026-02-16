@@ -363,6 +363,7 @@ const Timeline: React.FC = () => {
     const [startX, setStartX] = useState(0);
     const [startY, setStartY] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+    const dragScrollTop = useRef(0); // Separate ref so handleScroll doesn't overwrite it
     const [scrollTop, setScrollTop] = useState(0);
 
     // Physics refs
@@ -393,7 +394,7 @@ const Timeline: React.FC = () => {
         setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
         setStartY(e.pageY - scrollContainerRef.current.offsetTop);
         setScrollLeft(scrollContainerRef.current.scrollLeft);
-        setScrollTop(scrollContainerRef.current.scrollTop);
+        dragScrollTop.current = scrollContainerRef.current.scrollTop;
         scrollContainerRef.current.classList.add('is-dragging');
     };
 
@@ -426,8 +427,8 @@ const Timeline: React.FC = () => {
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        // Update scrollTop for animations
-        // Use rAF to avoid thrashing
+        // Update scrollTop for animations (but NOT during drag)
+        if (isDraggingRef.current) return;
         const top = e.currentTarget.scrollTop;
         requestAnimationFrame(() => {
             setScrollTop(top);
@@ -451,7 +452,7 @@ const Timeline: React.FC = () => {
         const walkY = (y - startY);
 
         scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        scrollContainerRef.current.scrollTop = scrollTop - walkY * 0.4;
+        scrollContainerRef.current.scrollTop = dragScrollTop.current - walkY;
     };
 
 
