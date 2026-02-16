@@ -17,15 +17,13 @@ const navItems = [
         href: '/projekty',
         color: '#90caf9',
         militaryColor: '#a5d6a7',
-        serviceColor: '#ce93d8', // Added specific color for service submenu
-        submenu: [
-            { name: 'SERVIS', href: '/servis' }, // Moved here
+        // serviceColor removed
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
-            { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
-        ]
+    { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
+]
     },
-    { name: 'VÝROBA', icon: Factory, href: '/vyroba', color: '#ef9a9a' },
-    { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
+{ name: 'VÝROBA', icon: Factory, href: '/vyroba', color: '#ef9a9a' },
+{ name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
 ];
 
 const IconButton = ({ children, onClick, title, className }: { children: React.ReactNode, onClick?: () => void, title?: string, className?: string }) => (
@@ -60,8 +58,7 @@ const Navbar = () => {
     const activeType = typeParam || inferredType;
     const activeCategory =
         activeType === 'military' ? 'ARMÁDNÍ' :
-            (activeType === 'civil' ? 'CIVILNÍ' :
-                (activeType === 'service' || pathname === '/servis' ? 'SERVIS' : null));
+            (activeType === 'civil' ? 'CIVILNÍ' : null);
 
     useEffect(() => {
         const fetchInferredType = async () => {
@@ -119,7 +116,7 @@ const Navbar = () => {
             case 'TIMELINE': return checkPerm('timeline');
             case 'ZAKÁZKY':
                 const hasMainAccess = checkPerm('projects');
-                const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military') || checkPerm('service');
+                const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military');
                 return hasMainAccess && hasAnySubAccess;
             case 'VÝROBA': return checkPerm('production');
             case 'NÁKUP': return checkPerm('purchasing');
@@ -138,13 +135,9 @@ const Navbar = () => {
                     <div className="flex items-center gap-1">
                         {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && (pathname === '/servis' || pathname?.startsWith('/projekty/')));
-                            const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
-                            const isService = item.name === 'ZAKÁZKY' && (pathname === '/servis' || activeType === 'service');
-
-                            // Determine active color based on type
+                            // Determine active Color
                             let activeColor = item.color;
                             if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
-                            if (isService && item.serviceColor) activeColor = item.serviceColor;
 
                             if (item.submenu) {
                                 return (
@@ -202,18 +195,17 @@ const Navbar = () => {
                                                     // But we might want granular control: 'service' inside submenu might link to permission 'service'.
 
                                                     const isSubMilitary = sub.name === 'ARMÁDNÍ';
-                                                    const isSubService = sub.name === 'SERVIS';
+                                                    // Service logic removed
+
+                                                    const isSubMilitary = sub.name === 'ARMÁDNÍ';
 
                                                     // Logic to hide specific submenu items based on permissions
-                                                    if (isSubService && checkPerm('service') === false) return null;
-                                                    // We could add 'military' / 'civil' permissions later if needed
+                                                    // We could add 'military' / 'civil' permissions here if needed
 
                                                     let subActiveColor = item.color;
                                                     if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;
-                                                    if (isSubService && item.serviceColor) subActiveColor = item.serviceColor;
 
                                                     const isSubActive =
-                                                        (sub.href === '/servis' && (pathname === '/servis' || activeType === 'service')) ||
                                                         (sub.href.includes('type=military') && activeType === 'military') ||
                                                         (sub.href.includes('type=civil') && activeType === 'civil');
 

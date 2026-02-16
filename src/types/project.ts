@@ -22,12 +22,12 @@ export interface Project {
     mounting_company?: string;      // Montážní společnost
     body_setup?: string;            // Nástavba nastavení
     serial_number?: string;         // Výrobní číslo
-    service_duration?: string;      // Délka servisu (dny)
+    // service_duration removed
 
     // Interní pole systému
     quantity: number;
     action_needed_by: ActionNeededBy;
-    project_type: 'civil' | 'military' | 'service';
+    project_type: 'civil' | 'military';
     custom_fields?: Record<string, any>;
     note?: string;
     created_at: string;

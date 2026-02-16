@@ -156,13 +156,7 @@ interface IColorsState {
     phaseMounting: IColorConfig;
     phaseBufferYellow: IColorConfig;
     phaseBufferOrange: IColorConfig;
-    phaseService: IColorConfig;
-    milestoneChassis: IColorConfig;
-    milestoneBody: IColorConfig;
-    milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
-    milestoneServiceStart: IColorConfig;
-    milestoneServiceEnd: IColorConfig;
 }
 
 interface IOutlineState {
@@ -184,8 +178,7 @@ const Timeline: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
         civil: true,
-        military: true,
-        service: true
+        military: true
     });
 
 
@@ -207,13 +200,7 @@ const Timeline: React.FC = () => {
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-        phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
-        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
-        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
-        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
-        milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu', icon: 'Play' },
-        milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu', icon: 'Check' },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
@@ -295,13 +282,7 @@ const Timeline: React.FC = () => {
         '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
         '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange.color, colors.phaseBufferOrange.opacity),
-        '--phase-service': hexToRgba(colors.phaseService.color, colors.phaseService.opacity),
-        '--milestone-chassis': colors.milestoneChassis.color,
-        '--milestone-body': colors.milestoneBody.color,
-        '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
-        '--milestone-service-start': colors.milestoneServiceStart.color,
-        '--milestone-service-end': colors.milestoneServiceEnd.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
@@ -315,13 +296,8 @@ const Timeline: React.FC = () => {
             phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
             phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
             phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
-            phaseService: { color: '#ce93d8', opacity: 0.35, label: 'Servis' },
-            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
-            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
-            milestoneServiceStart: { color: '#ef4444', opacity: 1, label: 'Zahájení servisu', icon: 'Play' },
-            milestoneServiceEnd: { color: '#b91c1c', opacity: 1, label: 'Ukončení servisu', icon: 'Check' },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };
@@ -562,9 +538,6 @@ const Timeline: React.FC = () => {
 
         // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
         return filtered.sort((a: Project, b: Project) => {
-            if (a.project_type === 'service' && b.project_type !== 'service') return -1;
-            if (a.project_type !== 'service' && b.project_type === 'service') return 1;
-
             const dateA = getLatestMilestoneDate(a);
             const dateB = getLatestMilestoneDate(b);
             return dateB - dateA;
@@ -573,9 +546,6 @@ const Timeline: React.FC = () => {
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
-        const civil = filteredProjects.filter(p => p.project_type === 'civil');
-        const military = filteredProjects.filter(p => p.project_type === 'military');
-
         return [
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
             { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
@@ -627,7 +597,6 @@ const Timeline: React.FC = () => {
 
                     <div className="type-filters flex items-center gap-4">
                         {[
-                            { id: 'service', label: 'Servis', color: '#ef4444' },
                             { id: 'civil', label: 'Civilní', color: '#3b82f6' },
                             { id: 'military', label: 'Armáda', color: '#10b981' }
                         ].map(({ id, label, color }) => (
@@ -669,7 +638,7 @@ const Timeline: React.FC = () => {
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-service)', border: '1px dashed rgba(59, 130, 246, 0.4)' }}></div> Servis</div>
+                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
                         </div>
                     </div>
 
@@ -1007,12 +976,8 @@ const Timeline: React.FC = () => {
                                                             // scrollTop > yComponents - myHeaderBottom
                                                             // scrollTop > (previousRowsCount * rowHeight) + (pIndex * rowHeight)
 
-                                                            const sDate = project.project_type === 'service'
-                                                                ? (parseDate(project.deadline) || new Date())
-                                                                : (parseDate(project.created_at) || new Date());
-                                                            const eDate = project.project_type === 'service'
-                                                                ? (parseDate(project.customer_handover) || sDate)
-                                                                : (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+                                                            const sDate = (parseDate(project.created_at) || new Date());
+                                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
 
                                                             return (
                                                                 <div
@@ -1029,8 +994,6 @@ const Timeline: React.FC = () => {
                                                                         endDate={eDate}
                                                                         timelineStart={timelineRange.start}
                                                                         dayWidth={dayWidth}
-                                                                        isService={project.project_type === 'service'}
-                                                                        isCollapsed={true}
                                                                         config={colors}
                                                                     />
                                                                 </div>
@@ -1043,8 +1006,8 @@ const Timeline: React.FC = () => {
                                                 {sector.projects.map((project) => (
                                                     <div key={project.id} className="timeline-row">
                                                         <Link
-                                                            href={project.project_type === 'service' ? '/servis' : `/projekty/${project.id}`}
-                                                            className={`project-info-sticky hover:bg-muted/50 transition-colors group ${project.project_type === 'service' ? 'is-service-row' : ''}`}
+                                                            href={`/projekty/${project.id}`}
+                                                            className={`project-info-sticky hover:bg-muted/50 transition-colors group`}
                                                         >
                                                             <div className="project-info-content pr-2">
                                                                 {rowHeight >= 30 ? (
@@ -1071,11 +1034,10 @@ const Timeline: React.FC = () => {
                                                             name={project.name}
                                                             project={project}
                                                             status={project.status}
-                                                            startDate={project.project_type === 'service' ? (parseDate(project.deadline) || new Date()) : new Date()}
-                                                            endDate={project.project_type === 'service' ? (parseDate(project.customer_handover) || new Date()) : new Date()}
+                                                            startDate={new Date()}
+                                                            endDate={new Date()}
                                                             timelineStart={timelineRange.start}
                                                             dayWidth={dayWidth}
-                                                            isService={project.project_type === 'service'}
                                                             config={colors}
                                                         />
                                                     </div>
