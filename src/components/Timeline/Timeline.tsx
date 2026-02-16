@@ -1041,31 +1041,29 @@ const Timeline: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* STACKED CONTENT (Only when collapsed) */}
-                                                    {isCollapsed && (
-                                                        <div className="absolute inset-0 left-[250px] overflow-hidden pointer-events-none">
-                                                            {sector.projects.map(project => {
-                                                                const sDate = (parseDate(project.created_at) || new Date());
-                                                                const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-                                                                return (
-                                                                    <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
-                                                                        <TimelineBar
-                                                                            id={project.id}
-                                                                            name={project.name}
-                                                                            project={project}
-                                                                            status={project.status}
-                                                                            startDate={sDate}
-                                                                            endDate={eDate}
-                                                                            timelineStart={timelineRange.start}
-                                                                            dayWidth={dayWidth}
-                                                                            isCollapsed={true}
-                                                                            config={colors}
-                                                                        />
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
+                                                    {/* STACKED CONTENT (Always visible) */}
+                                                    <div className="absolute inset-0 left-[250px] overflow-hidden pointer-events-none">
+                                                        {sector.projects.map(project => {
+                                                            const sDate = (parseDate(project.created_at) || new Date());
+                                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+                                                            return (
+                                                                <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
+                                                                    <TimelineBar
+                                                                        id={project.id}
+                                                                        name={project.name}
+                                                                        project={project}
+                                                                        status={project.status}
+                                                                        startDate={sDate}
+                                                                        endDate={eDate}
+                                                                        timelineStart={timelineRange.start}
+                                                                        dayWidth={dayWidth}
+                                                                        isCollapsed={true}
+                                                                        config={colors}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
 
                                                 {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}

@@ -285,18 +285,16 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const right = getDatePos(p.end);
                 const width = right - left;
                 if (width <= 0) return null;
-                // Check global visibility settings
-                let configKey = '';
-                if (p.class === 'phase-initial') configKey = 'phaseInitial';
-                if (p.class === 'phase-mounting') configKey = 'phaseMounting';
-                if (p.class === 'phase-buffer-yellow') configKey = 'phaseBufferYellow';
-                if (p.class === 'phase-buffer-orange') configKey = 'phaseBufferOrange';
-
-                const phaseConfig = config?.colors?.[configKey] || config?.[configKey];
-                if (phaseConfig?.showInStack === false) return null;
-
                 if (isCollapsed) {
-                    // Logic specific to collapsed view (if any extra needed)
+                    // Check stack visibility setting
+                    let configKey = '';
+                    if (p.class === 'phase-initial') configKey = 'phaseInitial';
+                    if (p.class === 'phase-mounting') configKey = 'phaseMounting';
+                    if (p.class === 'phase-buffer-yellow') configKey = 'phaseBufferYellow';
+                    if (p.class === 'phase-buffer-orange') configKey = 'phaseBufferOrange';
+
+                    const phaseConfig = config?.colors?.[configKey] || config?.[configKey];
+                    if (phaseConfig?.showInStack === false) return null;
                 }
 
                 // Specific opacity for stacked view
@@ -368,8 +366,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const configKey = configMap[m.class];
                                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
 
-                                // Check global visibility
-                                if (milestoneConfig?.showInStack === false) return null;
+                                // Check stack visibility
+                                if (isCollapsed && milestoneConfig?.showInStack === false) return null;
 
                                 const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
