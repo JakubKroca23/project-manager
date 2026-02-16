@@ -13,6 +13,7 @@ import {
     RotateCcw,
     ChevronDown,
     ChevronRight,
+    ChevronUp,
     Truck,
     Hammer,
     ThumbsUp,
@@ -381,32 +382,8 @@ const Timeline: React.FC = () => {
         const target = e.target as Element;
         const isSticky = !!target.closest('.project-info-sticky');
 
-        // Middle button (wheel) drag for row height (Y) and zoom (X)
+        // Middle button click - do nothing (zoom disabled)
         if (e.button === 1) {
-            if (!isSticky) {
-                e.preventDefault();
-                setIsMiddleDragging(true);
-                isMiddleDraggingRef.current = true;
-                setStartX(e.pageX);
-                setStartY(e.pageY);
-                startRowHeight.current = rowHeight;
-                startDayWidth.current = dayWidth;
-
-                // For zoom centering
-                const container = scrollContainerRef.current;
-                const rect = container.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-
-                // Day 0 starts at STICKY_COLUMN_WIDTH
-                // We need to know where the mouse is pointing in terms of days
-                // Similar logic to wheel zoom
-                zoomFocus.current = {
-                    pointDays: (container.scrollLeft + mouseX) / dayWidth,
-                    pixelOffset: mouseX
-                };
-
-                container.classList.add('is-row-resize');
-            }
             return;
         }
 
@@ -459,27 +436,8 @@ const Timeline: React.FC = () => {
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!scrollContainerRef.current) return;
 
-        // Middle button dragging (Row height & Zoom)
+        // Middle button dragging disabled
         if (isMiddleDraggingRef.current) {
-            e.preventDefault();
-
-            // 1. Row Height (Y)
-            const walkY = e.pageY - startY;
-            const newHeight = Math.min(Math.max(startRowHeight.current + Math.floor(walkY / 2), 14), 100);
-            if (newHeight !== rowHeight) {
-                setRowHeight(newHeight);
-            }
-
-            // 2. Zoom (X)
-            const walkX = e.pageX - startX;
-            // walkX > 0 -> zoom in, walkX < 0 -> zoom out
-            // We use an exponential factor for smooth feeling
-            const zoomFactor = Math.pow(1.005, walkX);
-            const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, startDayWidth.current * zoomFactor));
-
-            if (newWidth !== dayWidth) {
-                setDayWidth(newWidth);
-            }
             return;
         }
 
@@ -529,71 +487,8 @@ const Timeline: React.FC = () => {
 
 
 
-    // SMOOTH WHEEL ZOOM LOGIC (Mouse Wheel)
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
-
-        const handleWheel = (e: WheelEvent) => {
-            const target = e.target as Element;
-
-            // Handle vertical zoom on left column - DISABLED (allow default scroll)
-            if (target.closest('.project-info-sticky')) {
-                return;
-            }
-
-            // Check if hovering over the timeline header area (months/weeks/days)
-            const isOverHeader = target.closest('.timeline-grid-header-multi') || target.closest('.timeline-header-actions');
-
-            if (e.ctrlKey || isOverHeader) {
-                // If Ctrl is pressed OR we are over the header -> ZOOM
-                e.preventDefault();
-
-                // NATIVE ZOOM (Day Width) - logic shared
-                const delta = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out/in
-
-                // Jemnější faktor zoomu pokud jsme jen nad headerem bez Ctrl
-                const effectiveDelta = !e.ctrlKey && isOverHeader ? (e.deltaY > 0 ? 0.95 : 1.05) : delta;
-
-                const newWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH, dayWidthRef.current * effectiveDelta));
-
-                // Calculate mouse position relative to timeline start for centering zoom
-                const rect = container.getBoundingClientRect();
-                // If zooming via header, we might want to center on mouse X
-                // But we need to account for sticky column width (250px) if we are in the scrollable area
-                // Actually, the mouseX relative to container content is what matters.
-
-                let mouseX = e.clientX - rect.left;
-
-                // Adjust for sticky column if we are not over it
-                // Container scrollLeft starts after the sticky column visually, but logically includes it?
-                // No, the sticky column is inside the container. 
-                // Let's rely on scrollLeft + offset.
-
-                const scrollLeft = container.scrollLeft;
-                const pointDays = (scrollLeft + mouseX) / dayWidthRef.current;
-
-                setDayWidth(newWidth);
-
-                // Prepare restore scroll
-                zoomFocus.current = {
-                    pointDays: pointDays,
-                    pixelOffset: mouseX
-                };
-                return;
-            }
-
-            // Otherwise, default scrolling behavior (Vertical Scroll)
-            // Shift = Horizontal Scroll (Native)
-            if (e.shiftKey) return;
-
-            // Allow default vertical scroll
-            return;
-        };
-
-        container.addEventListener('wheel', handleWheel, { passive: false });
-        return () => container.removeEventListener('wheel', handleWheel);
-    }, [isLoading]);
+    // Wheel zoom disabled - only button controls are used
+    // Default scroll behavior is preserved (vertical scroll, shift+scroll for horizontal)
 
     const fetchProjects = useCallback(async () => {
         try {
@@ -767,7 +662,7 @@ const Timeline: React.FC = () => {
 
                     <div className="timeline-legend">
                         <div className="legend-group">
-                            <span className="legend-group-title">Fáze:</span>
+                            <span className="legend-group-title">Legenda:</span>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
@@ -783,7 +678,6 @@ const Timeline: React.FC = () => {
                             title="Nastavení Timeline"
                         >
                             <Settings size={16} />
-                            <span className="text-xs">Nastavení Timeline</span>
                         </button>
                     )}
                 </div>
@@ -974,6 +868,25 @@ const Timeline: React.FC = () => {
                             title="Přiblížit"
                         >
                             <ZoomIn size={16} />
+                        </button>
+                    </div>
+                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
+                            title="Zmenšit řádky"
+                        >
+                            <ChevronDown size={16} />
+                        </button>
+                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                            {rowHeight}px
+                        </span>
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
+                            title="Zvětšit řádky"
+                        >
+                            <ChevronUp size={16} />
                         </button>
                     </div>
                     <button
