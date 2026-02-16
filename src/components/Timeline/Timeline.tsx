@@ -572,12 +572,10 @@ const Timeline: React.FC = () => {
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
-        const services = filteredProjects.filter(p => p.project_type === 'service');
         const civil = filteredProjects.filter(p => p.project_type === 'civil');
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVISY', projects: services, color: '#ce93d8' },
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
             { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
         ];
@@ -945,8 +943,8 @@ const Timeline: React.FC = () => {
                                                         className="project-info-sticky sector-header"
                                                         style={{
                                                             borderLeft: `2px solid ${sector.color}`,
-                                                            background: 'transparent',
-                                                            height: 'var(--timeline-sector-height)',
+                                                            background: 'var(--background)',
+                                                            height: 'var(--row-height)',
                                                             borderRight: 'none',
                                                             boxShadow: 'none'
                                                         }}
