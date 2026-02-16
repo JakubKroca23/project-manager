@@ -768,25 +768,6 @@ const Timeline: React.FC = () => {
 
                         <div className="timeline-legend">
                             <div className="legend-group">
-                                <span className="legend-group-title">Milníky:</span>
-                                <div className="legend-item">
-                                    {(() => { const Icon = ICON_OPTIONS[(colors.milestoneChassis.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={14} color={colors.milestoneChassis.color} strokeWidth={2.5} />; })()}
-                                    <span className="ml-1">Podvozek</span>
-                                </div>
-                                <div className="legend-item">
-                                    {(() => { const Icon = ICON_OPTIONS[(colors.milestoneBody.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={14} color={colors.milestoneBody.color} strokeWidth={2.5} />; })()}
-                                    <span className="ml-1">Nástavba</span>
-                                </div>
-                                <div className="legend-item">
-                                    {(() => { const Icon = ICON_OPTIONS[(colors.milestoneHandover.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={14} color={colors.milestoneHandover.color} strokeWidth={2.5} />; })()}
-                                    <span className="ml-1">Předání</span>
-                                </div>
-                                <div className="legend-item">
-                                    {(() => { const Icon = ICON_OPTIONS[(colors.milestoneDeadline.icon as keyof typeof ICON_OPTIONS) || 'Milestone']; return <Icon size={14} color={colors.milestoneDeadline.color} strokeWidth={2.5} />; })()}
-                                    <span className="ml-1">Deadline</span>
-                                </div>
-                            </div>
-                            <div className="legend-group">
                                 <span className="legend-group-title">Fáze:</span>
                                 <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
                                 <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
@@ -795,20 +776,21 @@ const Timeline: React.FC = () => {
                                 <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-service)', border: '1px dashed rgba(59, 130, 246, 0.4)' }}></div> Servis</div>
                             </div>
                         </div>
+
+                        {isAdmin && (
+                            <button
+                                className={`action-button ${showColorEditor ? 'active' : ''}`}
+                                onClick={() => setShowColorEditor(!showColorEditor)}
+                                title="Nastavení Timeline"
+                            >
+                                <Settings size={16} />
+                                <span className="text-xs">Nastavení Timeline</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 <div className="header-right flex items-center gap-4">
-                    {isAdmin && (
-                        <button
-                            className={`action-button ${showColorEditor ? 'active' : ''}`}
-                            onClick={() => setShowColorEditor(!showColorEditor)}
-                            title="Nastavení Timeline"
-                        >
-                            <Settings size={16} />
-                            <span className="text-xs">Nastavení Timeline</span>
-                        </button>
-                    )}
 
                     {showColorEditor && (
                         <div className="absolute top-14 right-4 z-[100] w-80 bg-background border border-border shadow-xl rounded-lg p-4 animate-in fade-in zoom-in-95 duration-200">
