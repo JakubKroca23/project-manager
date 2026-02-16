@@ -523,7 +523,7 @@ const Timeline: React.FC = () => {
         // Passive: false is crucial to be able to preventDefault
         container.addEventListener('wheel', onWheel, { passive: false });
         return () => container.removeEventListener('wheel', onWheel);
-    }, []);
+    }, [isLoading]);
 
 
 
