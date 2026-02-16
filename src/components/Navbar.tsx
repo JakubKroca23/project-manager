@@ -17,13 +17,13 @@ const navItems = [
         href: '/projekty',
         color: '#90caf9',
         militaryColor: '#a5d6a7',
-        // serviceColor removed
+        submenu: [
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
-    { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
-]
+            { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
+        ]
     },
-{ name: 'VÝROBA', icon: Factory, href: '/vyroba', color: '#ef9a9a' },
-{ name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
+    { name: 'VÝROBA', icon: Factory, href: '/vyroba', color: '#ef9a9a' },
+    { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
 ];
 
 const IconButton = ({ children, onClick, title, className }: { children: React.ReactNode, onClick?: () => void, title?: string, className?: string }) => (
@@ -135,6 +135,8 @@ const Navbar = () => {
                     <div className="flex items-center gap-1">
                         {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && (pathname === '/servis' || pathname?.startsWith('/projekty/')));
+                            const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
+
                             // Determine active Color
                             let activeColor = item.color;
                             if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
@@ -194,14 +196,9 @@ const Navbar = () => {
                                                     // For now, if user has access to Parent 'ZAKÁZKY' (projects), they see the submenu.
                                                     // But we might want granular control: 'service' inside submenu might link to permission 'service'.
 
-                                                    const isSubMilitary = sub.name === 'ARMÁDNÍ';
                                                     // Service logic removed
 
                                                     const isSubMilitary = sub.name === 'ARMÁDNÍ';
-
-                                                    // Logic to hide specific submenu items based on permissions
-                                                    // We could add 'military' / 'civil' permissions here if needed
-
                                                     let subActiveColor = item.color;
                                                     if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;
 

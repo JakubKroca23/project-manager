@@ -156,6 +156,9 @@ interface IColorsState {
     phaseMounting: IColorConfig;
     phaseBufferYellow: IColorConfig;
     phaseBufferOrange: IColorConfig;
+    milestoneChassis: IColorConfig;
+    milestoneBody: IColorConfig;
+    milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
 }
 
@@ -200,6 +203,9 @@ const Timeline: React.FC = () => {
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
+        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
+        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
+        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
     });
 
@@ -282,6 +288,9 @@ const Timeline: React.FC = () => {
         '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
         '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange.color, colors.phaseBufferOrange.opacity),
+        '--milestone-chassis': colors.milestoneChassis.color,
+        '--milestone-body': colors.milestoneBody.color,
+        '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
@@ -296,6 +305,8 @@ const Timeline: React.FC = () => {
             phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava' },
             phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž' },
             phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize' },
+            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck' },
+            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer' },
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp' },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle' },
         });
@@ -546,6 +557,9 @@ const Timeline: React.FC = () => {
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
+        const civil = filteredProjects.filter(p => p.project_type === 'civil');
+        const military = filteredProjects.filter(p => p.project_type === 'military');
+
         return [
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
             { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }

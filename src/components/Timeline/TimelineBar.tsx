@@ -116,7 +116,6 @@ interface ITimelineBarProps {
     timelineStart: Date;
     dayWidth: number;
     topOffset?: number;
-    isService?: boolean;
     isCollapsed?: boolean;
     config?: any;
 }
@@ -141,7 +140,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     timelineStart,
     dayWidth,
     topOffset = 0,
-    isService = false,
     isCollapsed = false,
     config
 }: ITimelineBarProps) => {
@@ -156,22 +154,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
     // 1. Milníky (body v čase)
     const groupedMilestones = useMemo((): Record<string, IMilestone[]> => {
-        if (project.project_type === 'service') {
-            const raw: IMilestone[] = [
-                { key: 'service_start', date: t_deadline!, label: 'Zahájení servisu', class: 'service-start' },
-                { key: 'service_end', date: t_handover!, label: 'Ukončení servisu', class: 'service-end' },
-            ].filter(m => m.date !== null);
-
-            const groups: Record<string, IMilestone[]> = {};
-            raw.forEach(m => {
-                const d = m.date;
-                const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if (!groups[dateKey]) groups[dateKey] = [];
-                groups[dateKey].push(m);
-            });
-            return groups;
-        }
-
         const raw: IMilestone[] = [
             { key: 'chassis', date: t_chassis!, label: 'Podvozek', class: 'chassis' },
             { key: 'body', date: t_body!, label: 'Nástavba', class: 'body' },
@@ -196,9 +178,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 'chassis': 'chassis_delivery',
                 'body': 'body_delivery',
                 'handover': 'customer_handover',
-                'deadline': 'deadline',
-                'service-start': 'deadline',
-                'service-end': 'customer_handover'
+                'deadline': 'deadline'
             };
 
             const field = fieldMap[milestoneClass];
@@ -223,23 +203,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
     // 2. Fáze (plochy v čase)
     const phases = useMemo((): IPhase[] => {
-        if (project.project_type === 'service') {
-            const start = startDate;
-            let end = endDate;
-
-            // Pokud máme start, vypočteme konec podle délky trvání (pokud není zadán handover)
-            if (start && (!end || start.getTime() === end.getTime())) {
-                const duration = project.service_duration ? parseInt(project.service_duration) : 1;
-                end = new Date(start);
-                end.setDate(end.getDate() + duration);
-            }
-
-            if (start && end && start <= end) {
-                return [{ key: 'service-main', start, end, class: 'phase-service' }];
-            }
-            return [];
-        }
-
         const list: IPhase[] = [];
         const mDates = [t_chassis, t_body, t_handover, t_deadline].filter((d): d is Date => d !== null);
 
@@ -306,11 +269,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     };
 
     const containerStyle: React.CSSProperties = {
-        ...(isService ? {
-            top: topOffset || 0,
-            height: 'var(--timeline-row-height)',
-            padding: '2px 0'
-        } : {}),
         ...(isCollapsed ? {
             pointerEvents: 'auto', // Enable hover for stacked rows
             zIndex: activeCell ? 10002 : 30, // Stacked rows on top, much higher on active tooltip
@@ -341,7 +299,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             background: 'linear-gradient(to right, #facc15, #fb923c)' // Gradient Yellow -> Orange
                         };
                     }
-                    if (p.class === 'phase-service') opacityStyle = { opacity: 0.5, zIndex: 2 }; // Servis: 50%
                 }
 
                 return (
@@ -349,13 +306,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         key={`${id}-${p.key}`}
                         className={`timeline-phase ${p.class} flex items-center px-2 overflow-hidden`}
                         style={{ left, width, ...opacityStyle }}
-                        title={`${name}${p.key === 'service-main' ? ' (Servis)' : ''}`}
+                        title={`${name}`}
                     >
-                        {p.key === 'service-main' && width > 40 && (
-                            <span className="text-[9px] font-bold text-indigo-700 truncate drop-shadow-sm whitespace-nowrap">
-                                {name}
-                            </span>
-                        )}
                     </div>
                 );
             })}
@@ -398,9 +350,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     'chassis': 'milestoneChassis',
                                     'body': 'milestoneBody',
                                     'handover': 'milestoneHandover',
-                                    'deadline': 'milestoneDeadline',
-                                    'service-start': 'milestoneServiceStart',
-                                    'service-end': 'milestoneServiceEnd'
+                                    'deadline': 'milestoneDeadline'
                                 };
 
                                 const configKey = configMap[m.class];
@@ -438,9 +388,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         'chassis': 'milestoneChassis',
                                         'body': 'milestoneBody',
                                         'handover': 'milestoneHandover',
-                                        'deadline': 'milestoneDeadline',
-                                        'service-start': 'milestoneServiceStart',
-                                        'service-end': 'milestoneServiceEnd'
+                                        'deadline': 'milestoneDeadline'
                                     };
                                     const configKey = configMap[m.class];
                                     const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
