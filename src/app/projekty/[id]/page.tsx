@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Project } from '@/types/project';
+import { Project, Milestone } from '@/types/project';
 import {
     ArrowLeft,
     User,
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAdmin } from '@/hooks/useAdmin';
+import { Calendar, CheckCircle2, Circle, Clock, Flag } from 'lucide-react';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -38,6 +39,10 @@ export default function ProjectDetailPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedProject, setEditedProject] = useState<Project | null>(null);
     const [saving, setSaving] = useState(false);
+    const [milestones, setMilestones] = useState<Milestone[]>([]);
+    const [loadingMilestones, setLoadingMilestones] = useState(true);
+    const [isAddingMilestone, setIsAddingMilestone] = useState(false);
+    const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending' });
     const { canEdit } = usePermissions();
 
     useEffect(() => {
@@ -58,8 +63,90 @@ export default function ProjectDetailPage() {
             setLoading(false);
         }
 
-        if (id) fetchProject();
+        async function fetchMilestones() {
+            setLoadingMilestones(true);
+            const { data, error } = await supabase
+                .from('project_milestones')
+                .select('*')
+                .eq('project_id', id)
+                .order('date', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching milestones:', error);
+            } else {
+                setMilestones(data || []);
+            }
+            setLoadingMilestones(false);
+        }
+
+        if (id) {
+            fetchProject();
+            fetchMilestones();
+        }
     }, [id]);
+
+    const handleAddMilestone = async () => {
+        if (!newMilestone.name || !newMilestone.date) {
+            alert('Vyplňte název a datum milníku.');
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('project_milestones')
+                .insert({
+                    project_id: id,
+                    name: newMilestone.name,
+                    date: newMilestone.date,
+                    status: newMilestone.status
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            setMilestones([...milestones, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+            setNewMilestone({ name: '', date: '', status: 'pending' });
+            setIsAddingMilestone(false);
+        } catch (err) {
+            console.error('Error adding milestone:', err);
+            alert('Chyba při přidávání milníku.');
+        }
+    };
+
+    const handleToggleMilestoneStatus = async (milestone: Milestone) => {
+        const newStatus = milestone.status === 'completed' ? 'pending' : 'completed';
+        try {
+            const { error } = await supabase
+                .from('project_milestones')
+                .update({ status: newStatus })
+                .eq('id', milestone.id);
+
+            if (error) throw error;
+
+            setMilestones(milestones.map(m => m.id === milestone.id ? { ...m, status: newStatus } : m));
+        } catch (err) {
+            console.error('Error updating milestone status:', err);
+            alert('Chyba při aktualizaci stavu milníku.');
+        }
+    };
+
+    const handleDeleteMilestone = async (milestoneId: string) => {
+        if (!confirm('Opravdu smazat tento milník?')) return;
+        try {
+            const { error } = await supabase
+                .from('project_milestones')
+                .delete()
+                .eq('id', milestoneId);
+
+            if (error) throw error;
+
+            setMilestones(milestones.filter(m => m.id !== milestoneId));
+        } catch (err) {
+            console.error('Error deleting milestone:', err);
+            alert('Chyba při mazání milníku.');
+        }
+    };
 
     const handleSave = async () => {
         if (!editedProject) return;
@@ -302,6 +389,88 @@ export default function ProjectDetailPage() {
                         </FieldGrid>
                     </Section>
                 </div>
+                {/* ═══ 4.5 MILNÍKY ═══ */}
+                <Section
+                    icon={<Flag size={15} />}
+                    title="Milníky zakázky"
+                    color="emerald"
+                    fullWidth
+                    action={
+                        <button
+                            onClick={() => setIsAddingMilestone(!isAddingMilestone)}
+                            className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1"
+                        >
+                            {isAddingMilestone ? <X size={11} /> : <PlusCircle size={11} />}
+                            {isAddingMilestone ? 'Zrušit' : 'Nový milník'}
+                        </button>
+                    }
+                >
+                    <div className="space-y-3">
+                        {isAddingMilestone && (
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Název milníku</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Např. Kontrola kvality"
+                                        value={newMilestone.name}
+                                        onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
+                                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Datum</label>
+                                    <input
+                                        type="date"
+                                        value={newMilestone.date}
+                                        onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
+                                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleAddMilestone}
+                                    className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-1.5"
+                                >
+                                    <PlusCircle size={12} /> Přidat milník
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {loadingMilestones ? (
+                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground animate-pulse">Načítám milníky...</div>
+                            ) : milestones.length === 0 ? (
+                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground italic bg-muted/10 rounded-xl border border-dashed border-border/50">Žádné vlastní milníky nebyly přidány.</div>
+                            ) : (
+                                milestones.map((m) => (
+                                    <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/20 border-border/50'}`}>
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <button
+                                                onClick={() => handleToggleMilestoneStatus(m)}
+                                                className={`shrink-0 p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-muted-foreground/40 hover:text-primary hover:bg-primary/10'}`}
+                                            >
+                                                {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                                            </button>
+                                            <div className="min-w-0">
+                                                <p className={`text-xs font-bold truncate ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}>{m.name}</p>
+                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium">
+                                                    <Calendar size={10} />
+                                                    {new Date(m.date).toLocaleDateString('cs-CZ')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteMilestone(m.id)}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all shrink-0"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </Section>
 
                 {/* ═══ 5. POPIS ZAKÁZKY / POZNÁMKY ═══ */}
                 <Section icon={<ClipboardList size={15} />} title="Popis zakázky" color="slate" fullWidth>

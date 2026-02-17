@@ -145,6 +145,7 @@ interface ITimelineBarProps {
     isCollapsed?: boolean;
     config?: any;
     onProjectUpdate?: (updatedProject: Project) => void;
+    milestones?: any[];
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -169,7 +170,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     topOffset = 0,
     isCollapsed = false,
     config,
-    onProjectUpdate
+    onProjectUpdate,
+    milestones = []
 }: ITimelineBarProps) => {
     const [activeCell, setActiveCell] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<'top' | 'bottom'>('bottom');
@@ -293,6 +295,18 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         if (t_closed) {
             raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start' });
         }
+
+        // Add dynamic milestones from prop
+        milestones.forEach((m: any) => {
+            if (m.date) {
+                raw.push({
+                    key: m.id,
+                    date: parseDate(m.date)!,
+                    label: m.name,
+                    class: m.status === 'completed' ? 'custom-completed' : 'custom-pending'
+                });
+            }
+        });
 
         const validRaw = raw.filter(m => m.date !== null);
 
@@ -639,7 +653,9 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     'deadline': 'milestoneDeadline',
                                     'mounting_end': 'milestoneMountingEnd',
                                     'revision_end': 'milestoneRevisionEnd',
-                                    'start': 'milestoneStart'
+                                    'start': 'milestoneStart',
+                                    'custom-completed': 'milestoneHandover', // Reusing colors/icons for now
+                                    'custom-pending': 'milestoneBody'
                                 };
 
                                 const configKey = configMap[m.class];

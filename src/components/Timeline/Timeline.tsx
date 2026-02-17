@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
 import './Timeline.css';
 import { supabase } from '@/lib/supabase/client';
-import { Project } from '@/types/project';
+import { Project, Milestone as ProjectMilestone } from '@/types/project';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
 import {
@@ -208,6 +208,7 @@ interface IServiceLanesResult {
 
 const Timeline: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
+    const [allMilestones, setAllMilestones] = useState<ProjectMilestone[]>([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -601,13 +602,28 @@ const Timeline: React.FC = () => {
         }
     }, []);
 
+    const fetchMilestones = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('project_milestones')
+                .select('*');
+
+            if (error) throw error;
+            setAllMilestones(data || []);
+        } catch (error) {
+            console.error('Error fetching milestones:', error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchProjects();
-    }, [fetchProjects]);
+        fetchMilestones();
+    }, [fetchProjects, fetchMilestones]);
 
     const handleProjectUpdate = useCallback((updatedProject: Project) => {
         setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    }, []);
+        fetchMilestones(); // Refresh milestones too
+    }, [fetchMilestones]);
 
     // Helper pro řazení
     const getLatestMilestoneDate = (project: Project): number => {
@@ -1315,6 +1331,7 @@ const Timeline: React.FC = () => {
                                                                         isCollapsed={true}
                                                                         config={colors}
                                                                         onProjectUpdate={handleProjectUpdate}
+                                                                        milestones={allMilestones.filter(m => m.project_id === project.id)}
                                                                     />
                                                                 </div>
                                                             );
@@ -1367,6 +1384,7 @@ const Timeline: React.FC = () => {
                                                             dayWidth={dayWidth}
                                                             config={colors}
                                                             onProjectUpdate={handleProjectUpdate}
+                                                            milestones={allMilestones.filter(m => m.project_id === project.id)}
                                                         />
                                                     </div>
                                                 ))}

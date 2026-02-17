@@ -33,3 +33,14 @@ export interface Project {
     note?: string;
     created_at: string;
 }
+
+export interface Milestone {
+    id: string;
+    project_id: string;
+    name: string;
+    date: string;
+    status: string;
+    description?: string;
+    created_at: string;
+    updated_at: string;
+}
