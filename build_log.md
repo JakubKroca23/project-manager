@@ -37,7 +37,7 @@
 
 ## [2026-02-11] - Časová osa: Servisní řádek a pokročilé filtry
 - **Změna**: Implementace multi-výběrového filtrování projektů.
-- **Detail**: Původní přepínač nahrazen barevnými checkboxy (Civilní - modrá, Armáda - zelená, Servis - indigo), které umožňují kombinovat filtry.
+- **Detail**: Původní přepínač nahrazen barevnými checkboxy (Civilní - modrá, Vojenské - zelená, Servis - indigo), které umožňují kombinovat filtry.
 - **Změna**: Redesign servisního řádku.
 - **Detail**: Všechny servisní výjezdy sjednoceny do jediného řádku v horní části časové osy. Řádek je nyní `sticky` (fixovaný) s výškou 42px, má indigo ohraničení (3px) a skleněný efekt (blur).
 - **Změna**: Vylepšení překryvů servisů.
@@ -47,7 +47,7 @@
 
 ## [2026-02-11] - Rozšířená oprávnění a sjednocení vizuálu
 - **Změna**: Implementace granulárních oprávnění pro sekci ZAKÁZKY.
-- **Detail**: Do profilu uživatele přidána možnost spravovat přístup k sub-kategoriím (Civilní, Armádní, Servis). Sekce ZAKÁZKY v Navbar se automaticky skryje, pokud uživatel nemá přístup ani k jedné podkategorii.
+- **Detail**: Do profilu uživatele přidána možnost spravovat přístup k sub-kategoriím (Civilní, Vojenské, Servis). Sekce ZAKÁZKY v Navbar se automaticky skryje, pokud uživatel nemá přístup ani k jedné podkategorii.
 - **Změna**: Inteligentní Navbar a vizuální kontinuita.
 - **Detail**: Navbar nyní detekuje typ projektu v detailu a zvýrazňuje správnou kategorii i bez URL parametrů. V detailu projektu přidán horní barevný pruh odpovídající kategorii.
 - **Změna**: Sjednocení barevné palety napříč aplikací.
@@ -56,13 +56,13 @@
 - **Login Design**: Modernizován nadpis na "PLÁNOVÁNÍ ZAKÁZEK" s důrazem na čistý korporátní styl.
 
 ## 2026-02-11 (22:45): Refaktoring UI a Admin Panelu
-- **Vizuální konzistence**: Barvy kategorií (Armáda: #a5d6a7, Servis: #ce93d8, Civil: #90caf9) se nyní propisují i do řádků tabulky projektů (jemné pozadí) a do ovládacích prvků v detailu zakázky.
+- **Vizuální konzistence**: Barvy kategorií (Vojenské: #a5d6a7, Servis: #ce93d8, Civil: #90caf9) se nyní propisují i do řádků tabulky projektů (jemné pozadí) a do ovládacích prvků v detailu zakázky.
 - **Architektura Profilu**: Admin Panel byl oddělen od uživatelského nastavení (Vzhled, Heslo) do samostatného modulu/popupu, což zjednodušuje UI pro běžné uživatele i administrátory.
 - **DataTable**: Komponenta rozšířena o props `getRowClassName` pro flexibilní styling řádků na základě dat.
 
 ## [2026-02-11] - Refaktoring profilu a sjednocení tabulek
 - **Změna**: Vizuální sjednocení seznamu zakázek.
-- **Detail**: Řádky v tabulce projektů jsou nyní podbarveny podle kategorie (Zelená - Armáda, Fialová - Servis, Modrá - Civil), což usnadňuje orientaci v seznamu.
+- **Detail**: Řádky v tabulce projektů jsou nyní podbarveny podle kategorie (Zelená - Vojenské, Fialová - Servis, Modrá - Civil), což usnadňuje orientaci v seznamu.
 - **Změna**: Inteligentní detail zakázky.
 - **Detail**: V detailu projektu přidán horní indikační pruh a tlačítko "Zpět" nyní dynamicky přebírá barvu kategorie projektu.
 - **Změna**: Separace Admin Panelu v profilu.

@@ -58,6 +58,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'production_status', label: 'Status Výroby', defaultAliases: ['status výroby', 'stav výroby'] },
     { key: 'mounting_company', label: 'Montážní společnost', defaultAliases: ['montážní společnost', 'montáž', 'zhotovitel'] },
     { key: 'body_setup', label: 'Nástavba nastavení', defaultAliases: ['nástavba nastavení', 'konfigurace'] },
+    { key: 'body_type', label: 'Typ nástavby', defaultAliases: ['typ nástavby', 'body type', 'nastavba typ'] },
     { key: 'closed_at', label: 'Uzavřeno', defaultAliases: ['uzavřeno', 'closed', 'datum uzavření', 'datum ukončení'] },
     { key: 'serial_number', label: 'Výrobní číslo / VIN', defaultAliases: ['výrobní číslo', 'vč', 'vin', 'výr. č.'] },
 ];
@@ -265,6 +266,7 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                     production_status: cleanNaN(item[mapping['production_status']]),
                     mounting_company: cleanNaN(item[mapping['mounting_company']]),
                     body_setup: cleanNaN(item[mapping['body_setup']]),
+                    body_type: cleanNaN(item[mapping['body_type']]),
                     serial_number: cleanNaN(item[mapping['serial_number']]),
                     project_type: projectType,
                     custom_fields: {},
@@ -619,7 +621,7 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                                 <FileSpreadsheet size={24} />
                             </div>
                             <h3 className="text-2xl font-bold text-foreground">Import z Excelu</h3>
-                            <p className="text-sm text-muted-foreground">Vyberte formát dat pro import do kategorie <span className="font-bold text-foreground uppercase tracking-wider underline underline-offset-4 decoration-primary/30">{projectType === 'civil' ? 'Civilní' : 'Armáda'}</span></p>
+                            <p className="text-sm text-muted-foreground">Vyberte formát dat pro import do kategorie <span className="font-bold text-foreground uppercase tracking-wider underline underline-offset-4 decoration-primary/30">{projectType === 'civil' ? 'Civilní' : 'Vojenské'}</span></p>
                         </div>
 
                         <div className="space-y-3">
@@ -830,7 +832,7 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                             </div>
                             <h3 className="text-2xl font-bold text-foreground">Konflikt typů projektů</h3>
                             <p className="text-sm text-muted-foreground">
-                                Nalezeno <span className="font-bold text-foreground">{typeConflictGroups.length}</span> projektů, které již existují v druhé sekci ({projectType === 'civil' ? 'Armáda' : 'Civilní'}).
+                                Nalezeno <span className="font-bold text-foreground">{typeConflictGroups.length}</span> projektů, které již existují v druhé sekci ({projectType === 'civil' ? 'Vojenské' : 'Civilní'}).
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
                                 importem do této sekce dojde k jejich <span className="font-bold text-red-500">PŘESUNU A PŘEPSÁNÍ</span> typu.
@@ -866,7 +868,7 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                                 >
                                     <div className="text-left">
                                         <div className="font-bold text-xs">Přepsat a přesunout</div>
-                                        <div className="text-[10px] opacity-70">Projekty se přesunou do aktuální sekce ({projectType === 'civil' ? 'Civil' : 'Armáda'}).</div>
+                                        <div className="text-[10px] opacity-70">Projekty se přesunou do aktuální sekce ({projectType === 'civil' ? 'Civil' : 'Vojenské'}).</div>
                                     </div>
                                     {typeConflictAction === 'overwrite' && <CheckCircle size={16} />}
                                 </button>

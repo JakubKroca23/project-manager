@@ -286,7 +286,7 @@ export default function ServiceDetailPage() {
 
     if (isMilitary) {
         typeColor = '#a5d6a7';
-        typeLabel = 'Armáda';
+        typeLabel = 'Vojenské';
         typeClass = 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
     } else if (isCivil) {
         typeColor = '#90caf9';
@@ -362,7 +362,7 @@ export default function ServiceDetailPage() {
                                     className="text-[10px] bg-muted border border-border rounded px-2 py-0.5 outline-none"
                                 >
                                     <option value="civil">Civil</option>
-                                    <option value="military">Armáda</option>
+                                    <option value="military">Vojenské</option>
                                     <option value="service">Servis</option>
                                 </select>
                             )}

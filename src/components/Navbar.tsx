@@ -10,7 +10,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const navItems = [
-    { name: 'TIMELINE', icon: Calendar, href: '/', color: '#3b82f6' },
+    { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#3b82f6' },
     {
         name: 'ZAKÁZKY',
         icon: Briefcase,
@@ -19,11 +19,10 @@ const navItems = [
         militaryColor: '#10b981',
         submenu: [
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
-            { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
+            { name: 'VOJENSKÉ', href: '/projekty?type=military' },
         ]
     },
     { name: 'SERVIS', icon: Wrench, href: '/servis', color: '#f59e0b' },
-    { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#8d6e63' },
 ];
 export function Navbar() {
     const pathname = usePathname();
@@ -33,37 +32,24 @@ export function Navbar() {
     const { checkPerm } = usePermissions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
-            case 'TIMELINE': return checkPerm('timeline');
+            case 'HARMONOGRAM': return checkPerm('timeline');
             case 'ZAKÁZKY':
                 const hasMainAccess = checkPerm('projects');
                 const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military');
                 return hasMainAccess && hasAnySubAccess;
             case 'SERVIS': return checkPerm('service');
-            case 'NÁKUP': return checkPerm('purchasing');
             default: return true;
         }
     });
 
     const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-    const [currentTime, setCurrentTime] = useState<string>('');
-    const [currentDate, setCurrentDate] = useState<string>('');
     const [userEmail, setUserEmail] = useState<string>('');
     const [systemVersion, setSystemVersion] = useState<string>('v1.0.0-alpha');
 
     // Active Category Label
-    const activeCategory = activeType === 'military' ? 'ARMÁDA' : activeType === 'civil' ? 'CIVIL' : null;
+    const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : null;
 
-    useEffect(() => {
-        // Time/Date logic
-        const updateTime = () => {
-            const now = new Date();
-            setCurrentTime(now.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }));
-            setCurrentDate(now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' }));
-        };
-        updateTime();
-        const interval = setInterval(updateTime, 1000);
-        return () => clearInterval(interval);
-    }, []);
+
 
     useEffect(() => {
         // User email logic
@@ -97,18 +83,20 @@ export function Navbar() {
     };
 
     return (
-        <nav className="sticky top-0 z-50 w-full">
-            <div className="mx-auto max-w-5xl px-4">
+        <nav className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b shadow-xl">
+            <div className="w-full px-4">
                 <div
-                    className="flex h-12 items-center justify-between gap-1 rounded-b-xl px-4 shadow-xl border-x border-b bg-background/95 backdrop-blur-sm"
+                    className="flex h-12 items-center justify-between gap-1"
                 >
-                    {/* Navigation Items - Left/Center */}
-                    <div className="flex items-center gap-1">
+                    {/* Left side spacer to help center the menu */}
+                    <div className="flex-1 invisible sm:visible"></div>
+
+                    {/* Navigation Items - Centered Menu */}
+                    <div className="flex items-center justify-center gap-1">
                         {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
                             const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
 
-                            // Determine active Color
                             let activeColor = item.color;
                             if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
 
@@ -122,7 +110,7 @@ export function Navbar() {
                                     >
                                         <button
                                             className={cn(
-                                                "flex flex-col items-center justify-center px-3 py-1 rounded-md transition-all duration-200 uppercase whitespace-nowrap",
+                                                "flex flex-col items-center justify-center px-4 py-1 rounded-md transition-all duration-200 uppercase whitespace-nowrap",
                                                 isActive ? "bg-white/5" : "hover:bg-white/[0.02]"
                                             )}
                                             style={{
@@ -163,13 +151,7 @@ export function Navbar() {
                                                 className="bg-background rounded-md shadow-2xl px-1.5 py-1 flex flex-row items-center gap-0.5 whitespace-nowrap min-w-max border mt-[-1px]"
                                             >
                                                 {item.submenu.map((sub) => {
-                                                    // Check submenu permissions if needed. 
-                                                    // For now, if user has access to Parent 'ZAKÁZKY' (projects), they see the submenu.
-                                                    // But we might want granular control: 'service' inside submenu might link to permission 'service'.
-
-                                                    // Service logic removed
-
-                                                    const isSubMilitary = sub.name === 'ARMÁDNÍ';
+                                                    const isSubMilitary = sub.name === 'VOJENSKÉ';
                                                     let subActiveColor = item.color;
                                                     if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;
 
@@ -222,7 +204,7 @@ export function Navbar() {
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent",
+                                        "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent",
                                         isActive ? "bg-white/5" : ""
                                     )}
                                     style={{
@@ -252,48 +234,39 @@ export function Navbar() {
                         })}
                     </div>
 
+
+
                     {/* Right Side Tools & Profile */}
-                    <div className="flex items-center gap-3">
-                        <div className="h-6 w-px bg-border/40" />
+                    <div className="flex-1 flex items-center justify-end gap-3">
                         <div className="flex flex-col items-center justify-center">
-                            <span className="text-[8px] font-bold text-muted-foreground tracking-[0.2em] leading-none uppercase mb-0.5">Vers</span>
                             <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>
                         </div>
-                    </div>
-                    <div className="h-6 w-px bg-border/40" />
-                    <div className="flex flex-col items-end justify-center pr-3 border-r border-border/40">
-                        <span className="text-[12px] font-black text-primary tracking-[0.35em] mr-[-0.35em] tabular-nums leading-none mb-1">
-                            {currentTime}
-                        </span>
-                        <span className="text-[12px] font-black text-muted-foreground tracking-[0.05em] tabular-nums leading-none">
-                            {currentDate}
-                        </span>
-                    </div>
 
-                    <Link href="/profile" className="no-underline">
-                        <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
-                            <span className="text-white text-xs font-bold tracking-wider uppercase">
-                                {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
-                            </span>
-                        </div>
-                    </Link>
-
-                    <div className="flex items-center gap-2 pl-3 border-l border-border/40">
-                        <Link href="/profile" title="Nastavení profilu">
-                            <IconButton className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400 hover:text-blue-300">
-                                <Settings size={15} />
-                            </IconButton>
+                        <Link href="/profile" className="no-underline">
+                            <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
+                                <span className="text-white text-xs font-bold tracking-wider uppercase">
+                                    {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
+                                </span>
+                            </div>
                         </Link>
 
-                        <ThemeToggle className="bg-muted hover:bg-muted/80 border-border text-foreground hover:text-foreground" />
+                        <div className="flex items-center gap-2 pl-3 border-l border-border/40">
+                            <Link href="/profile" title="Nastavení profilu">
+                                <IconButton className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400 hover:text-blue-300">
+                                    <Settings size={15} />
+                                </IconButton>
+                            </Link>
 
-                        <IconButton
-                            onClick={handleLogout}
-                            title="Odhlásit se"
-                            className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
-                        >
-                            <LogOut size={15} />
-                        </IconButton>
+                            <ThemeToggle className="bg-muted hover:bg-muted/80 border-border text-foreground hover:text-foreground" />
+
+                            <IconButton
+                                onClick={handleLogout}
+                                title="Odhlásit se"
+                                className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                            >
+                                <LogOut size={15} />
+                            </IconButton>
+                        </div>
                     </div>
                 </div>
             </div>

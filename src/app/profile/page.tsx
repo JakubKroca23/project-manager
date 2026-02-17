@@ -849,7 +849,7 @@ export default function ProfilePage() {
                                     { key: 'timeline', label: 'Timeline (Kalendář)' },
                                     { key: 'projects', label: 'Zakázky (Projekty)', isParent: true },
                                     { key: 'projects_civil', label: 'Civilní projekty', isSub: true },
-                                    { key: 'projects_military', label: 'Armádní projekty', isSub: true },
+                                    { key: 'projects_military', label: 'Vojenské projekty', isSub: true },
                                     { key: 'service', label: 'Servisní projekty', isSub: true },
                                     { key: 'production', label: 'Výroba' },
                                     { key: 'purchasing', label: 'Nákup' },

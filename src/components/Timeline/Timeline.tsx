@@ -237,9 +237,6 @@ const Timeline: React.FC = () => {
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
     const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
-    const [isMiddleDragging, setIsMiddleDragging] = useState(false);
-    const startRowHeight = useRef(32);
-    const startDayWidth = useRef(DEFAULT_DAY_WIDTH);
 
     // Ref for accessing current dayWidth in event listeners
     const dayWidthRef = useRef(dayWidth);
@@ -248,7 +245,6 @@ const Timeline: React.FC = () => {
     }, [dayWidth]);
 
     // Color Configuration State
-    const [showColorEditor, setShowColorEditor] = useState(false);
     const [colors, setColors] = useState<IColorsState>({
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
@@ -302,26 +298,7 @@ const Timeline: React.FC = () => {
         }
     }, []);
 
-    const saveSettings = async () => {
-        if (!isAdmin) return;
-        setIsSaving(true);
-        try {
-            const { error } = await supabase
-                .from('app_settings')
-                .upsert({
-                    id: 'timeline_config',
-                    settings: { colors, outline, milestoneSize },
-                    updated_at: new Date().toISOString()
-                });
-            if (error) throw error;
-            setShowColorEditor(false);
-        } catch (err) {
-            console.error('Error saving settings:', err);
-            alert('Chyba při ukládání nastavení.');
-        } finally {
-            setIsSaving(false);
-        }
-    };
+
 
     const checkAdmin = useCallback(async () => {
         try {
@@ -370,26 +347,9 @@ const Timeline: React.FC = () => {
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
         '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
-        cursor: isMiddleDragging ? 'move' : 'auto',
     } as React.CSSProperties;
 
-    const resetColors = () => {
-        setColors({
-            phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
-            phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
-            phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
-            phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
-            milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
-            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
-            milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
-            milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
-            milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
-            milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
-            milestoneStart: { color: '#3b82f6', opacity: 1, label: 'Start', icon: 'Play', showInStack: false },
-        });
-        setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
-        setMilestoneSize(34);
-    };
+
 
 
 
@@ -411,117 +371,26 @@ const Timeline: React.FC = () => {
             const { pointDays, pixelOffset } = zoomFocus.current;
             const newScrollLeft = pointDays * dayWidth - pixelOffset;
             scrollContainerRef.current.scrollLeft = newScrollLeft;
-
-            // Keep focus during drag operations
-            if (!isMiddleDraggingRef.current) {
-                zoomFocus.current = null;
-            }
+            zoomFocus.current = null;
         }
     }, [dayWidth]);
 
-    // DRAG SCROLL & INERTIA LOGIC
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [startY, setStartY] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-    const dragScrollTop = useRef(0); // Separate ref so handleScroll doesn't overwrite it
     const [scrollTop, setScrollTop] = useState(0);
 
-    // Physics refs
-    const velocity = useRef({ x: 0, y: 0 });
-    const lastPos = useRef({ x: 0, y: 0 });
-    const lastTime = useRef(0);
-    const requestRef = useRef<number>(0);
-    const isDraggingRef = useRef(false); // Ref for immediate access in loop
-    const isMiddleDraggingRef = useRef(false);
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (!scrollContainerRef.current) return;
-
-        // Stop any current inertia
-        cancelAnimationFrame(requestRef.current);
-
-        const target = e.target as Element;
-        const isSticky = !!target.closest('.project-info-sticky');
-
-        // Middle button click - do nothing (zoom disabled)
-        if (e.button === 1) {
-            return;
-        }
-
-        setIsDragging(true);
-        isDraggingRef.current = true;
-
-        setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-        setStartY(e.pageY - scrollContainerRef.current.offsetTop);
-        setScrollLeft(scrollContainerRef.current.scrollLeft);
-        dragScrollTop.current = scrollContainerRef.current.scrollTop;
-        scrollContainerRef.current.classList.add('is-dragging');
-    };
-
-
-    const handleMouseLeave = () => {
-        if (isDragging) {
-            endDrag();
-        }
-    };
-
-    const handleMouseUp = () => {
-        endDrag();
-    };
-
-    const endDrag = () => {
-        if (!isDragging && !isMiddleDraggingRef.current) return;
-
-        setIsDragging(false);
-        isDraggingRef.current = false;
-        setIsMiddleDragging(false);
-        isMiddleDraggingRef.current = false;
-
+    // Unified scroll handler for horizontal scroll on header/summary rows
+    const handleHorizontalWheel = (e: React.WheelEvent) => {
         if (scrollContainerRef.current) {
-            scrollContainerRef.current.classList.remove('is-dragging');
-            scrollContainerRef.current.classList.remove('is-row-resize');
+            // Use deltaY for horizontal scroll
+            scrollContainerRef.current.scrollLeft += e.deltaY;
         }
-
-        // Clear zoom focus when drag ends
-        zoomFocus.current = null;
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        // Update scrollTop for animations (but NOT during drag)
-        if (isDraggingRef.current) return;
         const top = e.currentTarget.scrollTop;
         requestAnimationFrame(() => {
             setScrollTop(top);
         });
     };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!scrollContainerRef.current) return;
-
-        // Middle button dragging disabled
-        if (isMiddleDraggingRef.current) {
-            return;
-        }
-
-        if (!isDragging) return;
-        e.preventDefault();
-
-        const x = e.pageX - scrollContainerRef.current.offsetLeft;
-        const y = e.pageY - scrollContainerRef.current.offsetTop;
-        const walkX = (x - startX);
-        const walkY = (y - startY);
-
-        scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        scrollContainerRef.current.scrollTop = dragScrollTop.current - walkY;
-    };
-
-
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => cancelAnimationFrame(requestRef.current);
-    }, []);
 
     // Zoom handlers
     const handleZoomIn = () => {
@@ -549,55 +418,6 @@ const Timeline: React.FC = () => {
             setDayWidth(next);
         }
     };
-
-    // Wheel Zoom Logic
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
-
-        const onWheel = (e: WheelEvent) => {
-            // IF CTRL IS PRESSED -> Vertical Zoom
-            if (e.ctrlKey) {
-                e.preventDefault();
-                // Scroll UP (negative) -> Zoom IN (increase height)
-                const delta = e.deltaY < 0 ? 4 : -4;
-                setRowHeight(prev => Math.min(100, Math.max(14, prev + delta)));
-                return;
-            }
-
-            // IF NO MODIFIER (and not Shift/Alt/Meta) -> Horizontal Zoom
-            if (!e.shiftKey && !e.altKey && !e.metaKey) {
-                e.preventDefault();
-                // Scroll UP (negative) -> Zoom IN (increase width)
-                // Scroll DOWN (positive) -> Zoom OUT (decrease width)
-                const currentWidth = dayWidthRef.current;
-                const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-                let nextWidth = currentWidth * zoomFactor;
-
-                // Clamp values
-                nextWidth = Math.min(Math.max(nextWidth, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
-
-                if (Math.abs(nextWidth - currentWidth) > 0.01) {
-                    // Calculate cursor position to zoom towards mouse
-                    const rect = container.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-                    const scrollL = container.scrollLeft;
-
-                    // Time point under mouse (in days from start)
-                    const pointDays = (scrollL + mouseX) / currentWidth;
-
-                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
-                    setDayWidth(nextWidth);
-                }
-            }
-        };
-
-        // Passive: false is crucial to be able to preventDefault
-        container.addEventListener('wheel', onWheel, { passive: false });
-        return () => container.removeEventListener('wheel', onWheel);
-    }, [isLoading]);
-
-
 
     // Wheel zoom disabled - only button controls are used
     // Default scroll behavior is preserved (vertical scroll, shift+scroll for horizontal)
@@ -643,18 +463,37 @@ const Timeline: React.FC = () => {
 
     // Helper pro řazení
     const getSortDate = (project: Project): number => {
-        // Priority: Deadline -> Handover -> Other delivery dates
+        // Zjišťujeme začátek montáže (maximum z podvozku a nástavby)
+        const t_chassis = parseDate(project.chassis_delivery);
+        const t_body = parseDate(project.body_delivery);
+
+        const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
+
+        if (lastMainM.length > 0) {
+            return Math.max(...lastMainM.map(d => d.getTime()));
+        }
+
+        // Pokud není montáž definována, použijeme deadline/předání jako náhradní datum
         const dateStr = project.deadline || project.customer_handover || project.body_delivery || project.chassis_delivery;
         const d = parseDate(dateStr);
-        return d ? d.getTime() : 4102444800000; // Default to far future
+        return d ? d.getTime() : 4102444800000; // Far future
     };
 
     const filteredProjects = useMemo((): Project[] => {
         let filtered = projects;
 
-        // Filtr podle aktivních typů
+        // Pre-calculate parents that have children
+        const parentIds = new Set(projects.map(p => p.parent_id).filter(Boolean));
+
+        // Filtr podle aktivních typů a subzakázek
         filtered = filtered.filter((p: Project) => {
             const type = p.project_type || 'civil';
+
+            // Special rule for Military: Hide parents without children
+            if (type === 'military' && !p.parent_id && !parentIds.has(p.id)) {
+                return false;
+            }
+
             return activeTypes[type] === true;
         });
 
@@ -673,10 +512,22 @@ const Timeline: React.FC = () => {
                     p.id,
                     p.abra_project,
                     p.abra_order,
-                    p.serial_number
+                    p.serial_number,
+                    p.manager,
+                    p.status,
+                    p.category,
+                    p.production_status,
+                    p.mounting_company,
+                    p.body_type,
+                    p.body_setup
                 ].map(term => normalize(term || ''));
 
-                const searchStr = searchTerms.join(' ');
+                // Prohledávání i v custom_fields
+                const customTerms = p.custom_fields ? Object.values(p.custom_fields)
+                    .filter(v => typeof v === 'string')
+                    .map(v => normalize(v as string)) : [];
+
+                const searchStr = [...searchTerms, ...customTerms].join(' ');
                 return terms.every((term: string) => searchStr.includes(term));
             });
         }
@@ -708,11 +559,34 @@ const Timeline: React.FC = () => {
             });
         }
 
-        // Sorting: Nearest deadline first, then by name
+        // Sorting: Hierarchical (Parent + Children together)
         return filtered.sort((a, b) => {
-            const diff = getSortDate(a) - getSortDate(b);
+            // 1. Identify Root ID for both
+            const rootA = a.parent_id || a.id;
+            const rootB = b.parent_id || b.id;
+
+            // 2. If same root, sort Parent first, then Children by Name
+            if (rootA === rootB) {
+                if (a.id === rootA) return -1; // A is parent -> first
+                if (b.id === rootB) return 1;  // B is parent -> first
+                return (a.name || '').localeCompare(b.name || '');
+            }
+
+            // 3. If different roots, sort by Root Project's Date
+            // We need to find the root project to get its date
+            // Optimization: If projects are fully loaded, we might find them. 
+            // If not found (filtered out), fallback to own date.
+
+            const pA = projects.find(p => p.id === rootA) || a;
+            const pB = projects.find(p => p.id === rootB) || b;
+
+            const dateA = getSortDate(pA);
+            const dateB = getSortDate(pB);
+
+            const diff = dateA - dateB;
             if (diff !== 0) return diff;
-            return (a.name || '').localeCompare(b.name || '');
+
+            return (pA.name || '').localeCompare(pB.name || '');
         });
     }, [projects, searchQuery, activeTypes, showHidden]);
 
@@ -723,9 +597,9 @@ const Timeline: React.FC = () => {
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVIS', projects: service, color: '#f59e0b' },
+            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
-            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#10b981' }
+            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
         ];
     }, [filteredProjects]);
 
@@ -759,7 +633,7 @@ const Timeline: React.FC = () => {
     }
     return (
         <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
-            <header className="timeline-header-actions relative">
+            <header className="timeline-header-actions relative" onWheel={handleHorizontalWheel}>
                 <div className="header-left">
                     <div className="search-container">
                         <Search size={16} className="search-icon" />
@@ -774,9 +648,9 @@ const Timeline: React.FC = () => {
 
                     <div className="type-filters flex items-center gap-4">
                         {[
-                            { id: 'service', label: 'Servis', color: '#f97316' },
+                            { id: 'service', label: 'Servis', color: '#a855f7' },
                             { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Armáda', color: '#10b981' }
+                            { id: 'military', label: 'Vojenské', color: '#10b981' }
                         ].map(({ id, label, color }) => (
                             <label
                                 key={id}
@@ -824,7 +698,7 @@ const Timeline: React.FC = () => {
                                 </div>
                             </div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-                                Zobrazit skryté
+                                Dokončené
                             </span>
                         </label>
                     </div>
@@ -846,257 +720,9 @@ const Timeline: React.FC = () => {
                     >
                         <HelpCircle size={16} />
                     </button>
-
-
                 </div>
 
-                <div className="header-right flex items-center gap-4">
-                    {isAdmin && (
-                        <div style={{ position: 'relative' }}>
-                            <button
-                                className={`action-button ${showColorEditor ? 'active' : ''}`}
-                                onClick={() => setShowColorEditor(!showColorEditor)}
-                                title="Nastavení zobrazení"
-                            >
-                                <Settings size={16} />
-                            </button>
-
-
-                            {showColorEditor && (
-                                <div className="absolute top-full right-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
-                                    <div className="flex items-center justify-between p-3 border-b border-border bg-muted/40 shrink-0">
-                                        <div className="flex items-center gap-2">
-                                            <Settings size={16} />
-                                            <h3 className="font-bold text-sm">Nastavení zobrazení</h3>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={resetColors}
-                                                className="hover:bg-muted p-1 rounded text-muted-foreground hover:text-foreground"
-                                                title="Resetovat do výchozího stavu"
-                                            >
-                                                <RotateCcw size={14} />
-                                            </button>
-                                            <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto p-4 max-h-[60vh] custom-scrollbar space-y-6">
-                                        <div className="space-y-2">
-                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
-                                            {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
-                                                <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs font-medium">{config.label}</span>
-                                                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
-                                                            <input
-                                                                type="color"
-                                                                value={config.color}
-                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                    const newVal = e.target.value;
-                                                                    setColors((prev: IColorsState) => ({
-                                                                        ...prev,
-                                                                        [key]: { ...config, color: newVal }
-                                                                    }));
-                                                                }}
-                                                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Opacita:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="0.1"
-                                                            max="1"
-                                                            step="0.05"
-                                                            value={config.opacity}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColors(prev => ({
-                                                                ...prev,
-                                                                [key]: { ...prev[key as keyof IColorsState], opacity: parseFloat(e.target.value) }
-                                                            }))}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={config.showInStack !== false}
-                                                            onChange={(e) => {
-                                                                const newVal = e.target.checked;
-                                                                setColors((prev: IColorsState) => ({
-                                                                    ...prev,
-                                                                    [key]: { ...config, showInStack: newVal }
-                                                                }));
-                                                            }}
-                                                            className="rounded border-muted w-3 h-3"
-                                                        />
-                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] text-muted-foreground">Velikost: {milestoneSize}px</span>
-                                                    <input
-                                                        type="range"
-                                                        min="16"
-                                                        max="64"
-                                                        value={milestoneSize}
-                                                        onChange={(e) => setMilestoneSize(parseInt(e.target.value))}
-                                                        className="w-20 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                    />
-                                                </div>
-                                            </div>
-                                            {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => {
-                                                const isDotMilestone = key === 'milestoneMountingEnd' || key === 'milestoneRevisionEnd';
-                                                return (
-                                                    <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-xs font-medium">{config.label}</span>
-                                                            <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
-                                                                <input
-                                                                    type="color"
-                                                                    value={config.color}
-                                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                        const newVal = e.target.value;
-                                                                        setColors((prev: IColorsState) => ({
-                                                                            ...prev,
-                                                                            [key]: { ...config, color: newVal }
-                                                                        }));
-                                                                    }}
-                                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        {!isDotMilestone && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] text-muted-foreground">Ikona:</span>
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {VISIBLE_ICONS.map((iconName) => {
-                                                                        const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
-                                                                        return (
-                                                                            <button
-                                                                                key={iconName}
-                                                                                onClick={() => setColors(prev => ({
-                                                                                    ...prev,
-                                                                                    [key]: { ...config, icon: iconName as any }
-                                                                                }))}
-                                                                                className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
-                                                                                title={iconName}
-                                                                            >
-                                                                                <Icon size={12} />
-                                                                            </button>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={config.showInStack !== false}
-                                                                onChange={(e) => {
-                                                                    const newVal = e.target.checked;
-                                                                    setColors((prev: IColorsState) => ({
-                                                                        ...prev,
-                                                                        [key]: { ...config, showInStack: newVal }
-                                                                    }));
-                                                                }}
-                                                                className="rounded border-muted w-3 h-3"
-                                                            />
-                                                            <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="space-y-2 pt-4 mt-2 border-t border-border">
-                                            <div className="flex justify-between items-center">
-                                                <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-sm">Zobrazit obrys</span>
-                                                    </div>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={outline.enabled}
-                                                        onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
-                                                        className="accent-primary"
-                                                    />
-                                                </div>
-                                            </div>
-                                            {outline.enabled && (
-                                                <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={outline.showInStack !== false}
-                                                            onChange={(e) => setOutline(prev => ({ ...prev, showInStack: e.target.checked }))}
-                                                            className="rounded border-muted w-3 h-3"
-                                                        />
-                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs font-medium">Barva</span>
-                                                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
-                                                            <input
-                                                                type="color"
-                                                                value={outline.color}
-                                                                onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
-                                                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Šířka:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="1"
-                                                            max="5"
-                                                            step="1"
-                                                            value={outline.width}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{outline.width}px</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Opacita:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="0.1"
-                                                            max="1"
-                                                            step="0.05"
-                                                            value={outline.opacity}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="mt-4 pt-4 border-t border-border">
-                                            <button
-                                                onClick={saveSettings}
-                                                disabled={isSaving}
-                                                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                            >
-                                                <Save size={16} />
-                                                {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                <div className="header-center flex items-center gap-3">
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
                             className="action-button icon-only"
@@ -1105,7 +731,7 @@ const Timeline: React.FC = () => {
                         >
                             <ZoomOut size={16} />
                         </button>
-                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                        <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
                             {Math.round((dayWidth / 25) * 100)}%
                         </span>
                         <button
@@ -1116,6 +742,7 @@ const Timeline: React.FC = () => {
                             <ZoomIn size={16} />
                         </button>
                     </div>
+
                     <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
                         <button
                             className="action-button icon-only"
@@ -1124,7 +751,7 @@ const Timeline: React.FC = () => {
                         >
                             <ChevronDown size={16} />
                         </button>
-                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                        <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
                             {rowHeight}px
                         </span>
                         <button
@@ -1135,6 +762,9 @@ const Timeline: React.FC = () => {
                             <ChevronUp size={16} />
                         </button>
                     </div>
+                </div>
+
+                <div className="header-right flex items-center gap-4">
                     <button
                         className="action-button primary"
                         onClick={jumpToToday}
@@ -1144,7 +774,7 @@ const Timeline: React.FC = () => {
                         <span className="hidden lg:inline">Dnešek</span>
                     </button>
                 </div>
-            </header >
+            </header>
 
             {/* Help / Legend Modal */}
             {
@@ -1166,7 +796,7 @@ const Timeline: React.FC = () => {
                                 {/* 1. OVLÁDÁNÍ */}
                                 <section>
                                     <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <MousePointer2 size={16} /> Ovládání Timeline
+                                        <MousePointer2 size={16} /> Navigace a Interakce
                                     </h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
@@ -1174,8 +804,11 @@ const Timeline: React.FC = () => {
                                                 <MoveHorizontal size={20} className="text-primary" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-sm">Posun (Pan)</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Klikněte a táhněte myší (Drag & Drop) pro posun časové osy, nebo použijte kolečko myši.</p>
+                                                <p className="font-bold text-sm">Posun osy (Scroll/Pan)</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    <strong>Táhnutí:</strong> Klikněte kamkoliv do plochy a táhněte pro posun v čase.<br />
+                                                    <strong>Kolečko:</strong> Klasický posun v čase i vertikálně mezi projekty.
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
@@ -1183,8 +816,10 @@ const Timeline: React.FC = () => {
                                                 <ZoomIn size={20} className="text-primary" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-sm">Zoom</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Podržte <kbd className="bg-background border px-1 rounded text-[10px] font-mono">Ctrl</kbd> + kolečko myši pro přiblížení/oddálení.</p>
+                                                <p className="font-bold text-sm">Zoom (Lupa a Výška)</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    <strong>V hlavičce:</strong> Nastavte si hustotu dní (Dne/Měsíce) i výšku řádků pro detailnější náhled.
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
@@ -1192,11 +827,21 @@ const Timeline: React.FC = () => {
                                                 <MousePointerClick size={20} className="text-primary" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-sm">Interakce</p>
+                                                <p className="font-bold text-sm">Správa Milníků</p>
                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>Hover na milník:</strong> Zobrazí detail.<br />
-                                                    <strong>Klik na milník:</strong> Editace data/smazání.<br />
-                                                    <strong>Klik na řádek:</strong> Detail zakázky.
+                                                    <strong>2x Kliknutí:</strong> Rychlé přidání nového milníku na dané datum.<br />
+                                                    <strong>Klik na ikonu:</strong> Editace názvu, data nebo smazání milníku.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                                <Info size={20} className="text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-sm">Detaily a Rychlý náhled</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    <strong>Najetí myší:</strong> Zobrazí kontextové menu s informacemi o projektu a milníku.
                                                 </p>
                                             </div>
                                         </div>
@@ -1261,10 +906,6 @@ const Timeline: React.FC = () => {
             <div
                 className="timeline-scroll-wrapper"
                 ref={scrollContainerRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
                 onScroll={handleScroll}
             >
                 <div className="timeline-content">
@@ -1272,11 +913,32 @@ const Timeline: React.FC = () => {
                         startDate={timelineRange.start}
                         endDate={timelineRange.end}
                         dayWidth={dayWidth}
+                        onHeaderWheel={handleHorizontalWheel}
                     >
                         <div className="timeline-rows">
                             {/* 1. CATEGORY SUMMARIES (Stacked) */}
                             {(() => {
                                 const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+
+                                // Generate days array for matching the grid exactly
+                                const days: Date[] = [];
+                                const curr = new Date(timelineRange.start);
+                                while (curr <= timelineRange.end) {
+                                    days.push(new Date(curr));
+                                    curr.setDate(curr.getDate() + 1);
+                                }
+
+                                const isWeekend = (d: Date) => {
+                                    const day = d.getDay();
+                                    return day === 0 || day === 6;
+                                };
+                                const isToday = (d: Date) => {
+                                    const t = new Date();
+                                    return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+                                };
+
+                                const totalDaysWidth = days.length * dayWidth;
+
                                 return (
                                     <>
                                         {visibleSectors.map((sector, vIdx) => {
@@ -1285,25 +947,32 @@ const Timeline: React.FC = () => {
                                                 <div
                                                     key={`summary-${sector.id}`}
                                                     className="timeline-row"
+                                                    onWheel={handleHorizontalWheel}
                                                     style={{
                                                         position: 'sticky',
                                                         top: topOffset,
                                                         height: 'var(--timeline-row-height)',
-                                                        background: 'var(--background)',
-                                                        zIndex: 3500 - vIdx
+                                                        zIndex: 3500 - vIdx,
+                                                        width: 'max-content',
+                                                        minWidth: '100%'
                                                     }}
                                                 >
+                                                    {/* Block scrolling projects */}
+                                                    <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
                                                     <div
                                                         className="project-info-sticky"
                                                         style={{
                                                             borderLeft: `10px solid ${sector.color}`,
                                                             height: '100%',
-                                                            background: 'var(--background)',
+                                                            background: `color-mix(in srgb, ${sector.color}, var(--background) 90%)`,
+                                                            zIndex: 2005,
                                                             fontWeight: 900,
                                                             color: sector.color,
                                                             fontSize: '11px',
                                                             letterSpacing: '0.05em',
-                                                            boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
+                                                            boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
+                                                            position: 'sticky',
+                                                            left: 0
                                                         }}
                                                     >
                                                         <div className="flex items-center gap-2 pl-2">
@@ -1311,44 +980,56 @@ const Timeline: React.FC = () => {
                                                             <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                         </div>
                                                     </div>
-                                                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                                                        {sector.projects.map(p => (
-                                                            <div key={`stack-${p.id}`} className="absolute inset-x-0 h-full">
-                                                                <TimelineBar
-                                                                    id={p.id}
-                                                                    name={p.name}
-                                                                    project={p}
-                                                                    status={p.status}
-                                                                    startDate={parseDate(p.created_at) || new Date()}
-                                                                    endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
-                                                                    timelineStart={timelineRange.start}
-                                                                    dayWidth={dayWidth}
-                                                                    isCollapsed={true}
-                                                                    config={{ ...colors, milestoneSize }}
-                                                                    onProjectUpdate={handleProjectUpdate}
-                                                                    milestones={allMilestones.filter(m => m.project_id === p.id)}
-                                                                />
-                                                            </div>
+
+                                                    {/* Grid lines inside summary for parity */}
+                                                    <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
+                                                        {days.map((day, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className={`timeline-grid-column ${isWeekend(day) ? 'is-weekend' : ''} ${isToday(day) ? 'is-today' : ''}`}
+                                                                style={{ width: dayWidth }}
+                                                            />
                                                         ))}
                                                     </div>
-                                                </div>
+
+                                                    {sector.projects.map(p => (
+                                                        <TimelineBar
+                                                            key={`stack-${p.id}`}
+                                                            id={p.id}
+                                                            name={p.name}
+                                                            project={p}
+                                                            status={p.status}
+                                                            startDate={parseDate(p.created_at) || new Date()}
+                                                            endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
+                                                            timelineStart={timelineRange.start}
+                                                            dayWidth={dayWidth}
+                                                            rowHeight={rowHeight}
+                                                            isCollapsed={true}
+                                                            config={{ ...colors, milestoneSize }}
+                                                            onProjectUpdate={handleProjectUpdate}
+                                                            milestones={allMilestones.filter(m => m.project_id === p.id)}
+                                                        />
+                                                    ))}
+                                                </div >
                                             );
                                         })}
 
                                         {/* 2. HEAVY DIVIDER */}
                                         <div
-                                            className="timeline-row"
+                                            className="timeline-row p-0"
                                             style={{
                                                 position: 'sticky',
                                                 top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--timeline-row-height)))`,
-                                                height: '6px',
-                                                background: 'var(--muted-foreground)',
-                                                borderBottom: '2px solid var(--border)',
-                                                zIndex: 3400,
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                height: '2px',
+                                                background: '#1a1a1a',
+                                                borderBottom: 'none',
+                                                zIndex: 4000,
+                                                boxShadow: 'none',
+                                                width: 'max-content',
+                                                minWidth: '100%'
                                             }}
                                         >
-                                            <div className="project-info-sticky" style={{ height: '100%', background: 'var(--muted-foreground)', borderRight: 'none' }}></div>
+                                            <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
                                         </div>
                                     </>
                                 );
@@ -1366,28 +1047,40 @@ const Timeline: React.FC = () => {
                                             className="project-info-sticky transition-colors group"
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
-                                            <div className="project-info-content pr-2 pl-1">
-                                                {rowHeight >= 30 ? (
+                                            <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
+                                                {rowHeight >= 25 ? (
                                                     <>
-                                                        <span
-                                                            className={`project-name w-full text-left !font-normal ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
-                                                            style={{ textAlign: 'left', fontWeight: 400 }}
-                                                        >
-                                                            {project.name}
-                                                        </span>
-                                                        <div className="flex justify-between items-center w-full">
-                                                            <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-70">
-                                                                {sector?.id === 'service' ? 'Service' : sector?.id === 'military' ? 'Army' : 'Civil'}
+                                                        <div className="flex items-center gap-1">
+                                                            {project.parent_id && (
+                                                                <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
+                                                            )}
+                                                            <span
+                                                                className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-normal'} ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                                style={{ textAlign: 'left', fontWeight: project.parent_id ? 400 : 600 }}
+                                                            >
+                                                                {project.name}
                                                             </span>
-                                                            <span className="customer-name" style={{ textAlign: 'right' }}>
+                                                        </div>
+                                                        <div className="flex justify-between items-end w-full gap-2 mt-0.5">
+                                                            <div className="flex flex-col shrink-0">
+                                                                <span className="text-[10px] font-black text-black uppercase tracking-tight whitespace-nowrap" title={project.id}>
+                                                                    {project.id}
+                                                                </span>
+                                                            </div>
+                                                            <span className="customer-name text-[11px] font-bold text-muted-foreground/70 leading-none pb-[1px]" style={{ textAlign: 'right' }}>
                                                                 {project.customer || 'Bez zákazníka'}
                                                             </span>
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                        {project.customer || 'Bez zákazníka'}
-                                                    </span>
+                                                    <div className="flex justify-between items-center w-full h-full">
+                                                        <span className="text-[9px] font-black text-black uppercase tracking-tighter truncate mr-1" title={project.id}>
+                                                            {project.id}
+                                                        </span>
+                                                        <span className="text-[9px] font-bold text-muted-foreground/60 truncate italic" style={{ textAlign: 'right' }}>
+                                                            {project.customer || ''}
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
                                         </Link>
@@ -1400,6 +1093,7 @@ const Timeline: React.FC = () => {
                                             endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
                                             timelineStart={timelineRange.start}
                                             dayWidth={dayWidth}
+                                            rowHeight={rowHeight}
                                             config={{ ...colors, milestoneSize }}
                                             onProjectUpdate={handleProjectUpdate}
                                             milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}

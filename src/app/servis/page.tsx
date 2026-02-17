@@ -12,6 +12,7 @@ import { Project } from '@/types/project';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import CreateProjectModal from '@/components/CreateProjectModal';
+import { CategoryChip } from '@/components/CategoryChip';
 
 
 interface ImportInfo {
@@ -75,6 +76,7 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'category',
         header: 'Kategorie',
         minSize: 30,
+        cell: ({ row }) => <CategoryChip value={row.getValue('category')} />
     },
     {
         accessorKey: 'closed_at',

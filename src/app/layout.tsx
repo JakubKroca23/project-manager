@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import AuthGuard from '@/components/AuthGuard';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin', 'latin-ext'] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
                 {children}
               </main>
             </div>
+            <Toaster position="top-right" richColors closeButton />
           </AuthGuard>
         </ThemeProvider>
       </body>

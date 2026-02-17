@@ -18,6 +18,7 @@ import {
     Trash2,
     Plus,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 const HookLoader = ({ size = 24, ...props }: any) => (
@@ -172,6 +173,7 @@ interface ITimelineBarProps {
     endDate: Date;
     timelineStart: Date;
     dayWidth: number;
+    rowHeight: number;
     topOffset?: number;
     isCollapsed?: boolean;
     config?: any;
@@ -198,6 +200,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     endDate,
     timelineStart,
     dayWidth,
+    rowHeight,
     topOffset = 0,
     isCollapsed = false,
     config,
@@ -313,24 +316,26 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
     // 1. Milníky (body v čase)
     const groupedMilestones = useMemo((): Record<string, IMilestone[]> => {
+        const customIcons = project.custom_fields?.milestone_icons || {};
+
         const raw: IMilestone[] = [
-            { key: 'chassis', date: t_chassis!, label: 'Podvozek', class: 'chassis' },
-            { key: 'body', date: t_body!, label: 'Nástavba', class: 'body' },
-            { key: 'handover', date: t_handover!, label: 'Předání', class: 'handover' },
-            { key: 'deadline', date: t_deadline!, label: 'Deadline', class: 'deadline' },
+            { key: 'chassis', date: t_chassis!, label: 'Podvozek', class: 'chassis', icon: customIcons['chassis'] },
+            { key: 'body', date: t_body!, label: 'Nástavba', class: 'body', icon: customIcons['body'] },
+            { key: 'handover', date: t_handover!, label: 'Předání', class: 'handover', icon: customIcons['handover'] },
+            { key: 'deadline', date: t_deadline!, label: 'Deadline', class: 'deadline', icon: customIcons['deadline'] },
         ];
 
         // Add dynamic end milestones if they are relevant (mountingStart exists)
         if (mountingStart && mountingEnd) {
-            raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end' });
+            raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end', icon: customIcons['mounting_end'] });
         }
         if (mountingEnd && revisionEnd) {
-            raw.push({ key: 'revision_end', date: revisionEnd, label: 'Konec Revize', class: 'revision_end' });
+            raw.push({ key: 'revision_end', date: revisionEnd, label: 'Konec Revize', class: 'revision_end', icon: customIcons['revision_end'] });
         }
 
         // Add Start (Uzavřeno) milestone
         if (t_closed) {
-            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start' });
+            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start', icon: customIcons['start'] });
         }
 
         // Add dynamic milestones from prop
@@ -492,9 +497,62 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 // Fallback if no handler provided (should not happen with new setup)
                 window.location.reload();
             }
+            toast.success('Datum milníku aktualizováno');
         } catch (err) {
             console.error('Error updating milestone date:', err);
-            alert('Chyba při ukládání data.');
+            toast.error('Chyba při ukládání data.');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const toggleMilestoneCompletion = async (milestoneKey: string) => {
+        setIsUpdating(true);
+        try {
+            const isStandard = ['chassis', 'body', 'handover', 'deadline', 'mounting_end', 'revision_end', 'start'].includes(milestoneKey);
+            const currentCustom = project.custom_fields || {};
+            const completed = currentCustom.completed_milestones || [];
+
+            if (isStandard) {
+                let nextCompleted;
+                if (completed.includes(milestoneKey)) {
+                    nextCompleted = completed.filter((k: string) => k !== milestoneKey);
+                } else {
+                    nextCompleted = [...completed, milestoneKey];
+                }
+
+                const { error } = await supabase
+                    .from('projects')
+                    .update({
+                        custom_fields: {
+                            ...currentCustom,
+                            completed_milestones: nextCompleted
+                        }
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+            } else {
+                // Custom milestone from project_milestones table
+                const milestone = milestones.find(m => m.id === milestoneKey);
+                const nextStatus = milestone?.status === 'completed' ? 'pending' : 'completed';
+
+                const { error } = await supabase
+                    .from('project_milestones')
+                    .update({ status: nextStatus })
+                    .eq('id', milestoneKey);
+
+                if (error) throw error;
+            }
+
+            if (onProjectUpdate) {
+                const { data: updatedRow } = await supabase.from('projects').select('*').eq('id', id).single();
+                if (updatedRow) onProjectUpdate(updatedRow);
+            }
+            toast.success('Stav milníku aktualizován');
+        } catch (err) {
+            console.error('Error toggling milestone status:', err);
+            toast.error('Chyba při aktualizaci stavu');
         } finally {
             setIsUpdating(false);
         }
@@ -701,7 +759,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                     className={`p-1.5 rounded-md transition-all flex items-center justify-center ${customForm.icon === key ? 'bg-primary text-primary-foreground shadow-sm scale-110' : 'hover:bg-muted text-muted-foreground/70'}`}
                                                     title={key}
                                                 >
-                                                    <IconComponent size={14} />
+                                                    <IconComponent size={18} />
                                                 </button>
                                             ))}
                                         </div>
@@ -780,15 +838,24 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 // Dynamic icon size: adjust more reasonably at extreme zoom
                 // Dynamic icon size: adjust more reasonably at extreme zoom
                 // Dynamic icon size: adjust more reasonably at extreme zoom
-                const baseSize = config?.milestoneSize || 34; // Configurable base size, default 34
+                const baseSize = config?.milestoneSize || 22;
                 let iconSize = baseSize;
 
-                if (dayWidth < 5) {
-                    iconSize = Math.max(16, baseSize * 0.5); // Much smaller at max zoom out
-                } else if (dayWidth < 10) {
-                    iconSize = Math.max(22, baseSize * 0.65);
-                } else if (dayWidth < 20) {
-                    iconSize = Math.max(28, baseSize * 0.8);
+                // Horizontal zoom scaling (compact icons when days are narrow)
+                if (dayWidth < 10) {
+                    iconSize = Math.max(12, baseSize * 0.6);
+                } else if (dayWidth < 25) {
+                    iconSize = Math.max(16, baseSize * 0.8);
+                }
+
+                // Vertical zoom scaling (larger icons when rows are tall)
+                // Default rowHeight is 32. If it's larger, we can increase the icon size.
+                if (rowHeight > 32) {
+                    const verticalScale = Math.min(2, rowHeight / 32);
+                    iconSize = iconSize * verticalScale;
+                } else if (rowHeight < 24) {
+                    // Slight reduction for very thin rows
+                    iconSize = iconSize * 0.85;
                 }
 
                 return (
@@ -824,7 +891,22 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
-                                const milestoneColor = m.class === 'custom-completed' ? '#10b981' : (m.class === 'custom-pending' ? '#ef4444' : (milestoneConfig?.color || '#888'));
+
+                                // Color Logic: Global but status-aware
+                                // Grey default: #374151, Green: #22c55e, Red: #ef4444
+                                const completedMilestones = project.custom_fields?.completed_milestones || [];
+                                const isCompleted = m.class.startsWith('custom-')
+                                    ? (milestones.find(cm => cm.id === m.key)?.status === 'completed')
+                                    : completedMilestones.includes(m.key);
+
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                const isOverdue = !isCompleted && m.date < today;
+
+                                let milestoneColor = '#374151'; // Dark grey default
+                                if (isCompleted) milestoneColor = '#22c55e'; // Green
+                                else if (isOverdue) milestoneColor = '#ef4444'; // Red
+                                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color; // Fallback to provided config color if pending and not overdue
 
                                 const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
                                 const isStartVal = m.class === 'start';
@@ -895,7 +977,21 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 };
                 const configKey = configMap[m.class];
                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
-                const milestoneColor = m.class === 'custom-completed' ? '#10b981' : (m.class === 'custom-pending' ? '#ef4444' : (milestoneConfig?.color || '#888'));
+
+                const completedMilestones = project.custom_fields?.completed_milestones || [];
+                const isCompleted = m.class.startsWith('custom-')
+                    ? (milestones.find(cm => cm.id === m.key)?.status === 'completed')
+                    : completedMilestones.includes(m.key);
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isOverdue = !isCompleted && m.date < today;
+
+                let milestoneColor = '#374151';
+                if (isCompleted) milestoneColor = '#22c55e';
+                else if (isOverdue) milestoneColor = '#ef4444';
+                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color;
+
                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
@@ -997,15 +1093,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     </button>
 
                                     <button
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 transition-all border border-emerald-500/20 group"
-                                        onClick={() => {
-                                            // TODO: Funkce potvrzení doručení bude dodělána později
-                                            alert('Funkce potvrzení doručení bude implementována brzy.');
-                                        }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all border group ${isCompleted ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border-emerald-500/20'}`}
+                                        onClick={() => toggleMilestoneCompletion(m.key)}
                                         disabled={isUpdating}
                                     >
-                                        <ShieldCheck size={14} className="text-emerald-500 group-hover:scale-110 transition-transform" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Potvrdit</span>
+                                        <ShieldCheck size={14} className={isCompleted ? 'text-emerald-600' : 'text-emerald-500 group-hover:scale-110 transition-transform'} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{isCompleted ? 'Splněno' : 'Potvrdit'}</span>
                                     </button>
                                 </div>
 
@@ -1049,22 +1142,49 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             key={key}
                                             type="button"
                                             onClick={async () => {
+                                                setIsUpdating(true);
                                                 try {
-                                                    const { error } = await supabase
-                                                        .from('project_milestones')
-                                                        .update({ icon: key })
-                                                        .eq('id', m.key);
-                                                    if (error) throw error;
-                                                    handleDateUpdate(m.key, formatLocalDate(m.date));
+                                                    const isStandard = ['chassis', 'body', 'handover', 'deadline', 'mounting_end', 'revision_end', 'start'].includes(m.key);
+
+                                                    if (isStandard) {
+                                                        const currentCustom = project.custom_fields || {};
+                                                        const iconOverrides = currentCustom.milestone_icons || {};
+                                                        const { error } = await supabase
+                                                            .from('projects')
+                                                            .update({
+                                                                custom_fields: {
+                                                                    ...currentCustom,
+                                                                    milestone_icons: { ...iconOverrides, [m.key]: key }
+                                                                }
+                                                            })
+                                                            .eq('id', id);
+                                                        if (error) throw error;
+                                                    } else {
+                                                        // Custom milestone from table
+                                                        const { error } = await supabase
+                                                            .from('project_milestones')
+                                                            .update({ icon: key })
+                                                            .eq('id', m.key);
+                                                        if (error) throw error;
+                                                    }
+
+                                                    if (onProjectUpdate) {
+                                                        const { data } = await supabase.from('projects').select('*').eq('id', id).single();
+                                                        if (data) onProjectUpdate(data);
+                                                    }
+                                                    toast.success('Ikona aktualizována');
                                                     setIsIconPickerOpen(false);
                                                 } catch (err) {
                                                     console.error('Error updating icon:', err);
+                                                    toast.error('Chyba při změně ikony');
+                                                } finally {
+                                                    setIsUpdating(false);
                                                 }
                                             }}
-                                            className={`aspect-square rounded-md transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm scale-105' : 'bg-muted/30 hover:bg-muted text-muted-foreground/70'}`}
+                                            className={`aspect-square rounded-md transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm scale-110' : 'bg-muted/30 hover:bg-muted text-muted-foreground/70'}`}
                                             title={key}
                                         >
-                                            <IconComponent size={14} />
+                                            <IconComponent size={18} />
                                         </button>
                                     ))}
                                 </div>

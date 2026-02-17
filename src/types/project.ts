@@ -4,6 +4,7 @@ export type ActionNeededBy = 'internal' | 'external';
 export interface Project {
     // Základní pole
     id: string;             // Kód
+    parent_id?: string;     // ID Rodičovské zakázky (pro vojenské sady)
     name: string;           // Předmět
     customer: string;       // Klient
     manager: string;        // Vlastník

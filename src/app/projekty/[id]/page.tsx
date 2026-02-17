@@ -25,10 +25,13 @@ import {
     CalendarDays,
     Wrench,
     FileText,
-    Package
+    Package,
+    ArrowRightCircle
 } from 'lucide-react';
+import { VehicleGenerator } from '@/components/Military/VehicleGenerator';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAdmin } from '@/hooks/useAdmin';
+import { CategoryChip } from '@/components/CategoryChip';
 import {
     Calendar,
     CheckCircle2,
@@ -73,6 +76,7 @@ export default function ProjectDetailPage() {
     const [editedProject, setEditedProject] = useState<Project | null>(null);
     const [saving, setSaving] = useState(false);
     const [milestones, setMilestones] = useState<Milestone[]>([]);
+    const [subProjects, setSubProjects] = useState<Project[]>([]); // New state for sub-projects
     const [loadingMilestones, setLoadingMilestones] = useState(true);
     const [isAddingMilestone, setIsAddingMilestone] = useState(false);
     const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
@@ -112,9 +116,22 @@ export default function ProjectDetailPage() {
             setLoadingMilestones(false);
         }
 
+        async function fetchSubProjects() {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('parent_id', id)
+                .order('name', { ascending: true });
+
+            if (!error) {
+                setSubProjects(data || []);
+            }
+        }
+
         if (id) {
             fetchProject();
             fetchMilestones();
+            fetchSubProjects();
         }
     }, [id]);
 
@@ -337,7 +354,7 @@ export default function ProjectDetailPage() {
                                 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                                 : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 }`}>
-                                {p.project_type === 'military' ? 'Armáda' : 'Civil'}
+                                {p.project_type === 'military' ? 'Vojenské' : 'Civil'}
                             </span>
                             {isEditing && (
                                 <select
@@ -346,7 +363,7 @@ export default function ProjectDetailPage() {
                                     className="text-[10px] bg-muted border border-border rounded px-2 py-0.5 outline-none"
                                 >
                                     <option value="civil">Civil</option>
-                                    <option value="military">Armáda</option>
+                                    <option value="military">Vojenské</option>
                                 </select>
                             )}
                             <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{project.id}</span>
@@ -376,7 +393,15 @@ export default function ProjectDetailPage() {
                         <FieldGrid>
                             <Field label="Manažer" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Kategorie" icon={<Tag size={13} />} value={p.category} field="category" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Typ nástavby" icon={<Truck size={13} />} value={p.body_type} field="body_type" isEditing={isEditing} onChange={handleChange} />
+                            <Field
+                                label="Kategorie"
+                                icon={<Tag size={13} />}
+                                value={isEditing ? p.category : <CategoryChip value={p.category} className="text-[11px] px-3 py-1" />}
+                                field="category"
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                            />
                             <Field label="Výrobní číslo" icon={<Hash size={13} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
                         </FieldGrid>
                     </Section>
@@ -422,6 +447,75 @@ export default function ProjectDetailPage() {
                         </FieldGrid>
                     </Section>
                 </div>
+
+
+                {/* ═══ 4.2 VOZIDLA V ZAKÁZCE (Military Parent) ═══ */}
+                {isMilitary && !project.parent_id && (
+                    <Section icon={<Truck size={15} />} title="Vozidla v zakázce" color="emerald" fullWidth>
+                        {subProjects.length > 0 ? (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {subProjects.map(sub => (
+                                        <div
+                                            key={sub.id}
+                                            onClick={() => router.push(`/projekty/${sub.id}`)}
+                                            className="cursor-pointer group relative p-3 rounded-xl border border-border/50 bg-muted/10 hover:bg-muted/30 transition-all flex items-center justify-between"
+                                        >
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{sub.name}</span>
+                                                <span className="text-[10px] text-muted-foreground font-mono">{sub.id}</span>
+                                            </div>
+                                            <ArrowRightCircle size={16} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground text-center pt-2 border-t border-border/30">
+                                    Celkem {subProjects.length} vozidel
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-6 text-center">
+                                <p className="text-xs text-muted-foreground mb-4">Tato zakázka zatím nemá vygenerovaná žádná vozidla.</p>
+                                {isEditing ? (
+                                    <div className="text-xs text-amber-500 font-bold bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                                        Pro generování vozidel ukončete režim úprav.
+                                    </div>
+                                ) : (
+                                    canEdit && (
+                                        <VehicleGenerator
+                                            project={project}
+                                            onSuccess={() => {
+                                                // Refresh subprojects
+                                                window.location.reload();
+                                            }}
+                                        />
+                                    )
+                                )}
+                            </div>
+                        )}
+                    </Section>
+                )}
+
+                {/* ═══ 4.3 RODIČOVSKÁ ZAKÁZKA (Military Child) ═══ */}
+                {isMilitary && project.parent_id && (
+                    <Section icon={<Truck size={15} />} title="Součást zakázky" color="blue" fullWidth>
+                        <div className="flex items-center gap-4 p-2">
+                            <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
+                                <Truck size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Patří pod hlavní zakázku</h4>
+                                <button
+                                    onClick={() => router.push(`/projekty/${project.parent_id}`)}
+                                    className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                    Přejít na hlavní zakázku <ArrowRightCircle size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    </Section>
+                )}
+
                 {/* ═══ 4.5 MILNÍKY ═══ */}
                 <Section
                     icon={<Flag size={15} />}
@@ -624,7 +718,7 @@ export default function ProjectDetailPage() {
                     <ProjectHistory projectId={project.id} />
                 </Section>
             </div>
-        </div>
+        </div >
     );
 }
 
