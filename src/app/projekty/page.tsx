@@ -21,12 +21,27 @@ interface ImportInfo {
     excelDate: string;
 }
 
+const parseDate = (dateStr: string | undefined | null): Date | null => {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+};
+
+const SafeCellValue: React.FC<{ value: any }> = ({ value }) => {
+    if (value === null || value === undefined) return <span>-</span>;
+    if (typeof value === 'object') {
+        // Safe stringify for objects to prevent React crash
+        return <span className="text-muted-foreground text-[10px] break-all">{JSON.stringify(value)}</span>;
+    }
+    return <span>{String(value)}</span>;
+};
+
 const columns: ColumnDef<Project>[] = [
     {
         accessorKey: 'id',
         header: 'Kód',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('id')}</span>,
+        cell: ({ row }) => <span className="font-mono">{row.getValue('id')}</span>,
     },
     {
         accessorKey: 'name',
@@ -48,11 +63,14 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'status',
         header: 'Status',
         minSize: 30,
-        cell: ({ row }) => (
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                {row.getValue('status')}
-            </span>
-        ),
+        cell: ({ row }) => {
+            const val = row.getValue('status');
+            return (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                    {typeof val === 'string' ? val : '-'}
+                </span>
+            );
+        },
     },
     {
         accessorKey: 'production_status',
@@ -63,25 +81,25 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'chassis_delivery',
         header: 'Dodání Podvozku',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('chassis_delivery') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('chassis_delivery')} />,
     },
     {
         accessorKey: 'body_delivery',
         header: 'Dodání Nástavby',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('body_delivery') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('body_delivery')} />,
     },
     {
         accessorKey: 'customer_handover',
         header: 'Předání',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('customer_handover') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('customer_handover')} />,
     },
     {
         accessorKey: 'abra_project',
         header: 'ABRA Zakázka',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('abra_project') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('abra_project')} />,
     },
     {
         accessorKey: 'mounting_company',
@@ -102,13 +120,19 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'closed_at',
         header: 'Uzavřeno',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('closed_at') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('closed_at')} />,
     },
     {
         accessorKey: 'serial_number',
         header: 'VIN / VČ',
         minSize: 30,
-        cell: ({ row }) => <span>{row.getValue('serial_number') || '-'}</span>,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('serial_number')} />,
+    },
+    {
+        accessorKey: 'body_type',
+        header: 'Typ Nástavby',
+        minSize: 30,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('body_type')} />,
     },
 ];
 
@@ -201,7 +225,8 @@ export default function ProjektyPage() {
                 p.status,
                 p.category,
                 p.production_status,
-                p.mounting_company
+                p.mounting_company,
+                p.body_type
             ].map(val => normalize(val || ''));
 
             // Check custom fields as well
@@ -250,7 +275,7 @@ export default function ProjektyPage() {
                 id: `custom_${key}`,
                 header: key,
                 minSize: 30,
-                cell: ({ getValue }) => <span className="text-muted-foreground">{getValue() as string}</span>
+                cell: ({ getValue }) => <SafeCellValue value={getValue()} />
             });
         });
 

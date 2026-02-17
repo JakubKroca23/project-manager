@@ -642,17 +642,11 @@ const Timeline: React.FC = () => {
     }, [fetchMilestones]);
 
     // Helper pro řazení
-    const getLatestMilestoneDate = (project: Project): number => {
-        const dates = [
-            project.deadline,
-            project.customer_handover,
-            project.body_delivery,
-            project.chassis_delivery
-        ]
-            .map(d => parseDate(d)?.getTime())
-            .filter((t): t is number => t !== undefined && !isNaN(t));
-
-        return dates.length > 0 ? Math.max(...dates) : 0;
+    const getSortDate = (project: Project): number => {
+        // Priority: Deadline -> Handover -> Other delivery dates
+        const dateStr = project.deadline || project.customer_handover || project.body_delivery || project.chassis_delivery;
+        const d = parseDate(dateStr);
+        return d ? d.getTime() : 4102444800000; // Default to far future
     };
 
     const filteredProjects = useMemo((): Project[] => {
@@ -714,11 +708,11 @@ const Timeline: React.FC = () => {
             });
         }
 
-        // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
-        return filtered.sort((a: Project, b: Project) => {
-            const dateA = getLatestMilestoneDate(a);
-            const dateB = getLatestMilestoneDate(b);
-            return dateB - dateA;
+        // Sorting: Nearest deadline first, then by name
+        return filtered.sort((a, b) => {
+            const diff = getSortDate(a) - getSortDate(b);
+            if (diff !== 0) return diff;
+            return (a.name || '').localeCompare(b.name || '');
         });
     }, [projects, searchQuery, activeTypes, showHidden]);
 
@@ -729,9 +723,9 @@ const Timeline: React.FC = () => {
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVIS', projects: service, color: '#ffb74d' },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
-            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
+            { id: 'service', label: 'SERVIS', projects: service, color: '#f59e0b' },
+            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
+            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#10b981' }
         ];
     }, [filteredProjects]);
 
@@ -1280,207 +1274,139 @@ const Timeline: React.FC = () => {
                         dayWidth={dayWidth}
                     >
                         <div className="timeline-rows">
-                            <div className="timeline-rows">
-                                {(() => {
-                                    const visibleSectors = sectorizedProjects.filter(
-                                        sector => activeTypes[sector.id] && (sector.projects.length > 0 || sector.id === 'service')
-                                    );
-
-                                    const renderSectorRecursively = (index: number): React.ReactNode => {
-                                        if (index >= visibleSectors.length) return null;
-
-                                        const sector = visibleSectors[index];
-                                        const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
-                                        const isCollapsed = collapsedSectors[sector.id] === true;
-
-                                        return (
-                                            <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
-                                                {/* HEADER */}
+                            {/* 1. CATEGORY SUMMARIES (Stacked) */}
+                            {(() => {
+                                const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+                                return (
+                                    <>
+                                        {visibleSectors.map((sector, vIdx) => {
+                                            const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--timeline-row-height)))`;
+                                            return (
                                                 <div
-                                                    className="timeline-sector-header-row group/header cursor-pointer select-none"
-                                                    onClick={() => toggleSector(sector.id)}
+                                                    key={`summary-${sector.id}`}
+                                                    className="timeline-row"
                                                     style={{
-                                                        background: 'var(--background)',
-                                                        borderBottom: 'none',
+                                                        position: 'sticky',
                                                         top: topOffset,
-                                                        zIndex: 3400 - index
+                                                        height: 'var(--timeline-row-height)',
+                                                        background: 'var(--background)',
+                                                        zIndex: 3500 - vIdx
                                                     }}
                                                 >
                                                     <div
-                                                        className="project-info-sticky sector-header"
+                                                        className="project-info-sticky"
                                                         style={{
-                                                            borderLeft: `2px solid ${sector.color}`,
+                                                            borderLeft: `10px solid ${sector.color}`,
+                                                            height: '100%',
                                                             background: 'var(--background)',
-                                                            height: 'var(--row-height)',
-                                                            borderRight: 'none',
-                                                            boxShadow: 'none',
-                                                            zIndex: 50
+                                                            fontWeight: 900,
+                                                            color: sector.color,
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.05em',
+                                                            boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
                                                         }}
                                                     >
-                                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <button
-                                                                    className="p-1 hover:bg-muted/50 rounded-sm"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        toggleSector(sector.id);
-                                                                    }}
-                                                                >
-                                                                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                                                                </button>
-                                                                <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
-                                                                    {sector.label}
-                                                                </span>
-                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
-                                                                    ({sector.projects.length})
-                                                                </span>
-                                                            </div>
+                                                        <div className="flex items-center gap-2 pl-2">
+                                                            <span className="uppercase">{sector.label}</span>
+                                                            <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                         </div>
                                                     </div>
-
-                                                    {/* STACKED CONTENT (Always visible) */}
-                                                    <div
-                                                        className="absolute inset-0 overflow-hidden pointer-events-none"
-                                                        style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
-                                                    >
-                                                        {sector.projects.map(project => {
-                                                            const sDate = (parseDate(project.created_at) || new Date());
-                                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-                                                            return (
-                                                                <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
-                                                                    <TimelineBar
-                                                                        id={project.id}
-                                                                        name={project.name}
-                                                                        project={project}
-                                                                        status={project.status}
-                                                                        startDate={sDate}
-                                                                        endDate={eDate}
-                                                                        timelineStart={timelineRange.start}
-                                                                        dayWidth={dayWidth}
-                                                                        isCollapsed={true}
-                                                                        config={{ ...colors, milestoneSize }}
-                                                                        onProjectUpdate={handleProjectUpdate}
-                                                                        milestones={allMilestones.filter(m => m.project_id === project.id)}
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-
-                                                {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}
-                                                {!isCollapsed && (
-                                                    <div className="absolute inset-0 hot-zones-container">
-                                                        {renderHotZones(sector, index, visibleSectors)}
-                                                    </div>
-                                                )}
-
-                                                {/* ROWS - Only when expanded */}
-                                                {!isCollapsed && sector.projects.map((project) => (
-                                                    <div key={project.id} className="timeline-row">
-                                                        <Link
-                                                            href={`/projekty/${project.id}`}
-                                                            className={`project-info-sticky transition-colors group`}
-                                                        >
-                                                            <div className="project-info-content pr-2">
-                                                                {rowHeight >= 30 ? (
-                                                                    <>
-                                                                        <span
-                                                                            className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
-                                                                            style={{ textAlign: 'left', fontWeight: 400 }}
-                                                                        >
-                                                                            {project.name}
-                                                                        </span>
-                                                                        <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                                            {project.customer || 'Bez zákazníka'}
-                                                                        </span>
-                                                                    </>
-                                                                ) : (
-                                                                    <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                                        {project.customer || 'Bez zákazníka'}
-                                                                    </span>
-                                                                )}
+                                                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                                        {sector.projects.map(p => (
+                                                            <div key={`stack-${p.id}`} className="absolute inset-x-0 h-full">
+                                                                <TimelineBar
+                                                                    id={p.id}
+                                                                    name={p.name}
+                                                                    project={p}
+                                                                    status={p.status}
+                                                                    startDate={parseDate(p.created_at) || new Date()}
+                                                                    endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
+                                                                    timelineStart={timelineRange.start}
+                                                                    dayWidth={dayWidth}
+                                                                    isCollapsed={true}
+                                                                    config={{ ...colors, milestoneSize }}
+                                                                    onProjectUpdate={handleProjectUpdate}
+                                                                    milestones={allMilestones.filter(m => m.project_id === p.id)}
+                                                                />
                                                             </div>
-                                                        </Link>
-                                                        <TimelineBar
-                                                            id={project.id}
-                                                            name={project.name}
-                                                            project={project}
-                                                            status={project.status}
-                                                            startDate={parseDate(project.created_at) || new Date()}
-                                                            endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
-                                                            timelineStart={timelineRange.start}
-                                                            dayWidth={dayWidth}
-                                                            config={{ ...colors, milestoneSize }}
-                                                            onProjectUpdate={handleProjectUpdate}
-                                                            milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
-                                                        />
+                                                        ))}
                                                     </div>
-                                                ))}
-
-                                                {/* NESTED NEXT SECTOR */}
-                                                {renderSectorRecursively(index + 1)}
-                                            </div>
-                                        );
-                                    };
-
-                                    // Helper for HotZones moved out of JSX for clarity, but defined inline here:
-                                    const renderHotZones = (sector: any, index: number, allVisible: any[]) => {
-                                        // Same logic as before
-                                        return sector.projects.map((project: any) => {
-                                            // ... (calculations) ... 
-                                            // Because calculations depend on index, we'd need to copy logic.
-                                            // For brevity in edit tool, I will Inline the simplified block or assume existing logic is kept if not replaced.
-                                            // But since I am replacing the block, I MUST provide the content.
-                                            // Let's simplify/inline.
-
-                                            // Re-using calculations from previous view_file:
-                                            let previousRowsCount = 0;
-                                            for (let k = 0; k < index; k++) {
-                                                previousRowsCount += allVisible[k].projects.length;
-                                            }
-                                            const pIndex = sector.projects.findIndex((p: any) => p.id === project.id);
-                                            // Simplified, strict calculation not needed for absolute inset-0 wrapper?
-                                            // Wait, hot-zones-container logic was:
-                                            // absolute inset-0 relative to timeline-sector-stack.
-                                            // It iterates projects and renders TimelineBar absolute inset-0?
-                                            // This sounds wrong if they are supposed to be in rows.
-                                            // Ah, `hot-zones-container` was rendering an overlay?
-                                            // Actually, looking at previous code, `hot-zones-container` seemed to just re-render bars.
-                                            // Maybe for "Hot Zones" logic that wasn't fully implemented or visible?
-                                            // The previous code had `hot-zones-container` render `TimelineBar` inside `absolute inset-0`.
-                                            // This effectively stacks them on top of each other if offsets aren't applied.
-                                            // And `yComponents` calculation was unused in the JSX I saw?
-                                            // Let's look at lines 1028-1095 in previous view.
-                                            // `yComponents` calculated but seemingly unused in `return`.
-                                            // It returned `<div className="absolute inset-0"><TimelineBar ... /></div>`.
-                                            // This means it WAS rendering stacked bars blindly on top of the sector?
-                                            // If so, hiding it when not collapsed matches behavior.
-                                            // I will restore previous content logic for hot zones if needed, 
-                                            // but since `top` offsets were missing in style, it might have been buggy or specific.
-                                            // I'll keep it simple: Render same block if not collapsed.
-
-                                            const sDate = (parseDate(project.created_at) || new Date());
-                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-
-                                            // Note: If hot zones were relying on 'absolute inset-0' to fill the stack,
-                                            // and rows were static, this duplicates the bars?
-                                            // Yes, line 1100 rendered rows again.
-                                            // Duplicate rendering? Why?
-                                            // Maybe hot-zones are interaction layers?
-                                            // Let's just keep the existing loop logic but wrapped in !isCollapsed.
-
-                                            return (
-                                                <div key={`hot-wrapper-${project.id}`} className="absolute inset-0 pointer-events-none opacity-0">
-                                                    {/* Hidden interaction layer or duplicate? Leaving opacity 0 just in case */}
                                                 </div>
                                             );
-                                        });
-                                    };
+                                        })}
 
-                                    return renderSectorRecursively(0);
-                                })()}
-                            </div>
+                                        {/* 2. HEAVY DIVIDER */}
+                                        <div
+                                            className="timeline-row"
+                                            style={{
+                                                position: 'sticky',
+                                                top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--timeline-row-height)))`,
+                                                height: '6px',
+                                                background: 'var(--muted-foreground)',
+                                                borderBottom: '2px solid var(--border)',
+                                                zIndex: 3400,
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            }}
+                                        >
+                                            <div className="project-info-sticky" style={{ height: '100%', background: 'var(--muted-foreground)', borderRight: 'none' }}></div>
+                                        </div>
+                                    </>
+                                );
+                            })()}
+
+                            {/* 3. INDIVIDUAL PROJECTS */}
+                            {filteredProjects.map((project) => {
+                                const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
+                                const sectorColor = sector?.color || '#90caf9';
+
+                                return (
+                                    <div key={project.id} className="timeline-row">
+                                        <Link
+                                            href={`/projekty/${project.id}`}
+                                            className="project-info-sticky transition-colors group"
+                                            style={{ borderLeft: `10px solid ${sectorColor}` }}
+                                        >
+                                            <div className="project-info-content pr-2 pl-1">
+                                                {rowHeight >= 30 ? (
+                                                    <>
+                                                        <span
+                                                            className={`project-name w-full text-left !font-normal ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                            style={{ textAlign: 'left', fontWeight: 400 }}
+                                                        >
+                                                            {project.name}
+                                                        </span>
+                                                        <div className="flex justify-between items-center w-full">
+                                                            <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-70">
+                                                                {sector?.id === 'service' ? 'Service' : sector?.id === 'military' ? 'Army' : 'Civil'}
+                                                            </span>
+                                                            <span className="customer-name" style={{ textAlign: 'right' }}>
+                                                                {project.customer || 'Bez zákazníka'}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                        {project.customer || 'Bez zákazníka'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </Link>
+                                        <TimelineBar
+                                            id={project.id}
+                                            name={project.name}
+                                            project={project}
+                                            status={project.status}
+                                            startDate={parseDate(project.created_at) || new Date()}
+                                            endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
+                                            timelineStart={timelineRange.start}
+                                            dayWidth={dayWidth}
+                                            config={{ ...colors, milestoneSize }}
+                                            onProjectUpdate={handleProjectUpdate}
+                                            milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     </TimelineGrid>
                 </div>

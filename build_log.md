@@ -140,3 +140,8 @@
     - Obrazovka údržby nyní dynamicky načítá verzi systému z databáze (`app_settings`).
     - Přidána interaktivní minihra s jeřábem ("Crane Game") pro zabavení uživatelů během odstávky.
 - **Hotfix**: Oprava chybějícího importu `Trash2` na stránce Servisu, který způsoboval pád buildu na Vercelu.
+
+## [2026-02-17] - Fix: Obnova přihlašovacích údajů Supabase
+- **Chyba**: Systém hlásil nedostupnost Supabase credentials ("Supabase credentials missing!").
+- **Příčina**: Chybějící soubor `.env.local` v kořenovém adresáři projektu.
+- **Oprava**: Soubor byl nalezen v záložní složce `project-manager-1` a obnoven do aktuálního projektu.

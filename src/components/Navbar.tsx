@@ -10,20 +10,20 @@ import { ThemeToggle } from './ThemeToggle';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const navItems = [
-    { name: 'TIMELINE', icon: Calendar, href: '/', color: '#bae6fd' },
+    { name: 'TIMELINE', icon: Calendar, href: '/', color: '#3b82f6' },
     {
         name: 'ZAKÁZKY',
         icon: Briefcase,
         href: '/projekty',
-        color: '#90caf9',
-        militaryColor: '#a5d6a7',
+        color: '#3b82f6',
+        militaryColor: '#10b981',
         submenu: [
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
             { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
         ]
     },
-    { name: 'SERVIS', icon: Wrench, href: '/servis', color: '#ffb74d' }, // Orange for Service
-    { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
+    { name: 'SERVIS', icon: Wrench, href: '/servis', color: '#f59e0b' },
+    { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#8d6e63' },
 ];
 export function Navbar() {
     const pathname = usePathname();
@@ -48,6 +48,7 @@ export function Navbar() {
     const [currentTime, setCurrentTime] = useState<string>('');
     const [currentDate, setCurrentDate] = useState<string>('');
     const [userEmail, setUserEmail] = useState<string>('');
+    const [systemVersion, setSystemVersion] = useState<string>('v1.0.0-alpha');
 
     // Active Category Label
     const activeCategory = activeType === 'military' ? 'ARMÁDA' : activeType === 'civil' ? 'CIVIL' : null;
@@ -73,6 +74,22 @@ export function Navbar() {
         getUser();
     }, []);
 
+    useEffect(() => {
+        const fetchSystemInfo = async () => {
+            const { data } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'system_info')
+                .maybeSingle();
+
+            if (data) {
+                const settings = data.settings as any;
+                setSystemVersion(settings?.version || 'v1.0.0-alpha');
+            }
+        };
+        fetchSystemInfo();
+    }, []);
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.push('/login');
@@ -83,8 +100,7 @@ export function Navbar() {
         <nav className="sticky top-0 z-50 w-full">
             <div className="mx-auto max-w-5xl px-4">
                 <div
-                    className="flex h-12 items-center justify-between gap-1 rounded-b-xl px-4 shadow-xl"
-                    style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #333' }}
+                    className="flex h-12 items-center justify-between gap-1 rounded-b-xl px-4 shadow-xl border-x border-b bg-background/95 backdrop-blur-sm"
                 >
                     {/* Navigation Items - Left/Center */}
                     <div className="flex items-center gap-1">
@@ -110,7 +126,7 @@ export function Navbar() {
                                                 isActive ? "bg-white/5" : "hover:bg-white/[0.02]"
                                             )}
                                             style={{
-                                                color: isActive ? activeColor : 'rgb(156 163 175)',
+                                                color: isActive ? activeColor : undefined,
                                                 backgroundColor: isActive ? `${activeColor}15` : undefined
                                             }}
                                         >
@@ -122,7 +138,7 @@ export function Navbar() {
                                             {activeCategory && isActive && (
                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-4px] z-10 flex justify-center pointer-events-none">
                                                     <span
-                                                        className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-full bg-[#1a1a1a] border shadow-xl whitespace-nowrap"
+                                                        className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-full bg-background border shadow-xl whitespace-nowrap"
                                                         style={{
                                                             color: activeColor,
                                                             borderColor: `${activeColor}33`,
@@ -144,7 +160,7 @@ export function Navbar() {
                                             )}
                                         >
                                             <div
-                                                className="bg-[#1a1a1a] rounded-md shadow-2xl px-1.5 py-1 flex flex-row items-center gap-0.5 whitespace-nowrap min-w-max border border-[#333] mt-[-1px]"
+                                                className="bg-background rounded-md shadow-2xl px-1.5 py-1 flex flex-row items-center gap-0.5 whitespace-nowrap min-w-max border mt-[-1px]"
                                             >
                                                 {item.submenu.map((sub) => {
                                                     // Check submenu permissions if needed. 
@@ -210,7 +226,7 @@ export function Navbar() {
                                         isActive ? "bg-white/5" : ""
                                     )}
                                     style={{
-                                        color: isActive ? activeColor : 'rgb(156 163 175)',
+                                        color: isActive ? activeColor : undefined,
                                         backgroundColor: isActive ? `${activeColor}15` : undefined,
                                         borderColor: isActive ? `${activeColor}22` : 'transparent',
                                     }}
@@ -238,41 +254,46 @@ export function Navbar() {
 
                     {/* Right Side Tools & Profile */}
                     <div className="flex items-center gap-3">
-                        <div className="h-6 w-px bg-white/10" />
-                        <div className="flex flex-col items-end justify-center pr-3 border-r border-white/10">
-                            <span className="text-[12px] font-black text-[#0099ee] tracking-[0.35em] mr-[-0.35em] tabular-nums leading-none mb-1">
-                                {currentTime}
-                            </span>
-                            <span className="text-[12px] font-black text-gray-400 tracking-[0.05em] tabular-nums leading-none">
-                                {currentDate}
+                        <div className="h-6 w-px bg-border/40" />
+                        <div className="flex flex-col items-center justify-center">
+                            <span className="text-[8px] font-bold text-muted-foreground tracking-[0.2em] leading-none uppercase mb-0.5">Vers</span>
+                            <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>
+                        </div>
+                    </div>
+                    <div className="h-6 w-px bg-border/40" />
+                    <div className="flex flex-col items-end justify-center pr-3 border-r border-border/40">
+                        <span className="text-[12px] font-black text-primary tracking-[0.35em] mr-[-0.35em] tabular-nums leading-none mb-1">
+                            {currentTime}
+                        </span>
+                        <span className="text-[12px] font-black text-muted-foreground tracking-[0.05em] tabular-nums leading-none">
+                            {currentDate}
+                        </span>
+                    </div>
+
+                    <Link href="/profile" className="no-underline">
+                        <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
+                            <span className="text-white text-xs font-bold tracking-wider uppercase">
+                                {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
                             </span>
                         </div>
+                    </Link>
 
-                        <Link href="/profile" className="no-underline">
-                            <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
-                                <span className="text-white text-xs font-bold tracking-wider uppercase">
-                                    {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
-                                </span>
-                            </div>
+                    <div className="flex items-center gap-2 pl-3 border-l border-border/40">
+                        <Link href="/profile" title="Nastavení profilu">
+                            <IconButton className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400 hover:text-blue-300">
+                                <Settings size={15} />
+                            </IconButton>
                         </Link>
 
-                        <div className="flex items-center gap-2 pl-3 border-l border-white/10">
-                            <Link href="/profile" title="Nastavení profilu">
-                                <IconButton className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400 hover:text-blue-300">
-                                    <Settings size={15} />
-                                </IconButton>
-                            </Link>
+                        <ThemeToggle className="bg-muted hover:bg-muted/80 border-border text-foreground hover:text-foreground" />
 
-                            <ThemeToggle className="bg-white/10 hover:bg-white/20 border-white/20 text-white hover:text-white" />
-
-                            <IconButton
-                                onClick={handleLogout}
-                                title="Odhlásit se"
-                                className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
-                            >
-                                <LogOut size={15} />
-                            </IconButton>
-                        </div>
+                        <IconButton
+                            onClick={handleLogout}
+                            title="Odhlásit se"
+                            className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                        >
+                            <LogOut size={15} />
+                        </IconButton>
                     </div>
                 </div>
             </div>

@@ -201,7 +201,6 @@
 
 .timeline-grid-column.is-month-start {
   border-left: 2px solid var(--border);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.02), transparent 5px);
 }
 
 .timeline-grid-content {
@@ -318,11 +317,7 @@
   flex: 1;
   height: 100%;
   position: relative;
-  background: repeating-linear-gradient(90deg,
-      transparent,
-      transparent calc(var(--day-width) - 1px),
-      var(--timeline-grid-line) calc(var(--day-width) - 1px),
-      var(--timeline-grid-line) var(--day-width));
+  background-image: none;
 }
 
 .hot-zones-container {
@@ -461,14 +456,7 @@
 
 /* Gradient transition: Initial -> Mounting (Right side of Initial) */
 .phase-initial::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-mounting));
-  pointer-events: none;
+  content: none;
 }
 
 /* Light Blue - Zahájení */
@@ -480,14 +468,7 @@
 
 /* Gradient transition: Mounting -> Buffer Yellow (Right side of Mounting) */
 .phase-mounting::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-buffer-yellow));
-  pointer-events: none;
+  content: none;
 }
 
 /* Green - Příprava */
@@ -499,14 +480,7 @@
 
 /* Gradient transition: Yellow -> Orange (Right side of Yellow) */
 .phase-buffer-yellow::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(3 * var(--day-width));
-  background: linear-gradient(to right, transparent, var(--phase-buffer-orange));
-  pointer-events: none;
+  content: none;
 }
 
 /* Yellow - Montáž */
@@ -538,12 +512,14 @@
 
 .timeline-phase {
   position: absolute;
-  height: 100%;
+  top: 4px;
+  bottom: 4px;
   z-index: 5;
   /* Nad mřížkou, pod milníky */
   pointer-events: none;
   border: var(--element-border);
   box-sizing: border-box;
+  border-radius: 4px;
 }
 
 .milestone-cell {
