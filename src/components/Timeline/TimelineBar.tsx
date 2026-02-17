@@ -499,15 +499,16 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const isHovered = activeCell === dateKey;
 
                 // Dynamic icon size: adjust more reasonably at extreme zoom
-                const baseSize = 26;
+                // Dynamic icon size: adjust more reasonably at extreme zoom
+                const baseSize = 34; // Increased from 26
                 let iconSize = baseSize;
 
                 if (dayWidth < 5) {
-                    iconSize = 14; // Much smaller at max zoom out
+                    iconSize = 16; // Much smaller at max zoom out
                 } else if (dayWidth < 10) {
-                    iconSize = 18;
+                    iconSize = 22;
                 } else if (dayWidth < 20) {
-                    iconSize = 24;
+                    iconSize = 28;
                 }
 
                 return (
@@ -549,6 +550,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
                                             zIndex: idx
                                         }}
+                                        title={`${name} - ${m.label} (${formatLocalDate(m.date)})`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             const rect = e.currentTarget.getBoundingClientRect();
@@ -600,21 +602,25 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             left: Math.min(editPopup.x - 100, window.innerWidth - 250), // Prevent overflow right
                             top: topPos,
                             bottom: bottomPos,
-                            width: 240
+                            width: 280 // Slightly wider for project info
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center gap-2 border-b border-border pb-2">
-                            <Icon size={16} color={milestoneColor} />
-                            <span className="font-bold text-sm">{m.label}</span>
-                            <div className="flex-1" />
-                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground">
-                                <X size={14} />
+                        <div className="flex items-start justify-between border-b border-border pb-2 mb-1 gap-2">
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="font-bold text-sm truncate" title={name}>{name}</span>
+                                <span className="text-[10px] text-muted-foreground truncate">{project.customer || 'Bez zákazníka'}</span>
+                            </div>
+                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-0.5">
+                                <X size={16} />
                             </button>
                         </div>
 
-                        <div className="text-xs text-muted-foreground">
-                            {formatLocalDate(m.date)}
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon size={18} color={milestoneColor} />
+                            <span className="font-bold text-xs" style={{ color: milestoneColor }}>{m.label}</span>
+                            <div className="flex-1" />
+                            <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{formatLocalDate(m.date)}</span>
                         </div>
 
                         {!isDeleteConfirm && !isEditingDate && (
