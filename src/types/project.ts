@@ -41,6 +41,7 @@ export interface Milestone {
     date: string;
     status: string;
     description?: string;
+    icon?: string;
     created_at: string;
     updated_at: string;
 }

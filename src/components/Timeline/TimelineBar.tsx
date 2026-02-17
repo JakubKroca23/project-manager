@@ -130,6 +130,7 @@ interface IMilestone {
     date: Date;
     label: string;
     class: string;
+    icon?: string;
 }
 
 interface ITimelineBarProps {
@@ -185,7 +186,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
     const [addingCustomMode, setAddingCustomMode] = useState(false);
-    const [customForm, setCustomForm] = useState({ name: '', description: '', status: 'pending' });
+    const [customForm, setCustomForm] = useState({ name: '', description: '', status: 'pending', icon: 'Milestone' });
 
     // Hover timeout ref to prevent flickering
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -228,7 +229,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 setIsDeleteConfirm(false);
                 setIsEditingDate(false);
                 setAddingCustomMode(false);
-                setCustomForm({ name: '', description: '', status: 'pending' });
+                setCustomForm({ name: '', description: '', status: 'pending', icon: 'Milestone' });
             }
         };
 
@@ -307,7 +308,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     key: m.id,
                     date: parseDate(m.date)!,
                     label: m.name,
-                    class: m.status === 'completed' ? 'custom-completed' : 'custom-pending'
+                    class: m.status === 'completed' ? 'custom-completed' : 'custom-pending',
+                    icon: m.icon
                 });
             }
         });
@@ -365,12 +367,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         name: customForm.name,
                         description: customForm.description,
                         date: newDateStr,
-                        status: customForm.status
+                        status: customForm.status,
+                        icon: customForm.icon
                     });
 
                 if (error) throw error;
                 setAddingCustomMode(false);
-                setCustomForm({ name: '', description: '', status: 'pending' });
+                setCustomForm({ name: '', description: '', status: 'pending', icon: 'Milestone' });
             } else if (milestoneClass.startsWith('custom-') || !['chassis', 'body', 'handover', 'deadline', 'start'].includes(milestoneClass)) {
                 // This is an existing arbitrary milestone (id is passed as milestoneClass in m.key)
                 if (newDateStr === null) {
@@ -590,7 +593,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             onClick={() => {
                                 setAddMilestoneDate(null);
                                 setAddingCustomMode(false);
-                                setCustomForm({ name: '', description: '', status: 'pending' });
+                                setCustomForm({ name: '', description: '', status: 'pending', icon: 'Milestone' });
                             }}
                             className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors"
                         >
@@ -654,6 +657,22 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             value={customForm.description}
                                             onChange={(e) => setCustomForm({ ...customForm, description: e.target.value })}
                                         />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Ikonka</label>
+                                        <div className="grid grid-cols-6 gap-1 p-1 bg-muted/30 rounded-md">
+                                            {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
+                                                <button
+                                                    key={key}
+                                                    type="button"
+                                                    onClick={() => setCustomForm({ ...customForm, icon: key })}
+                                                    className={`p-1.5 rounded-md transition-all flex items-center justify-center ${customForm.icon === key ? 'bg-primary text-primary-foreground shadow-sm scale-110' : 'hover:bg-muted text-muted-foreground/70'}`}
+                                                    title={key}
+                                                >
+                                                    <IconComponent size={14} />
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="flex gap-2 pt-1">
                                         <button
@@ -770,7 +789,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 // Check stack visibility - explicit hide for mounting_end/revision_end/start in stack
                                 if (isCollapsed && (milestoneConfig?.showInStack === false || m.class === 'mounting_end' || m.class === 'revision_end' || m.class === 'start')) return null;
 
-                                const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                                const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
                                 const milestoneColor = milestoneConfig?.color || '#888';
 
@@ -844,7 +863,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const configKey = configMap[m.class];
                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
                 const milestoneColor = milestoneConfig?.color || '#888';
-                const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
                 // Calculate vertical position (check bounds)
@@ -927,7 +946,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
-                                {m.class.startsWith('custom-') && (
+                                <div className="flex flex-col gap-2">
                                     <button
                                         className={`w-full text-[10px] font-bold uppercase py-1.5 rounded transition-colors ${m.class === 'custom-completed' ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'}`}
                                         onClick={async () => {
@@ -946,7 +965,35 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     >
                                         {m.class === 'custom-completed' ? 'Označit jako rozpracované' : 'Označit jako hotové'}
                                     </button>
-                                )}
+
+                                    <div className="space-y-1 mt-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Změnit ikonku</label>
+                                        <div className="grid grid-cols-6 gap-1 p-1 bg-muted/20 rounded-md">
+                                            {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
+                                                <button
+                                                    key={key}
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const { error } = await supabase
+                                                                .from('project_milestones')
+                                                                .update({ icon: key })
+                                                                .eq('id', m.key);
+                                                            if (error) throw error;
+                                                            handleDateUpdate(m.key, formatLocalDate(m.date));
+                                                        } catch (err) {
+                                                            console.error('Error updating icon:', err);
+                                                        }
+                                                    }}
+                                                    className={`p-1 rounded transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground/50'}`}
+                                                    title={key}
+                                                >
+                                                    <IconComponent size={12} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -1011,37 +1058,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 <span className="text-xs text-muted-foreground font-medium line-clamp-1">{project.customer || 'Bez zákazníka'}</span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 mt-1">
+                            <div className="grid grid-cols-1 gap-2 mt-1">
                                 <div className="flex flex-col gap-1">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Typ nástavby</label>
-                                    <input
-                                        type="text"
-                                        className="bg-muted/50 border border-border/40 rounded px-2 py-1 text-[11px] font-medium outline-none focus:ring-1 focus:ring-primary/30"
-                                        placeholder="Vyplnit typ..."
-                                        defaultValue={project.body_type || ''}
-                                        onBlur={async (e) => {
-                                            const val = e.target.value;
-                                            if (val === (project.body_type || '')) return;
-
-                                            // Quick inline update
-                                            try {
-                                                const { error } = await supabase
-                                                    .from('projects')
-                                                    .update({ body_type: val })
-                                                    .eq('id', id);
-                                                if (error) throw error;
-                                                if (onProjectUpdate) {
-                                                    onProjectUpdate({ ...project, body_type: val });
-                                                }
-                                            } catch (err) {
-                                                console.error('Error updating body_type:', err);
-                                            }
-                                        }}
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</label>
-                                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1 rounded font-bold border border-blue-500/20 text-center truncate">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Aktuální Status Zakázky</label>
+                                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1.5 rounded font-bold border border-blue-500/20 text-center">
                                         {project.production_status || 'Bez statusu'}
                                     </span>
                                 </div>

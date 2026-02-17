@@ -29,7 +29,40 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAdmin } from '@/hooks/useAdmin';
-import { Calendar, CheckCircle2, Circle, Clock, Flag } from 'lucide-react';
+import {
+    Calendar,
+    CheckCircle2,
+    Circle,
+    Clock,
+    Flag,
+    Hammer,
+    ThumbsUp,
+    AlertTriangle,
+    Check,
+    Zap,
+    Factory as FactoryIcon,
+    ShieldCheck,
+    Box,
+    Play,
+    Settings
+} from 'lucide-react';
+
+const ICON_OPTIONS = {
+    Truck: Truck,
+    Hammer: Hammer,
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Check: Check,
+    Wrench: Wrench,
+    Zap: Zap,
+    Package: Package,
+    Factory: Factory,
+    ShieldCheck: ShieldCheck,
+    Box: Box,
+    Settings: Settings,
+    Play: Play,
+    Milestone: Flag
+};
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -42,7 +75,7 @@ export default function ProjectDetailPage() {
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [loadingMilestones, setLoadingMilestones] = useState(true);
     const [isAddingMilestone, setIsAddingMilestone] = useState(false);
-    const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending' });
+    const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
     const { canEdit } = usePermissions();
 
     useEffect(() => {
@@ -98,7 +131,8 @@ export default function ProjectDetailPage() {
                     project_id: id,
                     name: newMilestone.name,
                     date: newMilestone.date,
-                    status: newMilestone.status
+                    status: newMilestone.status,
+                    icon: newMilestone.icon
                 })
                 .select()
                 .single();
@@ -106,7 +140,7 @@ export default function ProjectDetailPage() {
             if (error) throw error;
 
             setMilestones([...milestones, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-            setNewMilestone({ name: '', date: '', status: 'pending' });
+            setNewMilestone({ name: '', date: '', status: 'pending', icon: 'Milestone' });
             setIsAddingMilestone(false);
         } catch (err) {
             console.error('Error adding milestone:', err);
@@ -375,7 +409,6 @@ export default function ProjectDetailPage() {
                     <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
                         <FieldGrid>
                             <Field label="Stav výroby" icon={<Factory size={13} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
-                            <Field label="Typ nástavby" icon={<Package size={13} />} value={p.body_type} field="body_type" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
                         </FieldGrid>
@@ -407,32 +440,60 @@ export default function ProjectDetailPage() {
                 >
                     <div className="space-y-3">
                         {isAddingMilestone && (
-                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                                <div className="space-y-1">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Název milníku</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Např. Kontrola kvality"
-                                        value={newMilestone.name}
-                                        onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
-                                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                                    />
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 flex flex-col gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Název milníku</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Např. Kontrola kvality"
+                                            value={newMilestone.name}
+                                            onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
+                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Datum</label>
+                                        <input
+                                            type="date"
+                                            value={newMilestone.date}
+                                            onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
+                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Datum</label>
-                                    <input
-                                        type="date"
-                                        value={newMilestone.date}
-                                        onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
-                                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                                    />
+
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Vyberte ikonku</label>
+                                    <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 border border-border/40 p-2 rounded-xl bg-background/50">
+                                        {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => setNewMilestone({ ...newMilestone, icon: key })}
+                                                className={`p-2 rounded-lg transition-all flex items-center justify-center ${newMilestone.icon === key ? 'bg-primary text-primary-foreground shadow-lg scale-110' : 'hover:bg-muted text-muted-foreground/60'}`}
+                                                title={key}
+                                            >
+                                                <IconComponent size={16} />
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={handleAddMilestone}
-                                    className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-1.5"
-                                >
-                                    <PlusCircle size={12} /> Přidat milník
-                                </button>
+
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={() => setIsAddingMilestone(false)}
+                                        className="px-4 py-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        Zrušit
+                                    </button>
+                                    <button
+                                        onClick={handleAddMilestone}
+                                        className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-bold uppercase hover:opacity-90 transition-all shadow-md shadow-primary/20"
+                                    >
+                                        Přidat milník
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -445,12 +506,18 @@ export default function ProjectDetailPage() {
                                 milestones.map((m) => (
                                     <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/20 border-border/50'}`}>
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <button
-                                                onClick={() => handleToggleMilestoneStatus(m)}
-                                                className={`shrink-0 p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-muted-foreground/40 hover:text-primary hover:bg-primary/10'}`}
-                                            >
-                                                {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                                            </button>
+                                            <div className="flex flex-col items-center gap-1 shrink-0">
+                                                <button
+                                                    onClick={() => handleToggleMilestoneStatus(m)}
+                                                    className={`p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-muted-foreground/40 hover:text-primary hover:bg-primary/10'}`}
+                                                >
+                                                    {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                                                </button>
+                                                {(() => {
+                                                    const MIcon = ICON_OPTIONS[m.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
+                                                    return <MIcon size={12} className="text-muted-foreground/50" />;
+                                                })()}
+                                            </div>
                                             <div className="min-w-0 flex-1">
                                                 <input
                                                     type="text"
