@@ -69,6 +69,24 @@ const Crane = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
+const Superstructure = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Hook */}
+        <path d="M12 2v2" />
+        <circle cx="12" cy="6" r="2" />
+        <path d="M12 8v2" />
+        <path d="M12 10 a 2 2 0 0 0 2 2" />
+
+        {/* Cables */}
+        <path d="M12 12 L 4 16" />
+        <path d="M12 12 L 20 16" />
+
+        {/* Load Block */}
+        <rect x="4" y="16" width="16" height="6" rx="1" />
+        <path d="M12 16v6" /> {/* Center line for visual weight */}
+    </svg>
+);
+
 const ICON_OPTIONS = {
     Truck: Truck,
     Hammer: Hammer,
@@ -88,6 +106,7 @@ const ICON_OPTIONS = {
     HydraulicPlatform: HydraulicPlatform,
     TruckCrane: TruckCrane,
     Crane: Crane,
+    Superstructure: Superstructure,
     Play: Play,
     Milestone: Milestone
 };
