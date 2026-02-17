@@ -655,6 +655,19 @@ const Timeline: React.FC = () => {
             });
         }
 
+        // Filter projects that only have the 'start' (closed_at) milestone
+        filtered = filtered.filter(p => {
+            const hasOtherMilestones =
+                p.chassis_delivery ||
+                p.body_delivery ||
+                p.customer_handover ||
+                p.deadline ||
+                p.custom_fields?.mounting_end_date ||
+                p.custom_fields?.revision_end_date;
+
+            return !!hasOtherMilestones;
+        });
+
         // Hide completed projects if showHidden is false
         if (!showHidden) {
             const today = new Date();
