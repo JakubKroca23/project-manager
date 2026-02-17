@@ -120,7 +120,7 @@ export default function ServisPage() {
             .from('app_metadata')
             .select('*')
             .eq('key', metaKey)
-            .single();
+            .maybeSingle();
 
         if (metaData?.value) {
             setLastImport(metaData.value as ImportInfo);
@@ -167,7 +167,8 @@ export default function ServisPage() {
             // Check custom fields as well
             if (p.custom_fields) {
                 Object.values(p.custom_fields).forEach(val => {
-                    if (typeof val === 'string') searchableFields.push(normalize(val));
+                    const strVal = typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val);
+                    searchableFields.push(normalize(strVal));
                 });
             }
 
@@ -210,7 +211,11 @@ export default function ServisPage() {
                 id: `custom_${key}`,
                 header: key,
                 minSize: 30,
-                cell: ({ getValue }) => <span className="text-muted-foreground">{getValue() as string}</span>
+                cell: ({ getValue }) => {
+                    const val = getValue();
+                    const display = typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val);
+                    return <span className="text-muted-foreground">{display}</span>;
+                }
             });
         });
 

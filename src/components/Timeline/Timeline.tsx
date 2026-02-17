@@ -287,7 +287,7 @@ const Timeline: React.FC = () => {
                 .from('app_settings')
                 .select('settings')
                 .eq('id', 'timeline_config')
-                .single();
+                .maybeSingle();
 
             if (data?.settings) {
                 const s = data.settings;
@@ -335,7 +335,7 @@ const Timeline: React.FC = () => {
                 .from('profiles')
                 .select('role')
                 .eq('id', user.id)
-                .single();
+                .maybeSingle();
 
             setIsAdmin(profile?.role === 'admin');
         } catch (err) {

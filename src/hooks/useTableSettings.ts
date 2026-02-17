@@ -39,7 +39,7 @@ export function useTableSettings(tableId: string) {
                     .select('column_order, column_visibility, sorting, column_sizing')
                     .eq('user_id', user.id)
                     .eq('table_id', tableId)
-                    .single();
+                    .maybeSingle();
 
                 if (data && !error) {
                     const loaded: TableSettings = {
