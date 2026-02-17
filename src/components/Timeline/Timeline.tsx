@@ -606,13 +606,27 @@ const Timeline: React.FC = () => {
             });
         }
 
+        // Hide completed projects if showHidden is false
+        if (!showHidden) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            filtered = filtered.filter(p => {
+                const handoverDate = parseDate(p.customer_handover);
+                // IF handover exists AND is before today -> Hide it
+                if (handoverDate && handoverDate < today) {
+                    return false;
+                }
+                return true;
+            });
+        }
+
         // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
         return filtered.sort((a: Project, b: Project) => {
             const dateA = getLatestMilestoneDate(a);
             const dateB = getLatestMilestoneDate(b);
             return dateB - dateA;
         });
-    }, [projects, searchQuery, activeTypes]);
+    }, [projects, searchQuery, activeTypes, showHidden]);
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
