@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import {
@@ -177,7 +177,33 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
 
-    // Global Click Listener to close popups
+    // Hover timeout ref to prevent flickering
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleMouseEnter = (m: IMilestone, rect: DOMRect) => {
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = null;
+        }
+        // Only set if not already editing/confirming on another popup (optional check)
+        if (!isDeleteConfirm && !isEditingDate) {
+            setEditPopup({ m, x: rect.left, y: rect.bottom });
+        }
+    };
+
+    const handleMouseLeave = () => {
+        hoverTimeoutRef.current = setTimeout(() => {
+            // Only close if we are not in the middle of an edit interaction that requires persistence
+            // But since this is a hover popover, generally we close it. 
+            // If user clicked "Delete", we might want to keep it? 
+            // For now, let's assume if they are interacting, they are INSIDE the popup, 
+            // so this onMouseLeave (from icon) is valid. 
+            // The popup ITSELF needs to cancel this timeout on enter.
+            if (!isEditingDate && !isDeleteConfirm) {
+                setEditPopup(null);
+            }
+        }, 300); // 300ms grace period
+    };
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -208,6 +234,38 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const t_handover = parseDate(project.customer_handover);
     const t_deadline = parseDate(project.deadline);
 
+    // Custom fields for end dates
+    const customMountingEnd = parseDate(project.custom_fields?.mounting_end_date);
+    const customRevisionEnd = parseDate(project.custom_fields?.revision_end_date);
+
+    // Calculated derived dates
+    const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
+    let mountingStart: Date | null = null;
+    let mountingEnd: Date | null = null;
+    let revisionEnd: Date | null = null;
+
+    if (lastMainM.length > 0) {
+        mountingStart = new Date(Math.max(...lastMainM.map(d => d.getTime())));
+
+        // Mounting End
+        if (customMountingEnd) {
+            mountingEnd = customMountingEnd;
+        } else {
+            const d = new Date(mountingStart);
+            d.setDate(d.getDate() + 14);
+            mountingEnd = d;
+        }
+
+        // Revision End
+        if (customRevisionEnd) {
+            revisionEnd = customRevisionEnd;
+        } else {
+            const d = new Date(mountingEnd);
+            d.setDate(d.getDate() + 7);
+            revisionEnd = d;
+        }
+    }
+
     // 1. Milníky (body v čase)
     const groupedMilestones = useMemo((): Record<string, IMilestone[]> => {
         const raw: IMilestone[] = [
@@ -215,62 +273,102 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             { key: 'body', date: t_body!, label: 'Nástavba', class: 'body' },
             { key: 'handover', date: t_handover!, label: 'Předání', class: 'handover' },
             { key: 'deadline', date: t_deadline!, label: 'Deadline', class: 'deadline' },
-        ].filter(m => m.date !== null);
+        ];
+
+        // Add dynamic end milestones if they are relevant (mountingStart exists)
+        if (mountingStart && mountingEnd) {
+            raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end' });
+        }
+        if (mountingEnd && revisionEnd) {
+            raw.push({ key: 'revision_end', date: revisionEnd, label: 'Konec Revize', class: 'revision_end' });
+        }
+
+        const validRaw = raw.filter(m => m.date !== null);
 
         const groups: Record<string, IMilestone[]> = {};
-        raw.forEach(m => {
+        validRaw.forEach(m => {
             const d = m.date;
             const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             if (!groups[dateKey]) groups[dateKey] = [];
             groups[dateKey].push(m);
         });
         return groups;
-    }, [t_chassis, t_body, t_handover, t_deadline, project.project_type]);
+    }, [t_chassis, t_body, t_handover, t_deadline, project.project_type, mountingStart, mountingEnd, revisionEnd]);
 
     const handleDateUpdate = async (milestoneClass: string, newDateStr: string | null) => {
         setIsUpdating(true);
         try {
-            const fieldMap: Record<string, string> = {
-                'chassis': 'chassis_delivery',
-                'body': 'body_delivery',
-                'handover': 'customer_handover',
-                'deadline': 'deadline'
-            };
+            // Special handling for custom field milestones
+            if (milestoneClass === 'mounting_end' || milestoneClass === 'revision_end') {
+                const key = milestoneClass === 'mounting_end' ? 'mounting_end_date' : 'revision_end_date';
 
-            const field = fieldMap[milestoneClass];
-            if (!field) return;
+                const { data: currentProject } = await supabase
+                    .from('projects')
+                    .select('custom_fields')
+                    .eq('id', id)
+                    .single();
 
-            // 1. Get current project custom_fields
-            const { data: currentProject, error: fetchError } = await supabase
-                .from('projects')
-                .select('custom_fields')
-                .eq('id', id)
-                .single();
+                const currentCustom = currentProject?.custom_fields || {};
+                const updatedCustom = {
+                    ...currentCustom,
+                    [key]: newDateStr // Set date or null (to reset to auto)
+                };
 
-            if (fetchError) throw fetchError;
+                const { error } = await supabase
+                    .from('projects')
+                    .update({ custom_fields: updatedCustom })
+                    .eq('id', id);
 
-            // 2. Prepare update payload
-            const currentCustom = currentProject?.custom_fields || {};
-            const manualOverrides = currentCustom.manual_overrides || {};
+                if (error) throw error;
+            } else {
+                const fieldMap: Record<string, string> = {
+                    'chassis': 'chassis_delivery',
+                    'body': 'body_delivery',
+                    'handover': 'customer_handover',
+                    'deadline': 'deadline'
+                };
 
-            // Mark this field as manually overridden
-            manualOverrides[field] = true;
+                const field = fieldMap[milestoneClass];
+                if (!field) return;
 
-            const updatedCustomFields = {
-                ...currentCustom,
-                manual_overrides: manualOverrides
-            };
+                // 1. Get current project custom_fields
+                const { data: currentProject, error: fetchError } = await supabase
+                    .from('projects')
+                    .select('custom_fields')
+                    .eq('id', id)
+                    .single();
 
-            // 3. Update both date and custom_fields
-            const { error } = await supabase
-                .from('projects')
-                .update({
-                    [field]: newDateStr,
-                    custom_fields: updatedCustomFields
-                })
-                .eq('id', id);
+                if (fetchError) throw fetchError;
 
-            if (error) throw error;
+                // 2. Prepare update payload
+                const currentCustom = currentProject?.custom_fields || {};
+                const manualOverrides = currentCustom.manual_overrides || {};
+
+                // Mark this field as manually overridden
+                if (newDateStr) {
+                    manualOverrides[field] = true;
+                } else {
+                    delete manualOverrides[field]; // If clearing date, maybe unset override? Logic depends on intent.
+                    // Actually if we clear date (set to null), maybe we want to un-override?
+                    // For now, let's keep it simple: date update = manual override.
+                }
+
+                const updatedCustomFields = {
+                    ...currentCustom,
+                    manual_overrides: manualOverrides
+                };
+
+                // 3. Update both date and custom_fields
+                const { error } = await supabase
+                    .from('projects')
+                    .update({
+                        [field]: newDateStr,
+                        custom_fields: updatedCustomFields
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+            }
 
             // Updated local data without reload
             setAddMilestoneDate(null); // Close popup
@@ -321,19 +419,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         }
 
         // Fáze 3 & 4: Dojezd po posledním milníku (podvozek nebo nástavba)
-        const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
-        if (lastMainM.length > 0) {
-            const maxMain = new Date(Math.max(...lastMainM.map(d => d.getTime())));
+        if (mountingStart && mountingEnd) {
+            // Fáze 3: Montáž
+            list.push({ key: 'p3', start: mountingStart, end: mountingEnd, class: 'phase-buffer-yellow' });
 
-            // Fáze 3: Montáž (14 dní)
-            const yellowEnd = new Date(maxMain);
-            yellowEnd.setDate(yellowEnd.getDate() + 14);
-            list.push({ key: 'p3', start: maxMain, end: yellowEnd, class: 'phase-buffer-yellow' });
-
-            // Fáze 4: Revize (7 dní)
-            const orangeEnd = new Date(yellowEnd);
-            orangeEnd.setDate(orangeEnd.getDate() + 7);
-            list.push({ key: 'p4', start: yellowEnd, end: orangeEnd, class: 'phase-buffer-orange' });
+            // Fáze 4: Revize
+            if (revisionEnd) {
+                list.push({ key: 'p4', start: mountingEnd, end: revisionEnd, class: 'phase-buffer-orange' });
+            }
         }
 
 
@@ -433,6 +526,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         {[
                             { id: 'chassis', label: 'Podvozek' },
                             { id: 'body', label: 'Nástavba' },
+                            { id: 'mounting_end', label: 'Konec Montáže' },
+                            { id: 'revision_end', label: 'Konec Revize' },
                             { id: 'handover', label: 'Předání', },
                             { id: 'deadline', label: 'Deadline' },
                         ].map(type => (
@@ -528,7 +623,9 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     'chassis': 'milestoneChassis',
                                     'body': 'milestoneBody',
                                     'handover': 'milestoneHandover',
-                                    'deadline': 'milestoneDeadline'
+                                    'deadline': 'milestoneDeadline',
+                                    'mounting_end': 'milestoneMountingEnd',
+                                    'revision_end': 'milestoneRevisionEnd'
                                 };
 
                                 const configKey = configMap[m.class];
@@ -550,9 +647,16 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
                                             zIndex: idx
                                         }}
-                                        title={`${name} - ${m.label} (${formatLocalDate(m.date)})`}
+                                        // title removed in favor of hover popup
+                                        onMouseEnter={(e) => {
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            handleMouseEnter(m, rect);
+                                        }}
+                                        onMouseLeave={handleMouseLeave}
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            // Click ensures it stays open / toggles? 
+                                            // With hover logic, click might not be strictly needed, but let's keep it to force-show/reset position
                                             const rect = e.currentTarget.getBoundingClientRect();
                                             setEditPopup({ m, x: rect.left, y: rect.bottom });
                                             setAddMilestoneDate(null);
@@ -582,7 +686,9 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     'chassis': 'milestoneChassis',
                     'body': 'milestoneBody',
                     'handover': 'milestoneHandover',
-                    'deadline': 'milestoneDeadline'
+                    'deadline': 'milestoneDeadline',
+                    'mounting_end': 'milestoneMountingEnd',
+                    'revision_end': 'milestoneRevisionEnd'
                 };
                 const configKey = configMap[m.class];
                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
@@ -597,21 +703,33 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-md p-3 z-[99999] timeline-popup-content flex flex-col gap-3"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-4 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200"
                         style={{
-                            left: Math.min(editPopup.x - 100, window.innerWidth - 250), // Prevent overflow right
+                            left: Math.min(editPopup.x - 100, window.innerWidth - 340), // Prevent overflow right
                             top: topPos,
                             bottom: bottomPos,
-                            width: 280 // Slightly wider for project info
+                            width: 320, // Wider for better readability
+                            maxWidth: '90vw'
                         }}
+                        onMouseEnter={() => {
+                            if (hoverTimeoutRef.current) {
+                                clearTimeout(hoverTimeoutRef.current);
+                                hoverTimeoutRef.current = null;
+                            }
+                        }}
+                        onMouseLeave={handleMouseLeave}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-start justify-between border-b border-border pb-2 mb-1 gap-2">
-                            <div className="flex flex-col overflow-hidden">
-                                <span className="font-bold text-sm truncate" title={name}>{name}</span>
-                                <span className="text-[10px] text-muted-foreground truncate">{project.customer || 'Bez zákazníka'}</span>
+                        <div className="flex items-start justify-between border-b border-border/50 pb-3 mb-1 gap-3">
+                            <div className="flex flex-col overflow-hidden gap-1">
+                                <span className="font-bold text-sm leading-tight break-words whitespace-normal">{name}</span>
+                                <span className="text-xs text-muted-foreground break-words whitespace-normal font-medium">{project.customer || 'Bez zákazníka'}</span>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {project.manager && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">👤 {project.manager}</span>}
+                                    {project.production_status && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded font-bold border border-blue-500/20">{project.production_status}</span>}
+                                </div>
                             </div>
-                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-0.5">
+                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors shrink-0">
                                 <X size={16} />
                             </button>
                         </div>
@@ -685,7 +803,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     </div>
                 );
             })()}
-        </div>
+        </div >
     );
 };
 

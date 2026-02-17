@@ -181,6 +181,8 @@ interface IColorsState {
     milestoneBody: IColorConfig;
     milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
+    milestoneMountingEnd: IColorConfig;
+    milestoneRevisionEnd: IColorConfig;
 }
 
 interface IOutlineState {
@@ -236,6 +238,8 @@ const Timeline: React.FC = () => {
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
+        milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
+        milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
@@ -342,9 +346,11 @@ const Timeline: React.FC = () => {
             phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
             phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
             milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
-            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer', showInStack: true },
+            milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
             milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
+            milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
+            milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
     };

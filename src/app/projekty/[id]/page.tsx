@@ -263,7 +263,21 @@ export default function ProjectDetailPage() {
                     <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                             <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <CustomDateField
+                                label="Konec montáže"
+                                value={p.custom_fields?.mounting_end_date}
+                                field="mounting_end_date"
+                                isEditing={isEditing}
+                                onChange={handleCustomFieldChange}
+                            />
                             <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <CustomDateField
+                                label="Konec revize"
+                                value={p.custom_fields?.revision_end_date}
+                                field="revision_end_date"
+                                isEditing={isEditing}
+                                onChange={handleCustomFieldChange}
+                            />
                             <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
                             <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
                         </div>
@@ -438,6 +452,36 @@ interface DateFieldProps {
 }
 
 function DateField({ label, value, field, isEditing, onChange, highlight }: DateFieldProps) {
+    const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
+    return (
+        <div>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
+            {isEditing ? (
+                <input
+                    type="date"
+                    value={value || ''}
+                    onChange={(e) => onChange(field, e.target.value)}
+                    className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
+                />
+            ) : (
+                <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>
+                    {formatted}
+                </p>
+            )}
+        </div>
+    );
+}
+
+interface CustomDateFieldProps {
+    label: string;
+    value: any;
+    field: string;
+    isEditing: boolean;
+    onChange: (field: string, value: any) => void;
+    highlight?: boolean;
+}
+
+function CustomDateField({ label, value, field, isEditing, onChange, highlight }: CustomDateFieldProps) {
     const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
     return (
         <div>
