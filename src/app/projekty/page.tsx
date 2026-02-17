@@ -40,6 +40,35 @@ const SafeCellValue: React.FC<{ value: any }> = ({ value }) => {
 
 const columns: ColumnDef<Project>[] = [
     {
+        id: 'select',
+        header: ({ table }) => (
+            <div className="px-1">
+                <input
+                    type="checkbox"
+                    checked={table.getIsAllPageRowsSelected()}
+                    onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+            </div>
+        ),
+        cell: ({ row }) => (
+            <div className="px-1">
+                <input
+                    type="checkbox"
+                    checked={row.getIsSelected()}
+                    onChange={(e) => row.toggleSelected(!!e.target.checked)}
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 30, // Fixed small width
+        minSize: 30,
+        maxSize: 30,
+    },
+    {
         accessorKey: 'id',
         header: 'Kód',
         minSize: 30,
@@ -150,6 +179,7 @@ export default function ProjektyPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [rowSelection, setRowSelection] = useState({});
     const tableSettings = useTableSettings(`projects-${activeTab}`);
     const router = useRouter();
 
@@ -377,6 +407,39 @@ export default function ProjektyPage() {
                                     </button>
                                 )}
 
+                                {Object.keys(rowSelection).length > 0 && (
+                                    <button
+                                        onClick={async () => {
+                                            const selectedIndices = Object.keys(rowSelection).map(Number);
+                                            // Note: rowSelection keys are indices from filteredProjects
+                                            // But standard useReactTable with our config might use index as ID if not specified otherwise in getRowId
+                                            // By default getRowId is index. Let's filter filteredProjects by index
+
+                                            const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx as keyof typeof rowSelection]);
+
+                                            if (confirm(`Opravdu změnit stav výroby na "Dokončeno" u ${selectedProjects.length} položek?`)) {
+                                                const ids = selectedProjects.map(p => p.id);
+                                                const { error } = await supabase
+                                                    .from('projects')
+                                                    .update({ production_status: 'Dokončeno' })
+                                                    .in('id', ids);
+
+                                                if (error) {
+                                                    toast.error('Chyba: ' + error.message);
+                                                } else {
+                                                    toast.success('Hromadná úprava dokončena');
+                                                    setRowSelection({});
+                                                    fetchProjects();
+                                                }
+                                            }
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 hover:bg-emerald-500/10 transition-all animate-in fade-in zoom-in-50"
+                                    >
+                                        <PackageCheck size={10} />
+                                        <span>Dokončit vybrané ({Object.keys(rowSelection).length})</span>
+                                    </button>
+                                )}
+
                                 {/* Search */}
                                 <div className="relative group max-w-xs flex-1" title="Hledat lze podle: Názvu, ID, Zákazníka, Manažera, Stavu, Výrobního čísla, Abra kódů a dalších vlastních polí.">
                                     <div className="flex items-center gap-1.5 w-full min-h-[30px] px-2.5 py-0.5 bg-muted/20 border border-border/60 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 focus-within:border-primary/40 transition-all flex-wrap">
@@ -420,6 +483,8 @@ export default function ProjektyPage() {
                         onSortingChange={tableSettings.setSorting}
                         columnSizing={tableSettings.columnSizing}
                         onColumnSizingChange={tableSettings.setColumnSizing}
+                        enableMultiSelect={true}
+                        onRowSelectionChange={setRowSelection}
                         headerClassName={activeTab === 'military' ? 'bg-emerald-100 text-emerald-900' : 'bg-blue-100 text-blue-900'}
                         getRowClassName={(row: Project) => {
                             if (row.project_type === 'military') return 'bg-emerald-500/5 hover:bg-emerald-500/10 active:bg-emerald-500/20';
@@ -436,7 +501,7 @@ export default function ProjektyPage() {
                 onSuccess={fetchProjects}
                 projectType={activeTab}
             />
-        </div>
+        </div >
     );
 }
 

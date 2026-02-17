@@ -89,6 +89,8 @@ interface DataTableProps<TData, TValue> {
     headerClassName?: string;
     toolbarSubtext?: React.ReactNode;
     getRowClassName?: (row: TData) => string;
+    onRowSelectionChange?: (selection: any) => void;
+    enableMultiSelect?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -110,6 +112,8 @@ export function DataTable<TData, TValue>({
     headerClassName,
     toolbarSubtext,
     getRowClassName,
+    onRowSelectionChange,
+    enableMultiSelect = false,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -171,7 +175,15 @@ export function DataTable<TData, TValue>({
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: handleVisibilityChange as any,
-        onRowSelectionChange: setRowSelection,
+        onRowSelectionChange: (updater) => {
+            setRowSelection(updater);
+            if (onRowSelectionChange) {
+                // We need to calculate the new selection state to pass it up
+                // Function updater pattern: updater(oldState) -> newState
+                const newSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+                onRowSelectionChange(newSelection);
+            }
+        },
         onColumnOrderChange: handleColumnOrderChange as any,
         onColumnSizingChange: handleColumnSizingChange as any,
         state: {
@@ -184,6 +196,7 @@ export function DataTable<TData, TValue>({
         },
         columnResizeMode: 'onChange',
         enableMultiSort: true,
+        enableRowSelection: enableMultiSelect,
         isMultiSortEvent: () => true,
     });
 
