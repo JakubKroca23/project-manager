@@ -4,8 +4,8 @@ import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useState } from 'react';
-import { useAdmin, type UserRequest, type UserProfile } from '@/hooks/useAdmin';
+import { useState, useEffect } from 'react';
+import { useAdmin, ADMIN_EMAIL, type UserRequest, type UserProfile } from '@/hooks/useAdmin';
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
 import { ActivityLogSection } from '@/components/profile/ActivityLogSection';
@@ -38,6 +38,29 @@ export default function ProfilePage() {
     const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<UserProfile | null>(null);
     const [editedPermissions, setEditedPermissions] = useState<{ [key: string]: boolean }>({});
     const [isSavingPermissions, setIsSavingPermissions] = useState(false);
+
+    // Maintenance Mode State
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+    useEffect(() => {
+        const fetchMaintenance = async () => {
+            const { data } = await supabase.from('app_settings').select('value').eq('key', 'maintenance_mode').single();
+            if (data?.value === true) setMaintenanceMode(true);
+        };
+        fetchMaintenance();
+    }, []);
+
+    const toggleMaintenance = async () => {
+        const newVal = !maintenanceMode;
+        setMaintenanceMode(newVal);
+        const { error } = await supabase.from('app_settings').upsert({ key: 'maintenance_mode', value: newVal }, { onConflict: 'key' as any }); // Cast as any to avoid strict type error if tables not fully typed
+        if (error) {
+            showToast('Nepodařilo se změnit režim údržby', 'error');
+            setMaintenanceMode(!newVal);
+        } else {
+            showToast(`Režim údržby ${newVal ? 'zapnut' : 'vypnut'}`, 'success');
+        }
+    };
 
     // Toast State
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' | null }>({ message: '', type: null });
@@ -341,6 +364,22 @@ export default function ProfilePage() {
                                                 Otevřít Panel
                                             </button>
                                         </div>
+
+                                        {/* Maintenance Mode Toggle - Only for Jakub Kroča */}
+                                        {currentUserProfile?.email === 'jakub.kroca@contsystem.cz' && (
+                                            <div className="flex items-center justify-between bg-white dark:bg-muted/30 px-4 py-3 rounded-xl border border-indigo-500/10">
+                                                <div className="space-y-0.5">
+                                                    <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
+                                                    <p className="text-[10px] text-muted-foreground">Zablokuje přístup pro ostatní</p>
+                                                </div>
+                                                <button
+                                                    onClick={toggleMaintenance}
+                                                    className={`relative w-11 h-6 rounded-full transition-all duration-300 ${maintenanceMode ? 'bg-orange-500' : 'bg-gray-400'}`}
+                                                >
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -623,155 +662,161 @@ export default function ProfilePage() {
             </div>
 
             {/* Approval Modal */}
-            {approveModalOpen && selectedRequest && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold">Schválit přístup</h3>
-                            <button onClick={() => setApproveModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
-                                <X size={18} className="text-muted-foreground" />
-                            </button>
-                        </div>
-
-                        <div className="text-sm text-muted-foreground">
-                            Vytvořte účet pro uživatele <strong>{selectedRequest.email}</strong>.
-                        </div>
-
-                        <form onSubmit={confirmApproval} className="space-y-4">
-                            <div className="space-y-1">
-                                <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Heslo pro uživatele</label>
-                                <div className="relative">
-                                    <KeyRound size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                    <input
-                                        type="text"
-                                        value={newUserPassword}
-                                        onChange={(e) => setNewUserPassword(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 bg-muted/50 border border-border rounded-lg text-sm font-mono"
-                                        required
-                                        minLength={6}
-                                    />
-                                </div>
-                                <p className="text-[10px] text-muted-foreground ml-1">Heslo sdělte uživateli bezpečně.</p>
+            {
+                approveModalOpen && selectedRequest && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-bold">Schválit přístup</h3>
+                                <button onClick={() => setApproveModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                                    <X size={18} className="text-muted-foreground" />
+                                </button>
                             </div>
 
-                            <div className="flex justify-end gap-2 pt-2">
+                            <div className="text-sm text-muted-foreground">
+                                Vytvořte účet pro uživatele <strong>{selectedRequest.email}</strong>.
+                            </div>
+
+                            <form onSubmit={confirmApproval} className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Heslo pro uživatele</label>
+                                    <div className="relative">
+                                        <KeyRound size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                        <input
+                                            type="text"
+                                            value={newUserPassword}
+                                            onChange={(e) => setNewUserPassword(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 bg-muted/50 border border-border rounded-lg text-sm font-mono"
+                                            required
+                                            minLength={6}
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground ml-1">Heslo sdělte uživateli bezpečně.</p>
+                                </div>
+
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setApproveModalOpen(false)}
+                                        className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
+                                    >
+                                        Zrušit
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isProcessingApproval}
+                                        className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+                                    >
+                                        {isProcessingApproval ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={14} />}
+                                        Vytvořit účet
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+            {/* Permissions Modal */}
+            {
+                permissionsModalOpen && selectedUserForPermissions && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between border-b border-border pb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold">Oprávnění uživatele</h3>
+                                    <p className="text-xs text-muted-foreground font-mono mt-1">{selectedUserForPermissions.email}</p>
+                                </div>
+                                <button onClick={() => setPermissionsModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
+                                    <X size={18} className="text-muted-foreground" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-3">
+                                {[
+                                    { key: 'timeline', label: 'Timeline (Kalendář)' },
+                                    { key: 'projects', label: 'Zakázky (Projekty)', isParent: true },
+                                    { key: 'projects_civil', label: 'Civilní projekty', isSub: true },
+                                    { key: 'projects_military', label: 'Armádní projekty', isSub: true },
+                                    { key: 'service', label: 'Servisní projekty', isSub: true },
+                                    { key: 'production', label: 'Výroba' },
+                                    { key: 'purchasing', label: 'Nákup' },
+                                ].map(({ key, label, isParent, isSub }) => (
+                                    <div
+                                        key={key}
+                                        className={cn(
+                                            "flex items-center justify-between p-3 rounded-xl border transition-all",
+                                            isParent ? "bg-primary/5 border-primary/20 mt-2" :
+                                                isSub ? "bg-muted/10 border-border/10 ml-6 scale-[0.98]" :
+                                                    "bg-muted/30 border-border/30"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {isSub && <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />}
+                                            <span className={cn(
+                                                "text-sm",
+                                                isParent ? "font-bold text-primary" : "font-medium"
+                                            )}>
+                                                {label}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => setEditedPermissions(prev => ({ ...prev, [key]: !prev[key] }))}
+                                            className={`relative w-10 h-6 rounded-full transition-all duration-200 ${editedPermissions[key] ? 'bg-primary' : 'bg-gray-400'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${editedPermissions[key] ? 'translate-x-4' : 'translate-x-0'}`} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2 border-t border-border mt-4">
                                 <button
-                                    type="button"
-                                    onClick={() => setApproveModalOpen(false)}
+                                    onClick={() => setPermissionsModalOpen(false)}
                                     className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
                                 >
                                     Zrušit
                                 </button>
                                 <button
-                                    type="submit"
-                                    disabled={isProcessingApproval}
-                                    className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+                                    onClick={async () => {
+                                        if (updateUserPermissions) {
+                                            setIsSavingPermissions(true);
+                                            const success = await updateUserPermissions(selectedUserForPermissions.id, editedPermissions);
+                                            if (success) {
+                                                setPermissionsModalOpen(false);
+                                            }
+                                            setIsSavingPermissions(false);
+                                        }
+                                    }}
+                                    disabled={isSavingPermissions}
+                                    className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 flex items-center gap-2"
                                 >
-                                    {isProcessingApproval ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={14} />}
-                                    Vytvořit účet
+                                    {isSavingPermissions ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    Uložit změny
                                 </button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-            {/* Permissions Modal */}
-            {permissionsModalOpen && selectedUserForPermissions && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between border-b border-border pb-4">
-                            <div>
-                                <h3 className="text-lg font-bold">Oprávnění uživatele</h3>
-                                <p className="text-xs text-muted-foreground font-mono mt-1">{selectedUserForPermissions.email}</p>
-                            </div>
-                            <button onClick={() => setPermissionsModalOpen(false)} className="p-1 hover:bg-muted rounded-full">
-                                <X size={18} className="text-muted-foreground" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-3">
-                            {[
-                                { key: 'timeline', label: 'Timeline (Kalendář)' },
-                                { key: 'projects', label: 'Zakázky (Projekty)', isParent: true },
-                                { key: 'projects_civil', label: 'Civilní projekty', isSub: true },
-                                { key: 'projects_military', label: 'Armádní projekty', isSub: true },
-                                { key: 'service', label: 'Servisní projekty', isSub: true },
-                                { key: 'production', label: 'Výroba' },
-                                { key: 'purchasing', label: 'Nákup' },
-                            ].map(({ key, label, isParent, isSub }) => (
-                                <div
-                                    key={key}
-                                    className={cn(
-                                        "flex items-center justify-between p-3 rounded-xl border transition-all",
-                                        isParent ? "bg-primary/5 border-primary/20 mt-2" :
-                                            isSub ? "bg-muted/10 border-border/10 ml-6 scale-[0.98]" :
-                                                "bg-muted/30 border-border/30"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {isSub && <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />}
-                                        <span className={cn(
-                                            "text-sm",
-                                            isParent ? "font-bold text-primary" : "font-medium"
-                                        )}>
-                                            {label}
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={() => setEditedPermissions(prev => ({ ...prev, [key]: !prev[key] }))}
-                                        className={`relative w-10 h-6 rounded-full transition-all duration-200 ${editedPermissions[key] ? 'bg-primary' : 'bg-gray-400'}`}
-                                    >
-                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${editedPermissions[key] ? 'translate-x-4' : 'translate-x-0'}`} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2 border-t border-border mt-4">
-                            <button
-                                onClick={() => setPermissionsModalOpen(false)}
-                                className="px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-lg"
-                            >
-                                Zrušit
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    if (updateUserPermissions) {
-                                        setIsSavingPermissions(true);
-                                        const success = await updateUserPermissions(selectedUserForPermissions.id, editedPermissions);
-                                        if (success) {
-                                            setPermissionsModalOpen(false);
-                                        }
-                                        setIsSavingPermissions(false);
-                                    }
-                                }}
-                                disabled={isSavingPermissions}
-                                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 flex items-center gap-2"
-                            >
-                                {isSavingPermissions ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
-                                Uložit změny
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* Toast Notification */}
-            {toast.type && (
-                <div className={cn(
-                    "fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl border transition-all duration-500 animate-in fade-in slide-in-from-bottom-5",
-                    toast.type === 'success' ? "bg-emerald-500 border-emerald-400/20 text-white" :
-                        toast.type === 'error' ? "bg-red-500 border-red-400/20 text-white" :
-                            "bg-blue-500 border-blue-400/20 text-white"
-                )}>
-                    {toast.type === 'success' && <CheckCircle size={18} />}
-                    {toast.type === 'error' && <AlertTriangle size={18} />}
-                    {toast.type === 'info' && <Clock size={18} />}
-                    <span className="text-sm font-bold tracking-wide">{toast.message}</span>
-                    <button onClick={() => setToast({ message: '', type: null })} className="ml-2 hover:opacity-70">
-                        <X size={14} />
-                    </button>
-                </div>
-            )}
-        </div>
+            {
+                toast.type && (
+                    <div className={cn(
+                        "fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl border transition-all duration-500 animate-in fade-in slide-in-from-bottom-5",
+                        toast.type === 'success' ? "bg-emerald-500 border-emerald-400/20 text-white" :
+                            toast.type === 'error' ? "bg-red-500 border-red-400/20 text-white" :
+                                "bg-blue-500 border-blue-400/20 text-white"
+                    )}>
+                        {toast.type === 'success' && <CheckCircle size={18} />}
+                        {toast.type === 'error' && <AlertTriangle size={18} />}
+                        {toast.type === 'info' && <Clock size={18} />}
+                        <span className="text-sm font-bold tracking-wide">{toast.message}</span>
+                        <button onClick={() => setToast({ message: '', type: null })} className="ml-2 hover:opacity-70">
+                            <X size={14} />
+                        </button>
+                    </div>
+                )
+            }
+        </div >
     );
 }

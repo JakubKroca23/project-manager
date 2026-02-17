@@ -29,7 +29,7 @@ export interface UserRequest {
     metadata?: any;
 }
 
-const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
+export const ADMIN_EMAIL = 'jakub.kroca@contsystem.cz';
 
 /**
  * Custom hook for administrative operations and real-time profile synchronization.

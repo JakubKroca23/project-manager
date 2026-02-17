@@ -7,17 +7,39 @@ import { Loader2 } from 'lucide-react';
 
 const PUBLIC_ROUTES = ['/login', '/auth'];
 
+import MaintenanceScreen from './MaintenanceScreen';
+import { ADMIN_EMAIL } from '@/hooks/useAdmin';
+
+// ... existing code ...
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isMaintenance, setIsMaintenance] = useState(false);
+    const [isBypassUser, setIsBypassUser] = useState(false);
 
     // Public routes should be rendered immediately to avoid the "Ověřování přístupu..." flicker
     const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route));
 
     useEffect(() => {
         const checkAuth = async () => {
+            // Check Maintenance Mode First
+            try {
+                const { data: maintenanceData } = await supabase
+                    .from('app_settings')
+                    .select('value')
+                    .eq('key', 'maintenance_mode')
+                    .single();
+
+                if (maintenanceData?.value === true) {
+                    setIsMaintenance(true);
+                }
+            } catch (err) {
+                console.warn('Failed to check maintenance mode', err);
+            }
+
             // If it's a public route, we don't need to block rendering for the session check
             if (isPublicRoute) {
                 setIsLoading(false);
@@ -29,6 +51,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
             if (!session) {
                 router.push('/login');
                 return;
+            }
+
+            // Check if user is the specific admin allowed to bypass maintenance
+            if (session.user.email === ADMIN_EMAIL) {
+                setIsBypassUser(true);
             }
 
             setIsAuthenticated(true);
@@ -61,6 +88,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                 </div>
             </div>
         );
+    }
+
+    // Maintenance Screen logic (only if not bypass user)
+    if (isMaintenance && !isBypassUser) {
+        return <MaintenanceScreen />;
     }
 
     if (!isAuthenticated) {
