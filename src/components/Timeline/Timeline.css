@@ -638,6 +638,18 @@
   /* Enable interaction with inputs */
 }
 
+.milestone-tooltip-container.tooltip-top {
+  top: auto;
+  bottom: 100%;
+  padding-top: 0;
+  padding-bottom: 12px;
+}
+
+.milestone-tooltip-container.tooltip-top::after {
+  top: auto;
+  bottom: 4px;
+}
+
 .milestone-tooltip {
   background: white;
   border-radius: 4px;

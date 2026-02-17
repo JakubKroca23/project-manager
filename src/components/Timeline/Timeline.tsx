@@ -102,6 +102,25 @@ const Crane = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
+const Superstructure = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Hook */}
+        <path d="M12 2v2" />
+        <circle cx="12" cy="5" r="1.5" />
+        <path d="M12 6.5v2" />
+        <path d="M12 8.5a2.5 2.5 0 0 0 2.5 2.5" />
+
+        {/* Cables */}
+        <path d="M12 11l-7 5" />
+        <path d="M12 11l7 5" />
+
+        {/* Load Block (Box) */}
+        <path d="M5 16h14v6H5z" />
+        <path d="M5 16l2-2h10l2 2" /> {/* Top/Perspective of box */}
+        <path d="M12 16v6" /> {/* Center line */}
+    </svg>
+);
+
 const ICON_OPTIONS = {
     Truck: Truck,
     Hammer: Hammer,
@@ -121,6 +140,7 @@ const ICON_OPTIONS = {
     HydraulicPlatform: HydraulicPlatform,
     TruckCrane: TruckCrane,
     Crane: Crane,
+    Superstructure: Superstructure,
     Play: Play,
     Milestone: Milestone
 };
@@ -130,7 +150,7 @@ const VISIBLE_ICONS = [
     'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Milestone'
+    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -213,7 +233,7 @@ const Timeline: React.FC = () => {
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
         phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
         milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
-        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hammer', showInStack: true },
+        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
     });

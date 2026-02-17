@@ -73,17 +73,18 @@ const Superstructure = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {/* Hook */}
         <path d="M12 2v2" />
-        <circle cx="12" cy="6" r="2" />
-        <path d="M12 8v2" />
-        <path d="M12 10 a 2 2 0 0 0 2 2" />
+        <circle cx="12" cy="5" r="1.5" />
+        <path d="M12 6.5v2" />
+        <path d="M12 8.5a2.5 2.5 0 0 0 2.5 2.5" />
 
         {/* Cables */}
-        <path d="M12 12 L 4 16" />
-        <path d="M12 12 L 20 16" />
+        <path d="M12 11l-7 5" />
+        <path d="M12 11l7 5" />
 
-        {/* Load Block */}
-        <rect x="4" y="16" width="16" height="6" rx="1" />
-        <path d="M12 16v6" /> {/* Center line for visual weight */}
+        {/* Load Block (Box) */}
+        <path d="M5 16h14v6H5z" />
+        <path d="M5 16l2-2h10l2 2" /> {/* Top/Perspective of box */}
+        <path d="M12 16v6" /> {/* Center line */}
     </svg>
 );
 
@@ -163,9 +164,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     config
 }: ITimelineBarProps) => {
     const [activeCell, setActiveCell] = useState<string | null>(null);
+    const [tooltipPosition, setTooltipPosition] = useState<'top' | 'bottom'>('bottom');
     const [isUpdating, setIsUpdating] = useState(false);
     const [addMilestoneDate, setAddMilestoneDate] = useState<Date | null>(null);
-    const [addMilestonePos, setAddMilestonePos] = useState<{ x: number, y: number } | null>(null);
+    const [addMilestonePos, setAddMilestonePos] = useState<{ x: number, placement: 'top' | 'bottom' } | null>(null);
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
@@ -212,7 +214,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
             if (error) throw error;
 
-            // Refresh page to see changes
             // Refresh page to see changes
             setAddMilestoneDate(null); // Close popup
             window.location.reload();
@@ -264,7 +265,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
 
         return list;
-    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type, t_deadline, t_handover]);
+    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type]);
 
     /**
      * Vypočítá vodorovnou pozici data v pixelech vzhledem k začátku časové osy.
@@ -310,11 +311,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         clickedDate.setDate(clickedDate.getDate() + days);
         clickedDate.setHours(0, 0, 0, 0);
 
+        const screenHeight = window.innerHeight;
+        const clickY = e.clientY;
+        const isNearBottom = screenHeight - clickY < 300; // threshold for popup height
+
         setAddMilestoneDate(clickedDate);
-        setAddMilestonePos({ x: e.clientX, y: e.clientY }); // Global position for fixed overlay or relative?
-        // Let's use relative to container if we render inside:
-        // Actually, rendering absolute to container is easier.
-        setAddMilestonePos({ x: x, y: 0 });
+        setAddMilestonePos({ x: x, placement: isNearBottom ? 'top' : 'bottom' });
     };
 
     return (
@@ -328,7 +330,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     className="absolute bg-background border border-border shadow-lg rounded-md p-2 z-[99999]"
                     style={{
                         left: addMilestonePos?.x || 0,
-                        top: 30, // Show below row
+                        top: addMilestonePos?.placement === 'bottom' ? 30 : 'auto',
+                        bottom: addMilestonePos?.placement === 'top' ? 40 : 'auto',
                         width: 200
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -434,7 +437,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             zIndex: isHovered ? 1000 : (isCollapsed ? 30 : 20),
                             pointerEvents: 'auto'
                         }}
-                        onMouseEnter={() => setActiveCell(dateKey)}
+                        onMouseEnter={(e) => {
+                            setActiveCell(dateKey);
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const spaceBelow = window.innerHeight - rect.bottom;
+                            setTooltipPosition(spaceBelow < 250 ? 'top' : 'bottom');
+                        }}
                         onMouseLeave={() => setActiveCell(null)}
                     >
                         <div className="milestone-icons-stack flex items-center justify-center relative w-full h-full">
@@ -459,7 +467,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 return (
                                     <div
                                         key={m.key}
-                                        className={`milestone-icon absolute transition-all duration-300 ${isHovered ? 'is-hovering' : ''}`}
+                                        className="milestone-icon"
                                         style={{
                                             color: milestoneColor,
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
@@ -479,7 +487,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         </div>
 
                         {isHovered && (
-                            <div className="milestone-tooltip-container">
+                            <div className={`milestone-tooltip-container ${tooltipPosition === 'top' ? 'tooltip-top' : ''}`}>
                                 {ms.map((m: IMilestone) => {
                                     const configMap: Record<string, string> = {
                                         'chassis': 'milestoneChassis',
