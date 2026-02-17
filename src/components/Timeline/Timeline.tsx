@@ -185,6 +185,7 @@ const Timeline: React.FC = () => {
         civil: true,
         military: true
     });
+    const [showHidden, setShowHidden] = useState(false);
 
 
     const toggleType = (type: string) => {
@@ -701,6 +702,26 @@ const Timeline: React.FC = () => {
                                 </span>
                             </label>
                         ))}
+
+                        {/* Hidden Projects Toggle */}
+                        <label className="flex items-center gap-2 cursor-pointer group select-none border-l pl-4 border-border/50">
+                            <div className="relative flex items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    checked={showHidden}
+                                    onChange={() => setShowHidden(!showHidden)}
+                                    className="peer appearance-none w-4 h-4 border-2 rounded transition-all border-muted-foreground peer-checked:bg-muted-foreground peer-checked:border-muted-foreground"
+                                />
+                                <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${showHidden ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                                Zobrazit skryté
+                            </span>
+                        </label>
                     </div>
 
                     <div className="timeline-legend">
