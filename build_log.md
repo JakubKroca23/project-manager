@@ -102,3 +102,17 @@
 - **Ikony**: Přidání ikony `Crane` (jeřáb) do `ICON_OPTIONS` v `Timeline.tsx` a `TimelineBar.tsx`.
 - **Stacked Rows Visibility**: Oprava problému, kdy bílé pozadí souhrnných řádků ("stacked" hot zones) v hlavičkách sektorů zakrývalo obsah. 
 - **Detail**: V `TimelineBar.tsx` nastaveno `background: 'transparent'` (místo `var(--background)`) pro komponenty v režimu `isCollapsed`. Tím je zajištěno, že při překryvu více projektů v jednom řádku (summary) jsou viditelné všechny indikátory.
+
+## [2026-02-17] - Timeline Legend & Milestone Refinements
+- **Změna**: Implementace Nápovědy a Legendy.
+- **Detail**: Přidáno tlačítko "Nápověda" do lišty Timeline. Otevírá modální okno s přehledem ovládání (myš, klávesnice) a kompletní legendou barev pro fáze a ikony milníků.
+- **Změna**: Redesign milníků "Konec montáže" a "Konec revize".
+- **Detail**: Tyto specifické milníky se nyní vykreslují jako jednoduché barevné tečky (dots) místo ikon, pro snížení vizuálního šumu.
+- **Změna**: Vylepšení Timeline Settings.
+- **Detail**:
+    - **UI**: Tlačítka v hlavičce jsou nyní pouze ikony (bez textu) pro čistší vzhled.
+    - **Color Pickers**: Všechny výběry barev (Fáze, Milníky, Obrys) mají nyní moderní kulatý design (`rounded-full`).
+    - **Layout**: Popup nastavení má fixní hlavičku a scrollovatelný obsah.
+    - **Logika**: Pro "dot" milníky (Montáž/Revize End) je v nastavení skryt výběr ikony.
+- **Změna**: Oprava Z-Indexu popupů (vrstvení).
+- **Detail**: Popup s detailem milníku/projektu v `TimelineBar` byl přesunut do `React Portal` (`document.body`). Tím se definitivně vyřešil problém s překrýváním popupu okolními elementy nebo "stacked" řádky.

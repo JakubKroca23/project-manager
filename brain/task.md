@@ -19,6 +19,10 @@
 - [x] Vylepšení vizuálu a chování "Stacked" řádků v hlavičkách sektorů.
 - [x] Přidání ikony `Crane` (jeřáb) do Timeline.
 - [x] Fix překryvu stacked řádků bílým pozadím (transparent fix).
+- [x] Implementace Nápovědy a Legendy pro Timeline.
+- [x] Redesign "Konec montáže" a "Konec revize" na jednoduché tečky (dots).
+- [x] Modernizace Timeline Settings UI (kulaté výběry barev, fixní layout).
+- [x] Oprava Z-Indexu popupů milníků (React Portal).
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

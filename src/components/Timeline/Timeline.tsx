@@ -830,7 +830,7 @@ const Timeline: React.FC = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-4 max-h-[60vh] custom-scrollbar">
+                                    <div className="flex-1 overflow-y-auto p-4 max-h-[60vh] custom-scrollbar space-y-6">
                                         <div className="space-y-2">
                                             <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
                                             {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
@@ -1020,402 +1020,401 @@ const Timeline: React.FC = () => {
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t border-border">
-                                        <button
-                                            onClick={saveSettings}
-                                            disabled={isSaving}
-                                            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                        >
-                                            <Save size={16} />
-                                            {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
-                                        </button>
+                                        <div className="mt-4 pt-4 border-t border-border">
+                                            <button
+                                                onClick={saveSettings}
+                                                disabled={isSaving}
+                                                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                            >
+                                                <Save size={16} />
+                                                {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                </div>
+                            )}
+                        </div>
                     )}
+                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                        <button
+                            className="action-button icon-only"
+                            onClick={handleZoomOut}
+                            title="Oddálit"
+                        >
+                            <ZoomOut size={16} />
+                        </button>
+                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                            {Math.round((dayWidth / 25) * 100)}%
+                        </span>
+                        <button
+                            className="action-button icon-only"
+                            onClick={handleZoomIn}
+                            title="Přiblížit"
+                        >
+                            <ZoomIn size={16} />
+                        </button>
+                    </div>
+                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
+                            title="Zmenšit řádky"
+                        >
+                            <ChevronDown size={16} />
+                        </button>
+                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                            {rowHeight}px
+                        </span>
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
+                            title="Zvětšit řádky"
+                        >
+                            <ChevronUp size={16} />
+                        </button>
+                    </div>
+                    <button
+                        className="action-button primary"
+                        onClick={jumpToToday}
+                        title="Skočit na dnešek"
+                    >
+                        <Calendar size={14} />
+                        <span className="hidden lg:inline">Dnešek</span>
+                    </button>
                 </div>
-                    )}
-                <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                    <button
-                        className="action-button icon-only"
-                        onClick={handleZoomOut}
-                        title="Oddálit"
-                    >
-                        <ZoomOut size={16} />
-                    </button>
-                    <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                        {Math.round((dayWidth / 25) * 100)}%
-                    </span>
-                    <button
-                        className="action-button icon-only"
-                        onClick={handleZoomIn}
-                        title="Přiblížit"
-                    >
-                        <ZoomIn size={16} />
-                    </button>
-                </div>
-                <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                    <button
-                        className="action-button icon-only"
-                        onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
-                        title="Zmenšit řádky"
-                    >
-                        <ChevronDown size={16} />
-                    </button>
-                    <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                        {rowHeight}px
-                    </span>
-                    <button
-                        className="action-button icon-only"
-                        onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
-                        title="Zvětšit řádky"
-                    >
-                        <ChevronUp size={16} />
-                    </button>
-                </div>
-                <button
-                    className="action-button primary"
-                    onClick={jumpToToday}
-                    title="Skočit na dnešek"
-                >
-                    <Calendar size={14} />
-                    <span className="hidden lg:inline">Dnešek</span>
-                </button>
-        </div>
             </header >
 
-    {/* Help / Legend Modal */ }
-{
-    showHelp && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
-                    <div className="flex items-center gap-2">
-                        <HelpCircle size={20} className="text-primary" />
-                        <h3 className="font-bold text-lg">Nápověda a Legenda</h3>
-                    </div>
-                    <button onClick={() => setShowHelp(false)} className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-lg transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="overflow-y-auto p-6 space-y-8 custom-scrollbar">
-
-                    {/* 1. OVLÁDÁNÍ */}
-                    <section>
-                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                            <MousePointer2 size={16} /> Ovládání Timeline
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                    <MoveHorizontal size={20} className="text-primary" />
+            {/* Help / Legend Modal */}
+            {
+                showHelp && (
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+                        <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+                                <div className="flex items-center gap-2">
+                                    <HelpCircle size={20} className="text-primary" />
+                                    <h3 className="font-bold text-lg">Nápověda a Legenda</h3>
                                 </div>
-                                <div>
-                                    <p className="font-bold text-sm">Posun (Pan)</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Klikněte a táhněte myší (Drag & Drop) pro posun časové osy, nebo použijte kolečko myši.</p>
-                                </div>
+                                <button onClick={() => setShowHelp(false)} className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-lg transition-colors">
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                    <ZoomIn size={20} className="text-primary" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-sm">Zoom</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Podržte <kbd className="bg-background border px-1 rounded text-[10px] font-mono">Ctrl</kbd> + kolečko myši pro přiblížení/oddálení.</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                    <MousePointerClick size={20} className="text-primary" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-sm">Interakce</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        <strong>Hover na milník:</strong> Zobrazí detail.<br />
-                                        <strong>Klik na milník:</strong> Editace data/smazání.<br />
-                                        <strong>Klik na řádek:</strong> Detail zakázky.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
-                    <div className="h-px bg-border/50" />
+                            <div className="overflow-y-auto p-6 space-y-8 custom-scrollbar">
 
-                    {/* 2. LEGENDA BAREV (FÁZE) */}
-                    <section>
-                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                            <Palette size={16} /> Legenda fází
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, conf]) => (
-                                <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
-                                    <div
-                                        className="w-8 h-8 rounded-md shadow-sm border border-border/20"
-                                        style={{ backgroundColor: conf.color, opacity: conf.opacity }}
-                                    />
-                                    <span className="text-sm font-medium">{conf.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    <div className="h-px bg-border/50" />
-
-                    {/* 3. LEGENDA MILNÍKŮ */}
-                    <section>
-                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                            <Flag size={16} /> Legenda milníků
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, conf]) => {
-                                const Icon = ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
-                                return (
-                                    <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg border border-border/40 bg-background/50">
-                                        <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center bg-muted"
-                                            style={{ color: conf.color }}
-                                        >
-                                            <Icon size={16} />
-                                        </div>
-                                        <span className="text-xs font-bold leading-tight">{conf.label}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                </div>
-                <div className="p-4 border-t border-border bg-muted/20 flex justify-end">
-                    <button onClick={() => setShowHelp(false)} className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors text-sm">
-                        Rozumím
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-<div
-    className="timeline-scroll-wrapper"
-    ref={scrollContainerRef}
-    onMouseDown={handleMouseDown}
-    onMouseLeave={handleMouseLeave}
-    onMouseUp={handleMouseUp}
-    onMouseMove={handleMouseMove}
-    onScroll={handleScroll}
->
-    <div className="timeline-content">
-        <TimelineGrid
-            startDate={timelineRange.start}
-            endDate={timelineRange.end}
-            dayWidth={dayWidth}
-        >
-            <div className="timeline-rows">
-                <div className="timeline-rows">
-                    {(() => {
-                        const visibleSectors = sectorizedProjects.filter(
-                            sector => activeTypes[sector.id] && sector.projects.length > 0
-                        );
-
-                        const renderSectorRecursively = (index: number): React.ReactNode => {
-                            if (index >= visibleSectors.length) return null;
-
-                            const sector = visibleSectors[index];
-                            const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
-                            const isCollapsed = collapsedSectors[sector.id] === true;
-
-                            return (
-                                <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
-                                    {/* HEADER */}
-                                    <div
-                                        className="timeline-sector-header-row group/header cursor-pointer select-none"
-                                        onClick={() => toggleSector(sector.id)}
-                                        style={{
-                                            background: 'var(--background)',
-                                            borderBottom: 'none',
-                                            top: topOffset,
-                                            zIndex: 3400 - index
-                                        }}
-                                    >
-                                        <div
-                                            className="project-info-sticky sector-header"
-                                            style={{
-                                                borderLeft: `2px solid ${sector.color}`,
-                                                background: 'var(--background)',
-                                                height: 'var(--row-height)',
-                                                borderRight: 'none',
-                                                boxShadow: 'none',
-                                                zIndex: 50
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <button
-                                                        className="p-1 hover:bg-muted/50 rounded-sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            toggleSector(sector.id);
-                                                        }}
-                                                    >
-                                                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                                                    </button>
-                                                    <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
-                                                        {sector.label}
-                                                    </span>
-                                                    <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
-                                                        ({sector.projects.length})
-                                                    </span>
-                                                </div>
+                                {/* 1. OVLÁDÁNÍ */}
+                                <section>
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                        <MousePointer2 size={16} /> Ovládání Timeline
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                                <MoveHorizontal size={20} className="text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-sm">Posun (Pan)</p>
+                                                <p className="text-xs text-muted-foreground mt-1">Klikněte a táhněte myší (Drag & Drop) pro posun časové osy, nebo použijte kolečko myši.</p>
                                             </div>
                                         </div>
+                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                                <ZoomIn size={20} className="text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-sm">Zoom</p>
+                                                <p className="text-xs text-muted-foreground mt-1">Podržte <kbd className="bg-background border px-1 rounded text-[10px] font-mono">Ctrl</kbd> + kolečko myši pro přiblížení/oddálení.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                                <MousePointerClick size={20} className="text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-sm">Interakce</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    <strong>Hover na milník:</strong> Zobrazí detail.<br />
+                                                    <strong>Klik na milník:</strong> Editace data/smazání.<br />
+                                                    <strong>Klik na řádek:</strong> Detail zakázky.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
 
-                                        {/* STACKED CONTENT (Always visible) */}
-                                        <div
-                                            className="absolute inset-0 overflow-hidden pointer-events-none"
-                                            style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
-                                        >
-                                            {sector.projects.map(project => {
-                                                const sDate = (parseDate(project.created_at) || new Date());
-                                                const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-                                                return (
-                                                    <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
+                                <div className="h-px bg-border/50" />
+
+                                {/* 2. LEGENDA BAREV (FÁZE) */}
+                                <section>
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                        <Palette size={16} /> Legenda fází
+                                    </h4>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, conf]) => (
+                                            <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
+                                                <div
+                                                    className="w-8 h-8 rounded-md shadow-sm border border-border/20"
+                                                    style={{ backgroundColor: conf.color, opacity: conf.opacity }}
+                                                />
+                                                <span className="text-sm font-medium">{conf.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                <div className="h-px bg-border/50" />
+
+                                {/* 3. LEGENDA MILNÍKŮ */}
+                                <section>
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                        <Flag size={16} /> Legenda milníků
+                                    </h4>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, conf]) => {
+                                            const Icon = ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
+                                            return (
+                                                <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg border border-border/40 bg-background/50">
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center bg-muted"
+                                                        style={{ color: conf.color }}
+                                                    >
+                                                        <Icon size={16} />
+                                                    </div>
+                                                    <span className="text-xs font-bold leading-tight">{conf.label}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
+                            </div>
+                            <div className="p-4 border-t border-border bg-muted/20 flex justify-end">
+                                <button onClick={() => setShowHelp(false)} className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors text-sm">
+                                    Rozumím
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            <div
+                className="timeline-scroll-wrapper"
+                ref={scrollContainerRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onScroll={handleScroll}
+            >
+                <div className="timeline-content">
+                    <TimelineGrid
+                        startDate={timelineRange.start}
+                        endDate={timelineRange.end}
+                        dayWidth={dayWidth}
+                    >
+                        <div className="timeline-rows">
+                            <div className="timeline-rows">
+                                {(() => {
+                                    const visibleSectors = sectorizedProjects.filter(
+                                        sector => activeTypes[sector.id] && sector.projects.length > 0
+                                    );
+
+                                    const renderSectorRecursively = (index: number): React.ReactNode => {
+                                        if (index >= visibleSectors.length) return null;
+
+                                        const sector = visibleSectors[index];
+                                        const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
+                                        const isCollapsed = collapsedSectors[sector.id] === true;
+
+                                        return (
+                                            <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
+                                                {/* HEADER */}
+                                                <div
+                                                    className="timeline-sector-header-row group/header cursor-pointer select-none"
+                                                    onClick={() => toggleSector(sector.id)}
+                                                    style={{
+                                                        background: 'var(--background)',
+                                                        borderBottom: 'none',
+                                                        top: topOffset,
+                                                        zIndex: 3400 - index
+                                                    }}
+                                                >
+                                                    <div
+                                                        className="project-info-sticky sector-header"
+                                                        style={{
+                                                            borderLeft: `2px solid ${sector.color}`,
+                                                            background: 'var(--background)',
+                                                            height: 'var(--row-height)',
+                                                            borderRight: 'none',
+                                                            boxShadow: 'none',
+                                                            zIndex: 50
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <button
+                                                                    className="p-1 hover:bg-muted/50 rounded-sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        toggleSector(sector.id);
+                                                                    }}
+                                                                >
+                                                                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                                                                </button>
+                                                                <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
+                                                                    {sector.label}
+                                                                </span>
+                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
+                                                                    ({sector.projects.length})
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* STACKED CONTENT (Always visible) */}
+                                                    <div
+                                                        className="absolute inset-0 overflow-hidden pointer-events-none"
+                                                        style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
+                                                    >
+                                                        {sector.projects.map(project => {
+                                                            const sDate = (parseDate(project.created_at) || new Date());
+                                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+                                                            return (
+                                                                <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
+                                                                    <TimelineBar
+                                                                        id={project.id}
+                                                                        name={project.name}
+                                                                        project={project}
+                                                                        status={project.status}
+                                                                        startDate={sDate}
+                                                                        endDate={eDate}
+                                                                        timelineStart={timelineRange.start}
+                                                                        dayWidth={dayWidth}
+                                                                        isCollapsed={true}
+                                                                        config={colors}
+                                                                        onProjectUpdate={handleProjectUpdate}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+
+                                                {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}
+                                                {!isCollapsed && (
+                                                    <div className="absolute inset-0 hot-zones-container">
+                                                        {renderHotZones(sector, index, visibleSectors)}
+                                                    </div>
+                                                )}
+
+                                                {/* ROWS - Only when expanded */}
+                                                {!isCollapsed && sector.projects.map((project) => (
+                                                    <div key={project.id} className="timeline-row">
+                                                        <Link
+                                                            href={`/projekty/${project.id}`}
+                                                            className={`project-info-sticky transition-colors group`}
+                                                        >
+                                                            <div className="project-info-content pr-2">
+                                                                {rowHeight >= 30 ? (
+                                                                    <>
+                                                                        <span
+                                                                            className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                                            style={{ textAlign: 'left', fontWeight: 400 }}
+                                                                        >
+                                                                            {project.name}
+                                                                        </span>
+                                                                        <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                                            {project.customer || 'Bez zákazníka'}
+                                                                        </span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                                        {project.customer || 'Bez zákazníka'}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </Link>
                                                         <TimelineBar
                                                             id={project.id}
                                                             name={project.name}
                                                             project={project}
                                                             status={project.status}
-                                                            startDate={sDate}
-                                                            endDate={eDate}
+                                                            startDate={parseDate(project.created_at) || new Date()}
+                                                            endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
                                                             timelineStart={timelineRange.start}
                                                             dayWidth={dayWidth}
-                                                            isCollapsed={true}
                                                             config={colors}
                                                             onProjectUpdate={handleProjectUpdate}
                                                         />
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
+                                                ))}
 
-                                    {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}
-                                    {!isCollapsed && (
-                                        <div className="absolute inset-0 hot-zones-container">
-                                            {renderHotZones(sector, index, visibleSectors)}
-                                        </div>
-                                    )}
+                                                {/* NESTED NEXT SECTOR */}
+                                                {renderSectorRecursively(index + 1)}
+                                            </div>
+                                        );
+                                    };
 
-                                    {/* ROWS - Only when expanded */}
-                                    {!isCollapsed && sector.projects.map((project) => (
-                                        <div key={project.id} className="timeline-row">
-                                            <Link
-                                                href={`/projekty/${project.id}`}
-                                                className={`project-info-sticky transition-colors group`}
-                                            >
-                                                <div className="project-info-content pr-2">
-                                                    {rowHeight >= 30 ? (
-                                                        <>
-                                                            <span
-                                                                className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
-                                                                style={{ textAlign: 'left', fontWeight: 400 }}
-                                                            >
-                                                                {project.name}
-                                                            </span>
-                                                            <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                                {project.customer || 'Bez zákazníka'}
-                                                            </span>
-                                                        </>
-                                                    ) : (
-                                                        <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                            {project.customer || 'Bez zákazníka'}
-                                                        </span>
-                                                    )}
+                                    // Helper for HotZones moved out of JSX for clarity, but defined inline here:
+                                    const renderHotZones = (sector: any, index: number, allVisible: any[]) => {
+                                        // Same logic as before
+                                        return sector.projects.map((project: any) => {
+                                            // ... (calculations) ... 
+                                            // Because calculations depend on index, we'd need to copy logic.
+                                            // For brevity in edit tool, I will Inline the simplified block or assume existing logic is kept if not replaced.
+                                            // But since I am replacing the block, I MUST provide the content.
+                                            // Let's simplify/inline.
+
+                                            // Re-using calculations from previous view_file:
+                                            let previousRowsCount = 0;
+                                            for (let k = 0; k < index; k++) {
+                                                previousRowsCount += allVisible[k].projects.length;
+                                            }
+                                            const pIndex = sector.projects.findIndex((p: any) => p.id === project.id);
+                                            // Simplified, strict calculation not needed for absolute inset-0 wrapper?
+                                            // Wait, hot-zones-container logic was:
+                                            // absolute inset-0 relative to timeline-sector-stack.
+                                            // It iterates projects and renders TimelineBar absolute inset-0?
+                                            // This sounds wrong if they are supposed to be in rows.
+                                            // Ah, `hot-zones-container` was rendering an overlay?
+                                            // Actually, looking at previous code, `hot-zones-container` seemed to just re-render bars.
+                                            // Maybe for "Hot Zones" logic that wasn't fully implemented or visible?
+                                            // The previous code had `hot-zones-container` render `TimelineBar` inside `absolute inset-0`.
+                                            // This effectively stacks them on top of each other if offsets aren't applied.
+                                            // And `yComponents` calculation was unused in the JSX I saw?
+                                            // Let's look at lines 1028-1095 in previous view.
+                                            // `yComponents` calculated but seemingly unused in `return`.
+                                            // It returned `<div className="absolute inset-0"><TimelineBar ... /></div>`.
+                                            // This means it WAS rendering stacked bars blindly on top of the sector?
+                                            // If so, hiding it when not collapsed matches behavior.
+                                            // I will restore previous content logic for hot zones if needed, 
+                                            // but since `top` offsets were missing in style, it might have been buggy or specific.
+                                            // I'll keep it simple: Render same block if not collapsed.
+
+                                            const sDate = (parseDate(project.created_at) || new Date());
+                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+
+                                            // Note: If hot zones were relying on 'absolute inset-0' to fill the stack,
+                                            // and rows were static, this duplicates the bars?
+                                            // Yes, line 1100 rendered rows again.
+                                            // Duplicate rendering? Why?
+                                            // Maybe hot-zones are interaction layers?
+                                            // Let's just keep the existing loop logic but wrapped in !isCollapsed.
+
+                                            return (
+                                                <div key={`hot-wrapper-${project.id}`} className="absolute inset-0 pointer-events-none opacity-0">
+                                                    {/* Hidden interaction layer or duplicate? Leaving opacity 0 just in case */}
                                                 </div>
-                                            </Link>
-                                            <TimelineBar
-                                                id={project.id}
-                                                name={project.name}
-                                                project={project}
-                                                status={project.status}
-                                                startDate={parseDate(project.created_at) || new Date()}
-                                                endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
-                                                timelineStart={timelineRange.start}
-                                                dayWidth={dayWidth}
-                                                config={colors}
-                                                onProjectUpdate={handleProjectUpdate}
-                                            />
-                                        </div>
-                                    ))}
+                                            );
+                                        });
+                                    };
 
-                                    {/* NESTED NEXT SECTOR */}
-                                    {renderSectorRecursively(index + 1)}
-                                </div>
-                            );
-                        };
-
-                        // Helper for HotZones moved out of JSX for clarity, but defined inline here:
-                        const renderHotZones = (sector: any, index: number, allVisible: any[]) => {
-                            // Same logic as before
-                            return sector.projects.map((project: any) => {
-                                // ... (calculations) ... 
-                                // Because calculations depend on index, we'd need to copy logic.
-                                // For brevity in edit tool, I will Inline the simplified block or assume existing logic is kept if not replaced.
-                                // But since I am replacing the block, I MUST provide the content.
-                                // Let's simplify/inline.
-
-                                // Re-using calculations from previous view_file:
-                                let previousRowsCount = 0;
-                                for (let k = 0; k < index; k++) {
-                                    previousRowsCount += allVisible[k].projects.length;
-                                }
-                                const pIndex = sector.projects.findIndex((p: any) => p.id === project.id);
-                                // Simplified, strict calculation not needed for absolute inset-0 wrapper?
-                                // Wait, hot-zones-container logic was:
-                                // absolute inset-0 relative to timeline-sector-stack.
-                                // It iterates projects and renders TimelineBar absolute inset-0?
-                                // This sounds wrong if they are supposed to be in rows.
-                                // Ah, `hot-zones-container` was rendering an overlay?
-                                // Actually, looking at previous code, `hot-zones-container` seemed to just re-render bars.
-                                // Maybe for "Hot Zones" logic that wasn't fully implemented or visible?
-                                // The previous code had `hot-zones-container` render `TimelineBar` inside `absolute inset-0`.
-                                // This effectively stacks them on top of each other if offsets aren't applied.
-                                // And `yComponents` calculation was unused in the JSX I saw?
-                                // Let's look at lines 1028-1095 in previous view.
-                                // `yComponents` calculated but seemingly unused in `return`.
-                                // It returned `<div className="absolute inset-0"><TimelineBar ... /></div>`.
-                                // This means it WAS rendering stacked bars blindly on top of the sector?
-                                // If so, hiding it when not collapsed matches behavior.
-                                // I will restore previous content logic for hot zones if needed, 
-                                // but since `top` offsets were missing in style, it might have been buggy or specific.
-                                // I'll keep it simple: Render same block if not collapsed.
-
-                                const sDate = (parseDate(project.created_at) || new Date());
-                                const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-
-                                // Note: If hot zones were relying on 'absolute inset-0' to fill the stack,
-                                // and rows were static, this duplicates the bars?
-                                // Yes, line 1100 rendered rows again.
-                                // Duplicate rendering? Why?
-                                // Maybe hot-zones are interaction layers?
-                                // Let's just keep the existing loop logic but wrapped in !isCollapsed.
-
-                                return (
-                                    <div key={`hot-wrapper-${project.id}`} className="absolute inset-0 pointer-events-none opacity-0">
-                                        {/* Hidden interaction layer or duplicate? Leaving opacity 0 just in case */}
-                                    </div>
-                                );
-                            });
-                        };
-
-                        return renderSectorRecursively(0);
-                    })()}
+                                    return renderSectorRecursively(0);
+                                })()}
+                            </div>
+                        </div>
+                    </TimelineGrid>
                 </div>
-            </div>
-        </TimelineGrid>
-    </div>
-</div >
+            </div >
         </div >
     );
 };

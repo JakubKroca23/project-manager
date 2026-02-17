@@ -92,4 +92,7 @@
 ## 2026-02-16: Timeline Visual Fixes (Crane & Stacked Rows)
 - **Ikony**: Do sady ikon přidána `Crane` (jeřáb) pro specifické vizualizace v Timeline.
 - **Stacked Layout Fix**: Opraveno vykreslování souhrnných řádků (hot zones) v hlavičkách sektorů. Původní nastavení pozadí (`var(--background)`) způsobovalo překryv obsahu.
-- **Transparentní Stack**: V `TimelineBar` komponentě nastaveno `background: 'transparent'` pro režim `isCollapsed`. Tím se zajistila správná "vrstevnatost" indikátorů bez vzájemného zakrývání blokem barvy.
+- **Čistota a Přehlednost**: V `TimelineBar.tsx` odstraněno pozadí (`transparent`) pro prvky ve "stacked" režimu.
+- **Nápověda a Legenda**: Implementováno modální okno s přehledem ovládání (myš, klávesnice) a vysvětlivkami barev fází i ikon milníků.
+- **Milestone Dot Rendering**: Speciální vykreslování pro "Konec montáže" a "Konec revize" (pouze malé tečky) pro vizuální odlehčení grafu.
+- **Portal Rendering**: Detailní popup milníku/projektu se nyní vykresluje do `document.body` přes React Portal, což zaručuje jeho viditelnost nad všemi vrstvami (Z-Index fix).
