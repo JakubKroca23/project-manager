@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
     Cog, Wrench, Zap, Cpu, Activity, Package, Box, HardHat,
     Construction, Factory, Pickaxe, Settings2, ShieldCheck,
-    Container, Anchor, Component, Drill, Settings, Plus, X
+    Container, Anchor, Component, Drill, Settings,
+    Clock,
+    X,
+    Trash2,
+    Plus,
 } from 'lucide-react';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
@@ -638,14 +643,19 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
                                 const milestoneColor = milestoneConfig?.color || '#888';
 
+                                const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
+
                                 return (
                                     <div
                                         key={m.key}
-                                        className="milestone-icon cursor-pointer transition-transform hover:scale-125"
+                                        className={`milestone-icon cursor-pointer transition-transform ${isPhaseEndVal ? 'hover:scale-105' : 'hover:scale-125'}`}
                                         style={{
                                             color: milestoneColor,
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
-                                            zIndex: idx
+                                            zIndex: idx,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
                                         }}
                                         // title removed in favor of hover popup
                                         onMouseEnter={(e) => {
@@ -655,8 +665,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         onMouseLeave={handleMouseLeave}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            // Click ensures it stays open / toggles? 
-                                            // With hover logic, click might not be strictly needed, but let's keep it to force-show/reset position
                                             const rect = e.currentTarget.getBoundingClientRect();
                                             setEditPopup({ m, x: rect.left, y: rect.bottom });
                                             setAddMilestoneDate(null);
@@ -664,13 +672,26 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             setIsEditingDate(false);
                                         }}
                                     >
-                                        <Icon
-                                            size={iconSize}
-                                            color={milestoneColor}
-                                            fill={IconKey === 'Play' ? milestoneColor : 'none'}
-                                            strokeWidth={2.5}
-                                            className="milestone-svg"
-                                        />
+                                        {isPhaseEndVal ? (
+                                            <div className="flex flex-col items-center justify-end h-full w-full gap-0.5" style={{ height: iconSize * 1.5 }}>
+                                                <div
+                                                    className="w-[2px] bg-current opacity-60 rounded-full"
+                                                    style={{ height: '70%', backgroundColor: milestoneColor }}
+                                                />
+                                                <div
+                                                    className="w-1.5 h-1.5 rounded-full"
+                                                    style={{ backgroundColor: milestoneColor }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <Icon
+                                                size={iconSize}
+                                                color={milestoneColor}
+                                                fill={IconKey === 'Play' ? milestoneColor : 'none'}
+                                                strokeWidth={2.5}
+                                                className="milestone-svg"
+                                            />
+                                        )}
                                     </div>
                                 );
                             })}
@@ -680,7 +701,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             })}
 
             {/* EDIT / DELETE POPUP */}
-            {editPopup && (() => {
+            {editPopup && createPortal((() => {
                 const m = editPopup.m;
                 const configMap: Record<string, string> = {
                     'chassis': 'milestoneChassis',
@@ -698,6 +719,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 // Calculate vertical position (check bounds)
                 const isNearBottom = (window.innerHeight - editPopup.y) < 200;
+                // Since we use Portal, coordinates are absolute to viewport, which matches clientRect
                 const topPos = isNearBottom ? 'auto' : editPopup.y + 10;
                 const bottomPos = isNearBottom ? (window.innerHeight - editPopup.y) + 30 : 'auto';
 
@@ -751,58 +773,66 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     Upravit
                                 </button>
                                 <button
-                                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground p-1.5 rounded"
+                                    className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50"
                                     onClick={() => setIsDeleteConfirm(true)}
+                                    title="Smazat milník"
                                     disabled={isUpdating}
-                                    title="Smazat"
                                 >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                    <Trash2 size={14} />
                                 </button>
                             </div>
                         )}
 
                         {isEditingDate && (
                             <div className="flex flex-col gap-2">
-                                <input
-                                    type="date"
-                                    defaultValue={formatLocalDate(m.date)}
-                                    className="w-full text-xs p-1 border rounded bg-background"
-                                    onChange={(e) => handleDateUpdate(m.class, e.target.value)}
-                                />
-                                <button
-                                    className="text-xs text-muted-foreground hover:underline"
-                                    onClick={() => setIsEditingDate(false)}
-                                >
-                                    Zpět
-                                </button>
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground">Nové datum</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="date"
+                                        className="flex-1 bg-background border border-input px-2 py-1 rounded text-sm"
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleDateUpdate(m.class, val);
+                                            setIsEditingDate(false);
+                                        }}
+                                        defaultValue={formatLocalDate(m.date)}
+                                    />
+                                    <button
+                                        className="p-1.5 bg-muted hover:bg-muted/80 rounded"
+                                        onClick={() => setIsEditingDate(false)}
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground">Vybráním data se milník uloží.</p>
                             </div>
                         )}
 
                         {isDeleteConfirm && (
-                            <div className="flex flex-col gap-2 bg-destructive/10 p-2 rounded">
-                                <span className="text-xs font-bold text-destructive">Opravdu smazat?</span>
+                            <div className="flex flex-col gap-2">
+                                <p className="text-xs font-bold text-destructive">Opravdu smazat milník?</p>
                                 <div className="flex gap-2">
                                     <button
-                                        className="flex-1 bg-destructive text-destructive-foreground text-xs py-1 rounded"
+                                        className="flex-1 bg-muted hover:bg-muted/80 text-xs py-1.5 rounded"
+                                        onClick={() => setIsDeleteConfirm(false)}
+                                    >
+                                        Zrušit
+                                    </button>
+                                    <button
+                                        className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs py-1.5 rounded"
                                         onClick={() => {
                                             handleDateUpdate(m.class, null);
                                             setEditPopup(null);
                                         }}
                                     >
-                                        Ano, smazat
-                                    </button>
-                                    <button
-                                        className="flex-1 bg-background text-foreground border text-xs py-1 rounded"
-                                        onClick={() => setIsDeleteConfirm(false)}
-                                    >
-                                        Ne
+                                        Potvrdit
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
                 );
-            })()}
+            })(), document.body)}
         </div >
     );
 };

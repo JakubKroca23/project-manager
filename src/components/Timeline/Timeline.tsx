@@ -1022,56 +1022,57 @@ const Timeline: React.FC = () => {
                                             </button>
                                         </div>
                                     </div>
-                            )}
                                 </div>
                             )}
-                            <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                                <button
-                                    className="action-button icon-only"
-                                    onClick={handleZoomOut}
-                                    title="Oddálit"
-                                >
-                                    <ZoomOut size={16} />
-                                </button>
-                                <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                                    {Math.round((dayWidth / 25) * 100)}%
-                                </span>
-                                <button
-                                    className="action-button icon-only"
-                                    onClick={handleZoomIn}
-                                    title="Přiblížit"
-                                >
-                                    <ZoomIn size={16} />
-                                </button>
-                            </div>
-                            <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                                <button
-                                    className="action-button icon-only"
-                                    onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
-                                    title="Zmenšit řádky"
-                                >
-                                    <ChevronDown size={16} />
-                                </button>
-                                <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                                    {rowHeight}px
-                                </span>
-                                <button
-                                    className="action-button icon-only"
-                                    onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
-                                    title="Zvětšit řádky"
-                                >
-                                    <ChevronUp size={16} />
-                                </button>
-                            </div>
-                            <button
-                                className="action-button primary"
-                                onClick={jumpToToday}
-                                title="Skočit na dnešek"
-                            >
-                                <Calendar size={14} />
-                                <span className="hidden lg:inline">Dnešek</span>
-                            </button>
                         </div>
+                    )}
+                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                        <button
+                            className="action-button icon-only"
+                            onClick={handleZoomOut}
+                            title="Oddálit"
+                        >
+                            <ZoomOut size={16} />
+                        </button>
+                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                            {Math.round((dayWidth / 25) * 100)}%
+                        </span>
+                        <button
+                            className="action-button icon-only"
+                            onClick={handleZoomIn}
+                            title="Přiblížit"
+                        >
+                            <ZoomIn size={16} />
+                        </button>
+                    </div>
+                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
+                            title="Zmenšit řádky"
+                        >
+                            <ChevronDown size={16} />
+                        </button>
+                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                            {rowHeight}px
+                        </span>
+                        <button
+                            className="action-button icon-only"
+                            onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
+                            title="Zvětšit řádky"
+                        >
+                            <ChevronUp size={16} />
+                        </button>
+                    </div>
+                    <button
+                        className="action-button primary"
+                        onClick={jumpToToday}
+                        title="Skočit na dnešek"
+                    >
+                        <Calendar size={14} />
+                        <span className="hidden lg:inline">Dnešek</span>
+                    </button>
+                </div>
             </header >
 
             {/* Help / Legend Modal */}
