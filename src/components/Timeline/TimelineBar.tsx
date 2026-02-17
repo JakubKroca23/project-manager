@@ -876,12 +876,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-4 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200 overflow-y-auto"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-2 transition-opacity duration-200 overflow-y-auto"
                         style={{
-                            left: Math.min(editPopup.x - 100, window.innerWidth - 340), // Prevent overflow right
+                            left: Math.min(editPopup.x - 100, window.innerWidth - 300), // Prevent overflow right
                             top: topPos,
                             bottom: bottomPos,
-                            width: 320, // Wider for better readability
+                            width: 280, // Compact width
                             maxWidth: '90vw',
                             maxHeight: '85vh'
                         }}
@@ -894,107 +894,142 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         onMouseLeave={handleMouseLeave}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-start justify-between border-b border-border/50 pb-2 mb-1 gap-3">
-                            <div className="flex items-center gap-2">
-                                <Icon size={18} color={milestoneColor} />
-                                {m.class.startsWith('custom-') ? (
-                                    <input
-                                        type="text"
-                                        defaultValue={m.label}
-                                        className="font-bold text-sm bg-muted/50 border-none px-1 rounded outline-none focus:ring-1 focus:ring-primary/30 flex-1"
-                                        onBlur={async (e) => {
-                                            const val = e.target.value;
-                                            if (!val || val === m.label) return;
-                                            try {
-                                                const { error } = await supabase
-                                                    .from('project_milestones')
-                                                    .update({ name: val })
-                                                    .eq('id', m.key);
-                                                if (error) throw error;
-                                                // Refresh page/component as needed
-                                                handleDateUpdate(m.key, formatLocalDate(m.date));
-                                            } catch (err) {
-                                                console.error('Error updating milestone name:', err);
-                                            }
-                                        }}
-                                    />
-                                ) : (
-                                    <span className="font-bold text-sm" style={{ color: milestoneColor }}>{m.label}</span>
-                                )}
+                        {/* Compact Header: Milestone Info & Project Info Combined */}
+                        <div className="flex flex-col gap-1 relative border-b border-border/50 pb-2">
+                            <button
+                                onClick={() => setEditPopup(null)}
+                                className="absolute -top-1 -right-1 text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors outline-none"
+                            >
+                                <X size={14} />
+                            </button>
+
+                            {/* Row 1: Icon + Milestone Name + Date */}
+                            <div className="flex items-center justify-between gap-2 pr-6">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <Icon size={14} color={milestoneColor} className="shrink-0" />
+                                    {m.class.startsWith('custom-') ? (
+                                        <input
+                                            type="text"
+                                            defaultValue={m.label}
+                                            className="font-bold text-sm bg-muted/50 border-none px-1 py-0 rounded outline-none focus:ring-1 focus:ring-primary/30 min-w-0 w-full"
+                                            onBlur={async (e) => {
+                                                const val = e.target.value;
+                                                if (!val || val === m.label) return;
+                                                try {
+                                                    const { error } = await supabase
+                                                        .from('project_milestones')
+                                                        .update({ name: val })
+                                                        .eq('id', m.key);
+                                                    if (error) throw error;
+                                                    handleDateUpdate(m.key, formatLocalDate(m.date));
+                                                } catch (err) {
+                                                    console.error('Error updating milestone name:', err);
+                                                }
+                                            }}
+                                        />
+                                    ) : (
+                                        <span className="font-bold text-sm truncate leading-tight" style={{ color: milestoneColor }}>{m.label}</span>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-mono bg-muted/50 px-1.5 py-0.5 rounded text-foreground/80 shrink-0 whitespace-nowrap">
+                                    {formatLocalDate(m.date)}
+                                </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{formatLocalDate(m.date)}</span>
-                                <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors shrink-0 outline-none">
-                                    <X size={16} />
-                                </button>
+
+                            {/* Row 2: OP Number (Key info) + Customer */}
+                            <div className="flex flex-col gap-0.5 mt-0.5">
+                                <div className="flex items-baseline gap-1.5 text-xs text-muted-foreground">
+                                    <span className="font-bold text-foreground bg-primary/10 text-primary px-1 rounded-sm border border-primary/20" title="Číslo zakázky / OP">
+                                        #{project.id}
+                                    </span>
+                                    {project.customer && (
+                                        <span className="truncate" title={project.customer}>• {project.customer}</span>
+                                    )}
+                                </div>
+                                {/* Row 3: Project Name (Description) */}
+                                <Link
+                                    href={`/projekty/${project.id}`}
+                                    className="text-[10px] leading-tight text-muted-foreground/80 hover:text-primary transition-colors line-clamp-1"
+                                    title={name}
+                                >
+                                    {name}
+                                </Link>
                             </div>
                         </div>
 
+
                         {!isDeleteConfirm && !isEditingDate && !isIconPickerOpen && (
-                            <div className="flex flex-col gap-2">
-                                <div className="flex gap-2">
+                            <div className="flex flex-col gap-2 pt-1">
+                                {/* Status Toggle - Prominent */}
+                                <button
+                                    className={`w-full text-[10px] font-bold uppercase py-1.5 rounded transition-colors border shadow-sm ${m.class === 'custom-completed'
+                                        ? 'bg-background border-amber-500/30 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                                        : 'bg-background border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
+                                        }`}
+                                    onClick={async () => {
+                                        const newStatus = m.class === 'custom-completed' ? 'pending' : 'completed';
+                                        try {
+                                            const { error } = await supabase
+                                                .from('project_milestones')
+                                                .update({ status: newStatus })
+                                                .eq('id', m.key);
+                                            if (error) throw error;
+                                            handleDateUpdate(m.key, formatLocalDate(m.date));
+                                        } catch (err) {
+                                            console.error('Error toggling status:', err);
+                                        }
+                                    }}
+                                >
+                                    {m.class === 'custom-completed' ? 'Rozpracovat' : 'Dokončit'}
+                                </button>
+
+                                {/* Icon Actions Row - Compact Grid */}
+                                <div className="grid grid-cols-3 gap-2">
                                     <button
-                                        className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors"
+                                        className="flex flex-col items-center justify-center gap-1 py-1.5 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                         onClick={() => setIsEditingDate(true)}
                                         disabled={isUpdating}
+                                        title="Změnit datum"
                                     >
-                                        Změnit datum
-                                    </button>
-                                    <button
-                                        className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50 transition-colors"
-                                        onClick={() => setIsDeleteConfirm(true)}
-                                        title="Smazat milník"
-                                        disabled={isUpdating}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <button
-                                        className={`w-full text-[10px] font-bold uppercase py-1.5 rounded transition-colors ${m.class === 'custom-completed' ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'}`}
-                                        onClick={async () => {
-                                            const newStatus = m.class === 'custom-completed' ? 'pending' : 'completed';
-                                            try {
-                                                const { error } = await supabase
-                                                    .from('project_milestones')
-                                                    .update({ status: newStatus })
-                                                    .eq('id', m.key);
-                                                if (error) throw error;
-                                                handleDateUpdate(m.key, formatLocalDate(m.date));
-                                            } catch (err) {
-                                                console.error('Error toggling status:', err);
-                                            }
-                                        }}
-                                    >
-                                        {m.class === 'custom-completed' ? 'Označit jako rozpracované' : 'Označit jako hotové'}
+                                        <Clock size={14} />
+                                        <span className="text-[9px] font-medium">Datum</span>
                                     </button>
 
-                                    <div className="space-y-1 mt-1">
-                                        <button
-                                            className="w-full bg-muted hover:bg-muted/80 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                                            onClick={() => setIsIconPickerOpen(true)}
-                                            disabled={isUpdating}
-                                        >
-                                            <Settings size={12} />
-                                            Změnit ikonku
-                                        </button>
-                                    </div>
+                                    <button
+                                        className="flex flex-col items-center justify-center gap-1 py-1.5 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                        onClick={() => setIsIconPickerOpen(true)}
+                                        disabled={isUpdating}
+                                        title="Změnit ikonku"
+                                    >
+                                        <Settings size={14} />
+                                        <span className="text-[9px] font-medium">Ikona</span>
+                                    </button>
+
+                                    <button
+                                        className="flex flex-col items-center justify-center gap-1 py-1.5 rounded bg-destructive/5 hover:bg-destructive/10 text-destructive/80 hover:text-destructive transition-colors"
+                                        onClick={() => setIsDeleteConfirm(true)}
+                                        disabled={isUpdating}
+                                        title="Smazat milník"
+                                    >
+                                        <Trash2 size={14} />
+                                        <span className="text-[9px] font-medium">Smazat</span>
+                                    </button>
                                 </div>
                             </div>
                         )}
 
                         {isIconPickerOpen && (
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Vyberte novou ikonku</span>
+                            <div className="flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="flex items-center justify-between pb-1 border-b border-border/50">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Vybrat ikonu</span>
                                     <button
-                                        className="text-[10px] font-bold bg-muted hover:bg-muted/80 px-2 py-1 rounded"
+                                        className="text-[10px] font-bold bg-muted hover:bg-muted/80 px-2 py-0.5 rounded"
                                         onClick={() => setIsIconPickerOpen(false)}
                                     >
                                         Zpět
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-6 gap-1 p-1 bg-muted/20 rounded-md">
+                                <div className="grid grid-cols-6 gap-1 p-0.5">
                                     {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
                                         <button
                                             key={key}
@@ -1012,10 +1047,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                     console.error('Error updating icon:', err);
                                                 }
                                             }}
-                                            className={`p-1 rounded transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground/50'}`}
+                                            className={`aspect-square rounded-md transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm scale-105' : 'bg-muted/30 hover:bg-muted text-muted-foreground/70'}`}
                                             title={key}
                                         >
-                                            <IconComponent size={12} />
+                                            <IconComponent size={14} />
                                         </button>
                                     ))}
                                 </div>
@@ -1023,8 +1058,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         )}
 
                         {isEditingDate && (
-                            <div className="flex flex-col gap-2 p-1 bg-muted/30 rounded-md">
-                                <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Nové datum milníku</label>
+                            <div className="flex flex-col gap-2 p-1 bg-muted/30 rounded-md animate-in fade-in zoom-in-95 duration-200">
+                                <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Nové datum</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="date"
@@ -1036,6 +1071,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             setIsEditingDate(false);
                                         }}
                                         defaultValue={formatLocalDate(m.date)}
+                                        autoFocus
                                     />
                                     <button
                                         className="p-1.5 bg-muted hover:bg-muted/80 rounded"
@@ -1048,11 +1084,11 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         )}
 
                         {isDeleteConfirm && (
-                            <div className="flex flex-col gap-2 p-1 bg-destructive/5 rounded-md border border-destructive/10">
-                                <p className="text-[10px] font-bold text-destructive uppercase tracking-tight">Opravdu smazat milník?</p>
+                            <div className="flex flex-col gap-2 p-2 bg-destructive/5 rounded-md border border-destructive/10 animate-in fade-in zoom-in-95 duration-200">
+                                <p className="text-[11px] font-bold text-destructive text-center">Opravdu smazat?</p>
                                 <div className="flex gap-2">
                                     <button
-                                        className="flex-1 bg-muted hover:bg-muted/80 text-[10px] font-bold uppercase py-1.5 rounded transition-colors"
+                                        className="flex-1 bg-background hover:bg-muted border border-border text-[10px] font-bold uppercase py-1.5 rounded transition-colors"
                                         onClick={() => setIsDeleteConfirm(false)}
                                     >
                                         Zrušit
@@ -1068,37 +1104,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         Smazat
                                     </button>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Project Info Section at the Bottom - Hide when picking icons to save space */}
-                        {!isIconPickerOpen && !isEditingDate && !isDeleteConfirm && (
-                            <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-2">
-                                <div className="flex flex-col gap-0.5">
-                                    <Link
-                                        href={`/projekty/${project.id}`}
-                                        className="font-bold text-sm leading-tight hover:text-primary transition-colors line-clamp-2"
-                                    >
-                                        {name}
-                                    </Link>
-                                    <span className="text-xs text-muted-foreground font-medium line-clamp-1">{project.customer || 'Bez zákazníka'}</span>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-2 mt-1">
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Aktuální Status Zakázky</label>
-                                        <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1.5 rounded font-bold border border-blue-500/20 text-center">
-                                            {project.production_status || 'Bez statusu'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {project.manager && (
-                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 px-2 py-1 rounded-md mt-1">
-                                        <span className="opacity-60">Manažer:</span>
-                                        <span className="font-bold">{project.manager}</span>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
