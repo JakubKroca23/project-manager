@@ -41,6 +41,7 @@ export default function ProfilePage() {
 
     // Maintenance Mode State
     const [maintenanceMode, setMaintenanceMode] = useState(false);
+    const [estimatedEndTime, setEstimatedEndTime] = useState('');
 
     useEffect(() => {
         const fetchMaintenance = async () => {
@@ -49,18 +50,42 @@ export default function ProfilePage() {
                 .select('settings')
                 .eq('id', 'maintenance_mode')
                 .maybeSingle();
-            if ((data?.settings as any)?.value === true) setMaintenanceMode(true);
+            const settings = data?.settings as any;
+            if (settings?.value === true) {
+                setMaintenanceMode(true);
+                if (settings?.estimated_end) {
+                    const date = new Date(settings.estimated_end);
+                    setEstimatedEndTime(date.toTimeString().slice(0, 5));
+                }
+            }
         };
         fetchMaintenance();
     }, []);
 
     const toggleMaintenance = async () => {
         const newVal = !maintenanceMode;
+
+        let ISOEndTime = null;
+        if (newVal && estimatedEndTime) {
+            const today = new Date();
+            const [hours, minutes] = estimatedEndTime.split(':');
+            today.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            ISOEndTime = today.toISOString();
+        }
+
         setMaintenanceMode(newVal);
         const { error } = await supabase
             .from('app_settings')
             .upsert(
-                { id: 'maintenance_mode', settings: { value: newVal }, updated_at: new Date().toISOString() },
+                {
+                    id: 'maintenance_mode',
+                    settings: {
+                        value: newVal,
+                        estimated_end: ISOEndTime,
+                        started_at: newVal ? new Date().toISOString() : null
+                    },
+                    updated_at: new Date().toISOString()
+                },
                 { onConflict: 'id' as any }
             );
         if (error) {
@@ -376,17 +401,31 @@ export default function ProfilePage() {
 
                                         {/* Maintenance Mode Toggle - Only for Admin */}
                                         {currentUserProfile?.email === ADMIN_EMAIL && (
-                                            <div className="flex items-center justify-between bg-white dark:bg-muted/30 px-4 py-3 rounded-xl border border-indigo-500/10">
-                                                <div className="space-y-0.5">
-                                                    <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
-                                                    <p className="text-[10px] text-muted-foreground">Zablokuje přístup pro ostatní</p>
+                                            <div className="bg-white dark:bg-muted/30 p-4 rounded-xl border border-indigo-500/10 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
+                                                        <p className="text-[10px] text-muted-foreground">Zablokuje přístup pro ostatní</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={toggleMaintenance}
+                                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 ${maintenanceMode ? 'bg-orange-500' : 'bg-gray-400'}`}
+                                                    >
+                                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={toggleMaintenance}
-                                                    className={`relative w-11 h-6 rounded-full transition-all duration-300 ${maintenanceMode ? 'bg-orange-500' : 'bg-gray-400'}`}
-                                                >
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                </button>
+
+                                                {maintenanceMode && (
+                                                    <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-4">
+                                                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Odhadovaný konec:</label>
+                                                        <input
+                                                            type="time"
+                                                            value={estimatedEndTime}
+                                                            onChange={(e) => setEstimatedEndTime(e.target.value)}
+                                                            className="bg-muted px-2 py-1 rounded text-[10px] font-bold outline-none border border-border/50"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

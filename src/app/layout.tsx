@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import AuthGuard from '@/components/AuthGuard';
+import SystemStatusBar from '@/components/SystemStatusBar';
 
 const inter = Inter({ subsets: ['latin', 'latin-ext'] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <AuthGuard>
             <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
               <NavbarWrapper />
+              <SystemStatusBar />
               <main className="flex-1 overflow-hidden p-6">
                 {children}
               </main>

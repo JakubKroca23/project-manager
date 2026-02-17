@@ -18,6 +18,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isMaintenance, setIsMaintenance] = useState(false);
+    const [estimatedEnd, setEstimatedEnd] = useState<string | undefined>(undefined);
     const [isBypassUser, setIsBypassUser] = useState(false);
 
     // Public routes should be rendered immediately to avoid the "Ověřování přístupu..." flicker
@@ -33,8 +34,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                     .eq('id', 'maintenance_mode')
                     .maybeSingle();
 
-                if ((maintenanceData?.settings as any)?.value === true) {
+                const settings = maintenanceData?.settings as any;
+                if (settings?.value === true) {
                     setIsMaintenance(true);
+                    setEstimatedEnd(settings?.estimated_end);
                 }
             } catch (err) {
                 console.warn('Failed to check maintenance mode', err);
@@ -92,7 +95,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Maintenance Screen logic (only if not bypass user)
     if (isMaintenance && !isBypassUser) {
-        return <MaintenanceScreen />;
+        return <MaintenanceScreen estimatedEnd={estimatedEnd} />;
     }
 
     if (!isAuthenticated) {

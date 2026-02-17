@@ -1,7 +1,14 @@
 import React from 'react';
 import { RefreshCw, Wrench } from 'lucide-react';
 
-export default function MaintenanceScreen() {
+interface MaintenanceScreenProps {
+    estimatedEnd?: string;
+}
+
+export default function MaintenanceScreen({ estimatedEnd }: MaintenanceScreenProps) {
+    const handleRefresh = () => {
+        window.location.reload();
+    };
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground space-y-6">
             <div className="relative">
@@ -21,9 +28,23 @@ export default function MaintenanceScreen() {
                 <p className="text-muted-foreground text-sm font-medium">
                     Systém je momentálně v režimu údržby.
                     <br />
-                    Prosím, zkuste to znovu za chvíli.
+                    {estimatedEnd ? (
+                        <>
+                            Očekávaný návrat do provozu v <strong>{new Date(estimatedEnd).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</strong>.
+                        </>
+                    ) : (
+                        'Prosím, zkuste to znovu za chvíli.'
+                    )}
                 </p>
             </div>
+
+            <button
+                onClick={handleRefresh}
+                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold text-sm shadow-xl hover:scale-105 transition-transform active:scale-95"
+            >
+                <RefreshCw className="h-4 w-4" />
+                Obnovit stránku
+            </button>
 
             <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/50 uppercase tracking-widest pt-8">
                 <span className="animate-pulse">System Update</span>
