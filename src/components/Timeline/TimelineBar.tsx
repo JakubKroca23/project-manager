@@ -327,6 +327,11 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             if (milestoneClass === 'mounting_end' || milestoneClass === 'revision_end') {
                 const key = milestoneClass === 'mounting_end' ? 'mounting_end_date' : 'revision_end_date';
 
+                if (newDateStr === null) {
+                    // Deletion logic for custom fields: reset to auto if needed? 
+                    // For now, let's just clear the field.
+                }
+
                 const { data: currentProject } = await supabase
                     .from('projects')
                     .select('custom_fields')
@@ -336,7 +341,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const currentCustom = currentProject?.custom_fields || {};
                 const updatedCustom = {
                     ...currentCustom,
-                    [key]: newDateStr // Set date or null (to reset to auto)
+                    [key]: newDateStr
                 };
 
                 const { error } = await supabase
@@ -345,6 +350,38 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     .eq('id', id);
 
                 if (error) throw error;
+            } else if (milestoneClass === 'custom_new') {
+                // Add new arbitrary milestone
+                const name = prompt('Název milníku:', 'Nový milník');
+                if (!name) return;
+
+                const { error } = await supabase
+                    .from('project_milestones')
+                    .insert({
+                        project_id: id,
+                        name: name,
+                        date: newDateStr,
+                        status: 'pending'
+                    });
+
+                if (error) throw error;
+            } else if (milestoneClass.startsWith('custom-') || !['chassis', 'body', 'handover', 'deadline', 'start'].includes(milestoneClass)) {
+                // This is an existing arbitrary milestone (id is passed as milestoneClass in m.key)
+                if (newDateStr === null) {
+                    // Delete
+                    const { error } = await supabase
+                        .from('project_milestones')
+                        .delete()
+                        .eq('id', milestoneClass);
+                    if (error) throw error;
+                } else {
+                    // Update date
+                    const { error } = await supabase
+                        .from('project_milestones')
+                        .update({ date: newDateStr })
+                        .eq('id', milestoneClass);
+                    if (error) throw error;
+                }
             } else {
                 const fieldMap: Record<string, string> = {
                     'chassis': 'chassis_delivery',
@@ -526,29 +563,43 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             style={containerStyle}
             onDoubleClick={handleDoubleClick}
         >
-            {/* Add Milestone Popup (Rendered inline but fixed positioned) */}
-            {addMilestoneDate && !isCollapsed && addMilestonePos && (
+            {/* Add Milestone Popup */}
+            {addMilestoneDate && !isCollapsed && addMilestonePos && createPortal((
                 <div
-                    className="fixed bg-popover text-popover-foreground border border-border shadow-lg rounded-md p-2 z-[99999] timeline-popup-content"
+                    className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[999999] timeline-popup-content animate-in zoom-in-95 duration-200"
                     style={{
-                        left: addMilestonePos.x,
+                        left: Math.min(addMilestonePos.x, window.innerWidth - 220),
                         top: addMilestonePos.placement === 'bottom' ? addMilestonePos.y + 10 : 'auto',
                         bottom: addMilestonePos.placement === 'top' ? (window.innerHeight - addMilestonePos.y) + 10 : 'auto',
                         width: 200
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="flex justify-between items-center mb-2 pb-1 border-b border-border">
-                        <span className="text-xs font-bold">{formatLocalDate(addMilestoneDate)}</span>
+                    <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-border">
+                        <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
+                            <Clock size={12} />
+                            {new Date(addMilestoneDate).toLocaleDateString('cs-CZ')}
+                        </span>
                         <button
                             onClick={() => setAddMilestoneDate(null)}
-                            className="text-muted-foreground hover:text-foreground"
+                            className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors"
                         >
                             <X size={14} />
                         </button>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Přidat milník</span>
+                    <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 px-1">Přidat milník</span>
+
+                        <button
+                            className="text-xs text-left px-2 py-2 hover:bg-primary/10 hover:text-primary rounded-md flex items-center gap-2 transition-all font-bold border border-transparent hover:border-primary/20"
+                            onClick={() => handleDateUpdate('custom_new', formatLocalDate(addMilestoneDate))}
+                        >
+                            <Plus size={14} className="text-primary" />
+                            Vlastní milník...
+                        </button>
+
+                        <div className="h-px bg-border/50 my-1 mx-1" />
+
                         {[
                             { id: 'chassis', label: 'Podvozek' },
                             { id: 'body', label: 'Nástavba' },
@@ -560,7 +611,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         ].map(type => (
                             <button
                                 key={type.id}
-                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded flex items-center gap-2 transition-colors"
+                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded-md flex items-center gap-2 transition-colors text-muted-foreground hover:text-foreground"
                                 onClick={() => handleDateUpdate(type.id, formatLocalDate(addMilestoneDate))}
                             >
                                 <Plus size={12} />
@@ -569,7 +620,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         ))}
                     </div>
                 </div>
-            )}
+            ), document.body)}
             {/* Vykreslení fází (podklad) */}
             {phases.map((p: IPhase) => {
                 const left = getDatePos(p.start);
@@ -769,7 +820,30 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         <div className="flex items-start justify-between border-b border-border/50 pb-2 mb-1 gap-3">
                             <div className="flex items-center gap-2">
                                 <Icon size={18} color={milestoneColor} />
-                                <span className="font-bold text-sm" style={{ color: milestoneColor }}>{m.label}</span>
+                                {m.class.startsWith('custom-') ? (
+                                    <input
+                                        type="text"
+                                        defaultValue={m.label}
+                                        className="font-bold text-sm bg-muted/50 border-none px-1 rounded outline-none focus:ring-1 focus:ring-primary/30 flex-1"
+                                        onBlur={async (e) => {
+                                            const val = e.target.value;
+                                            if (!val || val === m.label) return;
+                                            try {
+                                                const { error } = await supabase
+                                                    .from('project_milestones')
+                                                    .update({ name: val })
+                                                    .eq('id', m.key);
+                                                if (error) throw error;
+                                                // Refresh page/component as needed
+                                                handleDateUpdate(m.key, formatLocalDate(m.date));
+                                            } catch (err) {
+                                                console.error('Error updating milestone name:', err);
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <span className="font-bold text-sm" style={{ color: milestoneColor }}>{m.label}</span>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{formatLocalDate(m.date)}</span>
@@ -780,22 +854,44 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         </div>
 
                         {!isDeleteConfirm && !isEditingDate && (
-                            <div className="flex gap-2">
-                                <button
-                                    className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors"
-                                    onClick={() => setIsEditingDate(true)}
-                                    disabled={isUpdating}
-                                >
-                                    Změnit datum
-                                </button>
-                                <button
-                                    className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50 transition-colors"
-                                    onClick={() => setIsDeleteConfirm(true)}
-                                    title="Smazat milník"
-                                    disabled={isUpdating}
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex gap-2">
+                                    <button
+                                        className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors"
+                                        onClick={() => setIsEditingDate(true)}
+                                        disabled={isUpdating}
+                                    >
+                                        Změnit datum
+                                    </button>
+                                    <button
+                                        className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50 transition-colors"
+                                        onClick={() => setIsDeleteConfirm(true)}
+                                        title="Smazat milník"
+                                        disabled={isUpdating}
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                                {m.class.startsWith('custom-') && (
+                                    <button
+                                        className={`w-full text-[10px] font-bold uppercase py-1.5 rounded transition-colors ${m.class === 'custom-completed' ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'}`}
+                                        onClick={async () => {
+                                            const newStatus = m.class === 'custom-completed' ? 'pending' : 'completed';
+                                            try {
+                                                const { error } = await supabase
+                                                    .from('project_milestones')
+                                                    .update({ status: newStatus })
+                                                    .eq('id', m.key);
+                                                if (error) throw error;
+                                                handleDateUpdate(m.key, formatLocalDate(m.date));
+                                            } catch (err) {
+                                                console.error('Error toggling status:', err);
+                                            }
+                                        }}
+                                    >
+                                        {m.class === 'custom-completed' ? 'Označit jako rozpracované' : 'Označit jako hotové'}
+                                    </button>
+                                )}
                             </div>
                         )}
 
@@ -808,7 +904,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         className="flex-1 bg-background border border-border px-2 py-1 rounded text-xs outline-none focus:ring-1 focus:ring-primary/30"
                                         onChange={(e) => {
                                             const val = e.target.value;
-                                            handleDateUpdate(m.class, val);
+                                            const updateKey = m.class.startsWith('custom-') ? m.key : m.class;
+                                            handleDateUpdate(updateKey, val);
                                             setIsEditingDate(false);
                                         }}
                                         defaultValue={formatLocalDate(m.date)}
@@ -836,7 +933,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     <button
                                         className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-[10px] font-bold uppercase py-1.5 rounded transition-colors shadow-sm"
                                         onClick={() => {
-                                            handleDateUpdate(m.class, null);
+                                            const updateKey = m.class.startsWith('custom-') ? m.key : m.class;
+                                            handleDateUpdate(updateKey, null);
                                             setEditPopup(null);
                                         }}
                                     >

@@ -451,9 +451,30 @@ export default function ProjectDetailPage() {
                                             >
                                                 {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                                             </button>
-                                            <div className="min-w-0">
-                                                <p className={`text-xs font-bold truncate ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}>{m.name}</p>
-                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium">
+                                            <div className="min-w-0 flex-1">
+                                                <input
+                                                    type="text"
+                                                    value={m.name}
+                                                    onChange={async (e) => {
+                                                        const newName = e.target.value;
+                                                        const updatedMilestones = milestones.map(ms => ms.id === m.id ? { ...ms, name: newName } : ms);
+                                                        setMilestones(updatedMilestones);
+                                                    }}
+                                                    onBlur={async (e) => {
+                                                        const newName = e.target.value;
+                                                        if (!newName) return;
+                                                        try {
+                                                            await supabase
+                                                                .from('project_milestones')
+                                                                .update({ name: newName })
+                                                                .eq('id', m.id);
+                                                        } catch (err) {
+                                                            console.error('Error updating milestone name:', err);
+                                                        }
+                                                    }}
+                                                    className={`w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0 outline-none ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}
+                                                />
+                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium cursor-default">
                                                     <Calendar size={10} />
                                                     {new Date(m.date).toLocaleDateString('cs-CZ')}
                                                 </div>
