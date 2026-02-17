@@ -139,3 +139,4 @@
 - **Detail**: 
     - Obrazovka údržby nyní dynamicky načítá verzi systému z databáze (`app_settings`).
     - Přidána interaktivní minihra s jeřábem ("Crane Game") pro zabavení uživatelů během odstávky.
+- **Hotfix**: Oprava chybějícího importu `Trash2` na stránce Servisu, který způsoboval pád buildu na Vercelu.

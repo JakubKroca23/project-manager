@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Loader2, Search, Database, X, Plus } from 'lucide-react';
+import { Loader2, Search, Database, X, Plus, Trash2 } from 'lucide-react';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
