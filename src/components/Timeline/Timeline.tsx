@@ -273,7 +273,12 @@ const Timeline: React.FC = () => {
 
             if (data?.settings) {
                 const s = data.settings;
-                if (s.colors) setColors(s.colors);
+                if (s.colors) {
+                    setColors(prev => ({
+                        ...prev,
+                        ...s.colors
+                    }));
+                }
                 if (s.outline) setOutline(s.outline);
             }
         } catch (err) {
@@ -336,15 +341,15 @@ const Timeline: React.FC = () => {
     const customStyles = {
         '--timeline-header-height': `${headerHeight}px`,
         '--timeline-sector-height': '36px',
-        '--phase-initial': hexToRgba(colors.phaseInitial.color, colors.phaseInitial.opacity),
-        '--phase-mounting': hexToRgba(colors.phaseMounting.color, colors.phaseMounting.opacity),
-        '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow.color, colors.phaseBufferYellow.opacity),
-        '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange.color, colors.phaseBufferOrange.opacity),
-        '--milestone-chassis': colors.milestoneChassis.color,
-        '--milestone-body': colors.milestoneBody.color,
-        '--milestone-handover': colors.milestoneHandover.color,
-        '--milestone-deadline': colors.milestoneDeadline.color,
-        '--milestone-start': colors.milestoneStart.color,
+        '--phase-initial': hexToRgba(colors.phaseInitial?.color || '#bae6fd', colors.phaseInitial?.opacity || 0.4),
+        '--phase-mounting': hexToRgba(colors.phaseMounting?.color || '#4ade80', colors.phaseMounting?.opacity || 0.35),
+        '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow?.color || '#facc15', colors.phaseBufferYellow?.opacity || 0.5),
+        '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange?.color || '#fb923c', colors.phaseBufferOrange?.opacity || 0.55),
+        '--milestone-chassis': colors.milestoneChassis?.color || '#888',
+        '--milestone-body': colors.milestoneBody?.color || '#888',
+        '--milestone-handover': colors.milestoneHandover?.color || '#888',
+        '--milestone-deadline': colors.milestoneDeadline?.color || '#888',
+        '--milestone-start': colors.milestoneStart?.color || '#888',
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
