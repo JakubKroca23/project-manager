@@ -138,6 +138,7 @@ interface ITimelineBarProps {
     topOffset?: number;
     isCollapsed?: boolean;
     config?: any;
+    onProjectUpdate?: (updatedProject: Project) => void;
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -161,7 +162,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     dayWidth,
     topOffset = 0,
     isCollapsed = false,
-    config
+    config,
+    onProjectUpdate
 }: ITimelineBarProps) => {
     const [activeCell, setActiveCell] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<'top' | 'bottom'>('bottom');
@@ -214,9 +216,27 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
             if (error) throw error;
 
-            // Refresh page to see changes
+
+            if (error) throw error;
+
+            // Updated local data without reload
             setAddMilestoneDate(null); // Close popup
-            window.location.reload();
+
+            if (onProjectUpdate) {
+                // Fetch the fresh full project row to ensure consistency
+                const { data: updatedRow, error: fetchErr } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (!fetchErr && updatedRow) {
+                    onProjectUpdate(updatedRow);
+                }
+            } else {
+                // Fallback if no handler provided (should not happen with new setup)
+                window.location.reload();
+            }
         } catch (err) {
             console.error('Error updating milestone date:', err);
             alert('Chyba při ukládání data.');

@@ -580,6 +580,10 @@ const Timeline: React.FC = () => {
         fetchProjects();
     }, [fetchProjects]);
 
+    const handleProjectUpdate = useCallback((updatedProject: Project) => {
+        setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+    }, []);
+
     // Helper pro řazení
     const getLatestMilestoneDate = (project: Project): number => {
         const dates = [
@@ -1132,6 +1136,7 @@ const Timeline: React.FC = () => {
                                                                         dayWidth={dayWidth}
                                                                         isCollapsed={true}
                                                                         config={colors}
+                                                                        onProjectUpdate={handleProjectUpdate}
                                                                     />
                                                                 </div>
                                                             );
@@ -1183,6 +1188,7 @@ const Timeline: React.FC = () => {
                                                             timelineStart={timelineRange.start}
                                                             dayWidth={dayWidth}
                                                             config={colors}
+                                                            onProjectUpdate={handleProjectUpdate}
                                                         />
                                                     </div>
                                                 ))}
