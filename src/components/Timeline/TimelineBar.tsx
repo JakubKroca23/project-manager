@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { Project } from '@/types/project';
 import {
@@ -749,38 +750,30 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         onMouseLeave={handleMouseLeave}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-start justify-between border-b border-border/50 pb-3 mb-1 gap-3">
-                            <div className="flex flex-col overflow-hidden gap-1">
-                                <span className="font-bold text-sm leading-tight break-words whitespace-normal">{name}</span>
-                                <span className="text-xs text-muted-foreground break-words whitespace-normal font-medium">{project.customer || 'Bez zákazníka'}</span>
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                    {project.manager && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">👤 {project.manager}</span>}
-                                    {project.production_status && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded font-bold border border-blue-500/20">{project.production_status}</span>}
-                                </div>
+                        <div className="flex items-start justify-between border-b border-border/50 pb-2 mb-1 gap-3">
+                            <div className="flex items-center gap-2">
+                                <Icon size={18} color={milestoneColor} />
+                                <span className="font-bold text-sm" style={{ color: milestoneColor }}>{m.label}</span>
                             </div>
-                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors shrink-0">
-                                <X size={16} />
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-2 mb-2">
-                            <Icon size={18} color={milestoneColor} />
-                            <span className="font-bold text-xs" style={{ color: milestoneColor }}>{m.label}</span>
-                            <div className="flex-1" />
-                            <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{formatLocalDate(m.date)}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{formatLocalDate(m.date)}</span>
+                                <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors shrink-0 outline-none">
+                                    <X size={16} />
+                                </button>
+                            </div>
                         </div>
 
                         {!isDeleteConfirm && !isEditingDate && (
                             <div className="flex gap-2">
                                 <button
-                                    className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs py-1.5 rounded disabled:opacity-50"
+                                    className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors"
                                     onClick={() => setIsEditingDate(true)}
                                     disabled={isUpdating}
                                 >
-                                    Upravit
+                                    Změnit datum
                                 </button>
                                 <button
-                                    className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50"
+                                    className="px-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded disabled:opacity-50 transition-colors"
                                     onClick={() => setIsDeleteConfirm(true)}
                                     title="Smazat milník"
                                     disabled={isUpdating}
@@ -791,12 +784,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         )}
 
                         {isEditingDate && (
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground">Nové datum</label>
+                            <div className="flex flex-col gap-2 p-1 bg-muted/30 rounded-md">
+                                <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Nové datum milníku</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="date"
-                                        className="flex-1 bg-background border border-input px-2 py-1 rounded text-sm"
+                                        className="flex-1 bg-background border border-border px-2 py-1 rounded text-xs outline-none focus:ring-1 focus:ring-primary/30"
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             handleDateUpdate(m.class, val);
@@ -811,32 +804,87 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         <X size={14} />
                                     </button>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground">Vybráním data se milník uloží.</p>
                             </div>
                         )}
 
                         {isDeleteConfirm && (
-                            <div className="flex flex-col gap-2">
-                                <p className="text-xs font-bold text-destructive">Opravdu smazat milník?</p>
+                            <div className="flex flex-col gap-2 p-1 bg-destructive/5 rounded-md border border-destructive/10">
+                                <p className="text-[10px] font-bold text-destructive uppercase tracking-tight">Opravdu smazat milník?</p>
                                 <div className="flex gap-2">
                                     <button
-                                        className="flex-1 bg-muted hover:bg-muted/80 text-xs py-1.5 rounded"
+                                        className="flex-1 bg-muted hover:bg-muted/80 text-[10px] font-bold uppercase py-1.5 rounded transition-colors"
                                         onClick={() => setIsDeleteConfirm(false)}
                                     >
                                         Zrušit
                                     </button>
                                     <button
-                                        className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs py-1.5 rounded"
+                                        className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-[10px] font-bold uppercase py-1.5 rounded transition-colors shadow-sm"
                                         onClick={() => {
                                             handleDateUpdate(m.class, null);
                                             setEditPopup(null);
                                         }}
                                     >
-                                        Potvrdit
+                                        Smazat
                                     </button>
                                 </div>
                             </div>
                         )}
+
+                        {/* Project Info Section at the Bottom */}
+                        <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-2">
+                            <div className="flex flex-col gap-0.5">
+                                <Link
+                                    href={`/projekty/${project.id}`}
+                                    className="font-bold text-sm leading-tight hover:text-primary transition-colors line-clamp-2"
+                                >
+                                    {name}
+                                </Link>
+                                <span className="text-xs text-muted-foreground font-medium line-clamp-1">{project.customer || 'Bez zákazníka'}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Typ nástavby</label>
+                                    <input
+                                        type="text"
+                                        className="bg-muted/50 border border-border/40 rounded px-2 py-1 text-[11px] font-medium outline-none focus:ring-1 focus:ring-primary/30"
+                                        placeholder="Vyplnit typ..."
+                                        defaultValue={project.body_type || ''}
+                                        onBlur={async (e) => {
+                                            const val = e.target.value;
+                                            if (val === (project.body_type || '')) return;
+
+                                            // Quick inline update
+                                            try {
+                                                const { error } = await supabase
+                                                    .from('projects')
+                                                    .update({ body_type: val })
+                                                    .eq('id', id);
+                                                if (error) throw error;
+                                                if (onProjectUpdate) {
+                                                    onProjectUpdate({ ...project, body_type: val });
+                                                }
+                                            } catch (err) {
+                                                console.error('Error updating body_type:', err);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</label>
+                                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1 rounded font-bold border border-blue-500/20 text-center truncate">
+                                        {project.production_status || 'Bez statusu'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {project.manager && (
+                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 px-2 py-1 rounded-md mt-1">
+                                    <span className="opacity-60">Manažer:</span>
+                                    <span className="font-bold">{project.manager}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 );
             })(), document.body)}

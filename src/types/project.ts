@@ -21,6 +21,7 @@ export interface Project {
     production_status?: string;     // Status Výroby
     mounting_company?: string;      // Montážní společnost
     body_setup?: string;            // Nástavba nastavení
+    body_type?: string;             // Typ nástavby
     serial_number?: string;         // Výrobní číslo
     // service_duration removed
 

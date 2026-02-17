@@ -24,7 +24,8 @@ import {
     Factory,
     CalendarDays,
     Wrench,
-    FileText
+    FileText,
+    Package
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -287,6 +288,7 @@ export default function ProjectDetailPage() {
                     <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
                         <FieldGrid>
                             <Field label="Stav výroby" icon={<Factory size={13} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
+                            <Field label="Typ nástavby" icon={<Package size={13} />} value={p.body_type} field="body_type" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
                         </FieldGrid>
