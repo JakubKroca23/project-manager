@@ -804,10 +804,11 @@ const Timeline: React.FC = () => {
                                                 <MoveHorizontal size={20} className="text-primary" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-sm">Posun osy (Scroll/Pan)</p>
+                                                <p className="font-bold text-sm">Posun osy (Scroll)</p>
                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>Táhnutí:</strong> Klikněte kamkoliv do plochy a táhněte pro posun v čase.<br />
-                                                    <strong>Kolečko:</strong> Klasický posun v čase i vertikálně mezi projekty.
+                                                    <strong>Kolečko myši:</strong> Klasický posun v čase (vlevo/vpravo) i vertikálně mezi projekty.<br />
+                                                    <strong>Shift + Kolečko:</strong> Rychlejší horizontální posun v čase.<br />
+                                                    <strong>Táhnutí (Scrollbar):</strong> Použijte spodní lištu pro rychlou navigaci.
                                                 </p>
                                             </div>
                                         </div>
@@ -875,21 +876,43 @@ const Timeline: React.FC = () => {
                                     <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                                         <Flag size={16} /> Legenda milníků
                                     </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, conf]) => {
-                                            const Icon = ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
-                                            return (
-                                                <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg border border-border/40 bg-background/50">
-                                                    <div
-                                                        className="w-8 h-8 rounded-full flex items-center justify-center bg-muted"
-                                                        style={{ color: conf.color }}
-                                                    >
-                                                        <Icon size={16} />
-                                                    </div>
-                                                    <span className="text-xs font-bold leading-tight">{conf.label}</span>
-                                                </div>
-                                            );
-                                        })}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#374151] shadow-sm">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-white opacity-20" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold">Čekající (Standardní)</p>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">Milník v budoucnu nebo v termínu, který zatím nebyl potvrzen.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#22c55e] shadow-sm">
+                                                <Check size={16} className="text-white" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-emerald-600">Splněno (Potvrzeno)</p>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">Zelená barva značí milník, který byl uživatelem ručně potvrzen jako doručený/hotový.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#ef4444] shadow-sm">
+                                                <AlertTriangle size={16} className="text-white" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-red-600">Po termínu (Upozornění)</p>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">Červená barva svítí, pokud milník není splněn (nepotvrzen) a jeho datum už proběhlo.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-muted/20 italic">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted border border-border/50 shadow-inner">
+                                                <RotateCcw size={14} className="text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-muted-foreground">Ostatní</p>
+                                                <p className="text-[10px] text-muted-foreground leading-tight">Ikonku libovolného milníku lze změnit individuálně pro každou zakázku.</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </section>
                             </div>
