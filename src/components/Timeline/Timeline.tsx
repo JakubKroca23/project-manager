@@ -168,6 +168,7 @@ interface IOutlineState {
     width: number;
     color: string;
     opacity: number;
+    showInStack?: boolean;
 }
 
 interface IServiceLanesResult {
@@ -216,7 +217,7 @@ const Timeline: React.FC = () => {
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
     });
 
-    const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2 });
+    const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
 
     // Collapsed Sectors State
     const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
@@ -857,15 +858,29 @@ const Timeline: React.FC = () => {
                                         <div className="space-y-2 pt-4 mt-2 border-t border-border">
                                             <div className="flex justify-between items-center">
                                                 <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={outline.enabled}
-                                                    onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
-                                                    className="accent-primary"
-                                                />
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-sm">Zobrazit obrys</span>
+                                                    </div>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={outline.enabled}
+                                                        onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
+                                                        className="accent-primary"
+                                                    />
+                                                </div>
                                             </div>
                                             {outline.enabled && (
                                                 <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={outline.showInStack !== false}
+                                                            onChange={(e) => setOutline(prev => ({ ...prev, showInStack: e.target.checked }))}
+                                                            className="rounded border-muted w-3 h-3"
+                                                        />
+                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
+                                                    </div>
                                                     <div className="flex justify-between items-center">
                                                         <span className="text-xs font-medium">Barva</span>
                                                         <input
@@ -1043,7 +1058,10 @@ const Timeline: React.FC = () => {
                                                     </div>
 
                                                     {/* STACKED CONTENT (Always visible) */}
-                                                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                                    <div
+                                                        className="absolute inset-0 overflow-hidden pointer-events-none"
+                                                        style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
+                                                    >
                                                         {sector.projects.map(project => {
                                                             const sDate = (parseDate(project.created_at) || new Date());
                                                             const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
