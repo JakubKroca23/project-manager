@@ -791,7 +791,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
-                                const milestoneColor = milestoneConfig?.color || '#888';
+                                const milestoneColor = m.class === 'custom-completed' ? '#10b981' : (m.class === 'custom-pending' ? '#ef4444' : (milestoneConfig?.color || '#888'));
 
                                 const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
                                 const isStartVal = m.class === 'start';
@@ -862,25 +862,26 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 };
                 const configKey = configMap[m.class];
                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
-                const milestoneColor = milestoneConfig?.color || '#888';
+                const milestoneColor = m.class === 'custom-completed' ? '#10b981' : (m.class === 'custom-pending' ? '#ef4444' : (milestoneConfig?.color || '#888'));
                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
                 // Calculate vertical position (check bounds)
-                const isNearBottom = (window.innerHeight - editPopup.y) < 200;
+                const isNearBottom = (window.innerHeight - editPopup.y) < 400;
                 // Since we use Portal, coordinates are absolute to viewport, which matches clientRect
                 const topPos = isNearBottom ? 'auto' : editPopup.y + 10;
-                const bottomPos = isNearBottom ? (window.innerHeight - editPopup.y) + 30 : 'auto';
+                const bottomPos = isNearBottom ? Math.max(10, (window.innerHeight - editPopup.y) + 35) : 'auto';
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-4 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-4 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200 overflow-y-auto"
                         style={{
                             left: Math.min(editPopup.x - 100, window.innerWidth - 340), // Prevent overflow right
                             top: topPos,
                             bottom: bottomPos,
                             width: 320, // Wider for better readability
-                            maxWidth: '90vw'
+                            maxWidth: '90vw',
+                            maxHeight: '85vh'
                         }}
                         onMouseEnter={() => {
                             if (hoverTimeoutRef.current) {

@@ -504,12 +504,12 @@ export default function ProjectDetailPage() {
                                 <div className="col-span-full py-4 text-center text-xs text-muted-foreground italic bg-muted/10 rounded-xl border border-dashed border-border/50">Žádné vlastní milníky nebyly přidány.</div>
                             ) : (
                                 milestones.map((m) => (
-                                    <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/20 border-border/50'}`}>
+                                    <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="flex flex-col items-center gap-1 shrink-0">
                                                 <button
                                                     onClick={() => handleToggleMilestoneStatus(m)}
-                                                    className={`p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-muted-foreground/40 hover:text-primary hover:bg-primary/10'}`}
+                                                    className={`p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}
                                                 >
                                                     {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                                                 </button>
