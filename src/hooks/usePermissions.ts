@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { ADMIN_EMAIL } from './useAdmin';
 
 export interface UserPermissions {
     id: string;
@@ -72,7 +73,7 @@ export function usePermissions() {
 
     const checkPerm = useCallback((key: string) => {
         if (!permissions) return true;
-        if (permissions.role === 'admin' || permissions.email === 'jakub.kroca@contsystem.cz') return true;
+        if (permissions.role === 'admin' || permissions.email === ADMIN_EMAIL) return true;
 
         const perms = permissions.permissions || {};
         return perms[key as keyof typeof perms] !== false;
@@ -82,8 +83,8 @@ export function usePermissions() {
         permissions,
         isLoading,
         canImport: permissions?.can_import || false,
-        canEdit: permissions?.can_import || permissions?.role === 'admin' || permissions?.email === 'jakub.kroca@contsystem.cz',
-        isAdmin: permissions?.role === 'admin' || permissions?.email === 'jakub.kroca@contsystem.cz',
+        canEdit: permissions?.can_import || permissions?.role === 'admin' || permissions?.email === ADMIN_EMAIL,
+        isAdmin: permissions?.role === 'admin' || permissions?.email === ADMIN_EMAIL,
         checkPerm
     };
 }

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2, AlertCircle, ArrowRight, UserPlus, CheckCircle2, KeyRound } from 'lucide-react';
 import Image from 'next/image';
+import { ADMIN_EMAIL } from '@/hooks/useAdmin';
 
 import logo from '@/assets/contsystem-logo.png';
 
@@ -100,7 +101,7 @@ export default function LoginPage() {
                         .eq('id', userData.user.id);
                     if (updateError) throw updateError;
                 } else {
-                    throw new Error('Žádost o přístup se nepodařilo odeslat. Prosím kontaktujte administrátora na jakub.kroca@contsystem.cz');
+                    throw new Error(`Žádost o přístup se nepodařilo odeslat. Prosím kontaktujte administrátora na ${ADMIN_EMAIL}`);
                 }
             }
 

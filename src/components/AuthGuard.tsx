@@ -29,11 +29,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
             try {
                 const { data: maintenanceData } = await supabase
                     .from('app_settings')
-                    .select('value')
-                    .eq('key', 'maintenance_mode')
-                    .single();
+                    .select('settings')
+                    .eq('id', 'maintenance_mode')
+                    .maybeSingle();
 
-                if (maintenanceData?.value === true) {
+                if ((maintenanceData?.settings as any)?.value === true) {
                     setIsMaintenance(true);
                 }
             } catch (err) {

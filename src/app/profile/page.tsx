@@ -44,8 +44,12 @@ export default function ProfilePage() {
 
     useEffect(() => {
         const fetchMaintenance = async () => {
-            const { data } = await supabase.from('app_settings').select('value').eq('key', 'maintenance_mode').single();
-            if (data?.value === true) setMaintenanceMode(true);
+            const { data } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'maintenance_mode')
+                .maybeSingle();
+            if ((data?.settings as any)?.value === true) setMaintenanceMode(true);
         };
         fetchMaintenance();
     }, []);
@@ -53,7 +57,12 @@ export default function ProfilePage() {
     const toggleMaintenance = async () => {
         const newVal = !maintenanceMode;
         setMaintenanceMode(newVal);
-        const { error } = await supabase.from('app_settings').upsert({ key: 'maintenance_mode', value: newVal }, { onConflict: 'key' as any }); // Cast as any to avoid strict type error if tables not fully typed
+        const { error } = await supabase
+            .from('app_settings')
+            .upsert(
+                { id: 'maintenance_mode', settings: { value: newVal }, updated_at: new Date().toISOString() },
+                { onConflict: 'id' as any }
+            );
         if (error) {
             showToast('Nepodařilo se změnit režim údržby', 'error');
             setMaintenanceMode(!newVal);
@@ -365,8 +374,8 @@ export default function ProfilePage() {
                                             </button>
                                         </div>
 
-                                        {/* Maintenance Mode Toggle - Only for Jakub Kroča */}
-                                        {currentUserProfile?.email === 'jakub.kroca@contsystem.cz' && (
+                                        {/* Maintenance Mode Toggle - Only for Admin */}
+                                        {currentUserProfile?.email === ADMIN_EMAIL && (
                                             <div className="flex items-center justify-between bg-white dark:bg-muted/30 px-4 py-3 rounded-xl border border-indigo-500/10">
                                                 <div className="space-y-0.5">
                                                     <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
