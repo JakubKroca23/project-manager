@@ -184,6 +184,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const [editPopup, setEditPopup] = useState<{ m: IMilestone, x: number, y: number } | null>(null);
     const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
+    const [addingCustomMode, setAddingCustomMode] = useState(false);
+    const [customForm, setCustomForm] = useState({ name: '', description: '', status: 'pending' });
 
     // Hover timeout ref to prevent flickering
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -225,6 +227,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 setEditPopup(null);
                 setIsDeleteConfirm(false);
                 setIsEditingDate(false);
+                setAddingCustomMode(false);
+                setCustomForm({ name: '', description: '', status: 'pending' });
             }
         };
 
@@ -352,19 +356,21 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 if (error) throw error;
             } else if (milestoneClass === 'custom_new') {
                 // Add new arbitrary milestone
-                const name = prompt('Název milníku:', 'Nový milník');
-                if (!name) return;
+                if (!customForm.name) return;
 
                 const { error } = await supabase
                     .from('project_milestones')
                     .insert({
                         project_id: id,
-                        name: name,
+                        name: customForm.name,
+                        description: customForm.description,
                         date: newDateStr,
-                        status: 'pending'
+                        status: customForm.status
                     });
 
                 if (error) throw error;
+                setAddingCustomMode(false);
+                setCustomForm({ name: '', description: '', status: 'pending' });
             } else if (milestoneClass.startsWith('custom-') || !['chassis', 'body', 'handover', 'deadline', 'start'].includes(milestoneClass)) {
                 // This is an existing arbitrary milestone (id is passed as milestoneClass in m.key)
                 if (newDateStr === null) {
@@ -581,43 +587,92 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             {new Date(addMilestoneDate).toLocaleDateString('cs-CZ')}
                         </span>
                         <button
-                            onClick={() => setAddMilestoneDate(null)}
+                            onClick={() => {
+                                setAddMilestoneDate(null);
+                                setAddingCustomMode(false);
+                                setCustomForm({ name: '', description: '', status: 'pending' });
+                            }}
                             className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors"
                         >
                             <X size={14} />
                         </button>
                     </div>
-                    <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 px-1">Přidat milník</span>
+                    <div className="flex flex-col gap-1 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
+                        {!addingCustomMode ? (
+                            <>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 px-1">Přidat milník</span>
 
-                        <button
-                            className="text-xs text-left px-2 py-2 hover:bg-primary/10 hover:text-primary rounded-md flex items-center gap-2 transition-all font-bold border border-transparent hover:border-primary/20"
-                            onClick={() => handleDateUpdate('custom_new', formatLocalDate(addMilestoneDate))}
-                        >
-                            <Plus size={14} className="text-primary" />
-                            Vlastní milník...
-                        </button>
+                                <button
+                                    className="text-xs text-left px-2 py-2 hover:bg-primary/10 hover:text-primary rounded-md flex items-center gap-2 transition-all font-bold border border-transparent hover:border-primary/20"
+                                    onClick={() => setAddingCustomMode(true)}
+                                >
+                                    <Plus size={14} className="text-primary" />
+                                    Vlastní milník...
+                                </button>
 
-                        <div className="h-px bg-border/50 my-1 mx-1" />
+                                <div className="h-px bg-border/50 my-1 mx-1" />
 
-                        {[
-                            { id: 'chassis', label: 'Podvozek' },
-                            { id: 'body', label: 'Nástavba' },
-                            { id: 'mounting_end', label: 'Konec Montáže' },
-                            { id: 'revision_end', label: 'Konec Revize' },
-                            { id: 'start', label: 'Start (Uzavřeno)' },
-                            { id: 'handover', label: 'Předání', },
-                            { id: 'deadline', label: 'Deadline' },
-                        ].map(type => (
-                            <button
-                                key={type.id}
-                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded-md flex items-center gap-2 transition-colors text-muted-foreground hover:text-foreground"
-                                onClick={() => handleDateUpdate(type.id, formatLocalDate(addMilestoneDate))}
-                            >
-                                <Plus size={12} />
-                                {type.label}
-                            </button>
-                        ))}
+                                {[
+                                    { id: 'chassis', label: 'Podvozek' },
+                                    { id: 'body', label: 'Nástavba' },
+                                    { id: 'mounting_end', label: 'Konec Montáže' },
+                                    { id: 'revision_end', label: 'Konec Revize' },
+                                    { id: 'start', label: 'Start (Uzavřeno)' },
+                                    { id: 'handover', label: 'Předání', },
+                                    { id: 'deadline', label: 'Deadline' },
+                                ].map(type => (
+                                    <button
+                                        key={type.id}
+                                        className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded-md flex items-center gap-2 transition-colors text-muted-foreground hover:text-foreground"
+                                        onClick={() => handleDateUpdate(type.id, formatLocalDate(addMilestoneDate!))}
+                                    >
+                                        <Plus size={12} />
+                                        {type.label}
+                                    </button>
+                                ))}
+                            </>
+                        ) : (
+                            <div className="flex flex-col gap-2 p-1">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-primary mb-1 px-1">Nový vlastní milník</span>
+                                <div className="space-y-2">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Název</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Např. Kontrola kvality"
+                                            className="w-full text-xs bg-muted/50 border border-border px-2 py-1.5 rounded-md outline-none focus:ring-1 focus:ring-primary/30"
+                                            value={customForm.name}
+                                            onChange={(e) => setCustomForm({ ...customForm, name: e.target.value })}
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Popis (volitelné)</label>
+                                        <textarea
+                                            placeholder="Podrobnosti o milníku..."
+                                            className="w-full text-[11px] bg-muted/50 border border-border px-2 py-1.5 rounded-md outline-none focus:ring-1 focus:ring-primary/30 min-h-[60px] resize-none"
+                                            value={customForm.description}
+                                            onChange={(e) => setCustomForm({ ...customForm, description: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                        <button
+                                            className="flex-1 text-[10px] font-bold uppercase py-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
+                                            onClick={() => setAddingCustomMode(false)}
+                                        >
+                                            Zrušit
+                                        </button>
+                                        <button
+                                            className="flex-1 text-[10px] font-bold uppercase py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all shadow-sm"
+                                            onClick={() => handleDateUpdate('custom_new', formatLocalDate(addMilestoneDate!))}
+                                            disabled={!customForm.name || isUpdating}
+                                        >
+                                            {isUpdating ? 'Ukládám...' : 'Přidat'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             ), document.body)}
