@@ -127,5 +127,15 @@
 - **Detail**:
     - Popup pro editaci se nyní při blízkosti spodního okraje okna (limit zvýšen na 400px) automaticky otevírá směrem nahoru.
     - Přidán `max-height: 85vh` a `overflow-y: auto` do popupu, čímž je zaručena jeho plná viditelnost na všech zařízeních.
-- **Změna**: Oprava duplicity polí v detailu.
-- **Detail**: Odstraněna duplicitní "Montážní společnost" v sekci Výroba.
+
+## [2026-02-17] - Project Creation & Maintenance Enhancements
+- **Změna**: Implementace ručního vytváření zakázek a servisů.
+- **Detail**: Vytvořena komponenta `CreateProjectModal.tsx` s validací (povinná pole: ID, Název, Klient, Manažer). Tlačítka "Nový projekt/servis" integrována do stránek `/projekty` a `/servis`.
+- **Změna**: Vylepšení SystemStatusBar.
+- **Detail**:
+    - Přidána konstanta `LAST_DEPLOY_DATE` pro zobrazení reálného času nasazení systému.
+    - Zprovozněno tlačítko "Release Notes" s modálním oknem zobrazujícím novinky a opravy.
+- **Změna**: Modernizace Maintenance Screen.
+- **Detail**: 
+    - Obrazovka údržby nyní dynamicky načítá verzi systému z databáze (`app_settings`).
+    - Přidána interaktivní minihra s jeřábem ("Crane Game") pro zabavení uživatelů během odstávky.

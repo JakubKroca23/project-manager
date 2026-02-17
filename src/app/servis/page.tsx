@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Loader2, Search, Database, X, Trash2 } from 'lucide-react';
+import { Loader2, Search, Database, X, Plus } from 'lucide-react';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
@@ -11,6 +11,7 @@ import { useTableSettings } from '@/hooks/useTableSettings';
 import { Project } from '@/types/project';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import CreateProjectModal from '@/components/CreateProjectModal';
 
 
 interface ImportInfo {
@@ -97,6 +98,7 @@ export default function ServisPage() {
     const [searchTags, setSearchTags] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const tableSettings = useTableSettings(`projects-${activeTab}`);
     const router = useRouter();
 
@@ -283,6 +285,18 @@ export default function ServisPage() {
                                     </span>
                                 </div>
 
+                                {/* Create New Button */}
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all hover:scale-105 active:scale-95",
+                                        "bg-orange-600 text-white border-orange-500/20 shadow-orange-500/10"
+                                    )}
+                                >
+                                    <Plus size={10} />
+                                    <span>Nový servis</span>
+                                </button>
+
                                 {/* Search */}
                                 <div className="relative group max-w-xs flex-1" title="Hledat lze podle: Názvu, ID, Zákazníka, Manažera, Stavu, Výrobního čísla, Abra kódů a dalších vlastních polí.">
                                     <div className="flex items-center gap-1.5 w-full min-h-[30px] px-2.5 py-0.5 bg-muted/20 border border-border/60 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 focus-within:border-primary/40 transition-all flex-wrap">
@@ -333,6 +347,13 @@ export default function ServisPage() {
                     />
                 )}
             </div>
+
+            <CreateProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchProjects}
+                projectType={activeTab}
+            />
         </div>
     );
 }

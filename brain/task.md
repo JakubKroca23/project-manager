@@ -28,6 +28,12 @@
 - [x] Barevné odlišení milníků (Červená/Zelená).
 - [x] Fix pozicování a otevírání popupu Timeline (Bottom-overflow fix).
 - [x] Oprava duplicity polí v detailu projektu.
+- [x] Implementace modálu pro ruční vytváření zakázek a servisů.
+- [x] Integrace "Nový projekt" do stránek Projekty a Servis.
+- [x] Zobrazení reálného času nasazení (LAST_DEPLOY_DATE) v SystemStatusBar.
+- [x] Implementace Release Notes modálu.
+- [x] Dynamické načítání verze na obrazovce údržby.
+- [x] Implementace interaktivní minihry s jeřábem pro režim údržby.
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.
