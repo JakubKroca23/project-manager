@@ -788,6 +788,14 @@ const Timeline: React.FC = () => {
                         </div>
                     </div>
 
+                    <button
+                        className="action-button"
+                        onClick={() => setShowHelp(true)}
+                        title="Nápověda a Legenda"
+                    >
+                        <HelpCircle size={16} />
+                    </button>
+
 
                 </div>
 
@@ -802,13 +810,6 @@ const Timeline: React.FC = () => {
                                 <Settings size={16} />
                             </button>
 
-                            <button
-                                className="action-button"
-                                onClick={() => setShowHelp(true)}
-                                title="Nápověda a Legenda"
-                            >
-                                <HelpCircle size={16} />
-                            </button>
 
                             {showColorEditor && (
                                 <div className="absolute top-full right-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">

@@ -636,8 +636,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const configKey = configMap[m.class];
                                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
 
-                                // Check stack visibility
-                                if (isCollapsed && milestoneConfig?.showInStack === false) return null;
+                                // Check stack visibility - explicit hide for mounting_end/revision_end in stack
+                                if (isCollapsed && (milestoneConfig?.showInStack === false || m.class === 'mounting_end' || m.class === 'revision_end')) return null;
 
                                 const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
