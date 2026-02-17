@@ -64,9 +64,7 @@ const PROJECT_FIELDS: ProjectField[] = [
 
 type ImportSource = 'raynet' | 'group' | 'custom';
 
-67: export default function ExcelImporter({ onImportSuccess, projectType, lastImport }: { onImportSuccess: () => void, projectType: 'civil' | 'military' | 'service', lastImport?: { date: string; user: string } | null }) {
-...
-    622: <p className="text-sm text-muted-foreground">Vyberte formát dat pro import do kategorie <span className="font-bold text-foreground uppercase tracking-wider underline underline-offset-4 decoration-primary/30">{projectType === 'civil' ? 'Civilní' : projectType === 'service' ? 'Servis' : 'Armáda'}</span></p>
+export default function ExcelImporter({ onImportSuccess, projectType, lastImport }: { onImportSuccess: () => void, projectType: 'civil' | 'military' | 'service', lastImport?: { date: string; user: string } | null }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
