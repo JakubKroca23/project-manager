@@ -4,7 +4,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { Project } from '@/types/project';
+import { Project, Milestone as ProjectMilestone } from '@/types/project';
 import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
     Cog, Wrench, Zap, Cpu, Activity, Package, Box, HardHat,
@@ -158,7 +158,7 @@ interface ITimelineBarProps {
     isCollapsed?: boolean;
     config?: any;
     onProjectUpdate?: (updatedProject: Project) => void;
-    milestones?: any[];
+    milestones?: ProjectMilestone[];
 }
 
 const parseDate = (dateStr: string | undefined): Date | null => {
@@ -316,7 +316,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         }
 
         // Add dynamic milestones from prop
-        milestones.forEach((m: any) => {
+        milestones.forEach((m: ProjectMilestone) => {
             if (m.date) {
                 raw.push({
                     key: m.id,
