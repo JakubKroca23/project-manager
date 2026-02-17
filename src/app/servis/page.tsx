@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Loader2, Search, Database, X } from 'lucide-react';
+import { Loader2, Search, Database, X, Trash2 } from 'lucide-react';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTableSettings } from '@/hooks/useTableSettings';
@@ -192,6 +192,19 @@ export default function ServisPage() {
         setSearchTags(searchTags.filter(tag => tag !== tagToRemove));
     };
 
+    const deleteProject = useCallback(async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!window.confirm('Opravdu chcete smazat tento servis?')) return;
+
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+        if (error) {
+            console.error('Error deleting project:', error);
+            alert('Chyba při mazání servisu.');
+        } else {
+            setProjects(prev => prev.filter(p => p.id !== id));
+        }
+    }, []);
+
     // Memoize columns to include dynamic custom fields
     const tableColumns = useMemo(() => {
         const dynamicColumns: ColumnDef<Project>[] = [];
@@ -219,7 +232,22 @@ export default function ServisPage() {
             });
         });
 
-        return [...columns, ...dynamicColumns];
+        const actionColumn: ColumnDef<Project> = {
+            id: 'actions',
+            header: '',
+            size: 40,
+            cell: ({ row }) => (
+                <button
+                    onClick={(e) => deleteProject(row.original.id, e)}
+                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                    title="Smazat servis"
+                >
+                    <Trash2 size={16} />
+                </button>
+            )
+        };
+
+        return [...columns, ...dynamicColumns, actionColumn];
     }, [projects]);
 
     return (

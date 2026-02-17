@@ -1286,7 +1286,7 @@ const Timeline: React.FC = () => {
                             <div className="timeline-rows">
                                 {(() => {
                                     const visibleSectors = sectorizedProjects.filter(
-                                        sector => activeTypes[sector.id] && sector.projects.length > 0
+                                        sector => activeTypes[sector.id] && (sector.projects.length > 0 || sector.id === 'service')
                                     );
 
                                     const renderSectorRecursively = (index: number): React.ReactNode => {
