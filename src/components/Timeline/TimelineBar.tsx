@@ -185,6 +185,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const [editPopup, setEditPopup] = useState<{ m: IMilestone, x: number, y: number } | null>(null);
     const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
+    const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
     const [addingCustomMode, setAddingCustomMode] = useState(false);
     const [customForm, setCustomForm] = useState({ name: '', description: '', status: 'pending', icon: 'Milestone' });
 
@@ -197,7 +198,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             hoverTimeoutRef.current = null;
         }
         // Only set if not already editing/confirming on another popup (optional check)
-        if (!isDeleteConfirm && !isEditingDate) {
+        if (!isDeleteConfirm && !isEditingDate && !isIconPickerOpen) {
             setEditPopup({ m, x: rect.left, y: rect.bottom });
         }
     };
@@ -210,7 +211,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             // For now, let's assume if they are interacting, they are INSIDE the popup, 
             // so this onMouseLeave (from icon) is valid. 
             // The popup ITSELF needs to cancel this timeout on enter.
-            if (!isEditingDate && !isDeleteConfirm) {
+            if (!isEditingDate && !isDeleteConfirm && !isIconPickerOpen) {
                 setEditPopup(null);
             }
         }, 300); // 300ms grace period
@@ -228,6 +229,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 setEditPopup(null);
                 setIsDeleteConfirm(false);
                 setIsEditingDate(false);
+                setIsIconPickerOpen(false);
                 setAddingCustomMode(false);
                 setCustomForm({ name: '', description: '', status: 'pending', icon: 'Milestone' });
             }
@@ -928,7 +930,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             </div>
                         </div>
 
-                        {!isDeleteConfirm && !isEditingDate && (
+                        {!isDeleteConfirm && !isEditingDate && !isIconPickerOpen && (
                             <div className="flex flex-col gap-2">
                                 <div className="flex gap-2">
                                     <button
@@ -968,32 +970,54 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     </button>
 
                                     <div className="space-y-1 mt-1">
-                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Změnit ikonku</label>
-                                        <div className="grid grid-cols-6 gap-1 p-1 bg-muted/20 rounded-md">
-                                            {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
-                                                <button
-                                                    key={key}
-                                                    type="button"
-                                                    onClick={async () => {
-                                                        try {
-                                                            const { error } = await supabase
-                                                                .from('project_milestones')
-                                                                .update({ icon: key })
-                                                                .eq('id', m.key);
-                                                            if (error) throw error;
-                                                            handleDateUpdate(m.key, formatLocalDate(m.date));
-                                                        } catch (err) {
-                                                            console.error('Error updating icon:', err);
-                                                        }
-                                                    }}
-                                                    className={`p-1 rounded transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground/50'}`}
-                                                    title={key}
-                                                >
-                                                    <IconComponent size={12} />
-                                                </button>
-                                            ))}
-                                        </div>
+                                        <button
+                                            className="w-full bg-muted hover:bg-muted/80 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                                            onClick={() => setIsIconPickerOpen(true)}
+                                            disabled={isUpdating}
+                                        >
+                                            <Settings size={12} />
+                                            Změnit ikonku
+                                        </button>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {isIconPickerOpen && (
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Vyberte novou ikonku</span>
+                                    <button
+                                        className="text-[10px] font-bold bg-muted hover:bg-muted/80 px-2 py-1 rounded"
+                                        onClick={() => setIsIconPickerOpen(false)}
+                                    >
+                                        Zpět
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-6 gap-1 p-1 bg-muted/20 rounded-md">
+                                    {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const { error } = await supabase
+                                                        .from('project_milestones')
+                                                        .update({ icon: key })
+                                                        .eq('id', m.key);
+                                                    if (error) throw error;
+                                                    handleDateUpdate(m.key, formatLocalDate(m.date));
+                                                    setIsIconPickerOpen(false);
+                                                } catch (err) {
+                                                    console.error('Error updating icon:', err);
+                                                }
+                                            }}
+                                            className={`p-1 rounded transition-all flex items-center justify-center ${m.icon === key ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground/50'}`}
+                                            title={key}
+                                        >
+                                            <IconComponent size={12} />
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -1047,34 +1071,36 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             </div>
                         )}
 
-                        {/* Project Info Section at the Bottom */}
-                        <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-2">
-                            <div className="flex flex-col gap-0.5">
-                                <Link
-                                    href={`/projekty/${project.id}`}
-                                    className="font-bold text-sm leading-tight hover:text-primary transition-colors line-clamp-2"
-                                >
-                                    {name}
-                                </Link>
-                                <span className="text-xs text-muted-foreground font-medium line-clamp-1">{project.customer || 'Bez zákazníka'}</span>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-2 mt-1">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Aktuální Status Zakázky</label>
-                                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1.5 rounded font-bold border border-blue-500/20 text-center">
-                                        {project.production_status || 'Bez statusu'}
-                                    </span>
+                        {/* Project Info Section at the Bottom - Hide when picking icons to save space */}
+                        {!isIconPickerOpen && !isEditingDate && !isDeleteConfirm && (
+                            <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-2">
+                                <div className="flex flex-col gap-0.5">
+                                    <Link
+                                        href={`/projekty/${project.id}`}
+                                        className="font-bold text-sm leading-tight hover:text-primary transition-colors line-clamp-2"
+                                    >
+                                        {name}
+                                    </Link>
+                                    <span className="text-xs text-muted-foreground font-medium line-clamp-1">{project.customer || 'Bez zákazníka'}</span>
                                 </div>
-                            </div>
 
-                            {project.manager && (
-                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 px-2 py-1 rounded-md mt-1">
-                                    <span className="opacity-60">Manažer:</span>
-                                    <span className="font-bold">{project.manager}</span>
+                                <div className="grid grid-cols-1 gap-2 mt-1">
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Aktuální Status Zakázky</label>
+                                        <span className="text-[10px] bg-blue-500/10 text-blue-600 px-2 py-1.5 rounded font-bold border border-blue-500/20 text-center">
+                                            {project.production_status || 'Bez statusu'}
+                                        </span>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {project.manager && (
+                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 px-2 py-1 rounded-md mt-1">
+                                        <span className="opacity-60">Manažer:</span>
+                                        <span className="font-bold">{project.manager}</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 );
             })(), document.body)}
