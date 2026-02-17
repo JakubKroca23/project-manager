@@ -168,8 +168,39 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const [activeCell, setActiveCell] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<'top' | 'bottom'>('bottom');
     const [isUpdating, setIsUpdating] = useState(false);
+
+    // Popup States
     const [addMilestoneDate, setAddMilestoneDate] = useState<Date | null>(null);
-    const [addMilestonePos, setAddMilestonePos] = useState<{ x: number, placement: 'top' | 'bottom' } | null>(null);
+    const [addMilestonePos, setAddMilestonePos] = useState<{ x: number, y: number, placement: 'top' | 'bottom' } | null>(null);
+
+    const [editPopup, setEditPopup] = useState<{ m: IMilestone, x: number, y: number } | null>(null);
+    const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+    const [isEditingDate, setIsEditingDate] = useState(false);
+
+    // Global Click Listener to close popups
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+
+            // If clicking inside a popup, do nothing
+            if (target.closest('.timeline-popup-content')) return;
+
+            // Otherwise close everything
+            if (addMilestoneDate || editPopup) {
+                setAddMilestoneDate(null);
+                setEditPopup(null);
+                setIsDeleteConfirm(false);
+                setIsEditingDate(false);
+            }
+        };
+
+        if (addMilestoneDate || editPopup) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [addMilestoneDate, editPopup]);
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
@@ -196,7 +227,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         return groups;
     }, [t_chassis, t_body, t_handover, t_deadline, project.project_type]);
 
-    const handleDateUpdate = async (milestoneClass: string, newDateStr: string) => {
+    const handleDateUpdate = async (milestoneClass: string, newDateStr: string | null) => {
         setIsUpdating(true);
         try {
             const fieldMap: Record<string, string> = {
@@ -325,6 +356,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         if (isCollapsed) return;
 
         const rect = e.currentTarget.getBoundingClientRect();
+        // Calculate days based on click position relative to container
         const x = e.clientX - rect.left;
         const days = Math.floor(x / dayWidth);
         const clickedDate = new Date(timelineStart);
@@ -336,7 +368,15 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         const isNearBottom = screenHeight - clickY < 300; // threshold for popup height
 
         setAddMilestoneDate(clickedDate);
-        setAddMilestonePos({ x: x, placement: isNearBottom ? 'top' : 'bottom' });
+        // Use client coordinates for fixed positioning
+        setAddMilestonePos({
+            x: e.clientX,
+            y: e.clientY,
+            placement: isNearBottom ? 'top' : 'bottom'
+        });
+
+        // Close other popups
+        setEditPopup(null);
     };
 
     return (
@@ -345,13 +385,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             style={containerStyle}
             onDoubleClick={handleDoubleClick}
         >
-            {addMilestoneDate && !isCollapsed && (
+            {/* Add Milestone Popup (Rendered inline but fixed positioned) */}
+            {addMilestoneDate && !isCollapsed && addMilestonePos && (
                 <div
-                    className="absolute bg-background border border-border shadow-lg rounded-md p-2 z-[99999]"
+                    className="fixed bg-popover text-popover-foreground border border-border shadow-lg rounded-md p-2 z-[99999] timeline-popup-content"
                     style={{
-                        left: addMilestonePos?.x || 0,
-                        top: addMilestonePos?.placement === 'bottom' ? 30 : 'auto',
-                        bottom: addMilestonePos?.placement === 'top' ? 40 : 'auto',
+                        left: addMilestonePos.x,
+                        top: addMilestonePos.placement === 'bottom' ? addMilestonePos.y + 10 : 'auto',
+                        bottom: addMilestonePos.placement === 'top' ? (window.innerHeight - addMilestonePos.y) + 10 : 'auto',
                         width: 200
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -370,12 +411,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         {[
                             { id: 'chassis', label: 'Podvozek' },
                             { id: 'body', label: 'Nástavba' },
-                            { id: 'handover', label: 'Předání' },
+                            { id: 'handover', label: 'Předání', },
                             { id: 'deadline', label: 'Deadline' },
                         ].map(type => (
                             <button
                                 key={type.id}
-                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded flex items-center gap-2"
+                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded flex items-center gap-2 transition-colors"
                                 onClick={() => handleDateUpdate(type.id, formatLocalDate(addMilestoneDate))}
                             >
                                 <Plus size={12} />
@@ -457,13 +498,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             zIndex: isHovered ? 1000 : (isCollapsed ? 30 : 20),
                             pointerEvents: 'auto'
                         }}
-                        onMouseEnter={(e) => {
-                            setActiveCell(dateKey);
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            const spaceBelow = window.innerHeight - rect.bottom;
-                            setTooltipPosition(spaceBelow < 250 ? 'top' : 'bottom');
-                        }}
-                        onMouseLeave={() => setActiveCell(null)}
                     >
                         <div className="milestone-icons-stack flex items-center justify-center relative w-full h-full">
                             {ms.map((m: IMilestone, idx) => {
@@ -487,64 +521,142 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 return (
                                     <div
                                         key={m.key}
-                                        className="milestone-icon"
+                                        className="milestone-icon cursor-pointer transition-transform hover:scale-125"
                                         style={{
                                             color: milestoneColor,
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
                                             zIndex: idx
+                                        }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            setEditPopup({ m, x: rect.left, y: rect.bottom });
+                                            setAddMilestoneDate(null);
+                                            setIsDeleteConfirm(false);
+                                            setIsEditingDate(false);
                                         }}
                                     >
                                         <Icon
                                             size={iconSize}
                                             color={milestoneColor}
                                             fill={IconKey === 'Play' ? milestoneColor : 'none'}
-                                            strokeWidth={isHovered ? 3 : 2.5}
+                                            strokeWidth={2.5}
                                             className="milestone-svg"
                                         />
                                     </div>
                                 );
                             })}
                         </div>
+                    </div>
+                );
+            })}
 
-                        {isHovered && (
-                            <div className={`milestone-tooltip-container ${tooltipPosition === 'top' ? 'tooltip-top' : ''}`}>
-                                {ms.map((m: IMilestone) => {
-                                    const configMap: Record<string, string> = {
-                                        'chassis': 'milestoneChassis',
-                                        'body': 'milestoneBody',
-                                        'handover': 'milestoneHandover',
-                                        'deadline': 'milestoneDeadline'
-                                    };
-                                    const configKey = configMap[m.class];
-                                    const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
-                                    const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
-                                    const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
-                                    const milestoneColor = milestoneConfig?.color || '#888';
+            {/* EDIT / DELETE POPUP */}
+            {editPopup && (() => {
+                const m = editPopup.m;
+                const configMap: Record<string, string> = {
+                    'chassis': 'milestoneChassis',
+                    'body': 'milestoneBody',
+                    'handover': 'milestoneHandover',
+                    'deadline': 'milestoneDeadline'
+                };
+                const configKey = configMap[m.class];
+                const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
+                const milestoneColor = milestoneConfig?.color || '#888';
+                const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
+                const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
-                                    return (
-                                        <div key={m.key} className="milestone-tooltip">
-                                            <div className="tooltip-header" style={{ color: milestoneColor }}>
-                                                <Icon size={12} className="mr-2" />
-                                                <strong>{m.label}</strong>
-                                            </div>
-                                            <div className="tooltip-body">
-                                                <input
-                                                    type="date"
-                                                    className="tooltip-date-input"
-                                                    defaultValue={formatLocalDate(m.date)}
-                                                    onChange={(e) => handleDateUpdate(m.class, e.target.value)}
-                                                    disabled={isUpdating}
-                                                />
-                                                <div className="tooltip-project">{name}</div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                // Calculate vertical position (check bounds)
+                const isNearBottom = (window.innerHeight - editPopup.y) < 200;
+                const topPos = isNearBottom ? 'auto' : editPopup.y + 10;
+                const bottomPos = isNearBottom ? (window.innerHeight - editPopup.y) + 30 : 'auto';
+
+                return (
+                    <div
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-md p-3 z-[99999] timeline-popup-content flex flex-col gap-3"
+                        style={{
+                            left: Math.min(editPopup.x - 100, window.innerWidth - 250), // Prevent overflow right
+                            top: topPos,
+                            bottom: bottomPos,
+                            width: 240
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-2 border-b border-border pb-2">
+                            <Icon size={16} color={milestoneColor} />
+                            <span className="font-bold text-sm">{m.label}</span>
+                            <div className="flex-1" />
+                            <button onClick={() => setEditPopup(null)} className="text-muted-foreground hover:text-foreground">
+                                <X size={14} />
+                            </button>
+                        </div>
+
+                        <div className="text-xs text-muted-foreground">
+                            {formatLocalDate(m.date)}
+                        </div>
+
+                        {!isDeleteConfirm && !isEditingDate && (
+                            <div className="flex gap-2">
+                                <button
+                                    className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs py-1.5 rounded disabled:opacity-50"
+                                    onClick={() => setIsEditingDate(true)}
+                                    disabled={isUpdating}
+                                >
+                                    Upravit
+                                </button>
+                                <button
+                                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground p-1.5 rounded"
+                                    onClick={() => setIsDeleteConfirm(true)}
+                                    disabled={isUpdating}
+                                    title="Smazat"
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                </button>
+                            </div>
+                        )}
+
+                        {isEditingDate && (
+                            <div className="flex flex-col gap-2">
+                                <input
+                                    type="date"
+                                    defaultValue={formatLocalDate(m.date)}
+                                    className="w-full text-xs p-1 border rounded bg-background"
+                                    onChange={(e) => handleDateUpdate(m.class, e.target.value)}
+                                />
+                                <button
+                                    className="text-xs text-muted-foreground hover:underline"
+                                    onClick={() => setIsEditingDate(false)}
+                                >
+                                    Zpět
+                                </button>
+                            </div>
+                        )}
+
+                        {isDeleteConfirm && (
+                            <div className="flex flex-col gap-2 bg-destructive/10 p-2 rounded">
+                                <span className="text-xs font-bold text-destructive">Opravdu smazat?</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        className="flex-1 bg-destructive text-destructive-foreground text-xs py-1 rounded"
+                                        onClick={() => {
+                                            handleDateUpdate(m.class, null);
+                                            setEditPopup(null);
+                                        }}
+                                    >
+                                        Ano, smazat
+                                    </button>
+                                    <button
+                                        className="flex-1 bg-background text-foreground border text-xs py-1 rounded"
+                                        onClick={() => setIsDeleteConfirm(false)}
+                                    >
+                                        Ne
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 );
-            })}
+            })()}
         </div>
     );
 };
