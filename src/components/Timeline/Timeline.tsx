@@ -890,61 +890,66 @@ const Timeline: React.FC = () => {
                                             </div>
                                             <div className="space-y-2">
                                                 <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
-                                                {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => (
-                                                    <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-xs font-medium">{config.label}</span>
-                                                            <input
-                                                                type="color"
-                                                                value={config.color}
-                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                    const newVal = e.target.value;
-                                                                    setColors((prev: IColorsState) => ({
-                                                                        ...prev,
-                                                                        [key]: { ...config, color: newVal }
-                                                                    }));
-                                                                }}
-                                                                className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] text-muted-foreground">Ikona:</span>
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {VISIBLE_ICONS.map((iconName) => {
-                                                                    const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
-                                                                    return (
-                                                                        <button
-                                                                            key={iconName}
-                                                                            onClick={() => setColors(prev => ({
-                                                                                ...prev,
-                                                                                [key]: { ...config, icon: iconName as any }
-                                                                            }))}
-                                                                            className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
-                                                                            title={iconName}
-                                                                        >
-                                                                            <Icon size={12} />
-                                                                        </button>
-                                                                    );
-                                                                })}
+                                                {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => {
+                                                    const isDotMilestone = key === 'milestoneMountingEnd' || key === 'milestoneRevisionEnd';
+                                                    return (
+                                                        <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-xs font-medium">{config.label}</span>
+                                                                <input
+                                                                    type="color"
+                                                                    value={config.color}
+                                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                        const newVal = e.target.value;
+                                                                        setColors((prev: IColorsState) => ({
+                                                                            ...prev,
+                                                                            [key]: { ...config, color: newVal }
+                                                                        }));
+                                                                    }}
+                                                                    className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+                                                                />
+                                                            </div>
+                                                            {!isDotMilestone && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[10px] text-muted-foreground">Ikona:</span>
+                                                                    <div className="flex flex-wrap gap-1">
+                                                                        {VISIBLE_ICONS.map((iconName) => {
+                                                                            const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                                                            return (
+                                                                                <button
+                                                                                    key={iconName}
+                                                                                    onClick={() => setColors(prev => ({
+                                                                                        ...prev,
+                                                                                        [key]: { ...config, icon: iconName as any }
+                                                                                    }))}
+                                                                                    className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
+                                                                                    title={iconName}
+                                                                                >
+                                                                                    <Icon size={12} />
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={config.showInStack !== false}
+                                                                    onChange={(e) => {
+                                                                        const newVal = e.target.checked;
+                                                                        setColors((prev: IColorsState) => ({
+                                                                            ...prev,
+                                                                            [key]: { ...config, showInStack: newVal }
+                                                                        }));
+                                                                    }}
+                                                                    className="rounded border-muted w-3 h-3"
+                                                                />
+                                                                <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={config.showInStack !== false}
-                                                                onChange={(e) => {
-                                                                    const newVal = e.target.checked;
-                                                                    setColors((prev: IColorsState) => ({
-                                                                        ...prev,
-                                                                        [key]: { ...config, showInStack: newVal }
-                                                                    }));
-                                                                }}
-                                                                className="rounded border-muted w-3 h-3"
-                                                            />
-                                                            <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                             <div className="space-y-2 pt-4 mt-2 border-t border-border">
                                                 <div className="flex justify-between items-center">

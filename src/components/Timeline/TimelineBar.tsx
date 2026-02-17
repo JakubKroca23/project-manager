@@ -673,11 +673,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         }}
                                     >
                                         {isPhaseEndVal ? (
-                                            <div className="flex flex-col items-center justify-end h-full w-full gap-0.5" style={{ height: iconSize * 1.5 }}>
-                                                <div
-                                                    className="w-[2px] bg-current opacity-60 rounded-full"
-                                                    style={{ height: '70%', backgroundColor: milestoneColor }}
-                                                />
+                                            <div className="flex items-center justify-center w-full h-full">
                                                 <div
                                                     className="w-1.5 h-1.5 rounded-full"
                                                     style={{ backgroundColor: milestoneColor }}
