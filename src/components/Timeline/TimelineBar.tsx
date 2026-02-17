@@ -240,13 +240,35 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             const field = fieldMap[milestoneClass];
             if (!field) return;
 
+            // 1. Get current project custom_fields
+            const { data: currentProject, error: fetchError } = await supabase
+                .from('projects')
+                .select('custom_fields')
+                .eq('id', id)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            // 2. Prepare update payload
+            const currentCustom = currentProject?.custom_fields || {};
+            const manualOverrides = currentCustom.manual_overrides || {};
+
+            // Mark this field as manually overridden
+            manualOverrides[field] = true;
+
+            const updatedCustomFields = {
+                ...currentCustom,
+                manual_overrides: manualOverrides
+            };
+
+            // 3. Update both date and custom_fields
             const { error } = await supabase
                 .from('projects')
-                .update({ [field]: newDateStr })
+                .update({
+                    [field]: newDateStr,
+                    custom_fields: updatedCustomFields
+                })
                 .eq('id', id);
-
-            if (error) throw error;
-
 
             if (error) throw error;
 

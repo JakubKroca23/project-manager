@@ -424,26 +424,53 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
                 } else {
                     const changes: { field: string; old: any; new: any }[] = [];
 
+
                     // Compare standard fields
-                    ['name', 'customer', 'manager', 'status', 'production_status', 'project_type'].forEach(key => {
+                    const fieldMapping: Record<string, string> = {
+                        'body_delivery': 'body_delivery',
+                        'customer_handover': 'customer_handover',
+                        'chassis_delivery': 'chassis_delivery',
+                        'deadline': 'deadline'
+                    };
+
+                    ['name', 'customer', 'manager', 'status', 'production_status', 'project_type', 'body_delivery', 'customer_handover', 'chassis_delivery', 'deadline'].forEach(key => {
+                        // Check for manual override
+                        const isOverridden = oldP.custom_fields?.manual_overrides?.[key];
+
                         if (String(newP[key] || '') !== String(oldP[key] || '')) {
-                            changes.push({ field: key, old: oldP[key], new: newP[key] });
+                            if (isOverridden) {
+                                // Field is overridden manually, DO NOT update it automatically
+                                // We can optionally log this or show it as "ignored"
+                                // For now, we simply exclude it from changes to protect user data
+                                console.log(`Skipping update for locked field: ${key} on project ${newP.id}`);
+                            } else {
+                                changes.push({ field: key, old: oldP[key], new: newP[key] });
+                            }
                         }
                     });
 
                     // Compare custom fields
                     const oldCustom = oldP.custom_fields || {};
                     const newCustom = newP.custom_fields || {};
-                    const allKeys = Array.from(new Set([...Object.keys(oldCustom), ...Object.keys(newCustom)]));
+                    // Exclude manual_overrides from comparison
+                    const { manual_overrides: oldOverrides, ...oldCustomRest } = oldCustom;
+                    const { manual_overrides: newOverrides, ...newCustomRest } = newCustom; // New likely empty but just in case
+
+                    const allKeys = Array.from(new Set([...Object.keys(oldCustomRest), ...Object.keys(newCustomRest)]));
 
                     allKeys.forEach(key => {
-                        const oldVal = oldCustom[key] ?? "-";
-                        const newVal = newCustom[key] ?? "-";
+                        const oldVal = oldCustomRest[key] ?? "-";
+                        const newVal = newCustomRest[key] ?? "-";
 
                         if (String(oldVal) !== String(newVal)) {
-                            const fmtOld = typeof oldVal === 'object' ? JSON.stringify(oldVal) : String(oldVal);
-                            const fmtNew = typeof newVal === 'object' ? JSON.stringify(newVal) : String(newVal);
-                            changes.push({ field: `[EXT] ${key}`, old: fmtOld, new: fmtNew });
+                            // Check if this custom field is overridden (unlikely for arbitrary fields but consistent)
+                            if (oldP.custom_fields?.manual_overrides?.[key]) {
+                                console.log(`Skipping update for locked custom field: ${key}`);
+                            } else {
+                                const fmtOld = typeof oldVal === 'object' ? JSON.stringify(oldVal) : String(oldVal);
+                                const fmtNew = typeof newVal === 'object' ? JSON.stringify(newVal) : String(newVal);
+                                changes.push({ field: `[EXT] ${key}`, old: fmtOld, new: fmtNew });
+                            }
                         }
                     });
 
