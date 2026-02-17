@@ -128,6 +128,18 @@ const Superstructure = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
+const Hiab = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <path fill="currentColor" stroke="none" d="M1.000000,719.000000 C1.000000,480.305298 1.000000,241.610611 1.458877,2.563841 C3.083466,2.234620 4.249180,2.277543 5.414892,2.277472 C251.967224,2.262367 498.519562,2.245386 745.071899,2.212702 C748.063049,2.212305 751.054138,2.008735 754.379395,2.190670 C754.916687,4.776751 755.297546,7.072153 755.297729,9.367578 C755.312805,243.420898 755.300293,477.474213 755.272644,711.527527 C755.272339,714.011108 755.051025,716.494629 754.481934,718.977051 C752.198853,718.986023 750.366760,719.005188 748.534607,719.005188 C499.356415,719.004333 250.178207,719.002136 1.000000,719.000000 M710.484558,682.519592 C717.382812,682.514832 717.397461,682.514832 717.397400,675.968628 C717.395813,465.474792 717.391846,254.980927 717.373535,44.487080 C717.373413,43.051239 717.167297,41.615414 717.041809,39.975128 C715.375916,39.898144 714.076355,39.785503 712.776794,39.785595 C656.278442,39.789574 599.780151,39.821056 543.281799,39.812984 C376.453217,39.789158 209.624588,39.779362 42.796196,39.582157 C37.561188,39.575974 36.512508,40.978024 36.515289,45.945698 C36.630692,252.106094 36.602631,458.266602 36.588947,664.427063 C36.588627,669.260132 36.308804,674.111877 36.685020,678.913757 C36.784760,680.186768 38.745804,682.192627 40.020535,682.332947 C44.138775,682.786255 48.335388,682.541382 52.501797,682.541199 C271.495605,682.532410 490.489410,682.521240 710.484558,682.519592 z" />
+        <path fill="currentColor" opacity="0.6" stroke="none" d="M754.932861,718.978210 C755.051025,716.494629 755.272339,714.011108 755.272644,711.527527 C755.300293,477.474213 755.312805,243.420898 755.297729,9.367578 C755.297546,7.072153 754.916687,4.776751 754.382629,1.964943 C754.051697,1.448549 754.000000,1.000000 754.000000,1.000000 C755.654358,1.048076 757.871765,0.378559 757.024292,3.506584 C756.856018,4.127662 757.000000,4.833333 757.000000,5.500000 C757.000000,242.166672 757.001831,478.833344 756.958679,715.500000 C756.958435,717.000061 756.333313,718.500000 755.524780,719.741821 C755.010559,719.315186 754.971680,719.146729 754.932861,718.978210 z" />
+        <path fill="currentColor" stroke="none" d="M754.481934,718.977051 C754.971680,719.146729 755.010559,719.315186 755.024780,719.741821 C503.666656,720.000000 252.333328,720.000000 1.000000,719.500000 C250.178207,719.002136 499.356415,719.004333 748.534607,719.005188 C750.366760,719.005188 752.198853,718.986023 754.481934,718.977051 z" />
+        <path fill="currentColor" opacity="0.5" stroke="none" d="M753.531372,1.000000 C754.000000,1.000000 754.051697,1.448549 754.048462,1.674276 C751.054138,2.008735 748.063049,2.212305 745.071899,2.212702 C498.519562,2.245386 251.967224,2.262367 5.414892,2.277472 C4.249180,2.277543 3.083466,2.234620 1.458877,2.105888 C1.166376,1.666667 1.315335,1.056180 1.501923,1.044454 C2.829240,0.961039 4.164248,1.000000 5.496808,1.000000 C254.685440,1.000000 503.874054,1.000000 753.531372,1.000000 z" />
+        <path fill="var(--background, #fff)" stroke="none" d="M709.983887,682.514893 C490.489410,682.521240 271.495605,682.532410 52.501797,682.541199 C48.335388,682.541382 44.138775,682.786255 40.020535,682.332947 C38.745804,682.192627 36.784760,680.186768 36.685020,678.913757 C36.308804,674.111877 36.588627,669.260132 36.588947,664.427063 C36.602631,458.266602 36.630692,252.106094 36.515289,45.945698 C36.512508,40.978024 37.561188,39.575974 42.796196,39.582157 C209.624588,39.779362 376.453217,39.789158 543.281799,39.812984 C599.780151,39.821056 656.278442,39.789574 712.776794,39.785595 C714.076355,39.785503 715.375916,39.898144 717.041809,39.975128 C717.167297,41.615414 717.373413,43.051239 717.373535,44.487080 C717.391846,254.980927 717.395813,465.474792 717.397400,675.968628 C717.397461,682.514832 717.382812,682.514832 709.983887,682.514893 M239.668610,244.016754 C258.087372,236.593246 277.059540,234.515060 296.460724,238.938934 C315.365082,243.249496 332.136230,251.550446 344.542786,267.071228 C359.240570,285.458252 367.572266,306.651764 371.022034,329.723511 C375.579071,360.200592 380.711121,390.491394 389.878693,420.032654 C402.146088,459.562714 420.921997,495.269623 450.133575,524.910889 C459.901154,534.822144 470.681000,543.735840 481.364807,553.438538 C472.556335,575.556274 465.198578,598.751526 461.703094,623.471130 C527.332031,623.471130 592.401489,623.471130 657.474792,623.471130 C657.474792,483.451508 657.474792,343.750275 657.474792,204.022583 C656.691223,204.022583 656.311707,203.906326 656.075623,204.041153 C654.341736,205.031387 652.627502,206.057114 650.923706,207.098816 C633.773682,217.584396 615.185608,224.148117 595.280273,226.561981 C554.102417,231.555420 515.062378,223.809326 479.337524,203.185028 C460.278503,192.182083 442.542694,178.635559 425.192444,164.987671 C403.279755,147.750900 379.737000,133.745926 353.827484,123.622246 C309.664490,106.366371 265.006805,102.951469 219.688461,118.965439 C162.374619,139.218216 124.083107,178.646637 104.500275,235.729980 C90.995651,275.095520 90.394173,315.302216 103.475761,355.035187 C127.043213,426.617065 176.538651,469.077393 250.473999,482.307434 C282.792542,488.090546 314.852814,484.634644 346.087982,474.136627 C349.982635,472.827637 351.123352,470.902740 351.102631,466.984528 C350.979187,443.652557 351.094727,420.319366 351.103790,396.986572 C351.104340,395.619995 350.876465,394.253387 350.698639,392.254486 C349.350281,393.248383 348.646942,393.659393 348.072388,394.205811 C321.923950,419.072845 290.925354,427.049896 255.930511,420.166931 C214.633133,412.044403 184.659683,376.835571 182.767044,334.754974 C181.076263,297.162354 203.676422,260.819580 239.668610,244.016754 z" />
+        <path fill="var(--background, #fff)" stroke="none" d="M404.985992,356.043945 C399.298950,326.010345 397.282166,296.164215 399.397797,266.087616 C399.698334,261.814636 400.451782,257.409546 401.942169,253.419128 C404.838959,245.662964 411.363129,241.874100 419.133240,242.589844 C427.581482,243.368057 433.873779,248.895523 435.263367,257.750763 C437.043335,269.093719 438.283508,280.522980 439.677368,291.924713 C444.689209,332.920502 457.174347,371.040009 483.016296,403.948822 C498.028503,423.066315 516.372620,437.721619 539.855347,445.221893 C542.040405,445.919800 544.305969,446.365356 546.346313,446.880646 C529.752014,470.828064 513.274902,494.606476 496.417114,518.934143 C495.057343,517.953857 492.789459,516.429016 490.639832,514.752502 C463.614624,493.674988 445.061768,466.105164 430.494324,435.600952 C418.457458,410.395691 410.432312,383.842468 404.985992,356.043945 z" />
+        <path fill="var(--background, #fff)" stroke="none" d="M527.041626,298.965088 C537.709229,292.676788 548.244873,292.530487 558.450073,298.728607 C568.991577,305.131012 574.031616,314.867828 573.135559,327.223969 C572.231384,339.693481 565.409607,348.237457 554.090332,352.992706 C540.631409,358.646790 526.089478,353.933990 517.726929,341.649139 C509.870361,330.107635 511.238831,314.342743 521.088745,304.033264 C522.798889,302.243286 524.841736,300.771179 527.041626,298.965088 z" />
+    </svg>
+);
+
 const ICON_OPTIONS = {
     Truck: Truck,
     Hammer: Hammer,
@@ -149,7 +161,8 @@ const ICON_OPTIONS = {
     Crane: Crane,
     Superstructure: Superstructure,
     Play: Play,
-    Milestone: Milestone
+    Milestone: Milestone,
+    Hiab: Hiab
 };
 
 // Seznam ikon pro výběr v editoru (dle požadavku uživatele - ty co jsou vidět + nové)
@@ -157,7 +170,7 @@ const VISIBLE_ICONS = [
     'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone'
+    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -255,6 +268,9 @@ const Timeline: React.FC = () => {
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
 
+    // Global Milestone Size
+    const [milestoneSize, setMilestoneSize] = useState<number>(34);
+
     // Collapsed Sectors State
     const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
 
@@ -282,6 +298,7 @@ const Timeline: React.FC = () => {
                     }));
                 }
                 if (s.outline) setOutline(s.outline);
+                if (s.milestoneSize) setMilestoneSize(s.milestoneSize);
             }
         } catch (err) {
             console.error('Error fetching settings:', err);
@@ -296,7 +313,7 @@ const Timeline: React.FC = () => {
                 .from('app_settings')
                 .upsert({
                     id: 'timeline_config',
-                    settings: { colors, outline },
+                    settings: { colors, outline, milestoneSize },
                     updated_at: new Date().toISOString()
                 });
             if (error) throw error;
@@ -373,511 +390,586 @@ const Timeline: React.FC = () => {
             milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
             milestoneStart: { color: '#3b82f6', opacity: 1, label: 'Start', icon: 'Play', showInStack: false },
         });
-        setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
-    };
+    });
+    setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
+    setMilestoneSize(34);
+};
 
 
 
-    // Ref pro uchování pozice pro zoom
-    const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
+// Ref pro uchování pozice pro zoom
+const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
 
-    // Časový rozsah 2025 - 2027
-    const timelineRange = useMemo(() => {
-        const start = new Date(2025, 0, 1); // 1. 1. 2025
-        const end = new Date(2027, 11, 31); // 31. 12. 2027
-        return { start, end };
-    }, []);
+// Časový rozsah 2025 - 2027
+const timelineRange = useMemo(() => {
+    const start = new Date(2025, 0, 1); // 1. 1. 2025
+    const end = new Date(2027, 11, 31); // 31. 12. 2027
+    return { start, end };
+}, []);
 
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
+const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Restore scroll position after zoom
-    useLayoutEffect(() => {
-        if (zoomFocus.current && scrollContainerRef.current) {
-            const { pointDays, pixelOffset } = zoomFocus.current;
-            const newScrollLeft = pointDays * dayWidth - pixelOffset;
-            scrollContainerRef.current.scrollLeft = newScrollLeft;
+// Restore scroll position after zoom
+useLayoutEffect(() => {
+    if (zoomFocus.current && scrollContainerRef.current) {
+        const { pointDays, pixelOffset } = zoomFocus.current;
+        const newScrollLeft = pointDays * dayWidth - pixelOffset;
+        scrollContainerRef.current.scrollLeft = newScrollLeft;
 
-            // Keep focus during drag operations
-            if (!isMiddleDraggingRef.current) {
-                zoomFocus.current = null;
-            }
+        // Keep focus during drag operations
+        if (!isMiddleDraggingRef.current) {
+            zoomFocus.current = null;
         }
-    }, [dayWidth]);
-
-    // DRAG SCROLL & INERTIA LOGIC
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [startY, setStartY] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-    const dragScrollTop = useRef(0); // Separate ref so handleScroll doesn't overwrite it
-    const [scrollTop, setScrollTop] = useState(0);
-
-    // Physics refs
-    const velocity = useRef({ x: 0, y: 0 });
-    const lastPos = useRef({ x: 0, y: 0 });
-    const lastTime = useRef(0);
-    const requestRef = useRef<number>(0);
-    const isDraggingRef = useRef(false); // Ref for immediate access in loop
-    const isMiddleDraggingRef = useRef(false);
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (!scrollContainerRef.current) return;
-
-        // Stop any current inertia
-        cancelAnimationFrame(requestRef.current);
-
-        const target = e.target as Element;
-        const isSticky = !!target.closest('.project-info-sticky');
-
-        // Middle button click - do nothing (zoom disabled)
-        if (e.button === 1) {
-            return;
-        }
-
-        setIsDragging(true);
-        isDraggingRef.current = true;
-
-        setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-        setStartY(e.pageY - scrollContainerRef.current.offsetTop);
-        setScrollLeft(scrollContainerRef.current.scrollLeft);
-        dragScrollTop.current = scrollContainerRef.current.scrollTop;
-        scrollContainerRef.current.classList.add('is-dragging');
-    };
-
-
-    const handleMouseLeave = () => {
-        if (isDragging) {
-            endDrag();
-        }
-    };
-
-    const handleMouseUp = () => {
-        endDrag();
-    };
-
-    const endDrag = () => {
-        if (!isDragging && !isMiddleDraggingRef.current) return;
-
-        setIsDragging(false);
-        isDraggingRef.current = false;
-        setIsMiddleDragging(false);
-        isMiddleDraggingRef.current = false;
-
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.classList.remove('is-dragging');
-            scrollContainerRef.current.classList.remove('is-row-resize');
-        }
-
-        // Clear zoom focus when drag ends
-        zoomFocus.current = null;
-    };
-
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        // Update scrollTop for animations (but NOT during drag)
-        if (isDraggingRef.current) return;
-        const top = e.currentTarget.scrollTop;
-        requestAnimationFrame(() => {
-            setScrollTop(top);
-        });
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!scrollContainerRef.current) return;
-
-        // Middle button dragging disabled
-        if (isMiddleDraggingRef.current) {
-            return;
-        }
-
-        if (!isDragging) return;
-        e.preventDefault();
-
-        const x = e.pageX - scrollContainerRef.current.offsetLeft;
-        const y = e.pageY - scrollContainerRef.current.offsetTop;
-        const walkX = (x - startX);
-        const walkY = (y - startY);
-
-        scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
-        scrollContainerRef.current.scrollTop = dragScrollTop.current - walkY;
-    };
-
-
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => cancelAnimationFrame(requestRef.current);
-    }, []);
-
-    // Zoom handlers
-    const handleZoomIn = () => {
-        const currentWidth = dayWidth;
-        const next = Math.min(currentWidth * 1.2, MAX_DAY_WIDTH);
-
-        if (next !== currentWidth && scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const offset = container.clientWidth / 2;
-            const pointDays = (container.scrollLeft + offset) / currentWidth;
-            zoomFocus.current = { pointDays, pixelOffset: offset };
-            setDayWidth(next);
-        }
-    };
-
-    const handleZoomOut = () => {
-        const currentWidth = dayWidth;
-        const next = Math.max(currentWidth / 1.2, MIN_DAY_WIDTH);
-
-        if (next !== currentWidth && scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const offset = container.clientWidth / 2;
-            const pointDays = (container.scrollLeft + offset) / currentWidth;
-            zoomFocus.current = { pointDays, pixelOffset: offset };
-            setDayWidth(next);
-        }
-    };
-
-    // Wheel Zoom Logic
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
-
-        const onWheel = (e: WheelEvent) => {
-            // IF CTRL IS PRESSED -> Vertical Zoom
-            if (e.ctrlKey) {
-                e.preventDefault();
-                // Scroll UP (negative) -> Zoom IN (increase height)
-                const delta = e.deltaY < 0 ? 4 : -4;
-                setRowHeight(prev => Math.min(100, Math.max(14, prev + delta)));
-                return;
-            }
-
-            // IF NO MODIFIER (and not Shift/Alt/Meta) -> Horizontal Zoom
-            if (!e.shiftKey && !e.altKey && !e.metaKey) {
-                e.preventDefault();
-                // Scroll UP (negative) -> Zoom IN (increase width)
-                // Scroll DOWN (positive) -> Zoom OUT (decrease width)
-                const currentWidth = dayWidthRef.current;
-                const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-                let nextWidth = currentWidth * zoomFactor;
-
-                // Clamp values
-                nextWidth = Math.min(Math.max(nextWidth, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
-
-                if (Math.abs(nextWidth - currentWidth) > 0.01) {
-                    // Calculate cursor position to zoom towards mouse
-                    const rect = container.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-                    const scrollL = container.scrollLeft;
-
-                    // Time point under mouse (in days from start)
-                    const pointDays = (scrollL + mouseX) / currentWidth;
-
-                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
-                    setDayWidth(nextWidth);
-                }
-            }
-        };
-
-        // Passive: false is crucial to be able to preventDefault
-        container.addEventListener('wheel', onWheel, { passive: false });
-        return () => container.removeEventListener('wheel', onWheel);
-    }, [isLoading]);
-
-
-
-    // Wheel zoom disabled - only button controls are used
-    // Default scroll behavior is preserved (vertical scroll, shift+scroll for horizontal)
-
-    const fetchProjects = useCallback(async () => {
-        try {
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setProjects(data || []);
-        } catch (error) {
-            console.error('Error fetching projects:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    const fetchMilestones = useCallback(async () => {
-        try {
-            const { data, error } = await supabase
-                .from('project_milestones')
-                .select('*');
-
-            if (error) throw error;
-            setAllMilestones(data || []);
-        } catch (error) {
-            console.error('Error fetching milestones:', error);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchProjects();
-        fetchMilestones();
-    }, [fetchProjects, fetchMilestones]);
-
-    const handleProjectUpdate = useCallback((updatedProject: Project) => {
-        setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-        fetchMilestones(); // Refresh milestones too
-    }, [fetchMilestones]);
-
-    // Helper pro řazení
-    const getLatestMilestoneDate = (project: Project): number => {
-        const dates = [
-            project.deadline,
-            project.customer_handover,
-            project.body_delivery,
-            project.chassis_delivery
-        ]
-            .map(d => parseDate(d)?.getTime())
-            .filter((t): t is number => t !== undefined && !isNaN(t));
-
-        return dates.length > 0 ? Math.max(...dates) : 0;
-    };
-
-    const filteredProjects = useMemo((): Project[] => {
-        let filtered = projects;
-
-        // Filtr podle aktivních typů
-        filtered = filtered.filter((p: Project) => {
-            const type = p.project_type || 'civil';
-            return activeTypes[type] === true;
-        });
-
-        // Helper pro normalizaci (odstranění diakritiky)
-        const normalize = (str: string) =>
-            str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-        const query = normalize(searchQuery.trim());
-
-        if (query) {
-            const terms = query.split(/\s+/);
-            filtered = filtered.filter((p: Project) => {
-                const searchTerms = [
-                    p.name,
-                    p.customer,
-                    p.id,
-                    p.abra_project,
-                    p.abra_order,
-                    p.serial_number
-                ].map(term => normalize(term || ''));
-
-                const searchStr = searchTerms.join(' ');
-                return terms.every((term: string) => searchStr.includes(term));
-            });
-        }
-
-        // Filter projects that only have the 'start' (closed_at) milestone
-        filtered = filtered.filter(p => {
-            const hasOtherMilestones =
-                p.chassis_delivery ||
-                p.body_delivery ||
-                p.customer_handover ||
-                p.deadline ||
-                p.custom_fields?.mounting_end_date ||
-                p.custom_fields?.revision_end_date;
-
-            return !!hasOtherMilestones;
-        });
-
-        // Hide completed projects if showHidden is false
-        if (!showHidden) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            filtered = filtered.filter(p => {
-                const handoverDate = parseDate(p.customer_handover);
-                // IF handover exists AND is before today -> Hide it
-                if (handoverDate && handoverDate < today) {
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
-        return filtered.sort((a: Project, b: Project) => {
-            const dateA = getLatestMilestoneDate(a);
-            const dateB = getLatestMilestoneDate(b);
-            return dateB - dateA;
-        });
-    }, [projects, searchQuery, activeTypes, showHidden]);
-
-    // Grupa projektů do sektorů
-    const sectorizedProjects = useMemo(() => {
-        const service = filteredProjects.filter(p => p.project_type === 'service');
-        const civil = filteredProjects.filter(p => p.project_type === 'civil' || !p.project_type);
-        const military = filteredProjects.filter(p => p.project_type === 'military');
-
-        return [
-            { id: 'service', label: 'SERVIS', projects: service, color: '#ffb74d' },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
-            { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
-        ];
-    }, [filteredProjects]);
-
-    const jumpToToday = () => {
-        if (scrollContainerRef.current) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffDays = Math.floor((today.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
-
-            scrollContainerRef.current.scrollTo({
-                left: diffDays * dayWidth - 400,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    useEffect(() => {
-        if (!isLoading && scrollContainerRef.current) {
-            setTimeout(jumpToToday, 100);
-        }
-    }, [isLoading]);
-
-    const isCompact = dayWidth < 18;
-
-    if (isLoading) {
-        return (
-            <div className="timeline-container">
-                <div className="timeline-loading-spinner">Načítám časovou osu...</div>
-            </div>
-        );
     }
+}, [dayWidth]);
+
+// DRAG SCROLL & INERTIA LOGIC
+const [isDragging, setIsDragging] = useState(false);
+const [startX, setStartX] = useState(0);
+const [startY, setStartY] = useState(0);
+const [scrollLeft, setScrollLeft] = useState(0);
+const dragScrollTop = useRef(0); // Separate ref so handleScroll doesn't overwrite it
+const [scrollTop, setScrollTop] = useState(0);
+
+// Physics refs
+const velocity = useRef({ x: 0, y: 0 });
+const lastPos = useRef({ x: 0, y: 0 });
+const lastTime = useRef(0);
+const requestRef = useRef<number>(0);
+const isDraggingRef = useRef(false); // Ref for immediate access in loop
+const isMiddleDraggingRef = useRef(false);
+
+const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+
+    // Stop any current inertia
+    cancelAnimationFrame(requestRef.current);
+
+    const target = e.target as Element;
+    const isSticky = !!target.closest('.project-info-sticky');
+
+    // Middle button click - do nothing (zoom disabled)
+    if (e.button === 1) {
+        return;
+    }
+
+    setIsDragging(true);
+    isDraggingRef.current = true;
+
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setStartY(e.pageY - scrollContainerRef.current.offsetTop);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    dragScrollTop.current = scrollContainerRef.current.scrollTop;
+    scrollContainerRef.current.classList.add('is-dragging');
+};
+
+
+const handleMouseLeave = () => {
+    if (isDragging) {
+        endDrag();
+    }
+};
+
+const handleMouseUp = () => {
+    endDrag();
+};
+
+const endDrag = () => {
+    if (!isDragging && !isMiddleDraggingRef.current) return;
+
+    setIsDragging(false);
+    isDraggingRef.current = false;
+    setIsMiddleDragging(false);
+    isMiddleDraggingRef.current = false;
+
+    if (scrollContainerRef.current) {
+        scrollContainerRef.current.classList.remove('is-dragging');
+        scrollContainerRef.current.classList.remove('is-row-resize');
+    }
+
+    // Clear zoom focus when drag ends
+    zoomFocus.current = null;
+};
+
+const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    // Update scrollTop for animations (but NOT during drag)
+    if (isDraggingRef.current) return;
+    const top = e.currentTarget.scrollTop;
+    requestAnimationFrame(() => {
+        setScrollTop(top);
+    });
+};
+
+const handleMouseMove = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+
+    // Middle button dragging disabled
+    if (isMiddleDraggingRef.current) {
+        return;
+    }
+
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const y = e.pageY - scrollContainerRef.current.offsetTop;
+    const walkX = (x - startX);
+    const walkY = (y - startY);
+
+    scrollContainerRef.current.scrollLeft = scrollLeft - walkX;
+    scrollContainerRef.current.scrollTop = dragScrollTop.current - walkY;
+};
+
+
+
+// Cleanup on unmount
+useEffect(() => {
+    return () => cancelAnimationFrame(requestRef.current);
+}, []);
+
+// Zoom handlers
+const handleZoomIn = () => {
+    const currentWidth = dayWidth;
+    const next = Math.min(currentWidth * 1.2, MAX_DAY_WIDTH);
+
+    if (next !== currentWidth && scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const offset = container.clientWidth / 2;
+        const pointDays = (container.scrollLeft + offset) / currentWidth;
+        zoomFocus.current = { pointDays, pixelOffset: offset };
+        setDayWidth(next);
+    }
+};
+
+const handleZoomOut = () => {
+    const currentWidth = dayWidth;
+    const next = Math.max(currentWidth / 1.2, MIN_DAY_WIDTH);
+
+    if (next !== currentWidth && scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const offset = container.clientWidth / 2;
+        const pointDays = (container.scrollLeft + offset) / currentWidth;
+        zoomFocus.current = { pointDays, pixelOffset: offset };
+        setDayWidth(next);
+    }
+};
+
+// Wheel Zoom Logic
+useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const onWheel = (e: WheelEvent) => {
+        // IF CTRL IS PRESSED -> Vertical Zoom
+        if (e.ctrlKey) {
+            e.preventDefault();
+            // Scroll UP (negative) -> Zoom IN (increase height)
+            const delta = e.deltaY < 0 ? 4 : -4;
+            setRowHeight(prev => Math.min(100, Math.max(14, prev + delta)));
+            return;
+        }
+
+        // IF NO MODIFIER (and not Shift/Alt/Meta) -> Horizontal Zoom
+        if (!e.shiftKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            // Scroll UP (negative) -> Zoom IN (increase width)
+            // Scroll DOWN (positive) -> Zoom OUT (decrease width)
+            const currentWidth = dayWidthRef.current;
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            let nextWidth = currentWidth * zoomFactor;
+
+            // Clamp values
+            nextWidth = Math.min(Math.max(nextWidth, MIN_DAY_WIDTH), MAX_DAY_WIDTH);
+
+            if (Math.abs(nextWidth - currentWidth) > 0.01) {
+                // Calculate cursor position to zoom towards mouse
+                const rect = container.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const scrollL = container.scrollLeft;
+
+                // Time point under mouse (in days from start)
+                const pointDays = (scrollL + mouseX) / currentWidth;
+
+                zoomFocus.current = { pointDays, pixelOffset: mouseX };
+                setDayWidth(nextWidth);
+            }
+        }
+    };
+
+    // Passive: false is crucial to be able to preventDefault
+    container.addEventListener('wheel', onWheel, { passive: false });
+    return () => container.removeEventListener('wheel', onWheel);
+}, [isLoading]);
+
+
+
+// Wheel zoom disabled - only button controls are used
+// Default scroll behavior is preserved (vertical scroll, shift+scroll for horizontal)
+
+const fetchProjects = useCallback(async () => {
+    try {
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setProjects(data || []);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+    } finally {
+        setIsLoading(false);
+    }
+}, []);
+
+const fetchMilestones = useCallback(async () => {
+    try {
+        const { data, error } = await supabase
+            .from('project_milestones')
+            .select('*');
+
+        if (error) throw error;
+        setAllMilestones(data || []);
+    } catch (error) {
+        console.error('Error fetching milestones:', error);
+    }
+}, []);
+
+useEffect(() => {
+    fetchProjects();
+    fetchMilestones();
+}, [fetchProjects, fetchMilestones]);
+
+const handleProjectUpdate = useCallback((updatedProject: Project) => {
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+    fetchMilestones(); // Refresh milestones too
+}, [fetchMilestones]);
+
+// Helper pro řazení
+const getLatestMilestoneDate = (project: Project): number => {
+    const dates = [
+        project.deadline,
+        project.customer_handover,
+        project.body_delivery,
+        project.chassis_delivery
+    ]
+        .map(d => parseDate(d)?.getTime())
+        .filter((t): t is number => t !== undefined && !isNaN(t));
+
+    return dates.length > 0 ? Math.max(...dates) : 0;
+};
+
+const filteredProjects = useMemo((): Project[] => {
+    let filtered = projects;
+
+    // Filtr podle aktivních typů
+    filtered = filtered.filter((p: Project) => {
+        const type = p.project_type || 'civil';
+        return activeTypes[type] === true;
+    });
+
+    // Helper pro normalizaci (odstranění diakritiky)
+    const normalize = (str: string) =>
+        str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    const query = normalize(searchQuery.trim());
+
+    if (query) {
+        const terms = query.split(/\s+/);
+        filtered = filtered.filter((p: Project) => {
+            const searchTerms = [
+                p.name,
+                p.customer,
+                p.id,
+                p.abra_project,
+                p.abra_order,
+                p.serial_number
+            ].map(term => normalize(term || ''));
+
+            const searchStr = searchTerms.join(' ');
+            return terms.every((term: string) => searchStr.includes(term));
+        });
+    }
+
+    // Filter projects that only have the 'start' (closed_at) milestone
+    filtered = filtered.filter(p => {
+        const hasOtherMilestones =
+            p.chassis_delivery ||
+            p.body_delivery ||
+            p.customer_handover ||
+            p.deadline ||
+            p.custom_fields?.mounting_end_date ||
+            p.custom_fields?.revision_end_date;
+
+        return !!hasOtherMilestones;
+    });
+
+    // Hide completed projects if showHidden is false
+    if (!showHidden) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        filtered = filtered.filter(p => {
+            const handoverDate = parseDate(p.customer_handover);
+            // IF handover exists AND is before today -> Hide it
+            if (handoverDate && handoverDate < today) {
+                return false;
+            }
+            return true;
+        });
+    }
+
+    // Řazení: Servisy nahoru (pro filteredProjects.some), pak nejdále v budoucnosti nahoře.
+    return filtered.sort((a: Project, b: Project) => {
+        const dateA = getLatestMilestoneDate(a);
+        const dateB = getLatestMilestoneDate(b);
+        return dateB - dateA;
+    });
+}, [projects, searchQuery, activeTypes, showHidden]);
+
+// Grupa projektů do sektorů
+const sectorizedProjects = useMemo(() => {
+    const service = filteredProjects.filter(p => p.project_type === 'service');
+    const civil = filteredProjects.filter(p => p.project_type === 'civil' || !p.project_type);
+    const military = filteredProjects.filter(p => p.project_type === 'military');
+
+    return [
+        { id: 'service', label: 'SERVIS', projects: service, color: '#ffb74d' },
+        { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
+        { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
+    ];
+}, [filteredProjects]);
+
+const jumpToToday = () => {
+    if (scrollContainerRef.current) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffDays = Math.floor((today.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+
+        scrollContainerRef.current.scrollTo({
+            left: diffDays * dayWidth - 400,
+            behavior: 'smooth'
+        });
+    }
+};
+
+useEffect(() => {
+    if (!isLoading && scrollContainerRef.current) {
+        setTimeout(jumpToToday, 100);
+    }
+}, [isLoading]);
+
+const isCompact = dayWidth < 18;
+
+if (isLoading) {
     return (
-        <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
-            <header className="timeline-header-actions relative">
-                <div className="header-left">
-                    <div className="search-container">
-                        <Search size={16} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Hledat..."
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
+        <div className="timeline-container">
+            <div className="timeline-loading-spinner">Načítám časovou osu...</div>
+        </div>
+    );
+}
+return (
+    <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
+        <header className="timeline-header-actions relative">
+            <div className="header-left">
+                <div className="search-container">
+                    <Search size={16} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Hledat..."
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    />
+                </div>
 
-                    <div className="type-filters flex items-center gap-4">
-                        {[
-                            { id: 'service', label: 'Servis', color: '#f97316' },
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Armáda', color: '#10b981' }
-                        ].map(({ id, label, color }) => (
-                            <label
-                                key={id}
-                                className="flex items-center gap-2 cursor-pointer group select-none"
-                            >
-                                <div className="relative flex items-center justify-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={activeTypes[id]}
-                                        onChange={() => toggleType(id)}
-                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
-                                        style={{
-                                            borderColor: activeTypes[id] ? color : 'var(--border)',
-                                            backgroundColor: activeTypes[id] ? color : 'transparent'
-                                        }}
-                                    />
-                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <span
-                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
-                                >
-                                    {label}
-                                </span>
-                            </label>
-                        ))}
-
-                        {/* Hidden Projects Toggle */}
-                        <label className="flex items-center gap-2 cursor-pointer group select-none border-l pl-4 border-border/50">
+                <div className="type-filters flex items-center gap-4">
+                    {[
+                        { id: 'service', label: 'Servis', color: '#f97316' },
+                        { id: 'civil', label: 'Civilní', color: '#3b82f6' },
+                        { id: 'military', label: 'Armáda', color: '#10b981' }
+                    ].map(({ id, label, color }) => (
+                        <label
+                            key={id}
+                            className="flex items-center gap-2 cursor-pointer group select-none"
+                        >
                             <div className="relative flex items-center justify-center">
                                 <input
                                     type="checkbox"
-                                    checked={showHidden}
-                                    onChange={() => setShowHidden(!showHidden)}
-                                    className="peer appearance-none w-4 h-4 border-2 rounded transition-all border-muted-foreground peer-checked:bg-muted-foreground peer-checked:border-muted-foreground"
+                                    checked={activeTypes[id]}
+                                    onChange={() => toggleType(id)}
+                                    className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
+                                    style={{
+                                        borderColor: activeTypes[id] ? color : 'var(--border)',
+                                        backgroundColor: activeTypes[id] ? color : 'transparent'
+                                    }}
                                 />
-                                <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${showHidden ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                                         <polyline points="20 6 9 17 4 12" />
                                     </svg>
                                 </div>
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-                                Zobrazit skryté
+                            <span
+                                className="text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
+                            >
+                                {label}
                             </span>
                         </label>
-                    </div>
+                    ))}
 
-                    <div className="timeline-legend">
-                        <div className="legend-group">
-                            <span className="legend-group-title">Legenda:</span>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
+                    {/* Hidden Projects Toggle */}
+                    <label className="flex items-center gap-2 cursor-pointer group select-none border-l pl-4 border-border/50">
+                        <div className="relative flex items-center justify-center">
+                            <input
+                                type="checkbox"
+                                checked={showHidden}
+                                onChange={() => setShowHidden(!showHidden)}
+                                className="peer appearance-none w-4 h-4 border-2 rounded transition-all border-muted-foreground peer-checked:bg-muted-foreground peer-checked:border-muted-foreground"
+                            />
+                            <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${showHidden ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
                         </div>
-                    </div>
-
-                    <button
-                        className="action-button"
-                        onClick={() => setShowHelp(true)}
-                        title="Nápověda a Legenda"
-                    >
-                        <HelpCircle size={16} />
-                    </button>
-
-
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                            Zobrazit skryté
+                        </span>
+                    </label>
                 </div>
 
-                <div className="header-right flex items-center gap-4">
-                    {isAdmin && (
-                        <div style={{ position: 'relative' }}>
-                            <button
-                                className={`action-button ${showColorEditor ? 'active' : ''}`}
-                                onClick={() => setShowColorEditor(!showColorEditor)}
-                                title="Nastavení zobrazení"
-                            >
-                                <Settings size={16} />
-                            </button>
+                <div className="timeline-legend">
+                    <div className="legend-group">
+                        <span className="legend-group-title">Legenda:</span>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
+                        <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
+                    </div>
+                </div>
+
+                <button
+                    className="action-button"
+                    onClick={() => setShowHelp(true)}
+                    title="Nápověda a Legenda"
+                >
+                    <HelpCircle size={16} />
+                </button>
 
 
-                            {showColorEditor && (
-                                <div className="absolute top-full right-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
-                                    <div className="flex items-center justify-between p-3 border-b border-border bg-muted/40 shrink-0">
-                                        <div className="flex items-center gap-2">
-                                            <Settings size={16} />
-                                            <h3 className="font-bold text-sm">Nastavení zobrazení</h3>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={resetColors}
-                                                className="hover:bg-muted p-1 rounded text-muted-foreground hover:text-foreground"
-                                                title="Resetovat do výchozího stavu"
-                                            >
-                                                <RotateCcw size={14} />
-                                            </button>
-                                            <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
-                                                <X size={16} />
-                                            </button>
-                                        </div>
+            </div>
+
+            <div className="header-right flex items-center gap-4">
+                {isAdmin && (
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            className={`action-button ${showColorEditor ? 'active' : ''}`}
+                            onClick={() => setShowColorEditor(!showColorEditor)}
+                            title="Nastavení zobrazení"
+                        >
+                            <Settings size={16} />
+                        </button>
+
+
+                        {showColorEditor && (
+                            <div className="absolute top-full right-0 mt-2 z-[9999] w-80 bg-background border border-border shadow-2xl rounded-lg flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                                <div className="flex items-center justify-between p-3 border-b border-border bg-muted/40 shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <Settings size={16} />
+                                        <h3 className="font-bold text-sm">Nastavení zobrazení</h3>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-4 max-h-[60vh] custom-scrollbar space-y-6">
-                                        <div className="space-y-2">
-                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
-                                            {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
-                                                <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={resetColors}
+                                            className="hover:bg-muted p-1 rounded text-muted-foreground hover:text-foreground"
+                                            title="Resetovat do výchozího stavu"
+                                        >
+                                            <RotateCcw size={14} />
+                                        </button>
+                                        <button onClick={() => setShowColorEditor(false)} className="hover:bg-muted p-1 rounded">
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4 max-h-[60vh] custom-scrollbar space-y-6">
+                                    <div className="space-y-2">
+                                        <h4 className="text-xs font-semibold text-muted-foreground uppercase">Fáze</h4>
+                                        {Object.entries(colors).filter(([key]) => key.startsWith('phase')).map(([key, config]) => (
+                                            <div key={key} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs font-medium">{config.label}</span>
+                                                    <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                const newVal = e.target.value;
+                                                                setColors((prev: IColorsState) => ({
+                                                                    ...prev,
+                                                                    [key]: { ...config, color: newVal }
+                                                                }));
+                                                            }}
+                                                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span>Opacita:</span>
+                                                    <input
+                                                        type="range"
+                                                        min="0.1"
+                                                        max="1"
+                                                        step="0.05"
+                                                        value={config.opacity}
+                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                            const newVal = parseFloat(e.target.value);
+                                                            setColors((prev: IColorsState) => ({
+                                                                ...prev,
+                                                                [key]: { ...config, opacity: newVal }
+                                                            }));
+                                                        }}
+                                                        className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                    />
+                                                    <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={config.showInStack !== false}
+                                                        onChange={(e) => {
+                                                            const newVal = e.target.checked;
+                                                            setColors((prev: IColorsState) => ({
+                                                                ...prev,
+                                                                [key]: { ...config, showInStack: newVal }
+                                                            }));
+                                                        }}
+                                                        className="rounded border-muted w-3 h-3"
+                                                    />
+                                                    <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-muted-foreground">Velikost: {milestoneSize}px</span>
+                                                <input
+                                                    type="range"
+                                                    min="16"
+                                                    max="64"
+                                                    value={milestoneSize}
+                                                    onChange={(e) => setMilestoneSize(parseInt(e.target.value))}
+                                                    className="w-20 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
+                                        {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => {
+                                            const isDotMilestone = key === 'milestoneMountingEnd' || key === 'milestoneRevisionEnd';
+                                            return (
+                                                <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
                                                     <div className="flex justify-between items-center">
                                                         <span className="text-xs font-medium">{config.label}</span>
                                                         <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
@@ -895,25 +987,29 @@ const Timeline: React.FC = () => {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Opacita:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="0.1"
-                                                            max="1"
-                                                            step="0.05"
-                                                            value={config.opacity}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                const newVal = parseFloat(e.target.value);
-                                                                setColors((prev: IColorsState) => ({
-                                                                    ...prev,
-                                                                    [key]: { ...config, opacity: newVal }
-                                                                }));
-                                                            }}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{Math.round(config.opacity * 100)}%</span>
-                                                    </div>
+                                                    {!isDotMilestone && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] text-muted-foreground">Ikona:</span>
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {VISIBLE_ICONS.map((iconName) => {
+                                                                    const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                                                    return (
+                                                                        <button
+                                                                            key={iconName}
+                                                                            onClick={() => setColors(prev => ({
+                                                                                ...prev,
+                                                                                [key]: { ...config, icon: iconName as any }
+                                                                            }))}
+                                                                            className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
+                                                                            title={iconName}
+                                                                        >
+                                                                            <Icon size={12} />
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <input
                                                             type="checkbox"
@@ -930,538 +1026,474 @@ const Timeline: React.FC = () => {
                                                         <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Milníky</h4>
-                                            {Object.entries(colors).filter(([key]) => key.startsWith('milestone')).map(([key, config]) => {
-                                                const isDotMilestone = key === 'milestoneMountingEnd' || key === 'milestoneRevisionEnd';
-                                                return (
-                                                    <div key={key} className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-xs font-medium">{config.label}</span>
-                                                            <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
-                                                                <input
-                                                                    type="color"
-                                                                    value={config.color}
-                                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                        const newVal = e.target.value;
-                                                                        setColors((prev: IColorsState) => ({
-                                                                            ...prev,
-                                                                            [key]: { ...config, color: newVal }
-                                                                        }));
-                                                                    }}
-                                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        {!isDotMilestone && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] text-muted-foreground">Ikona:</span>
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {VISIBLE_ICONS.map((iconName) => {
-                                                                        const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
-                                                                        return (
-                                                                            <button
-                                                                                key={iconName}
-                                                                                onClick={() => setColors(prev => ({
-                                                                                    ...prev,
-                                                                                    [key]: { ...config, icon: iconName as any }
-                                                                                }))}
-                                                                                className={`p-1 rounded border transition-colors ${config.icon === iconName ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted-foreground/10 border-border'}`}
-                                                                                title={iconName}
-                                                                            >
-                                                                                <Icon size={12} />
-                                                                            </button>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={config.showInStack !== false}
-                                                                onChange={(e) => {
-                                                                    const newVal = e.target.checked;
-                                                                    setColors((prev: IColorsState) => ({
-                                                                        ...prev,
-                                                                        [key]: { ...config, showInStack: newVal }
-                                                                    }));
-                                                                }}
-                                                                className="rounded border-muted w-3 h-3"
-                                                            />
-                                                            <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="space-y-2 pt-4 mt-2 border-t border-border">
-                                            <div className="flex justify-between items-center">
-                                                <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-sm">Zobrazit obrys</span>
-                                                    </div>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={outline.enabled}
-                                                        onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
-                                                        className="accent-primary"
-                                                    />
-                                                </div>
-                                            </div>
-                                            {outline.enabled && (
-                                                <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={outline.showInStack !== false}
-                                                            onChange={(e) => setOutline(prev => ({ ...prev, showInStack: e.target.checked }))}
-                                                            className="rounded border-muted w-3 h-3"
-                                                        />
-                                                        <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs font-medium">Barva</span>
-                                                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
-                                                            <input
-                                                                type="color"
-                                                                value={outline.color}
-                                                                onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
-                                                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Šířka:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="1"
-                                                            max="5"
-                                                            step="1"
-                                                            value={outline.width}
-                                                            onChange={(e) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{outline.width}px</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <span>Opacita:</span>
-                                                        <input
-                                                            type="range"
-                                                            min="0.1"
-                                                            max="1"
-                                                            step="0.05"
-                                                            value={outline.opacity}
-                                                            onChange={(e) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
-                                                            className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="mt-4 pt-4 border-t border-border">
-                                            <button
-                                                onClick={saveSettings}
-                                                disabled={isSaving}
-                                                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                            >
-                                                <Save size={16} />
-                                                {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        <button
-                            className="action-button icon-only"
-                            onClick={handleZoomOut}
-                            title="Oddálit"
-                        >
-                            <ZoomOut size={16} />
-                        </button>
-                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                            {Math.round((dayWidth / 25) * 100)}%
-                        </span>
-                        <button
-                            className="action-button icon-only"
-                            onClick={handleZoomIn}
-                            title="Přiblížit"
-                        >
-                            <ZoomIn size={16} />
-                        </button>
-                    </div>
-                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        <button
-                            className="action-button icon-only"
-                            onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
-                            title="Zmenšit řádky"
-                        >
-                            <ChevronDown size={16} />
-                        </button>
-                        <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
-                            {rowHeight}px
-                        </span>
-                        <button
-                            className="action-button icon-only"
-                            onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
-                            title="Zvětšit řádky"
-                        >
-                            <ChevronUp size={16} />
-                        </button>
-                    </div>
-                    <button
-                        className="action-button primary"
-                        onClick={jumpToToday}
-                        title="Skočit na dnešek"
-                    >
-                        <Calendar size={14} />
-                        <span className="hidden lg:inline">Dnešek</span>
-                    </button>
-                </div>
-            </header >
-
-            {/* Help / Legend Modal */}
-            {
-                showHelp && (
-                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                        <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-                            <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
-                                <div className="flex items-center gap-2">
-                                    <HelpCircle size={20} className="text-primary" />
-                                    <h3 className="font-bold text-lg">Nápověda a Legenda</h3>
-                                </div>
-                                <button onClick={() => setShowHelp(false)} className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-lg transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="overflow-y-auto p-6 space-y-8 custom-scrollbar">
-
-                                {/* 1. OVLÁDÁNÍ */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <MousePointer2 size={16} /> Ovládání Timeline
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <MoveHorizontal size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Posun (Pan)</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Klikněte a táhněte myší (Drag & Drop) pro posun časové osy, nebo použijte kolečko myši.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <ZoomIn size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Zoom</p>
-                                                <p className="text-xs text-muted-foreground mt-1">Podržte <kbd className="bg-background border px-1 rounded text-[10px] font-mono">Ctrl</kbd> + kolečko myši pro přiblížení/oddálení.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <MousePointerClick size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Interakce</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>Hover na milník:</strong> Zobrazí detail.<br />
-                                                    <strong>Klik na milník:</strong> Editace data/smazání.<br />
-                                                    <strong>Klik na řádek:</strong> Detail zakázky.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <div className="h-px bg-border/50" />
-
-                                {/* 2. LEGENDA BAREV (FÁZE) */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <Palette size={16} /> Legenda fází
-                                    </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, conf]) => (
-                                            <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
-                                                <div
-                                                    className="w-8 h-8 rounded-md shadow-sm border border-border/20"
-                                                    style={{ backgroundColor: conf.color, opacity: conf.opacity }}
-                                                />
-                                                <span className="text-sm font-medium">{conf.label}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
-
-                                <div className="h-px bg-border/50" />
-
-                                {/* 3. LEGENDA MILNÍKŮ */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <Flag size={16} /> Legenda milníků
-                                    </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, conf]) => {
-                                            const Icon = ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
-                                            return (
-                                                <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg border border-border/40 bg-background/50">
-                                                    <div
-                                                        className="w-8 h-8 rounded-full flex items-center justify-center bg-muted"
-                                                        style={{ color: conf.color }}
-                                                    >
-                                                        <Icon size={16} />
-                                                    </div>
-                                                    <span className="text-xs font-bold leading-tight">{conf.label}</span>
-                                                </div>
                                             );
                                         })}
                                     </div>
-                                </section>
+                                    <div className="space-y-2 pt-4 mt-2 border-t border-border">
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Obrys prvků</h4>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-sm">Zobrazit obrys</span>
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={outline.enabled}
+                                                    onChange={(e) => setOutline(prev => ({ ...prev, enabled: e.target.checked }))}
+                                                    className="accent-primary"
+                                                />
+                                            </div>
+                                        </div>
+                                        {outline.enabled && (
+                                            <div className="flex flex-col gap-2 p-2 rounded bg-muted/30">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={outline.showInStack !== false}
+                                                        onChange={(e) => setOutline(prev => ({ ...prev, showInStack: e.target.checked }))}
+                                                        className="rounded border-muted w-3 h-3"
+                                                    />
+                                                    <span className="text-xs text-muted-foreground">Zobrazit ve stacku</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs font-medium">Barva</span>
+                                                    <div className="relative w-6 h-6 rounded-full overflow-hidden border border-border shadow-sm">
+                                                        <input
+                                                            type="color"
+                                                            value={outline.color}
+                                                            onChange={(e) => setOutline(prev => ({ ...prev, color: e.target.value }))}
+                                                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span>Šířka:</span>
+                                                    <input
+                                                        type="range"
+                                                        min="1"
+                                                        max="5"
+                                                        step="1"
+                                                        value={outline.width}
+                                                        onChange={(e) => setOutline(prev => ({ ...prev, width: parseInt(e.target.value) }))}
+                                                        className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                    />
+                                                    <span className="w-8 text-right">{outline.width}px</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span>Opacita:</span>
+                                                    <input
+                                                        type="range"
+                                                        min="0.1"
+                                                        max="1"
+                                                        step="0.05"
+                                                        value={outline.opacity}
+                                                        onChange={(e) => setOutline(prev => ({ ...prev, opacity: parseFloat(e.target.value) }))}
+                                                        className="flex-1 h-1 bg-muted-foreground/30 rounded-lg appearance-none cursor-pointer"
+                                                    />
+                                                    <span className="w-8 text-right">{Math.round(outline.opacity * 100)}%</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-border">
+                                        <button
+                                            onClick={saveSettings}
+                                            disabled={isSaving}
+                                            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                        >
+                                            <Save size={16} />
+                                            {isSaving ? 'Ukládám...' : 'Uložit pro všechny'}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="p-4 border-t border-border bg-muted/20 flex justify-end">
-                                <button onClick={() => setShowHelp(false)} className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors text-sm">
-                                    Rozumím
-                                </button>
+                        )}
+                    </div>
+                )}
+                <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                    <button
+                        className="action-button icon-only"
+                        onClick={handleZoomOut}
+                        title="Oddálit"
+                    >
+                        <ZoomOut size={16} />
+                    </button>
+                    <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                        {Math.round((dayWidth / 25) * 100)}%
+                    </span>
+                    <button
+                        className="action-button icon-only"
+                        onClick={handleZoomIn}
+                        title="Přiblížit"
+                    >
+                        <ZoomIn size={16} />
+                    </button>
+                </div>
+                <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                    <button
+                        className="action-button icon-only"
+                        onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
+                        title="Zmenšit řádky"
+                    >
+                        <ChevronDown size={16} />
+                    </button>
+                    <span className="text-xs font-mono text-muted-foreground min-w-[30px] text-center select-none">
+                        {rowHeight}px
+                    </span>
+                    <button
+                        className="action-button icon-only"
+                        onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
+                        title="Zvětšit řádky"
+                    >
+                        <ChevronUp size={16} />
+                    </button>
+                </div>
+                <button
+                    className="action-button primary"
+                    onClick={jumpToToday}
+                    title="Skočit na dnešek"
+                >
+                    <Calendar size={14} />
+                    <span className="hidden lg:inline">Dnešek</span>
+                </button>
+            </div>
+        </header >
+
+        {/* Help / Legend Modal */}
+        {
+            showHelp && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+                            <div className="flex items-center gap-2">
+                                <HelpCircle size={20} className="text-primary" />
+                                <h3 className="font-bold text-lg">Nápověda a Legenda</h3>
                             </div>
+                            <button onClick={() => setShowHelp(false)} className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-lg transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+                            {/* 1. OVLÁDÁNÍ */}
+                            <section>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                    <MousePointer2 size={16} /> Ovládání Timeline
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                        <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                            <MoveHorizontal size={20} className="text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm">Posun (Pan)</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Klikněte a táhněte myší (Drag & Drop) pro posun časové osy, nebo použijte kolečko myši.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                        <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                            <ZoomIn size={20} className="text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm">Zoom</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Podržte <kbd className="bg-background border px-1 rounded text-[10px] font-mono">Ctrl</kbd> + kolečko myši pro přiblížení/oddálení.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
+                                        <div className="bg-background p-2 rounded-md shadow-sm border border-border">
+                                            <MousePointerClick size={20} className="text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm">Interakce</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                <strong>Hover na milník:</strong> Zobrazí detail.<br />
+                                                <strong>Klik na milník:</strong> Editace data/smazání.<br />
+                                                <strong>Klik na řádek:</strong> Detail zakázky.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div className="h-px bg-border/50" />
+
+                            {/* 2. LEGENDA BAREV (FÁZE) */}
+                            <section>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                    <Palette size={16} /> Legenda fází
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, conf]) => (
+                                        <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
+                                            <div
+                                                className="w-8 h-8 rounded-md shadow-sm border border-border/20"
+                                                style={{ backgroundColor: conf.color, opacity: conf.opacity }}
+                                            />
+                                            <span className="text-sm font-medium">{conf.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <div className="h-px bg-border/50" />
+
+                            {/* 3. LEGENDA MILNÍKŮ */}
+                            <section>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                    <Flag size={16} /> Legenda milníků
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, conf]) => {
+                                        const Icon = ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
+                                        return (
+                                            <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg border border-border/40 bg-background/50">
+                                                <div
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center bg-muted"
+                                                    style={{ color: conf.color }}
+                                                >
+                                                    <Icon size={16} />
+                                                </div>
+                                                <span className="text-xs font-bold leading-tight">{conf.label}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        </div>
+                        <div className="p-4 border-t border-border bg-muted/20 flex justify-end">
+                            <button onClick={() => setShowHelp(false)} className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors text-sm">
+                                Rozumím
+                            </button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )
+        }
 
-            <div
-                className="timeline-scroll-wrapper"
-                ref={scrollContainerRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-                onScroll={handleScroll}
-            >
-                <div className="timeline-content">
-                    <TimelineGrid
-                        startDate={timelineRange.start}
-                        endDate={timelineRange.end}
-                        dayWidth={dayWidth}
-                    >
+        <div
+            className="timeline-scroll-wrapper"
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            onScroll={handleScroll}
+        >
+            <div className="timeline-content">
+                <TimelineGrid
+                    startDate={timelineRange.start}
+                    endDate={timelineRange.end}
+                    dayWidth={dayWidth}
+                >
+                    <div className="timeline-rows">
                         <div className="timeline-rows">
-                            <div className="timeline-rows">
-                                {(() => {
-                                    const visibleSectors = sectorizedProjects.filter(
-                                        sector => activeTypes[sector.id] && sector.projects.length > 0
-                                    );
+                            {(() => {
+                                const visibleSectors = sectorizedProjects.filter(
+                                    sector => activeTypes[sector.id] && sector.projects.length > 0
+                                );
 
-                                    const renderSectorRecursively = (index: number): React.ReactNode => {
-                                        if (index >= visibleSectors.length) return null;
+                                const renderSectorRecursively = (index: number): React.ReactNode => {
+                                    if (index >= visibleSectors.length) return null;
 
-                                        const sector = visibleSectors[index];
-                                        const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
-                                        const isCollapsed = collapsedSectors[sector.id] === true;
+                                    const sector = visibleSectors[index];
+                                    const topOffset = `calc(var(--timeline-header-height) + (${index} * var(--timeline-sector-height)))`;
+                                    const isCollapsed = collapsedSectors[sector.id] === true;
 
-                                        return (
-                                            <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
-                                                {/* HEADER */}
+                                    return (
+                                        <div key={sector.id} className="timeline-sector-stack" style={{ position: 'relative' }}>
+                                            {/* HEADER */}
+                                            <div
+                                                className="timeline-sector-header-row group/header cursor-pointer select-none"
+                                                onClick={() => toggleSector(sector.id)}
+                                                style={{
+                                                    background: 'var(--background)',
+                                                    borderBottom: 'none',
+                                                    top: topOffset,
+                                                    zIndex: 3400 - index
+                                                }}
+                                            >
                                                 <div
-                                                    className="timeline-sector-header-row group/header cursor-pointer select-none"
-                                                    onClick={() => toggleSector(sector.id)}
+                                                    className="project-info-sticky sector-header"
                                                     style={{
+                                                        borderLeft: `2px solid ${sector.color}`,
                                                         background: 'var(--background)',
-                                                        borderBottom: 'none',
-                                                        top: topOffset,
-                                                        zIndex: 3400 - index
+                                                        height: 'var(--row-height)',
+                                                        borderRight: 'none',
+                                                        boxShadow: 'none',
+                                                        zIndex: 50
                                                     }}
                                                 >
-                                                    <div
-                                                        className="project-info-sticky sector-header"
-                                                        style={{
-                                                            borderLeft: `2px solid ${sector.color}`,
-                                                            background: 'var(--background)',
-                                                            height: 'var(--row-height)',
-                                                            borderRight: 'none',
-                                                            boxShadow: 'none',
-                                                            zIndex: 50
-                                                        }}
-                                                    >
-                                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <button
-                                                                    className="p-1 hover:bg-muted/50 rounded-sm"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        toggleSector(sector.id);
-                                                                    }}
-                                                                >
-                                                                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                                                                </button>
-                                                                <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
-                                                                    {sector.label}
-                                                                </span>
-                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
-                                                                    ({sector.projects.length})
-                                                                </span>
-                                                            </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: '0 4px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <button
+                                                                className="p-1 hover:bg-muted/50 rounded-sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleSector(sector.id);
+                                                                }}
+                                                            >
+                                                                {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                                                            </button>
+                                                            <span className="sector-label uppercase text-[10px] font-black tracking-tight" style={{ color: sector.color }}>
+                                                                {sector.label}
+                                                            </span>
+                                                            <span className="text-[10px] text-muted-foreground font-mono opacity-90" style={{ fontWeight: 'bold' }}>
+                                                                ({sector.projects.length})
+                                                            </span>
                                                         </div>
-                                                    </div>
-
-                                                    {/* STACKED CONTENT (Always visible) */}
-                                                    <div
-                                                        className="absolute inset-0 overflow-hidden pointer-events-none"
-                                                        style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
-                                                    >
-                                                        {sector.projects.map(project => {
-                                                            const sDate = (parseDate(project.created_at) || new Date());
-                                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-                                                            return (
-                                                                <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
-                                                                    <TimelineBar
-                                                                        id={project.id}
-                                                                        name={project.name}
-                                                                        project={project}
-                                                                        status={project.status}
-                                                                        startDate={sDate}
-                                                                        endDate={eDate}
-                                                                        timelineStart={timelineRange.start}
-                                                                        dayWidth={dayWidth}
-                                                                        isCollapsed={true}
-                                                                        config={colors}
-                                                                        onProjectUpdate={handleProjectUpdate}
-                                                                        milestones={allMilestones.filter(m => m.project_id === project.id)}
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        })}
                                                     </div>
                                                 </div>
 
-                                                {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}
-                                                {!isCollapsed && (
-                                                    <div className="absolute inset-0 hot-zones-container">
-                                                        {renderHotZones(sector, index, visibleSectors)}
-                                                    </div>
-                                                )}
+                                                {/* STACKED CONTENT (Always visible) */}
+                                                <div
+                                                    className="absolute inset-0 overflow-hidden pointer-events-none"
+                                                    style={outline.showInStack === false ? { '--element-border': 'none' } as React.CSSProperties : undefined}
+                                                >
+                                                    {sector.projects.map(project => {
+                                                        const sDate = (parseDate(project.created_at) || new Date());
+                                                        const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+                                                        return (
+                                                            <div key={`stacked-${project.id}`} className="absolute inset-x-0 h-full">
+                                                                <TimelineBar
+                                                                    id={project.id}
+                                                                    name={project.name}
+                                                                    project={project}
+                                                                    status={project.status}
+                                                                    startDate={sDate}
+                                                                    endDate={eDate}
+                                                                    timelineStart={timelineRange.start}
+                                                                    dayWidth={dayWidth}
+                                                                    isCollapsed={true}
+                                                                    config={{ ...colors, milestoneSize }}
+                                                                    onProjectUpdate={handleProjectUpdate}
+                                                                    milestones={allMilestones.filter(m => m.project_id === project.id)}
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
 
-                                                {/* ROWS - Only when expanded */}
-                                                {!isCollapsed && sector.projects.map((project) => (
-                                                    <div key={project.id} className="timeline-row">
-                                                        <Link
-                                                            href={`/projekty/${project.id}`}
-                                                            className={`project-info-sticky transition-colors group`}
-                                                        >
-                                                            <div className="project-info-content pr-2">
-                                                                {rowHeight >= 30 ? (
-                                                                    <>
-                                                                        <span
-                                                                            className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
-                                                                            style={{ textAlign: 'left', fontWeight: 400 }}
-                                                                        >
-                                                                            {project.name}
-                                                                        </span>
-                                                                        <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
-                                                                            {project.customer || 'Bez zákazníka'}
-                                                                        </span>
-                                                                    </>
-                                                                ) : (
+                                            {/* HOT ZONES - Only when expanded (or maybe keep valid but hidden? No, hide for performance/clarity) */}
+                                            {!isCollapsed && (
+                                                <div className="absolute inset-0 hot-zones-container">
+                                                    {renderHotZones(sector, index, visibleSectors)}
+                                                </div>
+                                            )}
+
+                                            {/* ROWS - Only when expanded */}
+                                            {!isCollapsed && sector.projects.map((project) => (
+                                                <div key={project.id} className="timeline-row">
+                                                    <Link
+                                                        href={`/projekty/${project.id}`}
+                                                        className={`project-info-sticky transition-colors group`}
+                                                    >
+                                                        <div className="project-info-content pr-2">
+                                                            {rowHeight >= 30 ? (
+                                                                <>
+                                                                    <span
+                                                                        className={`project-name w-full text-left !font-normal pl-1 ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
+                                                                        style={{ textAlign: 'left', fontWeight: 400 }}
+                                                                    >
+                                                                        {project.name}
+                                                                    </span>
                                                                     <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
                                                                         {project.customer || 'Bez zákazníka'}
                                                                     </span>
-                                                                )}
-                                                            </div>
-                                                        </Link>
-                                                        <TimelineBar
-                                                            id={project.id}
-                                                            name={project.name}
-                                                            project={project}
-                                                            status={project.status}
-                                                            startDate={parseDate(project.created_at) || new Date()}
-                                                            endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
-                                                            timelineStart={timelineRange.start}
-                                                            dayWidth={dayWidth}
-                                                            config={colors}
-                                                            onProjectUpdate={handleProjectUpdate}
-                                                            milestones={allMilestones.filter(m => m.project_id === project.id)}
-                                                        />
-                                                    </div>
-                                                ))}
+                                                                </>
+                                                            ) : (
+                                                                <span className="customer-name w-full text-right" style={{ textAlign: 'right' }}>
+                                                                    {project.customer || 'Bez zákazníka'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                    <TimelineBar
+                                                        id={project.id}
+                                                        name={project.name}
+                                                        project={project}
+                                                        status={project.status}
+                                                        startDate={parseDate(project.created_at) || new Date()}
+                                                        endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
+                                                        timelineStart={timelineRange.start}
+                                                        dayWidth={dayWidth}
+                                                        config={{ ...colors, milestoneSize }}
+                                                        onProjectUpdate={handleProjectUpdate}
+                                                        milestones={allMilestones.filter(m => m.project_id === project.id)}
+                                                    />
+                                                </div>
+                                            ))}
 
-                                                {/* NESTED NEXT SECTOR */}
-                                                {renderSectorRecursively(index + 1)}
+                                            {/* NESTED NEXT SECTOR */}
+                                            {renderSectorRecursively(index + 1)}
+                                        </div>
+                                    );
+                                };
+
+                                // Helper for HotZones moved out of JSX for clarity, but defined inline here:
+                                const renderHotZones = (sector: any, index: number, allVisible: any[]) => {
+                                    // Same logic as before
+                                    return sector.projects.map((project: any) => {
+                                        // ... (calculations) ... 
+                                        // Because calculations depend on index, we'd need to copy logic.
+                                        // For brevity in edit tool, I will Inline the simplified block or assume existing logic is kept if not replaced.
+                                        // But since I am replacing the block, I MUST provide the content.
+                                        // Let's simplify/inline.
+
+                                        // Re-using calculations from previous view_file:
+                                        let previousRowsCount = 0;
+                                        for (let k = 0; k < index; k++) {
+                                            previousRowsCount += allVisible[k].projects.length;
+                                        }
+                                        const pIndex = sector.projects.findIndex((p: any) => p.id === project.id);
+                                        // Simplified, strict calculation not needed for absolute inset-0 wrapper?
+                                        // Wait, hot-zones-container logic was:
+                                        // absolute inset-0 relative to timeline-sector-stack.
+                                        // It iterates projects and renders TimelineBar absolute inset-0?
+                                        // This sounds wrong if they are supposed to be in rows.
+                                        // Ah, `hot-zones-container` was rendering an overlay?
+                                        // Actually, looking at previous code, `hot-zones-container` seemed to just re-render bars.
+                                        // Maybe for "Hot Zones" logic that wasn't fully implemented or visible?
+                                        // The previous code had `hot-zones-container` render `TimelineBar` inside `absolute inset-0`.
+                                        // This effectively stacks them on top of each other if offsets aren't applied.
+                                        // And `yComponents` calculation was unused in the JSX I saw?
+                                        // Let's look at lines 1028-1095 in previous view.
+                                        // `yComponents` calculated but seemingly unused in `return`.
+                                        // It returned `<div className="absolute inset-0"><TimelineBar ... /></div>`.
+                                        // This means it WAS rendering stacked bars blindly on top of the sector?
+                                        // If so, hiding it when not collapsed matches behavior.
+                                        // I will restore previous content logic for hot zones if needed, 
+                                        // but since `top` offsets were missing in style, it might have been buggy or specific.
+                                        // I'll keep it simple: Render same block if not collapsed.
+
+                                        const sDate = (parseDate(project.created_at) || new Date());
+                                        const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
+
+                                        // Note: If hot zones were relying on 'absolute inset-0' to fill the stack,
+                                        // and rows were static, this duplicates the bars?
+                                        // Yes, line 1100 rendered rows again.
+                                        // Duplicate rendering? Why?
+                                        // Maybe hot-zones are interaction layers?
+                                        // Let's just keep the existing loop logic but wrapped in !isCollapsed.
+
+                                        return (
+                                            <div key={`hot-wrapper-${project.id}`} className="absolute inset-0 pointer-events-none opacity-0">
+                                                {/* Hidden interaction layer or duplicate? Leaving opacity 0 just in case */}
                                             </div>
                                         );
-                                    };
+                                    });
+                                };
 
-                                    // Helper for HotZones moved out of JSX for clarity, but defined inline here:
-                                    const renderHotZones = (sector: any, index: number, allVisible: any[]) => {
-                                        // Same logic as before
-                                        return sector.projects.map((project: any) => {
-                                            // ... (calculations) ... 
-                                            // Because calculations depend on index, we'd need to copy logic.
-                                            // For brevity in edit tool, I will Inline the simplified block or assume existing logic is kept if not replaced.
-                                            // But since I am replacing the block, I MUST provide the content.
-                                            // Let's simplify/inline.
-
-                                            // Re-using calculations from previous view_file:
-                                            let previousRowsCount = 0;
-                                            for (let k = 0; k < index; k++) {
-                                                previousRowsCount += allVisible[k].projects.length;
-                                            }
-                                            const pIndex = sector.projects.findIndex((p: any) => p.id === project.id);
-                                            // Simplified, strict calculation not needed for absolute inset-0 wrapper?
-                                            // Wait, hot-zones-container logic was:
-                                            // absolute inset-0 relative to timeline-sector-stack.
-                                            // It iterates projects and renders TimelineBar absolute inset-0?
-                                            // This sounds wrong if they are supposed to be in rows.
-                                            // Ah, `hot-zones-container` was rendering an overlay?
-                                            // Actually, looking at previous code, `hot-zones-container` seemed to just re-render bars.
-                                            // Maybe for "Hot Zones" logic that wasn't fully implemented or visible?
-                                            // The previous code had `hot-zones-container` render `TimelineBar` inside `absolute inset-0`.
-                                            // This effectively stacks them on top of each other if offsets aren't applied.
-                                            // And `yComponents` calculation was unused in the JSX I saw?
-                                            // Let's look at lines 1028-1095 in previous view.
-                                            // `yComponents` calculated but seemingly unused in `return`.
-                                            // It returned `<div className="absolute inset-0"><TimelineBar ... /></div>`.
-                                            // This means it WAS rendering stacked bars blindly on top of the sector?
-                                            // If so, hiding it when not collapsed matches behavior.
-                                            // I will restore previous content logic for hot zones if needed, 
-                                            // but since `top` offsets were missing in style, it might have been buggy or specific.
-                                            // I'll keep it simple: Render same block if not collapsed.
-
-                                            const sDate = (parseDate(project.created_at) || new Date());
-                                            const eDate = (parseDate(project.deadline) || parseDate(project.customer_handover) || sDate);
-
-                                            // Note: If hot zones were relying on 'absolute inset-0' to fill the stack,
-                                            // and rows were static, this duplicates the bars?
-                                            // Yes, line 1100 rendered rows again.
-                                            // Duplicate rendering? Why?
-                                            // Maybe hot-zones are interaction layers?
-                                            // Let's just keep the existing loop logic but wrapped in !isCollapsed.
-
-                                            return (
-                                                <div key={`hot-wrapper-${project.id}`} className="absolute inset-0 pointer-events-none opacity-0">
-                                                    {/* Hidden interaction layer or duplicate? Leaving opacity 0 just in case */}
-                                                </div>
-                                            );
-                                        });
-                                    };
-
-                                    return renderSectorRecursively(0);
-                                })()}
-                            </div>
+                                return renderSectorRecursively(0);
+                            })()}
                         </div>
-                    </TimelineGrid>
-                </div>
-            </div >
+                    </div>
+                </TimelineGrid>
+            </div>
         </div >
-    );
+    </div >
+);
 };
 
 export default Timeline;
