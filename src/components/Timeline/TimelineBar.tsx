@@ -7,7 +7,7 @@ import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
     Cog, Wrench, Zap, Cpu, Activity, Package, Box, HardHat,
     Construction, Factory, Pickaxe, Settings2, ShieldCheck,
-    Container, Anchor, Component, Drill, Settings
+    Container, Anchor, Component, Drill, Settings, Plus, X
 } from 'lucide-react';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
@@ -145,6 +145,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 }: ITimelineBarProps) => {
     const [activeCell, setActiveCell] = useState<string | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [addMilestoneDate, setAddMilestoneDate] = useState<Date | null>(null);
+    const [addMilestonePos, setAddMilestonePos] = useState<{ x: number, y: number } | null>(null);
     // Parsujeme všechna data
     const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
@@ -192,6 +194,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             if (error) throw error;
 
             // Refresh page to see changes
+            // Refresh page to see changes
+            setAddMilestoneDate(null); // Close popup
             window.location.reload();
         } catch (err) {
             console.error('Error updating milestone date:', err);
@@ -277,8 +281,68 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         } : {})
     };
 
+    const handleDoubleClick = (e: React.MouseEvent) => {
+        if (isCollapsed) return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const days = Math.floor(x / dayWidth);
+        const clickedDate = new Date(timelineStart);
+        clickedDate.setDate(clickedDate.getDate() + days);
+        clickedDate.setHours(0, 0, 0, 0);
+
+        setAddMilestoneDate(clickedDate);
+        setAddMilestonePos({ x: e.clientX, y: e.clientY }); // Global position for fixed overlay or relative?
+        // Let's use relative to container if we render inside:
+        // Actually, rendering absolute to container is easier.
+        setAddMilestonePos({ x: x, y: 0 });
+    };
+
     return (
-        <div className={`milestones-container ${isCollapsed ? 'is-collapsed-bar' : ''}`} style={containerStyle}>
+        <div
+            className={`milestones-container ${isCollapsed ? 'is-collapsed-bar' : ''}`}
+            style={containerStyle}
+            onDoubleClick={handleDoubleClick}
+        >
+            {addMilestoneDate && !isCollapsed && (
+                <div
+                    className="absolute bg-background border border-border shadow-lg rounded-md p-2 z-[99999]"
+                    style={{
+                        left: addMilestonePos?.x || 0,
+                        top: 30, // Show below row
+                        width: 200
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex justify-between items-center mb-2 pb-1 border-b border-border">
+                        <span className="text-xs font-bold">{formatLocalDate(addMilestoneDate)}</span>
+                        <button
+                            onClick={() => setAddMilestoneDate(null)}
+                            className="text-muted-foreground hover:text-foreground"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Přidat milník</span>
+                        {[
+                            { id: 'chassis', label: 'Podvozek' },
+                            { id: 'body', label: 'Nástavba' },
+                            { id: 'handover', label: 'Předání' },
+                            { id: 'deadline', label: 'Deadline' },
+                        ].map(type => (
+                            <button
+                                key={type.id}
+                                className="text-xs text-left px-2 py-1.5 hover:bg-muted rounded flex items-center gap-2"
+                                onClick={() => handleDateUpdate(type.id, formatLocalDate(addMilestoneDate))}
+                            >
+                                <Plus size={12} />
+                                {type.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
             {/* Vykreslení fází (podklad) */}
             {phases.map((p: IPhase) => {
                 const left = getDatePos(p.start);
