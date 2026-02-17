@@ -330,7 +330,7 @@
   /* Show tooltips! */
   height: 100%;
   width: 100%;
-  pointer-events: auto;
+  pointer-events: none;
   /* Allow interaction with summary icons */
   z-index: 20;
 }
