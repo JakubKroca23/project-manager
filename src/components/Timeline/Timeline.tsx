@@ -214,7 +214,8 @@ const Timeline: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
         civil: true,
-        military: true
+        military: true,
+        service: true
     });
     const [showHidden, setShowHidden] = useState(false);
 
@@ -708,10 +709,12 @@ const Timeline: React.FC = () => {
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
-        const civil = filteredProjects.filter(p => p.project_type === 'civil');
+        const service = filteredProjects.filter(p => p.project_type === 'service');
+        const civil = filteredProjects.filter(p => p.project_type === 'civil' || !p.project_type);
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
+            { id: 'service', label: 'SERVIS', projects: service, color: '#ffb74d' },
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#90caf9' },
             { id: 'military', label: 'ARMÁDNÍ ZAKÁZKY', projects: military, color: '#a5d6a7' }
         ];
@@ -762,6 +765,7 @@ const Timeline: React.FC = () => {
 
                     <div className="type-filters flex items-center gap-4">
                         {[
+                            { id: 'service', label: 'Servis', color: '#f97316' },
                             { id: 'civil', label: 'Civilní', color: '#3b82f6' },
                             { id: 'military', label: 'Armáda', color: '#10b981' }
                         ].map(({ id, label, color }) => (

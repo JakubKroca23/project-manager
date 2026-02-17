@@ -22,95 +22,15 @@ const navItems = [
             { name: 'ARMÁDNÍ', href: '/projekty?type=military' },
         ]
     },
-    { name: 'VÝROBA', icon: Factory, href: '/vyroba', color: '#ef9a9a' },
+    { name: 'SERVIS', icon: Wrench, href: '/servis', color: '#ffb74d' }, // Orange for Service
     { name: 'NÁKUP', icon: ShoppingCart, href: '/nakup', color: '#80cbc4' },
 ];
-
-const IconButton = ({ children, onClick, title, className }: { children: React.ReactNode, onClick?: () => void, title?: string, className?: string }) => (
-    <button
-        onClick={onClick}
-        className={cn(
-            "w-7 h-7 flex items-center justify-center rounded-md transition-all duration-200 bg-white/5 hover:bg-white/10 active:scale-95 text-gray-400 hover:text-white border border-white/10",
-            className
-        )}
-        title={title}
-    >
-        {children}
-    </button>
-);
-
-const Navbar = () => {
+export function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const typeParam = searchParams.get('type');
-    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-    const router = useRouter();
-
-    const [currentTime, setCurrentTime] = useState('');
-    const [currentDate, setCurrentDate] = useState('');
-
-    const [inferredType, setInferredType] = useState<string | null>(null);
-    const { permissions, checkPerm } = usePermissions();
-
-    const userEmail = permissions?.email || null;
-
-    // Determine current active category label
-    const activeType = typeParam || inferredType;
-    const activeCategory =
-        activeType === 'military' ? 'ARMÁDNÍ' :
-            (activeType === 'civil' ? 'CIVILNÍ' : null);
-
-    useEffect(() => {
-        const fetchInferredType = async () => {
-            const projectDetailMatch = pathname?.match(/^\/projekty\/([^\/?]+)/);
-            const isProjectDetail = !!projectDetailMatch && pathname !== '/projekty';
-
-            if (isProjectDetail) {
-                const projectId = projectDetailMatch[1];
-                const { data } = await supabase
-                    .from('projects')
-                    .select('project_type')
-                    .eq('id', projectId)
-                    .single();
-
-                if (data?.project_type) {
-                    setInferredType(data.project_type);
-                }
-            } else {
-                setInferredType(null);
-            }
-        };
-
-        fetchInferredType();
-    }, [pathname]);
-
-    useEffect(() => {
-        // Update time and date
-        const updateDateTime = () => {
-            const now = new Date();
-            setCurrentDate(now.toLocaleDateString('cs-CZ', {
-                day: 'numeric',
-                month: 'numeric',
-                year: 'numeric'
-            }));
-            setCurrentTime(
-                now.getHours().toString().padStart(2, '0') + ':' +
-                now.getMinutes().toString().padStart(2, '0')
-            );
-        };
-
-        updateDateTime();
-        const interval = setInterval(updateDateTime, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        // Force a hard redirect to login and clear router cache
-        window.location.href = '/login';
-    };
-
-    // Filter nav items based on permissions
+    const router = useRouter(); // Use this if router is needed, otherwise remove. Added for safety based on import.
+    const activeType = searchParams.get('type');
+    const { checkPerm } = usePermissions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'TIMELINE': return checkPerm('timeline');
@@ -118,11 +38,46 @@ const Navbar = () => {
                 const hasMainAccess = checkPerm('projects');
                 const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military');
                 return hasMainAccess && hasAnySubAccess;
-            case 'VÝROBA': return checkPerm('production');
+            case 'SERVIS': return checkPerm('service');
             case 'NÁKUP': return checkPerm('purchasing');
             default: return true;
         }
     });
+
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+    const [currentTime, setCurrentTime] = useState<string>('');
+    const [currentDate, setCurrentDate] = useState<string>('');
+    const [userEmail, setUserEmail] = useState<string>('');
+
+    // Active Category Label
+    const activeCategory = activeType === 'military' ? 'ARMÁDA' : activeType === 'civil' ? 'CIVIL' : null;
+
+    useEffect(() => {
+        // Time/Date logic
+        const updateTime = () => {
+            const now = new Date();
+            setCurrentTime(now.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }));
+            setCurrentDate(now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' }));
+        };
+        updateTime();
+        const interval = setInterval(updateTime, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        // User email logic
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user?.email) setUserEmail(user.email);
+        };
+        getUser();
+    }, []);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+        router.refresh();
+    };
 
     return (
         <nav className="sticky top-0 z-50 w-full">
@@ -134,7 +89,7 @@ const Navbar = () => {
                     {/* Navigation Items - Left/Center */}
                     <div className="flex items-center gap-1">
                         {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && (pathname === '/servis' || pathname?.startsWith('/projekty/')));
+                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
                             const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
 
                             // Determine active Color
@@ -326,3 +281,21 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    children: React.ReactNode;
+}
+
+function IconButton({ className, children, ...props }: IconButtonProps) {
+    return (
+        <button
+            className={cn(
+                "flex items-center justify-center w-6 h-6 rounded-md transition-all duration-200",
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </button>
+    );
+}

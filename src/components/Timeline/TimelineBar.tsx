@@ -912,7 +912,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             type="text"
                                             defaultValue={m.label}
                                             className="font-bold text-sm bg-muted/50 border-none px-1 py-0 rounded outline-none focus:ring-1 focus:ring-primary/30 min-w-0 w-full"
-                                            onBlur={async (e) => {
+                                            onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
                                                 const val = e.target.value;
                                                 if (!val || val === m.label) return;
                                                 try {
@@ -1064,7 +1064,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     <input
                                         type="date"
                                         className="flex-1 bg-background border border-border px-2 py-1 rounded text-xs outline-none focus:ring-1 focus:ring-primary/30"
-                                        onChange={(e) => {
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                             const val = e.target.value;
                                             const updateKey = m.class.startsWith('custom-') ? m.key : m.class;
                                             handleDateUpdate(updateKey, val);

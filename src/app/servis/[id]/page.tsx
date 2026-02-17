@@ -1,0 +1,834 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
+import { Project, Milestone } from '@/types/project';
+import {
+    ArrowLeft,
+    User,
+    Building2,
+    Tag,
+    ClipboardList,
+    Truck,
+    Shield,
+    Globe,
+    Hash,
+    Edit2,
+    Save,
+    X,
+    Loader2,
+    PlusCircle,
+    Trash2,
+    AlertCircle,
+    Factory,
+    CalendarDays,
+    Wrench,
+    FileText,
+    Package
+} from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useAdmin } from '@/hooks/useAdmin';
+import {
+    Calendar,
+    CheckCircle2,
+    Circle,
+    Clock,
+    Flag,
+    Hammer,
+    ThumbsUp,
+    AlertTriangle,
+    Check,
+    Zap,
+    Factory as FactoryIcon,
+    ShieldCheck,
+    Box,
+    Play,
+    Settings
+} from 'lucide-react';
+
+const ICON_OPTIONS = {
+    Truck: Truck,
+    Hammer: Hammer,
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Check: Check,
+    Wrench: Wrench,
+    Zap: Zap,
+    Package: Package,
+    Factory: Factory,
+    ShieldCheck: ShieldCheck,
+    Box: Box,
+    Settings: Settings,
+    Play: Play,
+    Milestone: Flag
+};
+
+export default function ServiceDetailPage() {
+    const { id } = useParams();
+    const router = useRouter();
+    const [project, setProject] = useState<Project | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedProject, setEditedProject] = useState<Project | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [milestones, setMilestones] = useState<Milestone[]>([]);
+    const [loadingMilestones, setLoadingMilestones] = useState(true);
+    const [isAddingMilestone, setIsAddingMilestone] = useState(false);
+    const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
+    const { canEdit } = usePermissions();
+    const { profiles } = useAdmin();
+
+    useEffect(() => {
+        async function fetchProject() {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching project:', error);
+            } else {
+                setProject(data);
+                setEditedProject(data);
+            }
+            setLoading(false);
+        }
+
+        async function fetchMilestones() {
+            setLoadingMilestones(true);
+            const { data, error } = await supabase
+                .from('project_milestones')
+                .select('*')
+                .eq('project_id', id)
+                .order('date', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching milestones:', error);
+            } else {
+                setMilestones(data || []);
+            }
+            setLoadingMilestones(false);
+        }
+
+        if (id) {
+            fetchProject();
+            fetchMilestones();
+        }
+    }, [id]);
+
+    const handleAddMilestone = async () => {
+        if (!newMilestone.name || !newMilestone.date) {
+            alert('Vyplňte název a datum milníku.');
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('project_milestones')
+                .insert({
+                    project_id: id,
+                    name: newMilestone.name,
+                    date: newMilestone.date,
+                    status: newMilestone.status,
+                    icon: newMilestone.icon
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            setMilestones([...milestones, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+            setNewMilestone({ name: '', date: '', status: 'pending', icon: 'Milestone' });
+            setIsAddingMilestone(false);
+        } catch (err) {
+            console.error('Error adding milestone:', err);
+            alert('Chyba při přidávání milníku.');
+        }
+    };
+
+    const handleToggleMilestoneStatus = async (milestone: Milestone) => {
+        const newStatus = milestone.status === 'completed' ? 'pending' : 'completed';
+        try {
+            const { error } = await supabase
+                .from('project_milestones')
+                .update({ status: newStatus })
+                .eq('id', milestone.id);
+
+            if (error) throw error;
+
+            setMilestones(milestones.map(m => m.id === milestone.id ? { ...m, status: newStatus } : m));
+        } catch (err) {
+            console.error('Error updating milestone status:', err);
+            alert('Chyba při aktualizaci stavu milníku.');
+        }
+    };
+
+    const handleDeleteMilestone = async (milestoneId: string) => {
+        if (!confirm('Opravdu smazat tento milník?')) return;
+        try {
+            const { error } = await supabase
+                .from('project_milestones')
+                .delete()
+                .eq('id', milestoneId);
+
+            if (error) throw error;
+
+            setMilestones(milestones.filter(m => m.id !== milestoneId));
+        } catch (err) {
+            console.error('Error deleting milestone:', err);
+            alert('Chyba při mazání milníku.');
+        }
+    };
+
+    const handleSave = async () => {
+        if (!editedProject) return;
+        setSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const userName = user?.email?.split('@')[0] || 'Neznámý';
+
+            const updates = {
+                ...editedProject,
+                last_modified_by: userName,
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await supabase
+                .from('projects')
+                .update(updates)
+                .eq('id', project?.id);
+
+            if (error) throw error;
+
+            setProject(updates);
+            setIsEditing(false);
+        } catch (err) {
+            console.error('Error saving project:', err);
+            alert('Chyba při ukládání změn.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setEditedProject(project);
+        setIsEditing(false);
+    };
+
+    const handleChange = (field: keyof Project, value: any) => {
+        if (!editedProject) return;
+        setEditedProject({ ...editedProject, [field]: value });
+    };
+
+    const handleCustomFieldChange = (key: string, value: any) => {
+        if (!editedProject) return;
+        setEditedProject({
+            ...editedProject,
+            custom_fields: {
+                ...editedProject.custom_fields,
+                [key]: value
+            }
+        });
+    };
+
+    const addCustomField = () => {
+        const name = prompt("Název nového pole:");
+        if (name && editedProject) {
+            handleCustomFieldChange(name, "-");
+        }
+    };
+
+    const removeCustomField = (key: string) => {
+        if (!editedProject || !confirm(`Opravdu smazat pole "${key}"?`)) return;
+        const newFields = { ...editedProject.custom_fields };
+        delete newFields[key];
+        setEditedProject({ ...editedProject, custom_fields: newFields });
+    };
+
+    // --- Loading State ---
+    if (loading) {
+        return (
+            <div className="flex h-full items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 size={28} className="animate-spin text-primary" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Načítám detail servisu...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // --- Not Found State ---
+    if (!project) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center gap-6 p-6 bg-background">
+                <div className="p-6 bg-destructive/5 rounded-xl border border-destructive/10 text-destructive flex flex-col items-center gap-3">
+                    <AlertCircle size={40} strokeWidth={1.5} />
+                    <h2 className="text-lg font-bold">Servis nenalezen</h2>
+                    <p className="text-xs text-destructive/80">ID <span className="font-mono bg-destructive/10 px-1.5 py-0.5 rounded">{id}</span> neexistuje.</p>
+                </div>
+                <button onClick={() => router.push('/servis')} className="px-5 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition-all">
+                    <ArrowLeft size={14} /> Zpět
+                </button>
+            </div>
+        );
+    }
+
+    const isMilitary = project.project_type === 'military';
+    const isCivil = project.project_type === 'civil';
+    const isService = project.project_type === 'service';
+
+    let typeColor = '#94a3b8';
+    let typeLabel = 'Neznámý';
+    let typeClass = 'bg-slate-500/10 text-slate-600 border-slate-500/20';
+
+    if (isMilitary) {
+        typeColor = '#a5d6a7';
+        typeLabel = 'Armáda';
+        typeClass = 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+    } else if (isCivil) {
+        typeColor = '#90caf9';
+        typeLabel = 'Civil';
+        typeClass = 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+    } else if (isService) {
+        typeColor = '#ffb74d';
+        typeLabel = 'Servis';
+        typeClass = 'bg-orange-500/10 text-orange-600 border-orange-500/20';
+    }
+
+    const p = isEditing ? editedProject! : project;
+
+    const formatDate = (date: string | null | undefined) => {
+        if (!date) return '—';
+        return new Date(date).toLocaleDateString('cs-CZ');
+    };
+
+    return (
+        <div className="h-full overflow-y-auto bg-background text-foreground">
+            {/* ── Sticky Top Bar ── */}
+            <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50">
+                <div
+                    className="absolute top-0 left-0 right-0 h-[3px] transition-colors duration-500"
+                    style={{ backgroundColor: typeColor, boxShadow: `0 0 10px ${typeColor}44` }}
+                />
+                <div className="max-w-[1400px] mx-auto px-4 h-11 flex items-center justify-between">
+                    <button
+                        onClick={() => router.push('/servis')}
+                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
+                        style={{ color: typeColor }}
+                    >
+                        <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                        Zpět na servisy
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                        {isEditing ? (
+                            <>
+                                <button onClick={handleCancel} disabled={saving} className="px-4 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
+                                    <X size={12} /> Zrušit
+                                </button>
+                                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-90">
+                                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                                    Uložit
+                                </button>
+                            </>
+                        ) : (
+                            canEdit && (
+                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-muted hover:bg-primary/10 hover:text-primary text-[10px] font-bold uppercase tracking-wider transition-all">
+                                    <Edit2 size={12} /> Upravit
+                                </button>
+                            )
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Main Content ── */}
+            <div className="max-w-[1400px] mx-auto px-4 py-4 pb-16 space-y-4">
+
+                {/* ── HEADER ── */}
+                <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${typeClass}`}>
+                                {typeLabel}
+                            </span>
+                            {isEditing && (
+                                <select
+                                    value={p.project_type}
+                                    onChange={(e) => handleChange('project_type', e.target.value)}
+                                    className="text-[10px] bg-muted border border-border rounded px-2 py-0.5 outline-none"
+                                >
+                                    <option value="civil">Civil</option>
+                                    <option value="military">Armáda</option>
+                                    <option value="service">Servis</option>
+                                </select>
+                            )}
+                            <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{project.id}</span>
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                                <span className={`w-1.5 h-1.5 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
+                                {project.status}
+                            </span>
+                        </div>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.name}
+                                onChange={(e) => handleChange('name', e.target.value)}
+                                className="text-lg font-bold w-full bg-muted/30 border border-border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary/20 outline-none"
+                            />
+                        ) : (
+                            <h1 className="text-lg font-bold text-foreground leading-snug">{project.name}</h1>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── SECTIONS GRID ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                    {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
+                    <Section icon={<FileText size={15} />} title="Základní informace" color="blue">
+                        <FieldGrid>
+                            <Field label="Manažer" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Kategorie" icon={<Tag size={13} />} value={p.category} field="category" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Výrobní číslo" icon={<Hash size={13} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
+                        </FieldGrid>
+                    </Section>
+
+                    {/* ═══ 2. HARMONOGRAM ═══ */}
+                    <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <CustomDateField
+                                label="Konec montáže"
+                                value={p.custom_fields?.mounting_end_date}
+                                field="mounting_end_date"
+                                isEditing={isEditing}
+                                onChange={handleCustomFieldChange}
+                            />
+                            <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                            <CustomDateField
+                                label="Konec revize"
+                                value={p.custom_fields?.revision_end_date}
+                                field="revision_end_date"
+                                isEditing={isEditing}
+                                onChange={handleCustomFieldChange}
+                            />
+                            <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                            <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                        </div>
+                    </Section>
+
+                    {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
+                    <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
+                        <FieldGrid>
+                            <Field label="Stav výroby" icon={<Factory size={13} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
+                            <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
+                        </FieldGrid>
+                    </Section>
+
+                    {/* ═══ 4. ABRA PROPOJENÍ ═══ */}
+                    <Section icon={<Globe size={15} />} title="ABRA propojení" color="purple">
+                        <FieldGrid>
+                            <Field label="Číslo zakázky" icon={<Hash size={13} />} value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Číslo objednávky" icon={<Hash size={13} />} value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={handleChange} />
+                        </FieldGrid>
+                    </Section>
+                </div>
+                {/* ═══ 4.5 MILNÍKY ═══ */}
+                <Section
+                    icon={<Flag size={15} />}
+                    title="Milníky servisu"
+                    color="emerald"
+                    fullWidth
+                    action={
+                        <button
+                            onClick={() => setIsAddingMilestone(!isAddingMilestone)}
+                            className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1"
+                        >
+                            {isAddingMilestone ? <X size={11} /> : <PlusCircle size={11} />}
+                            {isAddingMilestone ? 'Zrušit' : 'Nový milník'}
+                        </button>
+                    }
+                >
+                    <div className="space-y-3">
+                        {isAddingMilestone && (
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 flex flex-col gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Název milníku</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Např. Kontrola kvality"
+                                            value={newMilestone.name}
+                                            onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
+                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Datum</label>
+                                        <input
+                                            type="date"
+                                            value={newMilestone.date}
+                                            onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
+                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Vyberte ikonku</label>
+                                    <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 border border-border/40 p-2 rounded-xl bg-background/50">
+                                        {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => setNewMilestone({ ...newMilestone, icon: key })}
+                                                className={`p-2 rounded-lg transition-all flex items-center justify-center ${newMilestone.icon === key ? 'bg-primary text-primary-foreground shadow-lg scale-110' : 'hover:bg-muted text-muted-foreground/60'}`}
+                                                title={key}
+                                            >
+                                                <IconComponent size={16} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={() => setIsAddingMilestone(false)}
+                                        className="px-4 py-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        Zrušit
+                                    </button>
+                                    <button
+                                        onClick={handleAddMilestone}
+                                        className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-bold uppercase hover:opacity-90 transition-all shadow-md shadow-primary/20"
+                                    >
+                                        Přidat milník
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {loadingMilestones ? (
+                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground animate-pulse">Načítám milníky...</div>
+                            ) : milestones.length === 0 ? (
+                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground italic bg-muted/10 rounded-xl border border-dashed border-border/50">Žádné vlastní milníky nebyly přidány.</div>
+                            ) : (
+                                milestones.map((m) => (
+                                    <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex flex-col items-center gap-1 shrink-0">
+                                                <button
+                                                    onClick={() => handleToggleMilestoneStatus(m)}
+                                                    className={`p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}
+                                                >
+                                                    {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                                                </button>
+                                                {(() => {
+                                                    const MIcon = ICON_OPTIONS[m.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
+                                                    return <MIcon size={12} className="text-muted-foreground/50" />;
+                                                })()}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <input
+                                                    type="text"
+                                                    value={m.name}
+                                                    onChange={async (e) => {
+                                                        const newName = e.target.value;
+                                                        const updatedMilestones = milestones.map(ms => ms.id === m.id ? { ...ms, name: newName } : ms);
+                                                        setMilestones(updatedMilestones);
+                                                    }}
+                                                    onBlur={async (e) => {
+                                                        const newName = e.target.value;
+                                                        if (!newName) return;
+                                                        try {
+                                                            await supabase
+                                                                .from('project_milestones')
+                                                                .update({ name: newName })
+                                                                .eq('id', m.id);
+                                                        } catch (err) {
+                                                            console.error('Error updating milestone name:', err);
+                                                        }
+                                                    }}
+                                                    className={`w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0 outline-none ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}
+                                                />
+                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium cursor-default">
+                                                    <Calendar size={10} />
+                                                    {new Date(m.date).toLocaleDateString('cs-CZ')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteMilestone(m.id)}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all shrink-0"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </Section>
+
+                {/* ═══ 5. POPIS ZAKÁZKY / POZNÁMKY ═══ */}
+                <Section icon={<ClipboardList size={15} />} title="Popis servisu" color="slate" fullWidth>
+                    {isEditing ? (
+                        <textarea
+                            value={p.note || ''}
+                            onChange={(e) => handleChange('note', e.target.value)}
+                            className="w-full h-28 bg-muted/20 border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed resize-none"
+                            placeholder="Zde můžete připsat popis servisu nebo poznámky..."
+                        />
+                    ) : (
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap min-h-[2rem]">
+                            {project.note || 'Žádný popis nebyl přidán.'}
+                        </p>
+                    )}
+                </Section>
+
+                {/* ═══ 6. OSTATNÍ DATA (Custom Fields) ═══ */}
+                {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
+                    <Section
+                        icon={<Globe size={15} />}
+                        title="Ostatní data"
+                        color="slate"
+                        fullWidth
+                        action={isEditing ? (
+                            <button onClick={addCustomField} className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1">
+                                <PlusCircle size={11} /> Přidat
+                            </button>
+                        ) : undefined}
+                    >
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                            {(isEditing
+                                ? Object.entries(p.custom_fields || {})
+                                : Object.entries(project.custom_fields || {})
+                            ).map(([key, val]) => (
+                                <div key={key} className="group relative bg-muted/20 hover:bg-muted/30 p-2.5 rounded-lg border border-transparent hover:border-border/50 transition-all">
+                                    <div className="flex justify-between items-start mb-0.5">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">{key}</p>
+                                        {isEditing && (
+                                            <button onClick={() => removeCustomField(key)} className="text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive/10 p-0.5 rounded transition-all">
+                                                <Trash2 size={10} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={val as string}
+                                            onChange={(e) => handleCustomFieldChange(key, e.target.value)}
+                                            className="w-full bg-transparent border-none text-xs font-medium text-foreground focus:ring-0 p-0"
+                                        />
+                                    ) : (
+                                        <p className="text-xs font-medium text-foreground">{val?.toString() || '-'}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </Section>
+                )}
+
+                {/* ═══ 7. HISTORIE ZMĚN ═══ */}
+                <Section icon={<ClipboardList size={15} />} title="Historie změn" color="slate" fullWidth>
+                    <ProjectHistory projectId={project.id} />
+                </Section>
+            </div>
+        </div>
+    );
+}
+
+// ─── SUBCOMPONENTS ───────────────────────────────────────────────
+
+// Color accent maps
+const colorMap: Record<string, { border: string; bg: string; icon: string; text: string }> = {
+    blue: { border: 'border-blue-500/20', bg: 'bg-blue-500/5', icon: 'text-blue-500', text: 'text-blue-600' },
+    amber: { border: 'border-amber-500/20', bg: 'bg-amber-500/5', icon: 'text-amber-500', text: 'text-amber-600' },
+    emerald: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/5', icon: 'text-emerald-500', text: 'text-emerald-600' },
+    purple: { border: 'border-purple-500/20', bg: 'bg-purple-500/5', icon: 'text-purple-500', text: 'text-purple-600' },
+    slate: { border: 'border-border/60', bg: 'bg-muted/5', icon: 'text-muted-foreground', text: 'text-muted-foreground' },
+};
+
+interface SectionProps {
+    icon: React.ReactNode;
+    title: string;
+    color: string;
+    children: React.ReactNode;
+    fullWidth?: boolean;
+    action?: React.ReactNode;
+}
+
+function Section({ icon, title, color, children, fullWidth, action }: SectionProps) {
+    const c = colorMap[color] || colorMap.slate;
+    return (
+        <div className={`rounded-xl border ${c.border} ${c.bg} p-4 ${fullWidth ? '' : ''}`}>
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <div className={`${c.icon}`}>{icon}</div>
+                    <h3 className={`text-[11px] font-bold uppercase tracking-widest ${c.text}`}>{title}</h3>
+                </div>
+                {action}
+            </div>
+            {children}
+        </div>
+    );
+}
+
+function FieldGrid({ children }: { children: React.ReactNode }) {
+    return <div className="grid grid-cols-2 gap-x-4 gap-y-2">{children}</div>;
+}
+
+interface FieldProps {
+    label: string;
+    icon: React.ReactNode;
+    value: any;
+    field: keyof Project;
+    isEditing: boolean;
+    onChange: (field: keyof Project, value: any) => void;
+    highlight?: boolean;
+}
+
+function Field({ label, icon, value, field, isEditing, onChange, highlight }: FieldProps) {
+    return (
+        <div className="flex items-start gap-2">
+            <div className="text-muted-foreground/50 mt-0.5 shrink-0">{icon}</div>
+            <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
+                {isEditing ? (
+                    <input
+                        type="text"
+                        value={String(value || '')}
+                        onChange={(e) => onChange(field, e.target.value)}
+                        className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                    />
+                ) : (
+                    <p className={`text-xs font-semibold truncate ${highlight ? 'text-primary' : 'text-foreground'}`} title={String(value || '')}>
+                        {value || '—'}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+interface DateFieldProps {
+    label: string;
+    value: any;
+    field: keyof Project;
+    isEditing: boolean;
+    onChange: (field: keyof Project, value: any) => void;
+    highlight?: boolean;
+}
+
+function DateField({ label, value, field, isEditing, onChange, highlight }: DateFieldProps) {
+    const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
+    return (
+        <div>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
+            {isEditing ? (
+                <input
+                    type="date"
+                    value={value || ''}
+                    onChange={(e) => onChange(field, e.target.value)}
+                    className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
+                />
+            ) : (
+                <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>
+                    {formatted}
+                </p>
+            )}
+        </div>
+    );
+}
+
+interface CustomDateFieldProps {
+    label: string;
+    value: any;
+    field: string;
+    isEditing: boolean;
+    onChange: (field: string, value: any) => void;
+    highlight?: boolean;
+}
+
+function CustomDateField({ label, value, field, isEditing, onChange, highlight }: CustomDateFieldProps) {
+    const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
+    return (
+        <div>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
+            {isEditing ? (
+                <input
+                    type="date"
+                    value={value || ''}
+                    onChange={(e) => onChange(field, e.target.value)}
+                    className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
+                />
+            ) : (
+                <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>
+                    {formatted}
+                </p>
+            )}
+        </div>
+    );
+}
+
+function ProjectHistory({ projectId }: { projectId: string }) {
+    const [logs, setLogs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { profiles } = useAdmin();
+
+    useEffect(() => {
+        async function fetchLogs() {
+            const { data, error } = await supabase
+                .from('project_action_logs')
+                .select('*')
+                .eq('project_id', projectId)
+                .order('performed_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching logs:', error);
+            } else {
+                setLogs(data || []);
+            }
+            setLoading(false);
+        }
+        fetchLogs();
+    }, [projectId]);
+
+    const resolveUser = (id: string) => {
+        if (!id) return 'Systém';
+        const profile = profiles.find((p: any) => p.id === id);
+        return profile?.email || id;
+    };
+
+    if (loading) return <div className="text-[10px] text-muted-foreground animate-pulse px-4 py-2">Načítám historii...</div>;
+    if (logs.length === 0) return <div className="text-[10px] text-muted-foreground px-4 py-2">Žádné záznamy o změnách.</div>;
+
+    return (
+        <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
+            {logs.map((log) => (
+                <div key={log.id} className="p-2.5 bg-background/40 rounded-lg border border-border/40 text-[10px] hover:bg-background/60 transition-colors">
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-bold text-foreground text-[11px]">{log.action_type}</span>
+                        <span className="text-[9px] text-muted-foreground/60">{new Date(log.performed_at).toLocaleString('cs-CZ')}</span>
+                    </div>
+                    {log.details && (
+                        <div className="text-muted-foreground/80 mb-2 font-mono text-[9px] bg-muted/20 p-1.5 rounded border border-border/20">
+                            {JSON.stringify(log.details, null, 2)}
+                        </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-muted-foreground/50">
+                        <User size={10} />
+                        <span>{resolveUser(log.user_id)}</span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
