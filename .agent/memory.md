@@ -96,3 +96,14 @@
 - **Nápověda a Legenda**: Implementováno modální okno s přehledem ovládání (myš, klávesnice) a vysvětlivkami barev fází i ikon milníků.
 - **Milestone Dot Rendering**: Speciální vykreslování pro "Konec montáže" a "Konec revize" (pouze malé tečky) pro vizuální odlehčení grafu.
 - **Portal Rendering**: Detailní popup milníku/projektu se nyní vykresluje do `document.body` přes React Portal, což zaručuje jeho viditelnost nad všemi vrstvami (Z-Index fix).
+99: 
+100: ## 2026-02-17: Custom Milestones & UI Polish
+101: - **Milestone Architecture (v2)**: 
+102:     - Přidána podpora pro ikony v tabulce `project_milestones` (sloupec `icon`).
+103:     - Rozšířen Milestone form o interaktivní výběr z 15+ ikon (`lucide-react`).
+104:     - Barvy milníků jsou nyní sémantické: Červená pro rozpracované, Zelená pro hotové.
+105: - **Timeline Popup Logic**:
+106:     - Implementována inteligentní detekce viewportu (`isNearBottom`). Popup se dynamicky otevírá nahoru/dolů, aby nebyl oříznut.
+107:     - Kontejner popupu má nyní definovaný `max-height` a `scroll`, což řeší přetečení u velkého množství ikon nebo dlouhých popisů.
+108: - **Data Clean-up**:
+109:     - Odstraněno pole `body_type` z projektu, jelikož tato data jsou nyní lépe zpracovávána skrze specifické milníky a konfigurace.

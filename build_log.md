@@ -114,5 +114,18 @@
     - **Color Pickers**: Všechny výběry barev (Fáze, Milníky, Obrys) mají nyní moderní kulatý design (`rounded-full`).
     - **Layout**: Popup nastavení má fixní hlavičku a scrollovatelný obsah.
     - **Logika**: Pro "dot" milníky (Montáž/Revize End) je v nastavení skryt výběr ikony.
-- **Změna**: Oprava Z-Indexu popupů (vrstvení).
+- **Změna**: Oprava Z-Indexu popupů milníků (React Portal).
 - **Detail**: Popup s detailem milníku/projektu v `TimelineBar` byl přesunut do `React Portal` (`document.body`). Tím se definitivně vyřešil problém s překrýváním popupu okolními elementy nebo "stacked" řádky.
+
+## [2026-02-17] - Custom Milestones Integration & UI Polish
+- **Změna**: Streamlined Custom Milestones.
+- **Detail**:
+    - **Odstranění pole**: Z detailu projektu i Timeline byl odstraněn nadbytečný "Typ nástavby" pro zjednodušení procesů.
+    - **Ikonky**: Implementován výběr ikon při tvorbě milníku (Truck, Hammer, Check, etc.). Ikonka se ukládá do DB (`project_milestones.icon`) a zobrazuje se v Timeline i v Detailu projektu.
+    - **Barevné rozlišení**: Rozpracované milníky (pending) jsou nyní červené, hotové (completed) zelené pro okamžitou vizuální kontrolu.
+- **Změna**: Fix positioning popup okna Timeline.
+- **Detail**:
+    - Popup pro editaci se nyní při blízkosti spodního okraje okna (limit zvýšen na 400px) automaticky otevírá směrem nahoru.
+    - Přidán `max-height: 85vh` a `overflow-y: auto` do popupu, čímž je zaručena jeho plná viditelnost na všech zařízeních.
+- **Změna**: Oprava duplicity polí v detailu.
+- **Detail**: Odstraněna duplicitní "Montážní společnost" v sekci Výroba.

@@ -23,6 +23,11 @@
 - [x] Redesign "Konec montáže" a "Konec revize" na jednoduché tečky (dots).
 - [x] Modernizace Timeline Settings UI (kulaté výběry barev, fixní layout).
 - [x] Oprava Z-Indexu popupů milníků (React Portal).
+- [x] Streamlining tvorby vlastních milníků (odstranění Typu nástavby).
+- [x] Implementace výběru ikon pro milníky.
+- [x] Barevné odlišení milníků (Červená/Zelená).
+- [x] Fix pozicování a otevírání popupu Timeline (Bottom-overflow fix).
+- [x] Oprava duplicity polí v detailu projektu.
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.
