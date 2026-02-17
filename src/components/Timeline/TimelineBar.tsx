@@ -806,15 +806,18 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 // Specific opacity for stacked view
                 let opacityStyle: React.CSSProperties = {};
                 if (isCollapsed) {
-                    if (p.class === 'phase-mounting') opacityStyle = { opacity: 0.2, zIndex: 1 }; // Příprava: 20%, vespod
-                    if (p.class === 'phase-buffer-yellow') opacityStyle = { opacity: 0.5, zIndex: 2 }; // Montáž: 50%, střední vrstva
-                    if (p.class === 'phase-buffer-orange') {
-                        opacityStyle = {
-                            opacity: 0.8,
-                            zIndex: 3, // Revize: 80%, nejvyšší vrstva fází
-                            backgroundColor: 'var(--phase-buffer-orange)'
-                        };
-                    }
+                    opacityStyle = {
+                        opacity: 0.25,
+                        zIndex: 1,
+                        mixBlendMode: 'multiply',
+                        borderLeft: '1px solid rgba(255,255,255,0.4)',
+                        borderRight: '1px solid rgba(0,0,0,0.05)',
+                        borderRadius: '2px'
+                    };
+
+                    if (p.class === 'phase-mounting') opacityStyle.backgroundColor = 'var(--phase-mounting)';
+                    if (p.class === 'phase-buffer-yellow') opacityStyle.backgroundColor = 'var(--phase-buffer-yellow)';
+                    if (p.class === 'phase-buffer-orange') opacityStyle.backgroundColor = 'var(--phase-buffer-orange)';
                 }
 
                 return (

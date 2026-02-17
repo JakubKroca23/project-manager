@@ -32,8 +32,7 @@ export function Sidebar() {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        router.push('/login');
-        router.refresh();
+        window.location.href = '/login';
     };
 
     // Don't show sidebar on login page

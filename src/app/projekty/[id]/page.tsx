@@ -433,7 +433,16 @@ export default function ProjectDetailPage() {
                     {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
                     <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
                         <FieldGrid>
-                            <Field label="Stav výroby" icon={<Factory size={13} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
+                            <Field
+                                label="Stav výroby"
+                                icon={<Factory size={13} />}
+                                value={p.production_status}
+                                field="production_status"
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                                highlight
+                                options={['V procesu', 'Dokončeno']}
+                            />
                             <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
                         </FieldGrid>
@@ -770,21 +779,35 @@ interface FieldProps {
     isEditing: boolean;
     onChange: (field: keyof Project, value: any) => void;
     highlight?: boolean;
+    options?: string[];
 }
 
-function Field({ label, icon, value, field, isEditing, onChange, highlight }: FieldProps) {
+function Field({ label, icon, value, field, isEditing, onChange, highlight, options }: FieldProps) {
     return (
         <div className="flex items-start gap-2">
             <div className="text-muted-foreground/50 mt-0.5 shrink-0">{icon}</div>
             <div className="flex-1 min-w-0">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
                 {isEditing ? (
-                    <input
-                        type="text"
-                        value={String(value || '')}
-                        onChange={(e) => onChange(field, e.target.value)}
-                        className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
-                    />
+                    options ? (
+                        <select
+                            value={String(value || '')}
+                            onChange={(e) => onChange(field, e.target.value)}
+                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                        >
+                            <option value="">Vyberte...</option>
+                            {options.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </select>
+                    ) : (
+                        <input
+                            type="text"
+                            value={String(value || '')}
+                            onChange={(e) => onChange(field, e.target.value)}
+                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                        />
+                    )
                 ) : (
                     <p className={`text-xs font-semibold truncate ${highlight ? 'text-primary' : 'text-foreground'}`} title={String(value || '')}>
                         {value || '—'}

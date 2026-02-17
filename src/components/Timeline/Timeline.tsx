@@ -550,6 +550,11 @@ const Timeline: React.FC = () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             filtered = filtered.filter((p: Project) => {
+                // Skrýt projekty kde je výroba "Dokončeno"
+                if (p.production_status && p.production_status.toLowerCase() === 'dokončeno') {
+                    return false;
+                }
+
                 const handoverDate = parseDate(p.customer_handover);
                 // IF handover exists AND is before today -> Hide it
                 if (handoverDate && handoverDate < today) {
