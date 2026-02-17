@@ -42,6 +42,8 @@ export default function ProfilePage() {
     // Maintenance Mode State
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [estimatedEndTime, setEstimatedEndTime] = useState('');
+    const [systemVersion, setSystemVersion] = useState('');
+    const [isSavingSystemInfo, setIsSavingSystemInfo] = useState(false);
 
     useEffect(() => {
         const fetchMaintenance = async () => {
@@ -59,8 +61,43 @@ export default function ProfilePage() {
                 }
             }
         };
+
+        const fetchSystemInfo = async () => {
+            const { data } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'system_info')
+                .maybeSingle();
+            const settings = data?.settings as any;
+            if (settings?.version) {
+                setSystemVersion(settings.version);
+            }
+        };
+
         fetchMaintenance();
+        fetchSystemInfo();
     }, []);
+
+    const saveSystemInfo = async () => {
+        setIsSavingSystemInfo(true);
+        const { error } = await supabase
+            .from('app_settings')
+            .upsert(
+                {
+                    id: 'system_info',
+                    settings: { version: systemVersion },
+                    updated_at: new Date().toISOString()
+                },
+                { onConflict: 'id' as any }
+            );
+
+        if (error) {
+            showToast('Nepodařilo se uložit systémové informace', 'error');
+        } else {
+            showToast('Systémové informace uloženy', 'success');
+        }
+        setIsSavingSystemInfo(false);
+    };
 
     const toggleMaintenance = async () => {
         const newVal = !maintenanceMode;
@@ -401,31 +438,59 @@ export default function ProfilePage() {
 
                                         {/* Maintenance Mode Toggle - Only for Admin */}
                                         {currentUserProfile?.email === ADMIN_EMAIL && (
-                                            <div className="bg-white dark:bg-muted/30 p-4 rounded-xl border border-indigo-500/10 space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
-                                                        <p className="text-[10px] text-muted-foreground">Zablokuje přístup pro ostatní</p>
+                                            <div className="space-y-4">
+                                                <div className="bg-white dark:bg-muted/30 p-4 rounded-xl border border-indigo-500/10 space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[11px] font-bold text-foreground">Režim údržby</p>
+                                                            <p className="text-[10px] text-muted-foreground">Zablokuje přístup pro ostatní</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={toggleMaintenance}
+                                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ${maintenanceMode ? 'bg-orange-500' : 'bg-gray-400'}`}
+                                                        >
+                                                            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        onClick={toggleMaintenance}
-                                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 ${maintenanceMode ? 'bg-orange-500' : 'bg-gray-400'}`}
-                                                    >
-                                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                    </button>
+
+                                                    {maintenanceMode && (
+                                                        <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-4">
+                                                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Odhadovaný konec:</label>
+                                                            <input
+                                                                type="time"
+                                                                value={estimatedEndTime}
+                                                                onChange={(e) => setEstimatedEndTime(e.target.value)}
+                                                                className="bg-muted px-2 py-1 rounded text-[10px] font-bold outline-none border border-border/50"
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
 
-                                                {maintenanceMode && (
-                                                    <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-4">
-                                                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Odhadovaný konec:</label>
-                                                        <input
-                                                            type="time"
-                                                            value={estimatedEndTime}
-                                                            onChange={(e) => setEstimatedEndTime(e.target.value)}
-                                                            className="bg-muted px-2 py-1 rounded text-[10px] font-bold outline-none border border-border/50"
-                                                        />
+                                                {/* System Info Management */}
+                                                <div className="bg-white dark:bg-muted/30 p-4 rounded-xl border border-indigo-500/10 space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[11px] font-bold text-foreground">Systémové informace</p>
+                                                            <p className="text-[10px] text-muted-foreground">Zobrazení verze v liště</p>
+                                                        </div>
                                                     </div>
-                                                )}
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={systemVersion}
+                                                            onChange={(e) => setSystemVersion(e.target.value)}
+                                                            placeholder="např. v1.0.0-alpha"
+                                                            className="flex-1 bg-muted px-3 py-1.5 rounded text-[10px] font-bold outline-none border border-border/50"
+                                                        />
+                                                        <button
+                                                            onClick={saveSystemInfo}
+                                                            disabled={isSavingSystemInfo}
+                                                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm disabled:opacity-50"
+                                                        >
+                                                            {isSavingSystemInfo ? <Loader2 size={12} className="animate-spin" /> : 'Uložit'}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
