@@ -802,22 +802,20 @@
   background: var(--timeline-weekend-bg);
 }
 
+/* VERTIKÁLNÍ LINKA DNES - NOVÁ IMPLEMENTACE NAD OBJEKTY */
+.timeline-today-indicator {
+  position: absolute;
+  width: 3px;
+  background: var(--timeline-today-line);
+  z-index: 5000;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
 .timeline-grid-column.is-today {
   background: var(--timeline-today-bg);
   position: relative;
-}
-
-/* VERTIKÁLNÍ LINKA DNES */
-.timeline-grid-column.is-today::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  background: var(--timeline-today-line);
-  pointer-events: none;
-  z-index: 90;
 }
 
 /* --- MOBILE OPTIMIZATION --- */

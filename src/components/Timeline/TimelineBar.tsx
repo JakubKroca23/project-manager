@@ -288,6 +288,11 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             raw.push({ key: 'revision_end', date: revisionEnd, label: 'Konec Revize', class: 'revision_end' });
         }
 
+        // Add Start (Uzavřeno) milestone
+        if (t_closed) {
+            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start' });
+        }
+
         const validRaw = raw.filter(m => m.date !== null);
 
         const groups: Record<string, IMilestone[]> = {};
@@ -330,7 +335,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     'chassis': 'chassis_delivery',
                     'body': 'body_delivery',
                     'handover': 'customer_handover',
-                    'deadline': 'deadline'
+                    'deadline': 'deadline',
+                    'start': 'closed_at'
                 };
 
                 const field = fieldMap[milestoneClass];
@@ -533,6 +539,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                             { id: 'body', label: 'Nástavba' },
                             { id: 'mounting_end', label: 'Konec Montáže' },
                             { id: 'revision_end', label: 'Konec Revize' },
+                            { id: 'start', label: 'Start (Uzavřeno)' },
                             { id: 'handover', label: 'Předání', },
                             { id: 'deadline', label: 'Deadline' },
                         ].map(type => (
@@ -630,25 +637,28 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     'handover': 'milestoneHandover',
                                     'deadline': 'milestoneDeadline',
                                     'mounting_end': 'milestoneMountingEnd',
-                                    'revision_end': 'milestoneRevisionEnd'
+                                    'revision_end': 'milestoneRevisionEnd',
+                                    'start': 'milestoneStart'
                                 };
 
                                 const configKey = configMap[m.class];
                                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];
 
-                                // Check stack visibility - explicit hide for mounting_end/revision_end in stack
-                                if (isCollapsed && (milestoneConfig?.showInStack === false || m.class === 'mounting_end' || m.class === 'revision_end')) return null;
+                                // Check stack visibility - explicit hide for mounting_end/revision_end/start in stack
+                                if (isCollapsed && (milestoneConfig?.showInStack === false || m.class === 'mounting_end' || m.class === 'revision_end' || m.class === 'start')) return null;
 
                                 const IconKey = milestoneConfig?.icon as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
                                 const milestoneColor = milestoneConfig?.color || '#888';
 
                                 const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
+                                const isStartVal = m.class === 'start';
+                                const isSmallMilestone = isPhaseEndVal || isStartVal;
 
                                 return (
                                     <div
                                         key={m.key}
-                                        className={`milestone-icon cursor-pointer transition-transform ${isPhaseEndVal ? 'hover:scale-105' : 'hover:scale-125'}`}
+                                        className={`milestone-icon cursor-pointer transition-transform ${isSmallMilestone ? 'hover:scale-105' : 'hover:scale-125'}`}
                                         style={{
                                             color: milestoneColor,
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
@@ -672,10 +682,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             setIsEditingDate(false);
                                         }}
                                     >
-                                        {isPhaseEndVal ? (
+                                        {isSmallMilestone ? (
                                             <div className="flex items-center justify-center w-full h-full">
                                                 <div
-                                                    className="w-1.5 h-1.5 rounded-full"
+                                                    className={`${isStartVal ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full`}
                                                     style={{ backgroundColor: milestoneColor }}
                                                 />
                                             </div>
@@ -705,7 +715,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     'handover': 'milestoneHandover',
                     'deadline': 'milestoneDeadline',
                     'mounting_end': 'milestoneMountingEnd',
-                    'revision_end': 'milestoneRevisionEnd'
+                    'revision_end': 'milestoneRevisionEnd',
+                    'start': 'milestoneStart'
                 };
                 const configKey = configMap[m.class];
                 const milestoneConfig = config?.colors?.[configKey] || config?.[configKey];

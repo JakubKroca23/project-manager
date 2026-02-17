@@ -190,6 +190,7 @@ interface IColorsState {
     milestoneDeadline: IColorConfig;
     milestoneMountingEnd: IColorConfig;
     milestoneRevisionEnd: IColorConfig;
+    milestoneStart: IColorConfig;
 }
 
 interface IOutlineState {
@@ -247,6 +248,7 @@ const Timeline: React.FC = () => {
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
         milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
+        milestoneStart: { color: '#3b82f6', opacity: 1, label: 'Start', icon: 'Play', showInStack: false },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
@@ -342,6 +344,7 @@ const Timeline: React.FC = () => {
         '--milestone-body': colors.milestoneBody.color,
         '--milestone-handover': colors.milestoneHandover.color,
         '--milestone-deadline': colors.milestoneDeadline.color,
+        '--milestone-start': colors.milestoneStart.color,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
@@ -361,6 +364,7 @@ const Timeline: React.FC = () => {
             milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
             milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
             milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
+            milestoneStart: { color: '#3b82f6', opacity: 1, label: 'Start', icon: 'Play', showInStack: false },
         });
         setOutline({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
     };
