@@ -87,7 +87,7 @@ export default function ImportWizard() {
     const { isImportWizardOpen, setIsImportWizardOpen } = useActions();
     const { canImport, isLoading: permsLoading } = usePermissions();
 
-    const [step, setStep] = useState<'type' | 'source' | 'mapping' | 'duplicates' | 'conflicts' | 'diff' | 'success'>('type');
+    const [step, setStep] = useState<'type' | 'source' | 'header-selection' | 'mapping' | 'duplicates' | 'conflicts' | 'diff' | 'success'>('type');
     const [projectType, setProjectType] = useState<ProjectType | null>(null);
     const [importSource, setImportSource] = useState<ImportSource>('raynet');
 
@@ -100,6 +100,8 @@ export default function ImportWizard() {
     const [customFields, setCustomFields] = useState<string[]>([]);
     const [renamedFields, setRenamedFields] = useState<Record<string, string>>({});
     const [rawData, setRawData] = useState<any[]>([]);
+    const [rawMatrix, setRawMatrix] = useState<any[][]>([]);
+    const [headerRowIndex, setHeaderRowIndex] = useState<number>(0);
     const [currentFile, setCurrentFile] = useState<File | null>(null);
 
     // Diff/Duplicate state
@@ -158,44 +160,51 @@ export default function ImportWizard() {
 
             if (jsonArray.length === 0) throw new Error('Soubor neobsahuje žádná data.');
 
-            // Header detection logic
-            let headerRowIndex = -1;
+            setRawMatrix(jsonArray);
+
+            // Initial auto-detection for default suggestion
+            let detectedIndex = 0;
             let maxCols = 0;
-            let bestRow = 0;
             for (let i = 0; i < Math.min(jsonArray.length, 20); i++) {
                 const row = jsonArray[i] || [];
-                const nonEmptyCount = row.filter((c: any) => c && typeof c === 'string' && c.trim() !== '').length;
-                if (nonEmptyCount > maxCols) { maxCols = nonEmptyCount; bestRow = i; }
+                const nonEmptyCount = row.filter((c: any) => c !== null && c !== undefined && String(c).trim() !== '').length;
+                if (nonEmptyCount > maxCols) { maxCols = nonEmptyCount; detectedIndex = i; }
                 if (row.some((cell: any) => cell && typeof cell === 'string' && /kód|code|předmět|zakázka|id|klient/i.test(cell))) {
-                    headerRowIndex = i; break;
+                    detectedIndex = i; break;
                 }
             }
-            if (headerRowIndex === -1) headerRowIndex = bestRow;
 
-            const cols = (jsonArray[headerRowIndex] as any[]).map(c => String(c || '').trim()).filter(c => c !== '');
-            setExcelColumns(cols);
-            setRawData(XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex }));
-
-            // Initial mapping
-            const savedMapping = localStorage.getItem(`excel_mapping_${importSource}`);
-            let initialMapping: Record<string, string> = {};
-            if (savedMapping) {
-                try { initialMapping = JSON.parse(savedMapping); } catch { }
-            }
-            PROJECT_FIELDS.forEach(field => {
-                if (!initialMapping[field.key] || !cols.includes(initialMapping[field.key])) {
-                    initialMapping[field.key] = findBestMatch(field, cols);
-                }
-            });
-
-            setMapping(initialMapping);
-            setStep('mapping');
+            setHeaderRowIndex(detectedIndex);
+            setStep('header-selection');
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message || 'Chyba při čtení souboru.' });
         } finally {
             setLoading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
+    };
+
+    const confirmHeaderAndContinue = (index: number) => {
+        const worksheet = XLSX.utils.aoa_to_sheet(rawMatrix);
+        const cols = (rawMatrix[index] as any[]).map(c => String(c || '').trim()).filter(c => c !== '');
+
+        setExcelColumns(cols);
+        setRawData(XLSX.utils.sheet_to_json(worksheet, { range: index }));
+
+        // Initial mapping
+        const savedMapping = localStorage.getItem(`excel_mapping_${importSource}`);
+        let initialMapping: Record<string, string> = {};
+        if (savedMapping) {
+            try { initialMapping = JSON.parse(savedMapping); } catch { }
+        }
+        PROJECT_FIELDS.forEach(field => {
+            if (!initialMapping[field.key] || !cols.includes(initialMapping[field.key])) {
+                initialMapping[field.key] = findBestMatch(field, cols);
+            }
+        });
+
+        setMapping(initialMapping);
+        setStep('mapping');
     };
 
     const prepareAndAnalyze = async () => {
@@ -391,9 +400,11 @@ export default function ImportWizard() {
                                 <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold border transition-colors",
                                     step === 'type' ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>1. TYP</span>
                                 <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold border transition-colors",
-                                    (step === 'source' || step === 'mapping') ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>2. ZDROJ</span>
+                                    (step === 'source' || step === 'header-selection') ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>2. SOUBOR</span>
                                 <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold border transition-colors",
-                                    step === 'diff' ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>3. ANALÝZA</span>
+                                    step === 'mapping' ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>3. MAPOVÁNÍ</span>
+                                <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold border transition-colors",
+                                    (step === 'diff' || step === 'success') ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>4. ANALÝZA</span>
                             </div>
                         </div>
                     </div>
@@ -473,6 +484,61 @@ export default function ImportWizard() {
                                 ))}
                             </div>
                             <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
+                        </div>
+                    )}
+
+                    {/* STEP 2.5: HEADER SELECTION */}
+                    {step === 'header-selection' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="text-center space-y-2">
+                                <h3 className="text-2xl font-black uppercase tracking-tight text-foreground">Vyberte řádek s hlavičkou</h3>
+                                <p className="text-muted-foreground text-sm">Kliknutím na řádek v tabulce zvolte ten, který obsahuje názvy sloupců.</p>
+                            </div>
+
+                            <div className="bg-muted/10 border border-border rounded-2xl overflow-hidden shadow-sm">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr className="bg-muted/30 border-b border-border">
+                                                <th className="px-4 py-2 w-12 text-[10px] font-black uppercase text-muted-foreground">Řádek</th>
+                                                {Array.from({ length: Math.max(...rawMatrix.slice(0, 10).map(r => r.length)) }).map((_, i) => (
+                                                    <th key={i} className="px-4 py-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Sloupec {i + 1}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/50">
+                                            {rawMatrix.slice(0, 15).map((row, rIdx) => (
+                                                <tr
+                                                    key={rIdx}
+                                                    onClick={() => setHeaderRowIndex(rIdx)}
+                                                    className={cn(
+                                                        "cursor-pointer transition-all hover:bg-primary/5 group",
+                                                        headerRowIndex === rIdx ? "bg-primary/10" : ""
+                                                    )}
+                                                >
+                                                    <td className="px-4 py-3 font-mono text-muted-foreground/60 border-r border-border/50">{rIdx + 1}</td>
+                                                    {row.map((cell, cIdx) => (
+                                                        <td key={cIdx} className={cn("px-4 py-3 truncate max-w-[200px]", headerRowIndex === rIdx ? "font-bold text-primary" : "text-muted-foreground")}>
+                                                            {cell !== null && cell !== undefined ? String(cell) : ""}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4">
+                                <button onClick={() => setStep('source')} className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-muted rounded-xl transition-all">Zpět</button>
+                                <button
+                                    onClick={() => confirmHeaderAndContinue(headerRowIndex)}
+                                    className="px-8 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+                                >
+                                    Potvrdit hlavičku
+                                    <ArrowRight size={14} />
+                                </button>
+                            </div>
                         </div>
                     )}
 
