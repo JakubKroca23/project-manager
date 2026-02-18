@@ -807,7 +807,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 let opacityStyle: React.CSSProperties = {};
                 if (isCollapsed) {
                     opacityStyle = {
-                        opacity: 0.25,
+                        opacity: 0.45,
                         zIndex: 1,
                         mixBlendMode: 'multiply',
                         borderLeft: '1px solid rgba(255,255,255,0.4)',

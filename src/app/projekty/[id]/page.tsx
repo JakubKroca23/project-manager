@@ -82,6 +82,18 @@ export default function ProjectDetailPage() {
     const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
     const { canEdit } = usePermissions();
 
+    const fetchSubProjects = React.useCallback(async () => {
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('parent_id', id)
+            .order('name', { ascending: true });
+
+        if (!error) {
+            setSubProjects(data || []);
+        }
+    }, [id]);
+
     useEffect(() => {
         async function fetchProject() {
             setLoading(true);
@@ -116,24 +128,48 @@ export default function ProjectDetailPage() {
             setLoadingMilestones(false);
         }
 
-        async function fetchSubProjects() {
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .eq('parent_id', id)
-                .order('name', { ascending: true });
-
-            if (!error) {
-                setSubProjects(data || []);
-            }
-        }
-
         if (id) {
             fetchProject();
             fetchMilestones();
             fetchSubProjects();
         }
-    }, [id]);
+    }, [id, fetchSubProjects]);
+
+    const handleDeleteProject = async () => {
+        if (!project) return;
+        if (!confirm('VAROVÁNÍ: Opravdu smazat tuto zakázku? Tato akce je nevratná.')) return;
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .eq('id', project.id);
+
+            if (error) throw error;
+            router.push('/projekty');
+        } catch (err: any) {
+            console.error('Error deleting project:', err);
+            alert('Chyba při mazání zakázky: ' + err.message);
+        }
+    };
+
+    const handleDeleteSubProject = async (subId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm('Opravdu odstranit toto vozidlo?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .eq('id', subId);
+
+            if (error) throw error;
+            fetchSubProjects();
+        } catch (err: any) {
+            console.error('Error deleting sub-project:', err);
+            alert('Chyba při mazání vozidla: ' + err.message);
+        }
+    };
 
     const handleAddMilestone = async () => {
         if (!newMilestone.name || !newMilestone.date) {
@@ -322,6 +358,14 @@ export default function ProjectDetailPage() {
                     </button>
 
                     <div className="flex items-center gap-2">
+                        {!isEditing && canEdit && (
+                            <button
+                                onClick={handleDeleteProject}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-all"
+                            >
+                                <Trash2 size={12} /> Smazat
+                            </button>
+                        )}
                         {isEditing ? (
                             <>
                                 <button onClick={handleCancel} disabled={saving} className="px-4 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
@@ -461,8 +505,8 @@ export default function ProjectDetailPage() {
                 {/* ═══ 4.2 VOZIDLA V ZAKÁZCE (Military Parent) ═══ */}
                 {isMilitary && !project.parent_id && (
                     <Section icon={<Truck size={15} />} title="Vozidla v zakázce" color="emerald" fullWidth>
-                        {subProjects.length > 0 ? (
-                            <div className="space-y-3">
+                        <div className="space-y-3">
+                            {subProjects.length > 0 && (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {subProjects.map(sub => (
                                         <div
@@ -474,34 +518,44 @@ export default function ProjectDetailPage() {
                                                 <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{sub.name}</span>
                                                 <span className="text-[10px] text-muted-foreground font-mono">{sub.id}</span>
                                             </div>
-                                            <ArrowRightCircle size={16} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                                            <div className="flex items-center gap-2">
+                                                {canEdit && (
+                                                    <button
+                                                        onClick={(e) => handleDeleteSubProject(sub.id, e)}
+                                                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                        title="Smazat vozidlo"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                                <ArrowRightCircle size={16} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
+                            )}
+
+                            {subProjects.length > 0 && (
                                 <div className="text-[10px] text-muted-foreground text-center pt-2 border-t border-border/30">
-                                    Celkem {subProjects.length} vozidel
+                                    Celkem {subProjects.length} vozidel {project.quantity ? `/ ${project.quantity}` : ''}
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-6 text-center">
-                                <p className="text-xs text-muted-foreground mb-4">Tato zakázka zatím nemá vygenerovaná žádná vozidla.</p>
-                                {isEditing ? (
-                                    <div className="text-xs text-amber-500 font-bold bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-                                        Pro generování vozidel ukončete režim úprav.
-                                    </div>
-                                ) : (
-                                    canEdit && (
-                                        <VehicleGenerator
-                                            project={project}
-                                            onSuccess={() => {
-                                                // Refresh subprojects
-                                                window.location.reload();
-                                            }}
-                                        />
-                                    )
-                                )}
-                            </div>
-                        )}
+                            )}
+
+                            {/* Generátor - zobrazit pokud nemáme plný počet */}
+                            {(!project.quantity || subProjects.length < project.quantity) && canEdit && !isEditing && (
+                                <VehicleGenerator
+                                    project={project}
+                                    existingCount={subProjects.length}
+                                    onSuccess={() => {
+                                        fetchSubProjects();
+                                    }}
+                                />
+                            )}
+
+                            {subProjects.length === 0 && !canEdit && (
+                                <div className="text-center py-4 text-xs text-muted-foreground">Žádná vozidla zatím nebyla přidána.</div>
+                            )}
+                        </div>
                     </Section>
                 )}
 

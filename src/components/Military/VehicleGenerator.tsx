@@ -7,11 +7,12 @@ import { Project } from '@/types/project';
 
 interface VehicleGeneratorProps {
     project: Project;
+    existingCount?: number;
     onSuccess: () => void;
 }
 
-export function VehicleGenerator({ project, onSuccess }: VehicleGeneratorProps) {
-    const [count, setCount] = useState<number>(project.quantity || 1);
+export function VehicleGenerator({ project, existingCount = 0, onSuccess }: VehicleGeneratorProps) {
+    const [count, setCount] = useState<number>(Math.max(1, (project.quantity || 1) - existingCount));
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -23,13 +24,15 @@ export function VehicleGenerator({ project, onSuccess }: VehicleGeneratorProps) 
             const { data: { user } } = await supabase.auth.getUser();
             const userName = user?.email?.split('@')[0] || 'System';
 
-            const newVehicles = [];
+            const newVehicles: any[] = []; // Explicit any to avoid partial type errors during construction
 
+            // Start from existingCount + 1
             for (let i = 1; i <= count; i++) {
+                const vehicleIndex = existingCount + i;
                 // Generate sub-project ID
                 // Format: {ParentID}-V{i} (e.g., 2024-001-V1)
-                const subId = `${project.id}-V${i}`;
-                const subName = `${project.name} - Vůz ${i}`;
+                const subId = `${project.id}-V${vehicleIndex}`;
+                const subName = `${project.name} - Vůz ${vehicleIndex}`;
 
                 newVehicles.push({
                     id: subId,
@@ -52,7 +55,7 @@ export function VehicleGenerator({ project, onSuccess }: VehicleGeneratorProps) 
                     // Technical fields
                     quantity: 1, // Sub-project is always 1 unit
                     created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(), // Use same time for creation
                     last_modified_by: userName
                 });
             }
