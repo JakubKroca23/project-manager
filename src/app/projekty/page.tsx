@@ -16,12 +16,7 @@ import CreateProjectModal from '@/components/CreateProjectModal';
 import { CategoryChip } from '@/components/CategoryChip';
 
 
-interface ImportInfo {
-    date: string;
-    user: string;
-    count: number;
-    excelDate: string;
-}
+
 
 const parseDate = (dateStr: string | undefined | null): Date | null => {
     if (!dateStr || typeof dateStr !== 'string') return null;
@@ -148,7 +143,6 @@ export default function ProjektyPage() {
 
     const { searchTerm } = useSearch();
     const [isLoading, setIsLoading] = useState(true);
-    const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [isBulkMode, setIsBulkMode] = useState(false);
@@ -166,35 +160,6 @@ export default function ProjektyPage() {
             console.error('Error fetching projects:', error);
         } else {
             setProjects(data || []);
-        }
-
-        // Load Global Import Metadata from DB (Category Specific)
-        const metaKey = `last_import_info_${activeTab}`;
-        const { data: metaData } = await supabase
-            .from('app_metadata')
-            .select('*')
-            .eq('key', metaKey)
-            .single();
-
-        if (metaData?.value) {
-            setLastImport(metaData.value as ImportInfo);
-        } else {
-            // Fallback to old key or clear if not found
-            if (activeTab === 'civil') {
-                const { data: legacyData } = await supabase
-                    .from('app_metadata')
-                    .select('*')
-                    .eq('key', 'last_import_info')
-                    .single();
-
-                if (legacyData?.value) {
-                    setLastImport(legacyData.value as ImportInfo);
-                } else {
-                    setLastImport(null);
-                }
-            } else {
-                setLastImport(null);
-            }
         }
 
         setIsLoading(false);
@@ -466,12 +431,7 @@ export default function ProjektyPage() {
                             </div>
                         }
                         toolbar={null}
-                        toolbarSubtext={lastImport ? (
-                            <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium">
-                                <Database size={10} />
-                                Poslední import: {lastImport.date} · {lastImport.user}
-                            </span>
-                        ) : null}
+                        toolbarSubtext={null}
                         onRowClick={(row) => {
                             if (isBulkMode) {
                                 // Find index of this row in filteredProjects to toggle selection

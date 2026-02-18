@@ -256,14 +256,11 @@ const Timeline: React.FC = () => {
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
-        phaseBufferOrange: { color: '#fb923c', opacity: 0.55, label: 'Revize', showInStack: true },
         milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
-        milestoneRevisionEnd: { color: '#f97316', opacity: 1, label: 'Konec Revize', icon: 'ShieldCheck', showInStack: false },
-        milestoneStart: { color: '#3b82f6', opacity: 1, label: 'Start', icon: 'Play', showInStack: false },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
@@ -344,7 +341,6 @@ const Timeline: React.FC = () => {
         '--phase-initial': hexToRgba(colors.phaseInitial?.color || '#bae6fd', colors.phaseInitial?.opacity || 0.4),
         '--phase-mounting': hexToRgba(colors.phaseMounting?.color || '#4ade80', colors.phaseMounting?.opacity || 0.35),
         '--phase-buffer-yellow': hexToRgba(colors.phaseBufferYellow?.color || '#facc15', colors.phaseBufferYellow?.opacity || 0.5),
-        '--phase-buffer-orange': hexToRgba(colors.phaseBufferOrange?.color || '#fb923c', colors.phaseBufferOrange?.opacity || 0.55),
         '--milestone-chassis': colors.milestoneChassis?.color || '#888',
         '--milestone-body': colors.milestoneBody?.color || '#888',
         '--milestone-handover': colors.milestoneHandover?.color || '#888',
@@ -839,9 +835,11 @@ const Timeline: React.FC = () => {
                         <div className="legend-group">
                             <span className="legend-group-title">Legenda:</span>
                             <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-mounting)' }}></div> Příprava</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-yellow)' }}></div> Montáž</div>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-buffer-orange)' }}></div> Revize</div>
+                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneChassis?.color }}></div> Podvozek</div>
+                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneBody?.color }}></div> Nástavba</div>
+                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneMountingEnd?.color }}></div> Konec Montáže</div>
+                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneHandover?.color }}></div> Předání</div>
+                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneDeadline?.color }}></div> Deadline</div>
                         </div>
                     </div>
 
@@ -983,18 +981,20 @@ const Timeline: React.FC = () => {
 
                                 <div className="h-px bg-border/50" />
 
-                                {/* 2. LEGENDA BAREV (FÁZE) */}
+                                {/* 2. LEGENDA BAREV (FÁZE A MILNÍKY) */}
                                 <section>
                                     <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <Palette size={16} /> Legenda fází
+                                        <Palette size={16} /> Legenda
                                     </h4>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, conf]) => (
+                                        {Object.entries(colors).map(([key, conf]) => (
                                             <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
                                                 <div
-                                                    className="w-8 h-8 rounded-md shadow-sm border border-border/20"
-                                                    style={{ backgroundColor: conf.color, opacity: conf.opacity }}
-                                                />
+                                                    className="w-8 h-8 rounded-md shadow-sm border border-border/20 flex items-center justify-center text-white"
+                                                    style={{ backgroundColor: conf.color, opacity: conf.opacity || 1 }}
+                                                >
+                                                    {conf.icon && ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] ? React.createElement(ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS], { size: 16 }) : null}
+                                                </div>
                                                 <span className="text-sm font-medium">{conf.label}</span>
                                             </div>
                                         ))}

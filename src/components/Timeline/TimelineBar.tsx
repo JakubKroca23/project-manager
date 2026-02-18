@@ -284,13 +284,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
     // Custom fields for end dates
     const customMountingEnd = parseDate(project.custom_fields?.mounting_end_date);
-    const customRevisionEnd = parseDate(project.custom_fields?.revision_end_date);
 
-    // Calculated derived dates
     const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
     let mountingStart: Date | null = null;
     let mountingEnd: Date | null = null;
-    let revisionEnd: Date | null = null;
 
     if (lastMainM.length > 0) {
         mountingStart = new Date(Math.max(...lastMainM.map(d => d.getTime())));
@@ -302,15 +299,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             const d = new Date(mountingStart);
             d.setDate(d.getDate() + 14);
             mountingEnd = d;
-        }
-
-        // Revision End
-        if (customRevisionEnd) {
-            revisionEnd = customRevisionEnd;
-        } else {
-            const d = new Date(mountingEnd);
-            d.setDate(d.getDate() + 7);
-            revisionEnd = d;
         }
     }
 
@@ -329,13 +317,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         if (mountingStart && mountingEnd) {
             raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end', icon: customIcons['mounting_end'] });
         }
-        if (mountingEnd && revisionEnd) {
-            raw.push({ key: 'revision_end', date: revisionEnd, label: 'Konec Revize', class: 'revision_end', icon: customIcons['revision_end'] });
-        }
 
         // Add Start (Uzavřeno) milestone
         if (t_closed) {
-            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start', icon: customIcons['start'] });
+            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start' });
         }
 
         // Add dynamic milestones from prop
@@ -361,14 +346,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             groups[dateKey].push(m);
         });
         return groups;
-    }, [t_chassis, t_body, t_handover, t_deadline, project.project_type, mountingStart, mountingEnd, revisionEnd]);
+    }, [t_chassis, t_body, t_handover, t_deadline, project.project_type, mountingStart, mountingEnd]);
 
     const handleDateUpdate = async (milestoneClass: string, newDateStr: string | null) => {
         setIsUpdating(true);
         try {
             // Special handling for custom field milestones
-            if (milestoneClass === 'mounting_end' || milestoneClass === 'revision_end') {
-                const key = milestoneClass === 'mounting_end' ? 'mounting_end_date' : 'revision_end_date';
+            if (milestoneClass === 'mounting_end') {
+                const key = 'mounting_end_date';
 
                 if (newDateStr === null) {
                     // Deletion logic for custom fields: reset to auto if needed? 
@@ -434,7 +419,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     'body': 'body_delivery',
                     'handover': 'customer_handover',
                     'deadline': 'deadline',
-                    'start': 'closed_at'
                 };
 
                 const field = fieldMap[milestoneClass];
@@ -509,7 +493,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     const toggleMilestoneCompletion = async (milestoneKey: string) => {
         setIsUpdating(true);
         try {
-            const isStandard = ['chassis', 'body', 'handover', 'deadline', 'mounting_end', 'revision_end', 'start'].includes(milestoneKey);
+            const isStandard = ['chassis', 'body', 'handover', 'deadline', 'mounting_end', 'start'].includes(milestoneKey);
             const currentCustom = project.custom_fields || {};
             const completed = currentCustom.completed_milestones || [];
 
@@ -558,7 +542,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         }
     };
 
-    // 2. Fáze (plochy v čase)
     const phases = useMemo((): IPhase[] => {
         const list: IPhase[] = [];
         const mDates = [t_chassis, t_body, t_handover, t_deadline].filter((d): d is Date => d !== null);
@@ -580,20 +563,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             }
         }
 
-        // Fáze 3 & 4: Dojezd po posledním milníku (podvozek nebo nástavba)
+        // Fáze 3: Montáž
         if (mountingStart && mountingEnd) {
-            // Fáze 3: Montáž
             list.push({ key: 'p3', start: mountingStart, end: mountingEnd, class: 'phase-buffer-yellow' });
-
-            // Fáze 4: Revize
-            if (revisionEnd) {
-                list.push({ key: 'p4', start: mountingEnd, end: revisionEnd, class: 'phase-buffer-orange' });
-            }
         }
 
-
         return list;
-    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type]);
+    }, [t_closed, t_chassis, t_body, t_handover, t_deadline, project.project_type, mountingStart, mountingEnd]);
 
     /**
      * Vypočítá vodorovnou pozici data v pixelech vzhledem k začátku časové osy.
@@ -709,8 +685,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     { id: 'chassis', label: 'Podvozek' },
                                     { id: 'body', label: 'Nástavba' },
                                     { id: 'mounting_end', label: 'Konec Montáže' },
-                                    { id: 'revision_end', label: 'Konec Revize' },
-                                    { id: 'start', label: 'Start (Uzavřeno)' },
                                     { id: 'handover', label: 'Předání', },
                                     { id: 'deadline', label: 'Deadline' },
                                 ].map(type => (
