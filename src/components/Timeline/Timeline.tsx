@@ -461,14 +461,19 @@ const Timeline: React.FC = () => {
         }
     };
 
-    // Wheel zoom and scroll handler
+    // Wheel zoom and scroll handler - AGGRESSIVE WINDOW CAPTURE
     useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
+        const handleWindowWheel = (e: WheelEvent) => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
 
-        const handleWheelNative = (e: WheelEvent) => {
-            // ALWAYS prevent default and stop propagation for wheel events on the timeline
-            // to ensure ONLY zoom happens and no horizontal/vertical page scroll.
+            // Check if event target is inside our timeline
+            // Use ID or class check to be sure
+            const isInsideTimeline = (e.target as HTMLElement).closest('.timeline-container');
+            if (!isInsideTimeline) return;
+
+            // ABSOLUTE BLOCK: Stop all native scrolling on the timeline
+            // User requested to use DRAG for scrolling, wheel is ONLY for zoom.
             e.preventDefault();
             e.stopPropagation();
 
@@ -487,13 +492,10 @@ const Timeline: React.FC = () => {
 
             // 2. Just Wheel = Horizontal Zoom (Day Width)
             // handle both deltaY (vertical wheel) and deltaX (trackpad horizontal)
-            // with a preference for intentional horizontal zoom via deltaY.
             const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
             if (delta === 0) return;
 
             const currentWidth = dayWidthRef.current;
-
-            // Výpočet pozice pro zoom na kurzor
             const rect = container.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
 
@@ -503,16 +505,15 @@ const Timeline: React.FC = () => {
 
             // Změna šířky dne (zoom)
             if (delta > 0) {
-                // Zoom out
                 setDayWidth(prev => Math.max(prev / 1.1, MIN_DAY_WIDTH));
             } else if (delta < 0) {
-                // Zoom in
                 setDayWidth(prev => Math.min(prev * 1.1, MAX_DAY_WIDTH));
             }
         };
 
-        container.addEventListener('wheel', handleWheelNative, { passive: false });
-        return () => container.removeEventListener('wheel', handleWheelNative);
+        // Attachment on window with capture: true is the most aggressive way to block scroll
+        window.addEventListener('wheel', handleWindowWheel, { passive: false, capture: true });
+        return () => window.removeEventListener('wheel', handleWindowWheel, { capture: true });
     }, [isLoading]);
 
     const fetchProjects = useCallback(async () => {
