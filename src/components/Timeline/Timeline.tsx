@@ -589,8 +589,8 @@ const Timeline: React.FC = () => {
             e.preventDefault();
             e.stopPropagation();
 
-            // Ignore zooming when over the month header row
-            if ((e.target as HTMLElement).closest('.timeline-header-row.months')) {
+            // Ignore zooming when over the top toolbar or design settings panel
+            if ((e.target as HTMLElement).closest('.timeline-header, .design-settings-panel')) {
                 return;
             }
 
