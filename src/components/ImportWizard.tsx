@@ -209,6 +209,15 @@ export default function ImportWizard() {
         setStep('mapping');
     };
 
+    // Helper for chunking arrays
+    const chunkArray = <T,>(array: T[], size: number): T[][] => {
+        const chunked: T[][] = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunked.push(array.slice(i, i + size));
+        }
+        return chunked;
+    };
+
     const prepareAndAnalyze = async () => {
         const missingRequired = PROJECT_FIELDS.filter(f => f.required && !mapping[f.key] && f.key !== 'id');
         if (missingRequired.length > 0) {
@@ -230,15 +239,23 @@ export default function ImportWizard() {
                     return null;
                 };
 
+                // ID handling
                 let projectId = item[mapping['id']]?.toString();
                 if (!projectId || projectId.trim() === '') {
+                    // Generate temp ID
                     projectId = `NO-OP-${new Date().getTime().toString().slice(-6)}-${index}`;
                     importNotes.push(`ID vygenerováno automaticky`);
+                } else {
+                    projectId = projectId.trim();
                 }
+
+                // Name is required
+                const nameVal = item[mapping['name']];
+                if (!nameVal || String(nameVal).trim() === '') return null;
 
                 const project: any = {
                     id: projectId,
-                    name: item[mapping['name']],
+                    name: String(nameVal).trim(),
                     customer: item[mapping['customer']] || "-",
                     manager: item[mapping['manager']] || "-",
                     status: "Aktivní",
@@ -255,7 +272,7 @@ export default function ImportWizard() {
                     body_setup: cleanNaN(item[mapping['body_setup']]),
                     body_type: cleanNaN(item[mapping['body_type']]),
                     serial_number: cleanNaN(item[mapping['serial_number']]),
-                    project_type: projectType,
+                    project_type: projectType || 'civil',
                     custom_fields: {},
                     last_modified_by: userName,
                     updated_at: new Date().toISOString()
@@ -267,12 +284,12 @@ export default function ImportWizard() {
                     project.custom_fields[targetKey] = item[col];
                 });
 
-                return (project.name) ? project : null;
+                return project;
             }).filter(p => p !== null);
 
-            if (rawProjects.length === 0) throw new Error('Žádné platné projekty k importu.');
+            if (rawProjects.length === 0) throw new Error('Žádné platné projekty k importu. Zkontrolujte sloupec "Název".');
 
-            // Check internal duplicates
+            // 1. Check internal duplicates
             const idGroups: Record<string, any[]> = {};
             const duplicates: Record<string, any[]> = {};
             let hasDuplicates = false;
@@ -284,7 +301,6 @@ export default function ImportWizard() {
 
             if (hasDuplicates) {
                 setDuplicateGroups(duplicates);
-                // Default manual resolutions to index 0 for each group
                 const initialResolutions: Record<string, number> = {};
                 Object.keys(duplicates).forEach(id => { initialResolutions[id] = 0; });
                 setManualResolutions(initialResolutions);
@@ -293,10 +309,23 @@ export default function ImportWizard() {
                 return;
             }
 
-            // Check cross-type conflicts
+            // 2. Check cross-type conflicts (Batched)
             const ids = rawProjects.map(p => p.id);
-            const { data: existingData } = await supabase.from('projects').select('id, project_type').in('id', ids);
-            const conflicts = existingData?.filter(e => e.project_type && e.project_type !== projectType) || [];
+            const idChunks = chunkArray(ids, 100); // 100 IDs per request
+            let conflicts: any[] = [];
+
+            for (const chunk of idChunks) {
+                const { data: existingChunk, error } = await supabase
+                    .from('projects')
+                    .select('id, project_type')
+                    .in('id', chunk);
+
+                if (error) throw error;
+                if (existingChunk) {
+                    const chunkConflicts = existingChunk.filter(e => e.project_type && e.project_type !== projectType);
+                    conflicts = [...conflicts, ...chunkConflicts];
+                }
+            }
 
             if (conflicts.length > 0) {
                 setTypeConflictGroups(conflicts);
@@ -305,9 +334,12 @@ export default function ImportWizard() {
                 return;
             }
 
+            // 3. Analyze Diffs
             await analyzeDiffs(rawProjects);
+
         } catch (err: any) {
-            alert(err.message);
+            console.error(err);
+            alert(`Chyba přípravy dat: ${err.message}`);
         } finally {
             setLoading(false);
         }
@@ -317,8 +349,20 @@ export default function ImportWizard() {
         setLoading(true);
         try {
             const ids = projectsToAnalyze.map(p => p.id);
-            const { data: existingData } = await supabase.from('projects').select('*').in('id', ids);
-            const existingMap = new Map(existingData?.map(p => [p.id, p]));
+            const idChunks = chunkArray(ids, 100);
+
+            const existingMap = new Map<string, any>();
+
+            // Fetch existing data in chunks
+            for (const chunk of idChunks) {
+                const { data: chunkData, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .in('id', chunk);
+
+                if (error) throw error;
+                chunkData?.forEach(p => existingMap.set(p.id, p));
+            }
 
             const diffs: DiffItem[] = [];
             projectsToAnalyze.forEach(newP => {
@@ -357,10 +401,11 @@ export default function ImportWizard() {
 
             setPreparedProjects(projectsToAnalyze);
             setDiffData(diffs);
-            setSelectedIds(new Set(diffs.map(d => d.id))); // Select all by default
+            setSelectedIds(new Set(diffs.map(d => d.id)));
             setStep('diff');
         } catch (err: any) {
-            alert(err.message);
+            console.error(err);
+            alert(`Chyba analýzy změn: ${err.message}`);
         } finally {
             setLoading(false);
         }
