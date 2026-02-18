@@ -40,6 +40,9 @@
 - [x] Přesun panelu Vzhled do inline popupu pod hlavičkou.
 - [x] Cleanup základních polí v detailu projektu.
 - [x] Vylepšení Import Wizardu (výběr hlavičky z náhledu).
+- [x] Oprava drag-to-scroll v časové ose (ignorování hlavičky).
+- [x] Implementace priorit zakázek (1-3) a mechanika barev dle priorit.
+- [x] Úprava nastavení vzhledu časové osy (procentuální výška, obrysy, odstranění stínů).
 
 
 ## Budoucí úkoly (Backlog)

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Project, Milestone } from '@/types/project';
+import { cn } from '@/lib/utils';
 import {
     ArrowLeft,
     User,
