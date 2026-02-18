@@ -336,6 +336,7 @@ export default function ImportWizard() {
             }
 
             // 1. Check internal duplicates
+            console.log("Checking duplicates...");
             const idGroups: Record<string, any[]> = {};
             const duplicates: Record<string, any[]> = {};
             let hasDuplicates = false;
@@ -344,6 +345,7 @@ export default function ImportWizard() {
                 idGroups[p.id].push(p);
                 if (idGroups[p.id].length > 1) { duplicates[p.id] = idGroups[p.id]; hasDuplicates = true; }
             });
+            console.log("Has duplicates:", hasDuplicates);
 
             if (hasDuplicates) {
                 setDuplicateGroups(duplicates);
@@ -356,6 +358,7 @@ export default function ImportWizard() {
             }
 
             // 2. Check cross-type conflicts (Batched)
+            console.log("Checking conflicts... Project Type:", projectType);
             const ids = rawProjects.map(p => p.id);
             const idChunks = chunkArray(ids, 100); // 100 IDs per request
             let conflicts: any[] = [];
@@ -366,13 +369,17 @@ export default function ImportWizard() {
                     .select('id, project_type')
                     .in('id', chunk);
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Conflict check error:", error);
+                    throw error;
+                }
                 if (existingChunk) {
                     const chunkConflicts = existingChunk.filter(e => e.project_type && e.project_type !== projectType);
                     conflicts = [...conflicts, ...chunkConflicts];
                 }
             }
 
+            console.log("Conflicts found:", conflicts.length);
             if (conflicts.length > 0) {
                 setTypeConflictGroups(conflicts);
                 setPreparedProjects(rawProjects);
@@ -381,6 +388,7 @@ export default function ImportWizard() {
             }
 
             // 3. Analyze Diffs
+            console.log("Calling analyzeDiffs...");
             await analyzeDiffs(rawProjects);
 
         } catch (err: any) {
@@ -392,6 +400,7 @@ export default function ImportWizard() {
     };
 
     const analyzeDiffs = async (projectsToAnalyze: any[]) => {
+        console.log("Inside analyzeDiffs...");
         setLoading(true);
         try {
             const ids = projectsToAnalyze.map(p => p.id);
@@ -401,14 +410,19 @@ export default function ImportWizard() {
 
             // Fetch existing data in chunks
             for (const chunk of idChunks) {
+                console.log("Fetching existing data chunk:", chunk);
                 const { data: chunkData, error } = await supabase
                     .from('projects')
                     .select('*')
                     .in('id', chunk);
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Fetch existing data error:", error);
+                    throw error;
+                }
                 chunkData?.forEach(p => existingMap.set(p.id, p));
             }
+            console.log("Existing data fetched. Map size:", existingMap.size);
 
             const diffs: DiffItem[] = [];
             projectsToAnalyze.forEach(newP => {
@@ -445,9 +459,11 @@ export default function ImportWizard() {
                 }
             });
 
+            console.log("Diffs analyzed:", diffs.length);
             setPreparedProjects(projectsToAnalyze);
             setDiffData(diffs);
             setSelectedIds(new Set(diffs.map(d => d.id)));
+            console.log("Setting step to 'diff'");
             setStep('diff');
         } catch (err: any) {
             console.error(err);
