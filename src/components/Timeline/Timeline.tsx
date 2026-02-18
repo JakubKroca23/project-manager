@@ -1156,25 +1156,26 @@ const Timeline: React.FC = () => {
                                         {/* Floating Zoom Control for Summaries (Vertical Glass) */}
                                         {visibleSectors.length > 0 && (
                                             <div
-                                                className="absolute left-[236px] z-[5005] flex flex-col gap-1.5 p-1.5 rounded-[1.2rem] bg-white/40 backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] pointer-events-auto transition-all hover:bg-white/50"
+                                                className="sticky left-[270px] z-[5005] flex flex-col gap-1 p-1 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg pointer-events-auto"
                                                 style={{
-                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) / 2)`,
-                                                    transform: 'translateY(-50%)'
+                                                    top: `calc(var(--timeline-header-height) + 12px)`,
+                                                    marginTop: '12px',
+                                                    width: 'fit-content'
                                                 }}
                                             >
                                                 <button
                                                     onClick={() => setSummaryRowHeight(prev => Math.min(120, prev + 4))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-rose-600 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
                                                     title="Zvětšit sumární řádky"
                                                 >
-                                                    <Plus size={24} strokeWidth={4} />
+                                                    <Plus size={16} strokeWidth={3} />
                                                 </button>
                                                 <button
                                                     onClick={() => setSummaryRowHeight(prev => Math.max(12, prev - 4))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-emerald-800 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
                                                     title="Zmenšit sumární řádky"
                                                 >
-                                                    <Minus size={24} strokeWidth={4} />
+                                                    <Minus size={16} strokeWidth={3} />
                                                 </button>
                                             </div>
                                         )}
@@ -1200,25 +1201,26 @@ const Timeline: React.FC = () => {
                                         {/* Floating Zoom Control for Individual Projects (Vertical Glass) */}
                                         {filteredProjects.length > 0 && (
                                             <div
-                                                className="absolute left-[236px] z-[5005] flex flex-col gap-1.5 p-1.5 rounded-[1.2rem] bg-white/40 backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] pointer-events-auto transition-all hover:bg-white/50"
+                                                className="sticky left-[270px] z-[5005] flex flex-col gap-1 p-1 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg pointer-events-auto"
                                                 style={{
-                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) + 2px + (${filteredProjects.length} * ${rowHeight}px) / 2)`,
-                                                    transform: 'translateY(-50%)'
+                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) + 14px)`,
+                                                    marginTop: '14px',
+                                                    width: 'fit-content'
                                                 }}
                                             >
                                                 <button
                                                     onClick={() => setRowHeight(prev => Math.min(120, prev + 4))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-rose-600 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
                                                     title="Zvětšit výšku řádků"
                                                 >
-                                                    <Plus size={24} strokeWidth={4} />
+                                                    <Plus size={16} strokeWidth={3} />
                                                 </button>
                                                 <button
                                                     onClick={() => setRowHeight(prev => Math.max(12, prev - 4))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-emerald-800 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
                                                     title="Zmenšit výšku řádků"
                                                 >
-                                                    <Minus size={24} strokeWidth={4} />
+                                                    <Minus size={16} strokeWidth={3} />
                                                 </button>
                                             </div>
                                         )}
