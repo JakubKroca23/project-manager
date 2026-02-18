@@ -151,3 +151,7 @@
     - Úprava drag-to-scroll: tažení myší je nyní ignorováno v oblasti časové hlavičky (měsíce, týdny, dny).
 - **Milníky**: Kompletně odstraněn milník "Konec montáže" ze systému.
 - **UX**: Tlačítka pro vertikální zoom (+/-) přímo v řádcích jsou nyní stále viditelná (20 % opacity) s poloprůhledným pozadím pro lepší orientaci.
+
+## [2026-02-18] - Import Wizard Expansion
+- **Nový typ importu**: Do prvního kroku (výběr typu) přidána možnost **"DOPLNĚNÍ K ZAKÁZCE"**.
+- **Design**: Tato volba je vizuálně menší a subtilnější, aby nenarušovala hlavní trojici (Civilní/Vojenské/Servis), ale připravuje systém na budoucí importy dokumentace a výkresů ke konkrétním existujícím zakázkám.

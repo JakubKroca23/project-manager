@@ -455,8 +455,8 @@ export default function ImportWizard() {
                                 <button
                                     onClick={() => handleTypeSelect('specific')}
                                     className={cn(
-                                        "flex items-center gap-3 px-6 py-3 rounded-2xl border border-divider hover:bg-muted/50 transition-all group",
-                                        "hover:border-primary/30 hover:shadow-md"
+                                        "flex items-center gap-2.5 px-4 py-2 rounded-xl border border-border bg-card transition-all group",
+                                        "hover:border-primary/40 hover:bg-muted/20 hover:shadow-lg"
                                     )}
                                 >
                                     <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center transition-transform group-hover:scale-110">

@@ -43,6 +43,7 @@
 - [x] Oprava drag-to-scroll v časové ose (ignorování hlavičky).
 - [x] Implementace priorit zakázek (1-3) a mechanika barev dle priorit.
 - [x] Úprava nastavení vzhledu časové osy (procentuální výška, obrysy, odstranění stínů).
+- [x] Rozšíření Import Wizardu o možnost "K ZAKÁZCE".
 
 
 ## Budoucí úkoly (Backlog)

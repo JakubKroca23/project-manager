@@ -137,11 +137,11 @@ export function Navbar() {
                                             {activeCategory && isActive && (
                                                 <div className="absolute top-[110%] left-1/2 -translate-x-1/2 z-10 flex justify-center pointer-events-none">
                                                     <span
-                                                        className="text-[10px] font-black tracking-[0.2em] uppercase animate-in fade-in slide-in-from-top-1 px-4 py-1.5 rounded-xl bg-background border-2 shadow-2xl shadow-black/20 whitespace-nowrap"
+                                                        className="text-[9px] font-black tracking-widest uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-lg bg-background border shadow-xl shadow-black/10 whitespace-nowrap"
                                                         style={{
                                                             color: activeColor,
                                                             borderColor: activeColor,
-                                                            backgroundColor: 'hsl(var(--background))'
+                                                            backgroundColor: 'white' // Force white background for maximum opacity
                                                         }}
                                                     >
                                                         {activeCategory}
