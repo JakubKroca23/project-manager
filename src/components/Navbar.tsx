@@ -270,10 +270,11 @@ export function Navbar() {
                         {onFit && (
                             <button
                                 onClick={onFit}
-                                className="flex items-center justify-center p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20 transition-all active:scale-95 group"
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground text-[10px] font-bold uppercase tracking-wider hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
                                 title="Přizpůsobit zobrazení"
                             >
-                                <Maximize2 size={16} className="group-hover:scale-110 transition-transform" />
+                                <Maximize2 size={14} className="group-hover:scale-110 transition-transform" />
+                                <span className="hidden sm:inline">Přizpůsobit</span>
                             </button>
                         )}
 
@@ -281,10 +282,11 @@ export function Navbar() {
                         {canImport && (
                             <button
                                 onClick={() => setIsImportWizardOpen(true)}
-                                className="flex items-center justify-center p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-500/20 transition-all active:scale-95 group"
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground text-[10px] font-bold uppercase tracking-wider hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
                                 title="Importní Průvodce (Excel)"
                             >
-                                <FileUp size={16} className="group-hover:scale-110 transition-transform" />
+                                <FileUp size={14} className="group-hover:scale-110 transition-transform" />
+                                <span className="hidden sm:inline">Import</span>
                             </button>
                         )}
 

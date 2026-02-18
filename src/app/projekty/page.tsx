@@ -266,14 +266,7 @@ export default function ProjektyPage() {
                                 {/* Compact Count - Styled like Navbar Active Pill */}
                                 <div className="hidden md:flex items-center gap-1" title="Zobrazeno / Celkem projektů">
                                     <span
-                                        className={cn(
-                                            "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all",
-                                            activeTab === 'service'
-                                                ? "bg-[#1a1a1a] text-purple-500 border-purple-500/20 shadow-purple-500/10"
-                                                : activeTab === 'military'
-                                                    ? "bg-[#1a1a1a] text-emerald-500 border-emerald-500/20 shadow-emerald-500/10"
-                                                    : "bg-[#1a1a1a] text-blue-500 border-blue-500/20 shadow-blue-500/10"
-                                        )}
+                                        className="flex items-center gap-1.5 px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80 transition-all"
                                     >
                                         <Database size={10} className="opacity-80" />
                                         <span>
