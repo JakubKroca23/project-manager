@@ -580,23 +580,24 @@ const Timeline: React.FC = () => {
             const container = scrollContainerRef.current;
             if (!container) return;
 
-            // Check if mouse is over the timeline container or its children
-            const isOverTimeline = (e.target as HTMLElement).closest('.timeline-container');
-            if (!isOverTimeline) return;
-
-            // ABSOLUTE BLOCK: Stop all native scrolling on the timeline
-            // User requested to use DRAG for scrolling, wheel is ONLY for zoom.
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Ignore zooming when over the top toolbar or design settings panel
-            if ((e.target as HTMLElement).closest('.timeline-header, .design-settings-panel')) {
+            // 1. Check if we are in an "excluded" zone where native scroll should happen
+            // (Design settings sidebar OR Top Header Actions)
+            if ((e.target as HTMLElement).closest('.design-settings-sidebar, .timeline-header-actions')) {
                 return;
             }
 
-            // 1. Ctrl + Wheel = Vertical Zoom (Row Height)
+            // 2. Check if mouse is over the timeline container (and not excluded)
+            const isOverTimeline = (e.target as HTMLElement).closest('.timeline-container');
+            if (!isOverTimeline) return;
+
+            // 3. ABSOLUTE BLOCK: Stop all native scrolling on the timeline grid
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 4. Ctrl + Wheel = Vertical Zoom (Row Height)
             if (e.ctrlKey || e.metaKey) {
                 const delta = e.deltaY;
+
                 if (delta === 0) return;
 
                 const target = e.target as HTMLElement;
@@ -882,7 +883,7 @@ const Timeline: React.FC = () => {
         >
             {/* Design Settings Panel - Static Sidebar (LEFT) */}
             {showDesignSettings && (
-                <div className="w-[320px] h-full bg-background/95 backdrop-blur-sm border-r border-border shadow-xl z-[4000] flex flex-col animate-in slide-in-from-left-5 fade-in duration-300 shrink-0">
+                <div className="design-settings-sidebar w-[320px] h-full bg-background/95 backdrop-blur-sm border-r border-border shadow-xl z-[4000] flex flex-col animate-in slide-in-from-left-5 fade-in duration-300 shrink-0">
                     <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
                         <div className="flex items-center gap-2">
                             <Settings2 size={14} className="text-primary" />
