@@ -467,15 +467,13 @@ const Timeline: React.FC = () => {
         if (!container) return;
 
         const handleWheelNative = (e: WheelEvent) => {
-            // 1. Shift + Wheel = Horizontal Scroll
-            if (e.shiftKey) {
-                return;
-            }
+            // ALWAYS prevent default and stop propagation for wheel events on the timeline
+            // to ensure ONLY zoom happens and no horizontal/vertical page scroll.
+            e.preventDefault();
+            e.stopPropagation();
 
-            // 2. Ctrl + Wheel = Vertical Zoom (Row Height)
+            // 1. Ctrl + Wheel = Vertical Zoom (Row Height)
             if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                e.stopPropagation();
                 const delta = e.deltaY;
                 if (delta === 0) return;
 
@@ -487,12 +485,11 @@ const Timeline: React.FC = () => {
                 return;
             }
 
-            // 3. Just Wheel = Horizontal Zoom (Day Width)
-            const delta = e.deltaY;
+            // 2. Just Wheel = Horizontal Zoom (Day Width)
+            // handle both deltaY (vertical wheel) and deltaX (trackpad horizontal)
+            // with a preference for intentional horizontal zoom via deltaY.
+            const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
             if (delta === 0) return;
-
-            e.preventDefault();
-            e.stopPropagation();
 
             const currentWidth = dayWidthRef.current;
 
