@@ -81,7 +81,7 @@ const PROJECT_FIELDS: ProjectField[] = [
 ];
 
 type ImportSource = 'raynet' | 'group' | 'custom';
-type ProjectType = 'civil' | 'military' | 'service';
+type ProjectType = 'civil' | 'military' | 'service' | 'specific';
 
 export default function ImportWizard() {
     const { isImportWizardOpen, setIsImportWizardOpen } = useActions();
@@ -448,6 +448,25 @@ export default function ImportWizard() {
                                         </div>
                                     </button>
                                 ))}
+                            </div>
+
+                            {/* Option for specific project - smaller and distinct */}
+                            <div className="flex justify-center pt-8 border-t border-border/30">
+                                <button
+                                    onClick={() => handleTypeSelect('specific')}
+                                    className={cn(
+                                        "flex items-center gap-3 px-6 py-3 rounded-2xl border border-divider hover:bg-muted/50 transition-all group",
+                                        "hover:border-primary/30 hover:shadow-md"
+                                    )}
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center transition-transform group-hover:scale-110">
+                                        <PlusCircle size={18} />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="block text-xs font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors italic">DOPLNĚNÍ K ZAKÁZCE</span>
+                                        <span className="block text-[10px] text-muted-foreground font-medium">Import dokumentů nebo dat ke konkrétní existující zakázce</span>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     )}
