@@ -589,6 +589,11 @@ const Timeline: React.FC = () => {
             e.preventDefault();
             e.stopPropagation();
 
+            // Ignore zooming when over the month header row
+            if ((e.target as HTMLElement).closest('.timeline-header-row.months')) {
+                return;
+            }
+
             // 1. Ctrl + Wheel = Vertical Zoom (Row Height)
             if (e.ctrlKey || e.metaKey) {
                 const delta = e.deltaY;
