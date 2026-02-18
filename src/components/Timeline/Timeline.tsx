@@ -260,10 +260,28 @@ const Timeline: React.FC = () => {
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
     };
 
-    const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
+    const [dayWidth, setDayWidth] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('timeline_dayWidth');
+            return saved ? parseFloat(saved) : DEFAULT_DAY_WIDTH;
+        }
+        return DEFAULT_DAY_WIDTH;
+    });
     const [isLoading, setIsLoading] = useState(true);
-    const [rowHeight, setRowHeight] = useState(32);
-    const [summaryRowHeight, setSummaryRowHeight] = useState(36);
+    const [rowHeight, setRowHeight] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('timeline_rowHeight');
+            return saved ? parseInt(saved) : 32;
+        }
+        return 32;
+    });
+    const [summaryRowHeight, setSummaryRowHeight] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('timeline_summaryRowHeight');
+            return saved ? parseInt(saved) : 36;
+        }
+        return 36;
+    });
     const [showDesignSettings, setShowDesignSettings] = useState(false);
     const [design, setDesign] = useState({
         borderRadius: 4,
@@ -280,7 +298,22 @@ const Timeline: React.FC = () => {
     // immediately for the next event in the loop.
     useLayoutEffect(() => {
         dayWidthRef.current = dayWidth;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('timeline_dayWidth', dayWidth.toString());
+        }
     }, [dayWidth]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('timeline_rowHeight', rowHeight.toString());
+        }
+    }, [rowHeight]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('timeline_summaryRowHeight', summaryRowHeight.toString());
+        }
+    }, [summaryRowHeight]);
 
     // Color Configuration State
     const [colors, setColors] = useState<IColorsState>({
