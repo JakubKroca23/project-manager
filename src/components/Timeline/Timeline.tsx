@@ -1258,19 +1258,9 @@ const Timeline: React.FC = () => {
                                                                 <span className="uppercase">{sector.label}</span>
                                                                 <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                             </div>
-                                                            <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button
-                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSummaryRowHeight(prev => Math.min(120, prev + 4)); }}
-                                                                    className="p-1 hover:bg-black/5 rounded transition-colors"
-                                                                >
-                                                                    <Plus size={10} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSummaryRowHeight(prev => Math.max(12, prev - 4)); }}
-                                                                    className="p-1 hover:bg-black/5 rounded transition-colors"
-                                                                >
-                                                                    <Minus size={10} />
-                                                                </button>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="uppercase">{sector.label}</span>
+                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1362,21 +1352,6 @@ const Timeline: React.FC = () => {
                                                     ) : (
                                                         <span className="text-[10px] truncate font-bold">{project.name}</span>
                                                     )}
-
-                                                    <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                                        <button
-                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.min(120, prev + 4)); }}
-                                                            className="p-1 hover:bg-black/5 rounded transition-colors"
-                                                        >
-                                                            <Plus size={10} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.max(12, prev - 4)); }}
-                                                            className="p-1 hover:bg-black/5 rounded transition-colors"
-                                                        >
-                                                            <Minus size={10} />
-                                                        </button>
-                                                    </div>
                                                 </div>
 
                                                 {rowHeight >= 80 && (
