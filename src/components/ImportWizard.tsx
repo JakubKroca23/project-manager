@@ -252,8 +252,13 @@ export default function ImportWizard() {
     };
 
     const prepareAndAnalyze = async () => {
+        console.log("Starting prepareAndAnalyze");
+        console.log("Current mapping:", mapping);
+        console.log("Raw data length:", rawData.length);
+
         const missingRequired = PROJECT_FIELDS.filter(f => f.required && !mapping[f.key] && f.key !== 'id');
         if (missingRequired.length > 0) {
+            console.log("Missing required fields:", missingRequired);
             alert(`Chybí mapování pro povinná pole: ${missingRequired.map(f => f.label).join(', ')}`);
             return;
         }
@@ -284,7 +289,10 @@ export default function ImportWizard() {
 
                 // Name is required
                 const nameVal = item[mapping['name']];
-                if (!nameVal || String(nameVal).trim() === '') return null;
+                if (!nameVal || String(nameVal).trim() === '') {
+                    console.log(`Skipping row ${index}: Missing name. Value:`, nameVal);
+                    return null;
+                }
 
                 const project: any = {
                     id: projectId,
@@ -320,7 +328,12 @@ export default function ImportWizard() {
                 return project;
             }).filter(p => p !== null);
 
-            if (rawProjects.length === 0) throw new Error('Žádné platné projekty k importu. Zkontrolujte sloupec "Název".');
+            console.log("Valid projects count:", rawProjects.length);
+
+            if (rawProjects.length === 0) {
+                console.error("No valid projects found!");
+                throw new Error('Žádné platné projekty k importu. Zkontrolujte sloupec "Název".');
+            }
 
             // 1. Check internal duplicates
             const idGroups: Record<string, any[]> = {};
