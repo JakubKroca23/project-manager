@@ -477,7 +477,6 @@ const Timeline: React.FC = () => {
             // 2. Ctrl + Wheel = Vertical Zoom (Row Height)
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
-                e.stopPropagation();
                 const delta = e.deltaY;
                 setRowHeight(prev => {
                     const next = delta > 0 ? prev - 4 : prev + 4;
@@ -488,28 +487,18 @@ const Timeline: React.FC = () => {
             }
 
             // 3. Just Wheel = Horizontal Zoom (Day Width)
-            // Agresivně zamezíme scrollu stránky a osy
             e.preventDefault();
-            e.stopPropagation();
-
             const delta = e.deltaY;
-            const currentWidth = dayWidthRef.current;
 
-            // Výpočet pozice pro zoom na kurzor
             const rect = container.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
-
-            // Kolik dní je od začátku osy k pozici myši
-            const pointDays = (container.scrollLeft + mouseX) / currentWidth;
+            const pointDays = (container.scrollLeft + mouseX) / dayWidthRef.current;
             zoomFocus.current = { pointDays, pixelOffset: mouseX };
 
-            // Změna šířky dne (zoom)
             if (delta > 0) {
-                // Zoom out
-                setDayWidth(prev => Math.max(prev / 1.1, MIN_DAY_WIDTH));
+                setDayWidth(prev => Math.max(prev / 1.05, MIN_DAY_WIDTH));
             } else {
-                // Zoom in
-                setDayWidth(prev => Math.min(prev * 1.1, MAX_DAY_WIDTH));
+                setDayWidth(prev => Math.min(prev * 1.05, MAX_DAY_WIDTH));
             }
         };
 
