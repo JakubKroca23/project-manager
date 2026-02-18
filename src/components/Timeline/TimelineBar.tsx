@@ -66,11 +66,15 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
 
 const FlatbedTruck = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 18h20" />
-        <circle cx="6" cy="18" r="2" />
-        <circle cx="18" cy="18" r="2" />
-        <path d="M2 18v-5h6l3-4h4v9" />
-        <path d="M15 14h7v4" />
+        {/* Cab */}
+        <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
+        <path d="M2 12h7" />
+        {/* Flatbed */}
+        <path d="M9 14h13v4H9z" />
+        {/* 3 Axles (Wheels) */}
+        <circle cx="5.5" cy="18" r="2" />
+        <circle cx="14.5" cy="18" r="2" />
+        <circle cx="19.5" cy="18" r="2" />
     </svg>
 );
 

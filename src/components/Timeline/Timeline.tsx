@@ -103,11 +103,15 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
 
 const FlatbedTruck = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 18h20" />
-        <circle cx="6" cy="18" r="2" />
-        <circle cx="18" cy="18" r="2" />
-        <path d="M2 18v-5h6l3-4h4v9" />
-        <path d="M15 14h7v4" />
+        {/* Cab */}
+        <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
+        <path d="M2 12h7" />
+        {/* Flatbed */}
+        <path d="M9 14h13v4H9z" />
+        {/* 3 Axles (Wheels) */}
+        <circle cx="5.5" cy="18" r="2" />
+        <circle cx="14.5" cy="18" r="2" />
+        <circle cx="19.5" cy="18" r="2" />
     </svg>
 );
 
@@ -1164,29 +1168,59 @@ const Timeline: React.FC = () => {
                                         >
                                             <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
                                                 {rowHeight >= 25 ? (
-                                                    <>
+                                                    <div className="flex flex-col h-full justify-center">
                                                         <div className="flex items-center gap-1">
                                                             {project.parent_id && (
                                                                 <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
                                                             )}
                                                             <span
-                                                                className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-normal'} ${rowHeight >= 45 ? 'is-wrapped' : ''}`}
-                                                                style={{ textAlign: 'left', fontWeight: project.parent_id ? 400 : 600 }}
+                                                                className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
+                                                                style={{ textAlign: 'left' }}
                                                             >
                                                                 {project.name}
                                                             </span>
                                                         </div>
                                                         <div className="flex justify-between items-end w-full gap-2 mt-0.5">
                                                             <div className="flex flex-col shrink-0">
-                                                                <span className="text-[10px] font-black text-black uppercase tracking-tight whitespace-nowrap" title={project.id}>
+                                                                <span className="text-[10px] font-black text-black/80 uppercase tracking-tight whitespace-nowrap" title={project.id}>
                                                                     {project.id}
                                                                 </span>
                                                             </div>
-                                                            <span className="customer-name text-[11px] font-bold text-muted-foreground/70 leading-none pb-[1px]" style={{ textAlign: 'right' }}>
+                                                            <span className="customer-name text-[11px] font-bold text-muted-foreground/70 leading-none pb-[1px] truncate" style={{ textAlign: 'right' }}>
                                                                 {project.customer || 'Bez zákazníka'}
                                                             </span>
                                                         </div>
-                                                    </>
+
+                                                        {rowHeight >= 50 && (
+                                                            <div className="mt-1.5 pt-1.5 border-t border-black/5 flex flex-col gap-0.5">
+                                                                <div className="flex justify-between items-center text-[10px]">
+                                                                    <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Vlastník:</span>
+                                                                    <span className="font-bold text-black/70">{project.manager || '—'}</span>
+                                                                </div>
+                                                                {project.production_status && (
+                                                                    <div className="flex justify-between items-center text-[10px]">
+                                                                        <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Výroba:</span>
+                                                                        <span className="font-black text-primary/80 uppercase tracking-widest text-[9px]">{project.production_status}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {rowHeight >= 80 && (
+                                                            <div className="mt-1 flex flex-col gap-0.5">
+                                                                {(project.serial_number || project.abra_order) && (
+                                                                    <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
+                                                                        <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
+                                                                        <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex justify-between items-center text-[10px] italic">
+                                                                    <span className="text-muted-foreground/60">Stav:</span>
+                                                                    <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <div className="flex justify-between items-center w-full h-full">
                                                         <span className="text-[9px] font-black text-black uppercase tracking-tighter truncate mr-1" title={project.id}>
