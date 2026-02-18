@@ -21,6 +21,7 @@ import {
     Clock,
     Briefcase,
     Shield,
+    Plus,
     Wrench,
     Check
 } from 'lucide-react';
@@ -109,7 +110,8 @@ export default function ImportWizard() {
     const [diffData, setDiffData] = useState<DiffItem[]>([]);
     const [preparedProjects, setPreparedProjects] = useState<any[]>([]);
     const [duplicateGroups, setDuplicateGroups] = useState<Record<string, any[]>>({});
-    const [resolutionStrategy, setResolutionStrategy] = useState<'keepLast' | 'keepFirst' | 'manual'>('keepLast');
+    const [resolutionStrategy, setResolutionStrategy] = useState<'keepLast' | 'keepFirst' | 'manual'>('manual');
+    const [manualResolutions, setManualResolutions] = useState<Record<string, number>>({}); // id -> selected index
     const [typeConflictGroups, setTypeConflictGroups] = useState<any[]>([]);
     const [typeConflictAction, setTypeConflictAction] = useState<'skip' | 'overwrite'>('skip');
 
@@ -282,6 +284,10 @@ export default function ImportWizard() {
 
             if (hasDuplicates) {
                 setDuplicateGroups(duplicates);
+                // Default manual resolutions to index 0 for each group
+                const initialResolutions: Record<string, number> = {};
+                Object.keys(duplicates).forEach(id => { initialResolutions[id] = 0; });
+                setManualResolutions(initialResolutions);
                 setPreparedProjects(rawProjects);
                 setStep('duplicates');
                 return;
@@ -575,8 +581,22 @@ export default function ImportWizard() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                 {field.label} {field.required && <span className="text-destructive">*</span>}
                                             </label>
-                                            {mapping[field.key] && (
-                                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold border border-emerald-500/20">NAPÁROVÁNO</span>
+                                            {mapping[field.key] ? (
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold border border-emerald-500/20">NAPÁROVÁNO</span>
+                                                    <button
+                                                        onClick={() => setMapping(prev => {
+                                                            const n = { ...prev };
+                                                            delete n[field.key];
+                                                            return n;
+                                                        })}
+                                                        className="text-muted-foreground hover:text-destructive transition-colors"
+                                                    >
+                                                        <X size={10} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-bold border border-amber-500/20">CHYBÍ</span>
                                             )}
                                         </div>
                                         <select
@@ -590,6 +610,35 @@ export default function ImportWizard() {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Unmapped pile */}
+                            {excelColumns.filter(c => !Object.values(mapping).includes(c)).length > 0 && (
+                                <div className="p-6 rounded-[2rem] bg-muted/10 border border-dashed border-border space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <TableIcon size={16} className="text-muted-foreground" />
+                                        <h4 className="text-xs font-black uppercase tracking-widest">Hromádka nespárovaných sloupců</h4>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {excelColumns.filter(c => !Object.values(mapping).includes(c)).map(col => (
+                                            <div key={col} className="group relative">
+                                                <button
+                                                    onClick={() => {
+                                                        // Auto-map to first empty required field or just highlight?
+                                                        // For now just a badge
+                                                    }}
+                                                    className="px-3 py-1.5 bg-background border border-border rounded-lg text-[10px] font-bold hover:border-primary/50 transition-all flex items-center gap-2 pr-2"
+                                                >
+                                                    {col}
+                                                    <div className="w-4 h-4 rounded-md bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Plus size={10} />
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground italic">Tyto sloupce nebudou do systému nahrány.</p>
+                                </div>
+                            )}
                             <div className="flex justify-end gap-3 pt-6">
                                 <button onClick={() => setStep('source')} className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-muted rounded-xl transition-all">Zpět</button>
                                 <button onClick={prepareAndAnalyze} disabled={loading} className="px-8 py-2.5 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
@@ -709,20 +758,113 @@ export default function ImportWizard() {
 
                     {/* DUPLICATES Resolution */}
                     {step === 'duplicates' && (
-                        <div className="space-y-6 text-center max-w-lg mx-auto py-8">
-                            <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-600 mx-auto">
-                                <AlertTriangle size={32} />
+                        <div className="space-y-6 animate-in fade-in">
+                            <div className="text-center space-y-2">
+                                <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-4">
+                                    <AlertTriangle size={32} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight">Ošetření duplicit v souboru</h3>
+                                <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                                    Nalezeno {Object.keys(duplicateGroups).length} skupin duplicitních ID. Vyberte, který záznam chcete ponechat, nebo upravte ID u konkrétního řádku.
+                                </p>
                             </div>
-                            <h3 className="text-2xl font-black uppercase tracking-tight">V souboru jsou duplicity</h3>
-                            <p className="text-sm text-muted-foreground">Některá ID se v tabulce vyskytují vícekrát ({Object.keys(duplicateGroups).length} kolizí).</p>
-                            <div className="flex flex-col gap-2 pt-4">
-                                <button onClick={() => { setResolutionStrategy('keepLast'); setStep('diff'); analyzeDiffs(preparedProjects); }} className="p-4 bg-muted/30 border border-border rounded-xl hover:border-primary text-xs font-bold uppercase tracking-wider text-left flex justify-between items-center group">
-                                    <span>Ponechat poslední výskyt</span>
-                                    <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
+
+                            <div className="space-y-8 max-h-[50vh] overflow-y-auto px-2 custom-scrollbar">
+                                {Object.entries(duplicateGroups).map(([id, items]) => (
+                                    <div key={id} className="p-6 rounded-[2rem] border border-border bg-muted/5 space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+                                                    ID: {id}
+                                                </div>
+                                                <span className="text-xs font-medium text-muted-foreground">nalezeno {items.length}x</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {items.map((item, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between",
+                                                        manualResolutions[id] === idx ? "bg-primary/5 border-primary shadow-sm" : "bg-background border-border hover:bg-muted/30"
+                                                    )}
+                                                    onClick={() => setManualResolutions(prev => ({ ...prev, [id]: idx }))}
+                                                >
+                                                    <div className="flex items-center gap-4 flex-1">
+                                                        <div className={cn(
+                                                            "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                                            manualResolutions[id] === idx ? "border-primary bg-primary text-white" : "border-muted-foreground/30"
+                                                        )}>
+                                                            {manualResolutions[id] === idx && <Check size={12} strokeWidth={4} />}
+                                                        </div>
+                                                        <div className="space-y-0.5">
+                                                            <div className="text-xs font-bold">{item.name}</div>
+                                                            <div className="text-[10px] text-muted-foreground">{item.customer} • {item.manager}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-[9px] font-black text-muted-foreground uppercase">Upravit ID:</label>
+                                                        <input
+                                                            type="text"
+                                                            value={item.id}
+                                                            onChange={(e) => {
+                                                                const newId = e.target.value;
+                                                                setPreparedProjects(prev => prev.map(p => {
+                                                                    if (p === item) return { ...p, id: newId };
+                                                                    return p;
+                                                                }));
+                                                                // If ID changed, it might no longer be a duplicate in this group
+                                                                // For UX simplicity, we edit the reference and user will see refresh
+                                                            }}
+                                                            onClick={e => e.stopPropagation()}
+                                                            className="h-7 w-24 bg-background border border-border rounded-md px-2 text-[10px] font-mono outline-none focus:ring-1 focus:ring-primary"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-center gap-3 pt-6 border-t border-border">
+                                <button
+                                    onClick={() => setStep('mapping')}
+                                    className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-muted rounded-xl transition-all"
+                                >
+                                    Zpět k mapování
                                 </button>
-                                <button onClick={() => { setResolutionStrategy('keepFirst'); setStep('diff'); analyzeDiffs(preparedProjects); }} className="p-4 bg-muted/30 border border-border rounded-xl hover:border-primary text-xs font-bold uppercase tracking-wider text-left flex justify-between items-center group">
-                                    <span>Ponechat první výskyt</span>
-                                    <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
+                                <button
+                                    onClick={() => {
+                                        // Finalize preparedProjects based on manualResolutions
+                                        const finalProjects: any[] = [];
+                                        const processedIds = new Set<string>();
+
+                                        // 1. Add unique ones or manually selected duplicates
+                                        preparedProjects.forEach(p => {
+                                            const isDuplicate = duplicateGroups[p.id];
+                                            if (!isDuplicate) {
+                                                finalProjects.push(p);
+                                            } else {
+                                                if (!processedIds.has(p.id)) {
+                                                    const selectedIdx = manualResolutions[p.id];
+                                                    const chosenOne = duplicateGroups[p.id][selectedIdx];
+                                                    finalProjects.push(chosenOne);
+                                                    processedIds.add(p.id);
+                                                }
+                                            }
+                                        });
+
+                                        setPreparedProjects(finalProjects);
+                                        setStep('diff');
+                                        analyzeDiffs(finalProjects);
+                                    }}
+                                    className="px-10 py-3 bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-primary/30 hover:scale-[1.05] transition-all flex items-center gap-3"
+                                >
+                                    Potvrdit a analyzovat změny
+                                    <ArrowRight size={14} />
                                 </button>
                             </div>
                         </div>

@@ -69,8 +69,8 @@ const FlatbedTruck = ({ size = 24, ...props }: any) => (
         {/* Cab */}
         <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
         <path d="M2 12h7" />
-        {/* Flatbed */}
-        <path d="M9 14h13v4H9z" />
+        {/* Flatbed - LOWERED from y=14 to y=16 */}
+        <path d="M9 16h13v2H9z" />
         {/* 3 Axles (Wheels) */}
         <circle cx="5.5" cy="18" r="2" />
         <circle cx="14.5" cy="18" r="2" />
@@ -122,7 +122,7 @@ const Hiab = ({ size = 24, ...props }: any) => (
 );
 
 const ICON_OPTIONS = {
-    Truck: Truck,
+    Truck: FlatbedTruck,
     Hammer: Hammer,
     ThumbsUp: ThumbsUp,
     AlertTriangle: AlertTriangle,
