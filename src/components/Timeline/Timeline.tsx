@@ -237,9 +237,8 @@ const Timeline: React.FC = () => {
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
     };
 
-    const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
-    const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
+    const [summaryRowHeight, setSummaryRowHeight] = useState(36);
     const timelineRef = useRef<HTMLDivElement>(null);
 
     // Ref for accessing current dayWidth in event listeners
@@ -346,11 +345,45 @@ const Timeline: React.FC = () => {
         '--milestone-handover': colors.milestoneHandover?.color || '#888',
         '--milestone-deadline': colors.milestoneDeadline?.color || '#888',
         '--milestone-start': colors.milestoneStart?.color || '#888',
+        '--summary-row-height': `${summaryRowHeight}px`,
+        '--project-row-height': `${rowHeight}px`,
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
         '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
     } as React.CSSProperties;
+
+    // Independent vertical zoom via Ctrl + Wheel
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -4 : 4;
+                const target = e.target as HTMLElement;
+                const summaryRow = target.closest('.is-summary');
+                const projectRow = target.closest('.is-project');
+
+                if (summaryRow) {
+                    setSummaryRowHeight(prev => Math.min(120, Math.max(12, prev + delta)));
+                } else if (projectRow) {
+                    setRowHeight(prev => Math.min(120, Math.max(12, prev + delta)));
+                } else {
+                    // Default horizontal zoom if not over a specific row
+                    const currentWidth = dayWidthRef.current;
+                    const next = delta > 0 ? Math.min(currentWidth * 1.15, MAX_DAY_WIDTH) : Math.max(currentWidth / 1.15, MIN_DAY_WIDTH);
+                    if (next !== currentWidth) {
+                        setDayWidth(next);
+                    }
+                }
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        return () => container.removeEventListener('wheel', handleWheel);
+    }, [scrollContainerRef]);
 
 
 
@@ -1096,15 +1129,15 @@ const Timeline: React.FC = () => {
                                 return (
                                     <>
                                         {visibleSectors.map((sector, vIdx) => {
-                                            const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--timeline-row-height)))`;
+                                            const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
                                             return (
                                                 <div
                                                     key={`summary-${sector.id}`}
-                                                    className="timeline-row"
+                                                    className="timeline-row is-summary"
                                                     style={{
                                                         position: 'sticky',
                                                         top: topOffset,
-                                                        height: 'var(--timeline-row-height)',
+                                                        height: 'var(--summary-row-height)',
                                                         zIndex: 3500 - vIdx,
                                                         width: 'max-content',
                                                         minWidth: '100%'
@@ -1156,7 +1189,7 @@ const Timeline: React.FC = () => {
                                                             endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
                                                             timelineStart={timelineRange.start}
                                                             dayWidth={dayWidth}
-                                                            rowHeight={rowHeight}
+                                                            rowHeight={summaryRowHeight}
                                                             isCollapsed={true}
                                                             config={{ ...colors, milestoneSize }}
                                                             onProjectUpdate={handleProjectUpdate}
@@ -1172,7 +1205,7 @@ const Timeline: React.FC = () => {
                                             className="timeline-row p-0"
                                             style={{
                                                 position: 'sticky',
-                                                top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--timeline-row-height)))`,
+                                                top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)))`,
                                                 height: '2px',
                                                 background: '#1a1a1a',
                                                 borderBottom: 'none',
@@ -1194,7 +1227,7 @@ const Timeline: React.FC = () => {
                                 const sectorColor = sector?.color || '#90caf9';
 
                                 return (
-                                    <div key={project.id} className="timeline-row">
+                                    <div key={project.id} className="timeline-row is-project">
                                         <Link
                                             href={`/projekty/${project.id}`}
                                             className="project-info-sticky transition-colors group"

@@ -318,10 +318,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end', icon: customIcons['mounting_end'] });
         }
 
-        // Add Start (Uzavřeno) milestone
-        if (t_closed) {
-            raw.push({ key: 'start', date: t_closed, label: 'Start (Uzavřeno)', class: 'start' });
-        }
+
 
         // Add dynamic milestones from prop
         milestones.forEach((m: ProjectMilestone) => {
