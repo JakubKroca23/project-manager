@@ -4,9 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Settings, Search, X } from 'lucide-react';
+import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Search, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
-import { ThemeToggle } from './ThemeToggle';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useSearch } from '@/providers/SearchProvider';
 
@@ -112,17 +111,16 @@ export function Navbar() {
                                         <button
                                             className={cn(
                                                 "flex flex-col items-center justify-center px-4 py-1 rounded-md transition-all duration-200 uppercase whitespace-nowrap",
-                                                isActive ? "bg-white/5" : "hover:bg-white/[0.02]"
+                                                isActive ? "bg-primary/10" : "hover:bg-primary/5"
                                             )}
                                             style={{
-                                                color: isActive ? activeColor : undefined,
-                                                backgroundColor: isActive ? `${activeColor}15` : undefined
+                                                color: isActive ? activeColor : 'hsl(var(--foreground) / 0.8)',
                                             }}
                                         >
                                             <div className="flex items-center gap-2">
-                                                <item.icon size={18} style={{ color: activeColor }} className="group-hover:opacity-100" />
-                                                <span className="text-xs font-bold tracking-wider hidden sm:inline" style={{ color: isActive ? activeColor : undefined }}>{item.name}</span>
-                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : undefined }} />
+                                                <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.6)' }} className="group-hover:opacity-100" />
+                                                <span className="text-xs font-bold tracking-wider hidden sm:inline">{item.name}</span>
+                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.5)' }} />
                                             </div>
                                             {activeCategory && isActive && (
                                                 <div className="absolute top-full left-0 mt-[-4px] z-10 flex justify-center pointer-events-none">
@@ -185,7 +183,7 @@ export function Navbar() {
                                                             }}
                                                             onMouseLeave={(e) => {
                                                                 if (!isSubActive) {
-                                                                    e.currentTarget.style.color = 'rgb(156 163 175)';
+                                                                    e.currentTarget.style.color = 'hsl(var(--foreground) / 0.6)';
                                                                     e.currentTarget.style.backgroundColor = 'transparent';
                                                                     e.currentTarget.style.borderColor = 'transparent';
                                                                     e.currentTarget.style.boxShadow = 'none';
@@ -217,30 +215,14 @@ export function Navbar() {
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent",
-                                        isActive ? "bg-white/5" : ""
+                                        "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border",
+                                        isActive ? "bg-primary/10 border-primary/30" : "border-transparent text-foreground/70 hover:bg-primary/5 hover:border-primary/20"
                                     )}
                                     style={{
                                         color: isActive ? activeColor : undefined,
-                                        backgroundColor: isActive ? `${activeColor}15` : undefined,
-                                        borderColor: isActive ? `${activeColor}22` : 'transparent',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isActive) {
-                                            e.currentTarget.style.backgroundColor = `${activeColor}10`;
-                                            e.currentTarget.style.color = activeColor!;
-                                            e.currentTarget.style.borderColor = `${activeColor}22`;
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isActive) {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                            e.currentTarget.style.color = 'rgb(156 163 175)';
-                                            e.currentTarget.style.borderColor = 'transparent';
-                                        }
                                     }}
                                 >
-                                    <item.icon size={18} style={{ color: activeColor }} />
+                                    <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.6)' }} />
                                     <span className="hidden sm:inline">{item.name}</span>
                                 </Link>
                             );
@@ -252,18 +234,18 @@ export function Navbar() {
                         {/* Search Field */}
                         <div className="max-w-xs w-full px-2">
                             <div className="relative group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-blue-500 transition-all duration-300" size={14} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 group-focus-within:text-blue-600 transition-all duration-300" size={14} />
                                 <input
                                     type="text"
                                     placeholder="Hledat..."
-                                    className="w-full bg-white/[0.03] border border-white/10 rounded-full py-1.5 pl-9 pr-9 text-[11px] focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white/[0.05] focus:border-blue-500/50 transition-all duration-300 placeholder:text-muted-foreground/30 shadow-inner"
+                                    className="w-full bg-foreground/[0.03] border border-foreground/15 rounded-full py-1.5 pl-9 pr-9 text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-background focus:border-blue-500 transition-all duration-300 placeholder:text-foreground/40"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                                 {searchTerm && (
                                     <button
                                         onClick={() => setSearchTerm('')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-blue-500 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-blue-600 transition-colors"
                                     >
                                         <X size={14} />
                                     </button>
@@ -283,19 +265,11 @@ export function Navbar() {
                             </div>
                         </Link>
 
-                        <div className="flex items-center gap-2 pl-3 border-l border-border/40">
-                            <Link href="/profile" title="Nastavení profilu">
-                                <IconButton className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400 hover:text-blue-300">
-                                    <Settings size={15} />
-                                </IconButton>
-                            </Link>
-
-                            <ThemeToggle className="bg-muted hover:bg-muted/80 border-border text-foreground hover:text-foreground" />
-
+                        <div className="flex items-center gap-2 pl-3 border-l border-border">
                             <IconButton
                                 onClick={handleLogout}
                                 title="Odhlásit se"
-                                className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                                className="bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20 text-rose-600 hover:text-rose-700"
                             >
                                 <LogOut size={15} />
                             </IconButton>
