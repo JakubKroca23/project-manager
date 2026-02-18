@@ -1079,6 +1079,8 @@ export default function ImportWizard() {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
             `}</style>
-                </div >
-                );
+                </div>
+            </div>
+        </div>
+    );
 }
