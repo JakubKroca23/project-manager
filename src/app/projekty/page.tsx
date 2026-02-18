@@ -54,7 +54,7 @@ const columns: ColumnDef<Project>[] = [
     },
     {
         accessorKey: 'manager',
-        header: 'Manažer',
+        header: 'Vedoucí projektu',
         minSize: 30,
     },
     {
@@ -444,7 +444,7 @@ export default function ProjektyPage() {
                                 }
                                 return;
                             }
-                            router.push(`/projekty/${row.id}`);
+                            router.push(`/projekty/${row.id}?type=${row.project_type || 'civil'}`);
                         }}
                         searchValue={searchTerm}
                         columnOrder={tableSettings.columnOrder}

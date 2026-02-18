@@ -435,9 +435,9 @@ export default function ProjectDetailPage() {
                     {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
                     <Section icon={<FileText size={15} />} title="Základní informace" color="blue">
                         <FieldGrid>
-                            <Field label="Manažer" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Vedoucí projektu" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Typ nástavby" icon={<Truck size={13} />} value={p.body_type} field="body_type" isEditing={isEditing} onChange={handleChange} />
+
                             <Field
                                 label="Kategorie"
                                 icon={<Tag size={13} />}
@@ -446,7 +446,7 @@ export default function ProjectDetailPage() {
                                 isEditing={isEditing}
                                 onChange={handleChange}
                             />
-                            <Field label="Výrobní číslo" icon={<Hash size={13} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
+
                         </FieldGrid>
                     </Section>
 

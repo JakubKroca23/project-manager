@@ -1162,7 +1162,7 @@ const Timeline: React.FC = () => {
                                 return (
                                     <div key={project.id} className="timeline-row is-project">
                                         <Link
-                                            href={`/projekty/${project.id}`}
+                                            href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
                                             className="project-info-sticky transition-colors group"
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
@@ -1194,7 +1194,7 @@ const Timeline: React.FC = () => {
                                                         {rowHeight >= 50 && (
                                                             <div className="mt-1.5 pt-1.5 border-t border-black/5 flex flex-col gap-0.5">
                                                                 <div className="flex justify-between items-center text-[10px]">
-                                                                    <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Vlastník:</span>
+                                                                    <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Vedoucí projektu:</span>
                                                                     <span className="font-bold text-black/70">{project.manager || '—'}</span>
                                                                 </div>
                                                                 {project.production_status && (

@@ -30,7 +30,8 @@ export function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter(); // Use this if router is needed, otherwise remove. Added for safety based on import.
-    const activeType = searchParams.get('type');
+    const activeTypeFromParams = searchParams.get('type');
+    const activeType = activeTypeFromParams || (pathname?.startsWith('/servis') ? 'service' : null);
     const { checkPerm, canImport } = usePermissions();
     const { searchTerm, setSearchTerm } = useSearch();
     const { onFit, setIsImportWizardOpen } = useActions();

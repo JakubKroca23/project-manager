@@ -65,7 +65,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'id', label: 'Kód (ID)', required: true, defaultAliases: ['kód', 'code', 'id', 'předmět a číslo op', 'identifikátor'] },
     { key: 'name', label: 'Název / Předmět', required: true, defaultAliases: ['předmět', 'název', 'name', 'subject', 'titul'] },
     { key: 'customer', label: 'Klient', defaultAliases: ['klient', 'zákazník', 'customer', 'klient náz', 'odběratel'] },
-    { key: 'manager', label: 'Manažer / Vlastník', defaultAliases: ['vlastník', 'manažer', 'owner', 'manager'] },
+    { key: 'manager', label: 'Vedoucí projektu', defaultAliases: ['vlastník', 'manažer', 'owner', 'manager'] },
     { key: 'category', label: 'Kategorie', defaultAliases: ['kategorie', 'category'] },
     { key: 'abra_order', label: 'Abra Objednávka', defaultAliases: ['abra objednávka', 'objednávka', 'číslo objednávky'] },
     { key: 'abra_project', label: 'Abra Zakázka', defaultAliases: ['abra zakázka', 'zakázka', 'číslo zakázky'] },

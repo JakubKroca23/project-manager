@@ -119,7 +119,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Manažer / Vlastník</label>
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Vedoucí projektu</label>
                             <input
                                 required
                                 value={formData.manager}
