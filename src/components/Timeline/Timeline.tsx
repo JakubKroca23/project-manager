@@ -888,118 +888,120 @@ const Timeline: React.FC = () => {
                 </div>
             </header>
 
-            {/* Design Settings Sidebar */}
+            {/* Design Settings Panel - Inline Popup */}
             {showDesignSettings && (
-                <div className="fixed top-24 right-4 z-[100] w-72 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col max-h-[70vh]">
-                    <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
-                        <span className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                            <Palette size={14} className="text-primary" />
-                            Nastavení Vzhledu
-                        </span>
-                        <button onClick={() => setShowDesignSettings(false)} className="p-1 hover:bg-muted rounded-lg transition-colors">
-                            <X size={16} />
-                        </button>
-                    </div>
-                    <div className="p-4 overflow-y-auto custom-scrollbar space-y-6">
-                        {/* Bar Shape */}
-                        <div className="space-y-3">
-                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Tvar a Rozměry</h4>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                        <span>Zaoblení</span>
-                                        <span className="text-primary">{design.borderRadius}px</span>
-                                    </div>
-                                    <input
-                                        type="range" min="0" max="20" step="1"
-                                        value={design.borderRadius}
-                                        onChange={(e) => setDesign({ ...design, borderRadius: parseInt(e.target.value) })}
-                                        className="w-full accent-primary"
-                                    />
+                <div className="design-settings-panel border-b border-border/50 bg-muted/5 animate-in slide-in-from-top duration-300 overflow-hidden">
+                    <div className="max-w-[1400px] mx-auto p-4 py-6">
+                        <div className="flex flex-wrap gap-8 justify-between">
+                            {/* Bar Shape */}
+                            <div className="flex-1 min-w-[200px] space-y-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Tvar a Rozměry</h4>
+                                    <div className="h-px flex-1 bg-border/30"></div>
                                 </div>
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                        <span>Výška Baru (px)</span>
-                                        <span className="text-primary">{design.barHeight}px</span>
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                            <span className="text-muted-foreground">Zaoblení</span>
+                                            <span className="text-primary">{design.borderRadius}px</span>
+                                        </div>
+                                        <input
+                                            type="range" min="0" max="20" step="1"
+                                            value={design.borderRadius}
+                                            onChange={(e) => setDesign({ ...design, borderRadius: parseInt(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
                                     </div>
-                                    <input
-                                        type="range" min="4" max="64" step="2"
-                                        value={design.barHeight}
-                                        onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
-                                        className="w-full accent-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                        <span>Odsazení stran</span>
-                                        <span className="text-primary">{design.insetX}px</span>
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                            <span className="text-muted-foreground">Výška Baru</span>
+                                            <span className="text-primary">{design.barHeight}px</span>
+                                        </div>
+                                        <input
+                                            type="range" min="4" max="64" step="2"
+                                            value={design.barHeight}
+                                            onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
                                     </div>
-                                    <input
-                                        type="range" min="0" max="20" step="1"
-                                        value={design.insetX}
-                                        onChange={(e) => setDesign({ ...design, insetX: parseInt(e.target.value) })}
-                                        className="w-full accent-primary"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Effects */}
-                        <div className="space-y-3 pt-2 border-t border-border/50">
-                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Efekty a Stíny</h4>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                        <span>Průhlednost</span>
-                                        <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
-                                    </div>
-                                    <input
-                                        type="range" min="0" max="1" step="0.05"
-                                        value={design.opacity}
-                                        onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
-                                        className="w-full accent-primary"
-                                    />
-                                </div>
-                                <div className="space-y-2 px-1">
-                                    <span className="text-[10px] font-bold">Styl stínu</span>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {[
-                                            { label: 'Žádný', val: 'none' },
-                                            { label: 'Jemný', val: '0 1px 3px rgba(0,0,0,0.1)' },
-                                            { label: 'Výrazný', val: '0 4px 10px rgba(0,0,0,0.15)' },
-                                            { label: 'Vnitřní', val: 'inset 0 1px 3px rgba(0,0,0,0.1)' }
-                                        ].map(sh => (
-                                            <button
-                                                key={sh.val}
-                                                onClick={() => setDesign({ ...design, shadow: sh.val })}
-                                                className={`text-[10px] py-2 px-1 rounded-md border transition-all ${design.shadow === sh.val ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-muted/50 border-border hover:border-border-muted text-muted-foreground'}`}
-                                            >
-                                                {sh.label}
-                                            </button>
-                                        ))}
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                            <span className="text-muted-foreground">Odsazení</span>
+                                            <span className="text-primary">{design.insetX}px</span>
+                                        </div>
+                                        <input
+                                            type="range" min="0" max="20" step="1"
+                                            value={design.insetX}
+                                            onChange={(e) => setDesign({ ...design, insetX: parseInt(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Colors */}
-                        <div className="space-y-3 pt-2 border-t border-border/50">
-                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Barvy Fází</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
-                                    <div key={key} className="space-y-1">
-                                        <label className="text-[9px] font-bold text-muted-foreground px-1 truncate block">{config.label}</label>
-                                        <div className="flex items-center gap-2 bg-muted/40 p-1.5 rounded-lg border border-border/50">
-                                            <input
-                                                type="color"
-                                                value={config.color}
-                                                onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-none"
-                                            />
-                                            <span className="text-[10px] font-mono opacity-60">{config.color}</span>
+                            {/* Effects */}
+                            <div className="flex-1 min-w-[200px] space-y-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Efekty a Stíny</h4>
+                                    <div className="h-px flex-1 bg-border/30"></div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                            <span className="text-muted-foreground">Průhlednost</span>
+                                            <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
+                                        </div>
+                                        <input
+                                            type="range" min="0" max="1" step="0.05"
+                                            value={design.opacity}
+                                            onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 px-1">
+                                        <span className="text-[10px] font-bold text-muted-foreground">Styl stínu</span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                { label: 'Žádný', val: 'none' },
+                                                { label: 'Jemný', val: '0 1px 3px rgba(0,0,0,0.1)' },
+                                                { label: 'Výrazný', val: '0 4px 10px rgba(0,0,0,0.15)' },
+                                                { label: 'Vnitřní', val: 'inset 0 1px 3px rgba(0,0,0,0.1)' }
+                                            ].map(sh => (
+                                                <button
+                                                    key={sh.val}
+                                                    onClick={() => setDesign({ ...design, shadow: sh.val })}
+                                                    className={`text-[9px] font-black uppercase tracking-tighter py-1.5 px-3 rounded-md border transition-all ${design.shadow === sh.val ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-background border-border/50 hover:border-primary/50 text-muted-foreground'}`}
+                                                >
+                                                    {sh.label}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                ))}
+                                </div>
+                            </div>
+
+                            {/* Colors */}
+                            <div className="flex-[1.5] min-w-[300px] space-y-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Barvy Fází</h4>
+                                    <div className="h-px flex-1 bg-border/30"></div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-x-4 gap-y-3">
+                                    {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
+                                        <div key={key} className="flex flex-col gap-1">
+                                            <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
+                                            <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
+                                                <input
+                                                    type="color"
+                                                    value={config.color}
+                                                    onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                    className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
+                                                />
+                                                <span className="text-[9px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
