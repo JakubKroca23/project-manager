@@ -109,6 +109,9 @@ export default function ImportWizard() {
     const [typeConflictGroups, setTypeConflictGroups] = useState<any[]>([]);
     const [typeConflictAction, setTypeConflictAction] = useState<'skip' | 'overwrite'>('skip');
 
+    // Selection state
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
     // Reset wizard when opened
     useEffect(() => {
         if (isImportWizardOpen) {
@@ -322,6 +325,7 @@ export default function ImportWizard() {
 
             setPreparedProjects(projectsToAnalyze);
             setDiffData(diffs);
+            setSelectedIds(new Set(diffs.map(d => d.id))); // Select all by default
             setStep('diff');
         } catch (err: any) {
             alert(err.message);
@@ -333,7 +337,12 @@ export default function ImportWizard() {
     const finishImport = async () => {
         setLoading(true);
         try {
-            const { error } = await supabase.from('projects').upsert(preparedProjects);
+            const projectsToUpsert = preparedProjects.filter(p => selectedIds.has(p.id));
+            if (projectsToUpsert.length === 0) {
+                alert('Nebyly vybrány žádné projekty k importu.');
+                return;
+            }
+            const { error } = await supabase.from('projects').upsert(projectsToUpsert);
             if (error) throw error;
             localStorage.setItem(`excel_mapping_${importSource}`, JSON.stringify(mapping));
             setStep('success');
@@ -516,14 +525,41 @@ export default function ImportWizard() {
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-muted/30 border-b border-border">
                                         <tr>
+                                            <th className="px-4 py-3 w-10">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                    checked={selectedIds.size === diffData.length && diffData.length > 0}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setSelectedIds(new Set(diffData.map(d => d.id)));
+                                                        } else {
+                                                            setSelectedIds(new Set());
+                                                        }
+                                                    }}
+                                                />
+                                            </th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Stav</th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Projekt/ID</th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Změny</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/50">
-                                        {diffData.slice(0, 50).map((d) => (
-                                            <tr key={d.id} className="hover:bg-muted/5">
+                                        {diffData.slice(0, 100).map((d) => (
+                                            <tr key={d.id} className={cn("hover:bg-muted/5 transition-colors", !selectedIds.has(d.id) && "opacity-50")}>
+                                                <td className="px-4 py-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                        checked={selectedIds.has(d.id)}
+                                                        onChange={() => {
+                                                            const newSet = new Set(selectedIds);
+                                                            if (newSet.has(d.id)) newSet.delete(d.id);
+                                                            else newSet.add(d.id);
+                                                            setSelectedIds(newSet);
+                                                        }}
+                                                    />
+                                                </td>
                                                 <td className="px-4 py-3">
                                                     {d.isNew ?
                                                         <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-bold border border-blue-500/20">NOVÝ</span> :
