@@ -1117,20 +1117,6 @@ const Timeline: React.FC = () => {
                                                                 <span className="uppercase">{sector.label}</span>
                                                                 <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                             </div>
-                                                            <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button
-                                                                    onClick={(e) => { e.preventDefault(); setSummaryRowHeight(prev => Math.min(120, prev + 4)); }}
-                                                                    className="w-4 h-4 flex items-center justify-center text-black/40 hover:text-black hover:bg-black/5 rounded transition-all"
-                                                                >
-                                                                    <Plus size={12} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => { e.preventDefault(); setSummaryRowHeight(prev => Math.max(12, prev - 4)); }}
-                                                                    className="w-4 h-4 flex items-center justify-center text-black/40 hover:text-black hover:bg-black/5 rounded transition-all"
-                                                                >
-                                                                    <Minus size={12} />
-                                                                </button>
-                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1167,6 +1153,32 @@ const Timeline: React.FC = () => {
                                             );
                                         })}
 
+                                        {/* Floating Zoom Control for Summaries (Vertical Glass) */}
+                                        {visibleSectors.length > 0 && (
+                                            <div
+                                                className="absolute left-[236px] z-[5005] flex flex-col gap-1.5 p-1.5 rounded-[1.2rem] bg-white/40 backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] pointer-events-auto transition-all hover:bg-white/50"
+                                                style={{
+                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) / 2)`,
+                                                    transform: 'translateY(-50%)'
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() => setSummaryRowHeight(prev => Math.min(120, prev + 4))}
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-rose-600 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    title="Zvětšit sumární řádky"
+                                                >
+                                                    <Plus size={24} strokeWidth={4} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setSummaryRowHeight(prev => Math.max(12, prev - 4))}
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-emerald-800 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    title="Zmenšit sumární řádky"
+                                                >
+                                                    <Minus size={24} strokeWidth={4} />
+                                                </button>
+                                            </div>
+                                        )}
+
                                         {/* 2. HEAVY DIVIDER */}
                                         <div
                                             className="timeline-row p-0"
@@ -1184,6 +1196,32 @@ const Timeline: React.FC = () => {
                                         >
                                             <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
                                         </div>
+
+                                        {/* Floating Zoom Control for Individual Projects (Vertical Glass) */}
+                                        {filteredProjects.length > 0 && (
+                                            <div
+                                                className="absolute left-[236px] z-[5005] flex flex-col gap-1.5 p-1.5 rounded-[1.2rem] bg-white/40 backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] pointer-events-auto transition-all hover:bg-white/50"
+                                                style={{
+                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) + 2px + (${filteredProjects.length} * ${rowHeight}px) / 2)`,
+                                                    transform: 'translateY(-50%)'
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() => setRowHeight(prev => Math.min(120, prev + 4))}
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-rose-600 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    title="Zvětšit výšku řádků"
+                                                >
+                                                    <Plus size={24} strokeWidth={4} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setRowHeight(prev => Math.max(12, prev - 4))}
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/60 text-emerald-800 hover:bg-white/90 hover:scale-105 active:scale-90 transition-all shadow-sm"
+                                                    title="Zmenšit výšku řádků"
+                                                >
+                                                    <Minus size={24} strokeWidth={4} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </>
                                 );
                             })()}
@@ -1200,22 +1238,6 @@ const Timeline: React.FC = () => {
                                             className="project-info-sticky transition-colors group"
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
-                                            <div className="absolute top-0 right-0 opacity-20 group-hover:opacity-100 transition-opacity flex flex-col z-[2001] bg-background/80 rounded-bl-lg border-l border-b border-border/20">
-                                                <button
-                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.min(120, prev + 4)); }}
-                                                    className="w-5 h-5 flex items-center justify-center text-foreground hover:bg-primary/10 transition-all"
-                                                    title="Zvětšit výšku řádku"
-                                                >
-                                                    <Plus size={12} />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.max(12, prev - 4)); }}
-                                                    className="w-5 h-5 flex items-center justify-center text-foreground hover:bg-primary/10 transition-all"
-                                                    title="Zmenšit výšku řádku"
-                                                >
-                                                    <Minus size={12} />
-                                                </button>
-                                            </div>
                                             <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
                                                 {rowHeight >= 25 ? (
                                                     <div className="flex flex-col h-full justify-center">
