@@ -894,8 +894,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
 
-                                // Color Logic: Global but status-aware
-                                // Grey default: #374151, Green: #22c55e, Red: #ef4444
+                                // Color Logic: Uses global state colors from config
                                 const completedMilestones = project.custom_fields?.completed_milestones || [];
                                 const isCompleted = m.class.startsWith('custom-')
                                     ? (milestones.find(cm => cm.id === m.key)?.status === 'completed')
@@ -905,10 +904,17 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 today.setHours(0, 0, 0, 0);
                                 const isOverdue = !isCompleted && m.date < today;
 
-                                let milestoneColor = '#374151'; // Dark grey default
-                                if (isCompleted) milestoneColor = '#22c55e'; // Green
-                                else if (isOverdue) milestoneColor = '#ef4444'; // Red
-                                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color; // Fallback to provided config color if pending and not overdue
+                                // Fallback to config colors
+                                const stateColors = {
+                                    pending: config?.colors?.statePending?.color || '#374151',
+                                    completed: config?.colors?.stateCompleted?.color || '#22c55e',
+                                    overdue: config?.colors?.stateOverdue?.color || '#ef4444'
+                                };
+
+                                let milestoneColor = stateColors.pending;
+                                if (isCompleted) milestoneColor = stateColors.completed;
+                                else if (isOverdue) milestoneColor = stateColors.overdue;
+                                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color;
 
                                 const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
                                 const isStartVal = m.class === 'start';

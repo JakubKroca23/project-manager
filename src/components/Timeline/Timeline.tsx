@@ -223,6 +223,9 @@ interface IColorsState {
     priority1: IColorConfig;
     priority2: IColorConfig;
     priority3: IColorConfig;
+    statePending: IColorConfig;
+    stateCompleted: IColorConfig;
+    stateOverdue: IColorConfig;
 }
 
 interface IOutlineState {
@@ -291,6 +294,9 @@ const Timeline: React.FC = () => {
         priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
         priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
         priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
+        statePending: { color: '#374151', opacity: 1, label: 'Čeká' },
+        stateCompleted: { color: '#22c55e', opacity: 1, label: 'Hotovo' },
+        stateOverdue: { color: '#ef4444', opacity: 1, label: 'Zpožděno' },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
@@ -306,6 +312,33 @@ const Timeline: React.FC = () => {
     };
 
 
+
+    const saveSettings = async () => {
+        if (!isAdmin) return;
+        setIsSaving(true);
+        try {
+            const { error } = await supabase
+                .from('app_settings')
+                .upsert({
+                    id: 'timeline_config',
+                    settings: {
+                        colors,
+                        outline,
+                        milestoneSize,
+                        design
+                    },
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+            alert('Nastavení uloženo pro všechny.');
+        } catch (err) {
+            console.error('Error saving settings:', err);
+            alert('Chyba při ukládání nastavení.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const fetchSettings = useCallback(async () => {
         try {
@@ -1035,8 +1068,83 @@ const Timeline: React.FC = () => {
                                             ))}
                                         </div>
                                     </div>
+
+                                    {/* Milestone Colors & Icons */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Ikony a Barvy Milníků</span>
+                                            <div className="h-px flex-1 bg-border/20"></div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, config]) => (
+                                                <div key={key} className="p-2 rounded-xl bg-background/50 border border-border/40 space-y-2">
+                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter block">{config.label}</label>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 min-w-[80px]">
+                                                            <input
+                                                                type="color"
+                                                                value={config.color}
+                                                                onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                                className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
+                                                            />
+                                                            <span className="text-[8px] font-mono font-bold opacity-40 uppercase">{config.color}</span>
+                                                        </div>
+                                                        <select
+                                                            value={config.icon || ""}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, icon: e.target.value as any } })}
+                                                            className="flex-1 bg-background border border-border/40 rounded-lg py-1 px-2 text-[10px] outline-none focus:border-primary/50"
+                                                        >
+                                                            {VISIBLE_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Milestone State Colors */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Barvy Stavů Milníků</span>
+                                            <div className="h-px flex-1 bg-border/20"></div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {Object.entries(colors).filter(([k]) => k.startsWith('state')).map(([key, config]) => (
+                                                <div key={key} className="flex flex-col gap-1">
+                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
+                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
+                                                        />
+                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Save Button for Admins */}
+                            {isAdmin && (
+                                <div className="flex justify-end pt-6 border-t border-border/20">
+                                    <button
+                                        onClick={saveSettings}
+                                        disabled={isSaving}
+                                        className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                                    >
+                                        {isSaving ? (
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <Save size={14} />
+                                        )}
+                                        Uložit všem
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1117,6 +1225,20 @@ const Timeline: React.FC = () => {
                                                                 <span className="uppercase">{sector.label}</span>
                                                                 <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                             </div>
+                                                            <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSummaryRowHeight(prev => Math.min(120, prev + 4)); }}
+                                                                    className="p-1 hover:bg-black/5 rounded transition-colors"
+                                                                >
+                                                                    <Plus size={10} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSummaryRowHeight(prev => Math.max(12, prev - 4)); }}
+                                                                    className="p-1 hover:bg-black/5 rounded transition-colors"
+                                                                >
+                                                                    <Minus size={10} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1144,7 +1266,7 @@ const Timeline: React.FC = () => {
                                                             dayWidth={dayWidth}
                                                             rowHeight={summaryRowHeight}
                                                             isCollapsed={true}
-                                                            config={{ ...colors, milestoneSize }}
+                                                            config={{ colors, milestoneSize, design }}
                                                             onProjectUpdate={handleProjectUpdate}
                                                             milestones={allMilestones.filter(m => m.project_id === p.id)}
                                                         />
@@ -1153,32 +1275,6 @@ const Timeline: React.FC = () => {
                                             );
                                         })}
 
-                                        {/* Floating Zoom Control for Summaries (Vertical Glass) */}
-                                        {visibleSectors.length > 0 && (
-                                            <div
-                                                className="sticky left-[270px] z-[5005] flex flex-col gap-1 p-1 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg pointer-events-auto"
-                                                style={{
-                                                    top: `calc(var(--timeline-header-height) + 12px)`,
-                                                    marginTop: '12px',
-                                                    width: 'fit-content'
-                                                }}
-                                            >
-                                                <button
-                                                    onClick={() => setSummaryRowHeight(prev => Math.min(120, prev + 4))}
-                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
-                                                    title="Zvětšit sumární řádky"
-                                                >
-                                                    <Plus size={16} strokeWidth={3} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setSummaryRowHeight(prev => Math.max(12, prev - 4))}
-                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
-                                                    title="Zmenšit sumární řádky"
-                                                >
-                                                    <Minus size={16} strokeWidth={3} />
-                                                </button>
-                                            </div>
-                                        )}
 
                                         {/* 2. HEAVY DIVIDER */}
                                         <div
@@ -1198,32 +1294,6 @@ const Timeline: React.FC = () => {
                                             <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
                                         </div>
 
-                                        {/* Floating Zoom Control for Individual Projects (Vertical Glass) */}
-                                        {filteredProjects.length > 0 && (
-                                            <div
-                                                className="sticky left-[270px] z-[5005] flex flex-col gap-1 p-1 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg pointer-events-auto"
-                                                style={{
-                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)) + 14px)`,
-                                                    marginTop: '14px',
-                                                    width: 'fit-content'
-                                                }}
-                                            >
-                                                <button
-                                                    onClick={() => setRowHeight(prev => Math.min(120, prev + 4))}
-                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
-                                                    title="Zvětšit výšku řádků"
-                                                >
-                                                    <Plus size={16} strokeWidth={3} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setRowHeight(prev => Math.max(12, prev - 4))}
-                                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/30 text-foreground/70 hover:bg-white/60 active:scale-95 transition-all shadow-sm"
-                                                    title="Zmenšit výšku řádků"
-                                                >
-                                                    <Minus size={16} strokeWidth={3} />
-                                                </button>
-                                            </div>
-                                        )}
                                     </>
                                 );
                             })()}
@@ -1241,72 +1311,58 @@ const Timeline: React.FC = () => {
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
                                             <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
-                                                {rowHeight >= 25 ? (
-                                                    <div className="flex flex-col h-full justify-center">
-                                                        <div className="flex items-center gap-1">
-                                                            {project.parent_id && (
-                                                                <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
-                                                            )}
-                                                            <span
-                                                                className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
-                                                                style={{ textAlign: 'left' }}
-                                                            >
-                                                                {project.name}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex justify-between items-end w-full gap-2 mt-0.5">
-                                                            <div className="flex flex-col shrink-0">
-                                                                <span className="text-[10px] font-black text-black/80 uppercase tracking-tight whitespace-nowrap" title={project.id}>
-                                                                    {project.id}
+                                                <div className="flex items-center justify-between w-full">
+                                                    {rowHeight >= 25 ? (
+                                                        <div className="flex flex-col h-full justify-center">
+                                                            <div className="flex items-center gap-1">
+                                                                {project.parent_id && (
+                                                                    <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
+                                                                )}
+                                                                <span
+                                                                    className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
+                                                                    style={{ textAlign: 'left' }}
+                                                                >
+                                                                    {project.name}
                                                                 </span>
                                                             </div>
-                                                            <span className="customer-name text-[11px] font-bold text-muted-foreground/70 leading-none pb-[1px] truncate" style={{ textAlign: 'right' }}>
-                                                                {project.customer || 'Bez zákazníka'}
-                                                            </span>
                                                         </div>
+                                                    ) : (
+                                                        <span className="text-[10px] truncate font-bold">{project.name}</span>
+                                                    )}
 
-                                                        {rowHeight >= 50 && (
-                                                            <div className="mt-1.5 pt-1.5 border-t border-black/5 flex flex-col gap-0.5">
-                                                                <div className="flex justify-between items-center text-[10px]">
-                                                                    <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Vedoucí projektu:</span>
-                                                                    <span className="font-bold text-black/70">{project.manager || '—'}</span>
-                                                                </div>
-                                                                {project.production_status && (
-                                                                    <div className="flex justify-between items-center text-[10px]">
-                                                                        <span className="text-muted-foreground/60 uppercase font-black tracking-tighter">Výroba:</span>
-                                                                        <span className="font-black text-primary/80 uppercase tracking-widest text-[9px]">{project.production_status}</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        {rowHeight >= 80 && (
-                                                            <div className="mt-1 flex flex-col gap-0.5">
-                                                                {(project.serial_number || project.abra_order) && (
-                                                                    <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
-                                                                        <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
-                                                                        <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
-                                                                    </div>
-                                                                )}
-                                                                <div className="flex justify-between items-center text-[10px] italic">
-                                                                    <span className="text-muted-foreground/60">Stav:</span>
-                                                                    <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
-                                                                </div>
-                                                            </div>
-                                                        )}
+                                                    <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.min(120, prev + 4)); }}
+                                                            className="p-1 hover:bg-black/5 rounded transition-colors"
+                                                        >
+                                                            <Plus size={10} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.max(12, prev - 4)); }}
+                                                            className="p-1 hover:bg-black/5 rounded transition-colors"
+                                                        >
+                                                            <Minus size={10} />
+                                                        </button>
                                                     </div>
-                                                ) : (
-                                                    <div className="flex justify-between items-center w-full h-full">
-                                                        <span className="text-[9px] font-black text-black uppercase tracking-tighter truncate mr-1" title={project.id}>
-                                                            {project.id}
-                                                        </span>
-                                                        <span className="text-[9px] font-bold text-muted-foreground/60 truncate italic" style={{ textAlign: 'right' }}>
-                                                            {project.customer || ''}
-                                                        </span>
+                                                </div>
+
+                                                {rowHeight >= 80 && (
+                                                    <div className="mt-1 flex flex-col gap-0.5">
+                                                        {(project.serial_number || project.abra_order) && (
+                                                            <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
+                                                                <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
+                                                                <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between items-center text-[10px] italic">
+                                                            <span className="text-muted-foreground/60">Stav:</span>
+                                                            <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
                                         </Link>
+
                                         <TimelineBar
                                             id={project.id}
                                             name={project.name}
@@ -1326,9 +1382,9 @@ const Timeline: React.FC = () => {
                             })}
                         </div>
                     </TimelineGrid>
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     );
 };
 
