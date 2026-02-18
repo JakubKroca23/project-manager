@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffe
 import './Timeline.css';
 import { supabase } from '@/lib/supabase/client';
 import { Project, Milestone as ProjectMilestone } from '@/types/project';
+import { useSearch } from '@/providers/SearchProvider';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
 import {
@@ -221,7 +222,7 @@ const Timeline: React.FC = () => {
     const [allMilestones, setAllMilestones] = useState<ProjectMilestone[]>([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const { searchTerm: searchQuery } = useSearch();
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
         civil: true,
         military: true,
@@ -750,17 +751,6 @@ const Timeline: React.FC = () => {
         >
             <header className="timeline-header-actions relative">
                 <div className="header-left">
-                    <div className="search-container">
-                        <Search size={16} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Hledat..."
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-
                     <div className="type-filters flex items-center gap-4">
                         {[
                             { id: 'service', label: 'Servis', color: '#a855f7' },

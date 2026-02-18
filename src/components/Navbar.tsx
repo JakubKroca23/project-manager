@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Settings } from 'lucide-react';
+import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Settings, Search, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { ThemeToggle } from './ThemeToggle';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useSearch } from '@/providers/SearchProvider';
 
 const navItems = [
     {
@@ -31,6 +32,7 @@ export function Navbar() {
     const router = useRouter(); // Use this if router is needed, otherwise remove. Added for safety based on import.
     const activeType = searchParams.get('type');
     const { checkPerm } = usePermissions();
+    const { searchTerm, setSearchTerm } = useSearch();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -205,7 +207,7 @@ export function Navbar() {
                     </div>
 
                     {/* Center: Harmonogram */}
-                    <div className="flex-initial flex items-center justify-center gap-1">
+                    <div className="flex-none flex items-center justify-center gap-1">
                         {filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
                             let activeColor = item.color;
@@ -245,10 +247,30 @@ export function Navbar() {
                         })}
                     </div>
 
-
-
-                    {/* Right Side Tools & Profile */}
+                    {/* Right: Search & Tools */}
                     <div className="flex-1 flex items-center justify-end gap-3">
+                        {/* Search Field */}
+                        <div className="max-w-xs w-full px-2">
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-blue-500 transition-all duration-300" size={14} />
+                                <input
+                                    type="text"
+                                    placeholder="Hledat..."
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-full py-1.5 pl-9 pr-9 text-[11px] focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white/[0.05] focus:border-blue-500/50 transition-all duration-300 placeholder:text-muted-foreground/30 shadow-inner"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-blue-500 transition-colors"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex flex-col items-center justify-center">
                             <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>
                         </div>

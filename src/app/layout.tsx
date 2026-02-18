@@ -2,6 +2,7 @@ import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
+import { SearchProvider } from '@/providers/SearchProvider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import AuthGuard from '@/components/AuthGuard';
 import { Toaster } from 'sonner';
@@ -22,15 +23,17 @@ export default function RootLayout({
     <html lang="cs" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          <AuthGuard>
-            <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
-              <NavbarWrapper />
-              <main className="flex-1 overflow-hidden p-6">
-                {children}
-              </main>
-            </div>
-            <Toaster position="top-right" richColors closeButton />
-          </AuthGuard>
+          <SearchProvider>
+            <AuthGuard>
+              <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+                <NavbarWrapper />
+                <main className="flex-1 overflow-hidden p-6">
+                  {children}
+                </main>
+              </div>
+              <Toaster position="top-right" richColors closeButton />
+            </AuthGuard>
+          </SearchProvider>
         </ThemeProvider>
       </body>
     </html>

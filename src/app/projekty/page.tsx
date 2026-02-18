@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
 import { Loader2, Search, Database, X, Plus, PackageCheck, Trash2, CheckCircle2 } from 'lucide-react';
+import { useSearch } from '@/providers/SearchProvider';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
@@ -146,8 +147,7 @@ export default function ProjektyPage() {
     const typeParam = searchParams.get('type');
     const activeTab = (typeParam === 'service' ? 'service' : typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military' | 'service';
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchTags, setSearchTags] = useState<string[]>([]);
+    const { searchTerm } = useSearch();
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -214,9 +214,11 @@ export default function ProjektyPage() {
             str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
         return tabProjects.filter(p => {
-            // Search filter (Tags + Current Input)
-            const currentTerm = normalize(searchTerm);
-            const allTerms = [...searchTags.map(t => normalize(t)), currentTerm].filter(t => t);
+            // Search filter (Words separated by space)
+            const allTerms = searchTerm
+                .split(/\s+/)
+                .filter((t: string) => t.length > 0)
+                .map((t: string) => normalize(t));
 
             if (allTerms.length === 0) return true;
 
@@ -233,34 +235,22 @@ export default function ProjektyPage() {
                 p.production_status,
                 p.mounting_company,
                 p.body_type
-            ].map(val => normalize(val || ''));
+            ].map((val: string | undefined) => normalize(val || ''));
 
             // Check custom fields as well
             if (p.custom_fields) {
-                Object.values(p.custom_fields).forEach(val => {
+                Object.values(p.custom_fields).forEach((val: any) => {
                     if (typeof val === 'string') searchableFields.push(normalize(val));
                 });
             }
 
             const searchString = searchableFields.join(' ');
 
-            return allTerms.every(term => searchString.includes(term));
+            return allTerms.every((term: string) => searchString.includes(term));
         });
-    }, [tabProjects, searchTerm, searchTags]);
+    }, [tabProjects, searchTerm]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if ((e.key === 'Enter' || e.key === ' ') && searchTerm.trim()) {
-            e.preventDefault();
-            setSearchTags([...searchTags, searchTerm.trim()]);
-            setSearchTerm('');
-        } else if (e.key === 'Backspace' && !searchTerm && searchTags.length > 0) {
-            setSearchTags(searchTags.slice(0, -1));
-        }
-    };
 
-    const removeTag = (tagToRemove: string) => {
-        setSearchTags(searchTags.filter(tag => tag !== tagToRemove));
-    };
 
     // Memoize columns to include dynamic custom fields
     const tableColumns = useMemo(() => {
@@ -468,30 +458,7 @@ export default function ProjektyPage() {
                                     </button>
                                 )}
 
-                                {/* Search */}
-                                <div className="relative group max-w-xs flex-1" title="Hledat lze podle: Názvu, ID, Zákazníka, Manažera, Stavu, Výrobního čísla, Abra kódů a dalších vlastních polí.">
-                                    <div className="flex items-center gap-1.5 w-full min-h-[30px] px-2.5 py-0.5 bg-muted/20 border border-border/60 rounded-lg focus-within:ring-1 focus-within:ring-primary/20 focus-within:border-primary/40 transition-all flex-wrap">
-                                        <Search className="text-muted-foreground/50 group-focus-within:text-primary transition-colors flex-shrink-0" size={12} />
 
-                                        {searchTags.map((tag, idx) => (
-                                            <div key={idx} className="flex items-center gap-1 px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold animate-in zoom-in-50 duration-200">
-                                                <span>{tag}</span>
-                                                <button onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors">
-                                                    <X size={8} />
-                                                </button>
-                                            </div>
-                                        ))}
-
-                                        <input
-                                            type="text"
-                                            placeholder={searchTags.length === 0 ? "Hledat..." : ""}
-                                            className="flex-1 bg-transparent border-none outline-none text-[11px] font-medium placeholder:text-muted-foreground/50 min-w-[40px]"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            onKeyDown={handleKeyDown}
-                                        />
-                                    </div>
-                                </div>
                             </div>
                         }
                         toolbar={<ExcelImporter onImportSuccess={fetchProjects} projectType={activeTab} />}
