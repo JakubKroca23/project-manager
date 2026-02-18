@@ -11,7 +11,7 @@ import TimelineBar from './TimelineBar';
 import {
     Search, Calendar, ZoomIn,
     ZoomOut,
-    X,
+    X, Plus, Minus,
     RotateCcw,
     ChevronDown,
     ChevronRight,
@@ -873,25 +873,7 @@ const Timeline: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        <button
-                            className="action-button icon-only"
-                            onClick={() => setRowHeight(prev => Math.max(14, prev - 4))}
-                            title="Zmenšit řádky"
-                        >
-                            <ChevronDown size={16} />
-                        </button>
-                        <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
-                            {rowHeight}px
-                        </span>
-                        <button
-                            className="action-button icon-only"
-                            onClick={() => setRowHeight(prev => Math.min(100, prev + 4))}
-                            title="Zvětšit řádky"
-                        >
-                            <ChevronUp size={16} />
-                        </button>
-                    </div>
+
                 </div>
 
                 <div className="header-right flex items-center gap-4">
@@ -1094,9 +1076,25 @@ const Timeline: React.FC = () => {
                                                             left: 0
                                                         }}
                                                     >
-                                                        <div className="flex items-center gap-2 pl-2">
-                                                            <span className="uppercase">{sector.label}</span>
-                                                            <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
+                                                        <div className="flex items-center justify-between w-full h-full pl-2 pr-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="uppercase">{sector.label}</span>
+                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
+                                                            </div>
+                                                            <div className="flex flex-col gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); setSummaryRowHeight(prev => Math.min(120, prev + 4)); }}
+                                                                    className="w-4 h-4 flex items-center justify-center text-black/40 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                                >
+                                                                    <Plus size={12} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); setSummaryRowHeight(prev => Math.max(12, prev - 4)); }}
+                                                                    className="w-4 h-4 flex items-center justify-center text-black/40 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                                >
+                                                                    <Minus size={12} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1166,6 +1164,20 @@ const Timeline: React.FC = () => {
                                             className="project-info-sticky transition-colors group"
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
+                                            <div className="absolute top-1 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col z-50">
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.min(120, prev + 4)); }}
+                                                    className="w-4 h-4 flex items-center justify-center text-black/20 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                >
+                                                    <Plus size={10} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.max(12, prev - 4)); }}
+                                                    className="w-4 h-4 flex items-center justify-center text-black/20 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                >
+                                                    <Minus size={10} />
+                                                </button>
+                                            </div>
                                             <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
                                                 {rowHeight >= 25 ? (
                                                     <div className="flex flex-col h-full justify-center">
