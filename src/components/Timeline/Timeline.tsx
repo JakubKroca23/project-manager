@@ -964,20 +964,40 @@ const Timeline: React.FC = () => {
                 </div>
             </header>
 
-            {/* Design Settings Panel - Inline Popup */}
+            {/* Design Settings Panel - Floating Sidebar */}
             {showDesignSettings && (
-                <div className="design-settings-panel border-b border-border/50 bg-muted/5 animate-in slide-in-from-top duration-300 overflow-hidden">
-                    <div className="max-w-[1400px] mx-auto p-4 py-6">
-                        <div className="flex flex-wrap gap-8 justify-between">
-                            {/* Bar Shape */}
-                            <div className="flex-1 min-w-[200px] space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Tvar a Rozměry</h4>
-                                    <div className="h-px flex-1 bg-border/30"></div>
+                <div className="absolute top-[70px] right-4 w-[320px] bg-background/95 backdrop-blur-sm border border-border shadow-2xl rounded-xl z-[4000] flex flex-col max-h-[calc(100vh-140px)] animate-in slide-in-from-right-5 fade-in duration-300">
+                    <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
+                        <div className="flex items-center gap-2">
+                            <Settings2 size={14} className="text-primary" />
+                            <h3 className="text-xs font-black uppercase tracking-widest">Nastavení Vzhledu</h3>
+                        </div>
+                        <button onClick={() => setShowDesignSettings(false)} className="p-1 hover:bg-muted rounded-md transition-colors">
+                            <X size={14} />
+                        </button>
+                    </div>
+
+                    <div className="overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                        {/* 1. Shape & Opacity */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider mb-2">Tvar a Průhlednost</h4>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Výška Baru</span>
+                                        <span className="text-primary">{design.barHeight}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="10" max="100" step="5"
+                                        value={design.barHeight}
+                                        onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
                                 </div>
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                        <div className="flex justify-between text-[10px] font-bold mb-1.5">
                                             <span className="text-muted-foreground">Zaoblení</span>
                                             <span className="text-primary">{design.borderRadius}px</span>
                                         </div>
@@ -989,20 +1009,8 @@ const Timeline: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                            <span className="text-muted-foreground">Výška Baru</span>
-                                            <span className="text-primary">{design.barHeight}%</span>
-                                        </div>
-                                        <input
-                                            type="range" min="10" max="100" step="5"
-                                            value={design.barHeight}
-                                            onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
-                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                            <span className="text-muted-foreground">Obrys (středový)</span>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                            <span className="text-muted-foreground">Obrys</span>
                                             <span className="text-primary">{outline.width}px</span>
                                         </div>
                                         <input
@@ -1013,178 +1021,129 @@ const Timeline: React.FC = () => {
                                         />
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Effects & Priorities */}
-                            <div className="flex-1 min-w-[200px] space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Priority a Průhlednost</h4>
-                                    <div className="h-px flex-1 bg-border/30"></div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Průhlednost</span>
+                                        <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="1" step="0.05"
+                                        value={design.opacity}
+                                        onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
                                 </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                            <span className="text-muted-foreground">Průhlednost</span>
-                                            <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
-                                        </div>
-                                        <input
-                                            type="range" min="0" max="1" step="0.05"
-                                            value={design.opacity}
-                                            onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
-                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
-                                        />
-                                    </div>
-                                    <div className="flex items-center justify-between px-1">
-                                        <span className="text-[10px] font-bold text-muted-foreground">Barvy dle priority</span>
-                                        <button
-                                            onClick={() => setDesign({ ...design, usePriorityColors: !design.usePriorityColors })}
-                                            className={cn(
-                                                "w-8 h-4 rounded-full transition-colors relative",
-                                                design.usePriorityColors ? "bg-primary" : "bg-muted"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform",
-                                                design.usePriorityColors ? "translate-x-4" : "translate-x-0"
-                                            )} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Colors */}
-                            <div className="flex-[1.5] min-w-[300px] space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Barvy Fází</h4>
-                                    <div className="h-px flex-1 bg-border/30"></div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                    {/* Phase Colors */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Fáze Projektu</span>
-                                            <div className="h-px flex-1 bg-border/20"></div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
-                                                <div key={key} className="flex flex-col gap-1">
-                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
-                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
-                                                        <input
-                                                            type="color"
-                                                            value={config.color}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
-                                                        />
-                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Priority Colors */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Barvy Priorit</span>
-                                            <div className="h-px flex-1 bg-border/20"></div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {Object.entries(colors).filter(([k]) => k.startsWith('priority')).map(([key, config]) => (
-                                                <div key={key} className="flex flex-col gap-1">
-                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
-                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
-                                                        <input
-                                                            type="color"
-                                                            value={config.color}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
-                                                        />
-                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Milestone Colors & Icons */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Ikony a Barvy Milníků</span>
-                                            <div className="h-px flex-1 bg-border/20"></div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, config]) => (
-                                                <div key={key} className="p-2 rounded-xl bg-background/50 border border-border/40 space-y-2">
-                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter block">{config.label}</label>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 min-w-[80px]">
-                                                            <input
-                                                                type="color"
-                                                                value={config.color}
-                                                                onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                                className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
-                                                            />
-                                                            <span className="text-[8px] font-mono font-bold opacity-40 uppercase">{config.color}</span>
-                                                        </div>
-                                                        <select
-                                                            value={config.icon || ""}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, icon: e.target.value as any } })}
-                                                            className="flex-1 bg-background border border-border/40 rounded-lg py-1 px-2 text-[10px] outline-none focus:border-primary/50"
-                                                        >
-                                                            {VISIBLE_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Milestone State Colors */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Barvy Stavů Milníků</span>
-                                            <div className="h-px flex-1 bg-border/20"></div>
-                                        </div>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {Object.entries(colors).filter(([k]) => k.startsWith('state')).map(([key, config]) => (
-                                                <div key={key} className="flex flex-col gap-1">
-                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
-                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
-                                                        <input
-                                                            type="color"
-                                                            value={config.color}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
-                                                        />
-                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Save Button for Admins */}
-                            {isAdmin && (
-                                <div className="flex justify-end pt-6 border-t border-border/20">
+                                <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border/30">
+                                    <span className="text-[10px] font-bold text-muted-foreground">Barvy dle priority</span>
                                     <button
-                                        onClick={saveSettings}
-                                        disabled={isSaving}
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
-                                    >
-                                        {isSaving ? (
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        ) : (
-                                            <Save size={14} />
+                                        onClick={() => setDesign({ ...design, usePriorityColors: !design.usePriorityColors })}
+                                        className={cn(
+                                            "w-7 h-3.5 rounded-full transition-colors relative",
+                                            design.usePriorityColors ? "bg-primary" : "bg-muted-foreground/30"
                                         )}
-                                        Uložit všem
+                                    >
+                                        <div className={cn(
+                                            "absolute top-0.5 left-0.5 w-2.5 h-2.5 rounded-full bg-white transition-transform shadow-sm",
+                                            design.usePriorityColors ? "translate-x-3.5" : "translate-x-0"
+                                        )} />
                                     </button>
                                 </div>
-                            )}
+                            </div>
+                        </div>
+
+                        <div className="h-px bg-border/40" />
+
+                        {/* 2. Colors */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider mb-2">Barvy Projektů</h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                {/* Phases */}
+                                {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
+                                    <div key={key} className="flex items-center justify-between p-1.5 bg-muted/20 rounded border border-border/20">
+                                        <span className="text-[9px] font-bold truncate max-w-[80px] text-muted-foreground">{config.label}</span>
+                                        <input
+                                            type="color"
+                                            value={config.color}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                            className="w-4 h-4 rounded cursor-pointer bg-transparent border-none p-0 overflow-hidden"
+                                        />
+                                    </div>
+                                ))}
+                                {/* Priorities */}
+                                {Object.entries(colors).filter(([k]) => k.startsWith('priority')).map(([key, config]) => (
+                                    <div key={key} className="flex items-center justify-between p-1.5 bg-muted/20 rounded border border-border/20">
+                                        <span className="text-[9px] font-bold truncate max-w-[80px] text-muted-foreground">{config.label}</span>
+                                        <input
+                                            type="color"
+                                            value={config.color}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                            className="w-4 h-4 rounded cursor-pointer bg-transparent border-none p-0 overflow-hidden"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="h-px bg-border/40" />
+
+                        {/* 3. Milestones */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider mb-2">Milníky</h4>
+
+                            {/* States */}
+                            <div className="flex gap-2 mb-3">
+                                {Object.entries(colors).filter(([k]) => k.startsWith('state')).map(([key, config]) => (
+                                    <div key={key} className="flex-1 flex flex-col gap-1 items-center bg-muted/20 p-1.5 rounded border border-border/20">
+                                        <span className="text-[8px] font-bold text-muted-foreground uppercase">{config.label}</span>
+                                        <input
+                                            type="color"
+                                            value={config.color}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                            className="w-full h-2 rounded cursor-pointer bg-transparent border-none p-0"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Standard Milestones */}
+                            <div className="space-y-2">
+                                {Object.entries(colors).filter(([k]) => k.startsWith('milestone')).map(([key, config]) => (
+                                    <div key={key} className="flex items-center gap-2 p-1.5 bg-muted/20 rounded border border-border/20">
+                                        <input
+                                            type="color"
+                                            value={config.color}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                            className="w-5 h-5 min-w-[20px] rounded cursor-pointer bg-transparent border-none p-0"
+                                        />
+                                        <div className="flex-1 flex flex-col min-w-0">
+                                            <span className="text-[9px] font-bold truncate text-muted-foreground">{config.label}</span>
+                                        </div>
+                                        <select
+                                            value={config.icon || ""}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, icon: e.target.value as any } })}
+                                            className="w-[100px] h-5 bg-background border border-border/40 rounded text-[9px] px-1 outline-none"
+                                        >
+                                            {VISIBLE_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
+                                        </select>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
+
+                    {/* Footer */}
+                    {isAdmin && (
+                        <div className="p-3 border-t border-border/50 bg-muted/20">
+                            <button
+                                onClick={saveSettings}
+                                disabled={isSaving}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+                            >
+                                {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                                Uložit Všem
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
