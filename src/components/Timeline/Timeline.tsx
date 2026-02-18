@@ -872,101 +872,17 @@ const Timeline: React.FC = () => {
             className={`timeline-container ${isCompact ? 'mode-compact' : ''}`}
             style={{
                 ...customStyles,
-                cursor: isDragging ? 'grabbing' : 'grab'
+                cursor: isDragging ? 'grabbing' : 'grab',
+                flexDirection: 'row'
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
         >
-            <header className="timeline-header-actions relative">
-                <div className="header-left">
-                    <div className="type-filters flex items-center gap-4">
-                        {[
-                            { id: 'service', label: 'Servis', color: '#a855f7' },
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Vojenské', color: '#10b981' }
-                        ].map(({ id, label, color }) => (
-                            <label
-                                key={id}
-                                className="flex items-center gap-2 cursor-pointer group select-none"
-                            >
-                                <div className="relative flex items-center justify-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={activeTypes[id]}
-                                        onChange={() => toggleType(id)}
-                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
-                                        style={{
-                                            borderColor: activeTypes[id] ? color : 'var(--border)',
-                                            backgroundColor: activeTypes[id] ? color : 'transparent'
-                                        }}
-                                    />
-                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <span
-                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
-                                >
-                                    {label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-
-                    <button
-                        className={`action-button ${showDesignSettings ? 'primary' : ''}`}
-                        onClick={() => setShowDesignSettings(!showDesignSettings)}
-                        title="Nastavení designu"
-                    >
-                        <Settings2 size={16} />
-                        <span>Vzhled</span>
-                    </button>
-                </div>
-
-                <div className="header-center flex items-center gap-3">
-                    <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                        <button
-                            className="action-button icon-only"
-                            onClick={handleZoomOut}
-                            title="Oddálit"
-                        >
-                            <ZoomOut size={16} />
-                        </button>
-                        <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
-                            {Math.round((dayWidth / 25) * 100)}%
-                        </span>
-                        <button
-                            className="action-button icon-only"
-                            onClick={handleZoomIn}
-                            title="Přiblížit"
-                        >
-                            <ZoomIn size={16} />
-                        </button>
-                    </div>
-
-
-                </div>
-
-                <div className="header-right flex items-center gap-4">
-                    <button
-                        className="action-button primary"
-                        onClick={jumpToToday}
-                        title="Skočit na dnešek"
-                    >
-                        <Calendar size={14} />
-                        <span className="hidden lg:inline">Dnešek</span>
-                    </button>
-                </div>
-            </header>
-
-            {/* Design Settings Panel - Floating Sidebar (LEFT) */}
+            {/* Design Settings Panel - Static Sidebar (LEFT) */}
             {showDesignSettings && (
-                <div className="absolute top-0 left-0 h-full w-[320px] bg-background/95 backdrop-blur-sm border-r border-border shadow-2xl z-[4000] flex flex-col animate-in slide-in-from-left-5 fade-in duration-300">
+                <div className="w-[320px] h-full bg-background/95 backdrop-blur-sm border-r border-border shadow-xl z-[4000] flex flex-col animate-in slide-in-from-left-5 fade-in duration-300 shrink-0">
                     <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
                         <div className="flex items-center gap-2">
                             <Settings2 size={14} className="text-primary" />
@@ -977,7 +893,7 @@ const Timeline: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                    <div className="overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent flex-1">
                         {/* 1. Shape & Opacity */}
                         <div className="space-y-3">
                             <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider mb-2">Tvar a Průhlednost</h4>
@@ -1133,7 +1049,7 @@ const Timeline: React.FC = () => {
 
                     {/* Footer */}
                     {isAdmin && (
-                        <div className="p-3 border-t border-border/50 bg-muted/20">
+                        <div className="p-3 border-t border-border/50 bg-muted/20 shrink-0">
                             <button
                                 onClick={saveSettings}
                                 disabled={isSaving}
@@ -1147,211 +1063,296 @@ const Timeline: React.FC = () => {
                 </div>
             )}
 
-            <div
-                className="timeline-scroll-wrapper"
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-            >
-                <div className="timeline-content">
-                    <TimelineGrid
-                        startDate={timelineRange.start}
-                        endDate={timelineRange.end}
-                        dayWidth={dayWidth}
-                    >
-                        <div className="timeline-rows">
-                            {/* 1. CATEGORY SUMMARIES (Stacked) */}
-                            {(() => {
-                                const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+            <div className="flex flex-col flex-1 h-full min-w-0 relative">
+                <header className="timeline-header-actions relative border-b border-border/40">
+                    <div className="header-left">
+                        <div className="type-filters flex items-center gap-4">
+                            {[
+                                { id: 'service', label: 'Servis', color: '#a855f7' },
+                                { id: 'civil', label: 'Civilní', color: '#3b82f6' },
+                                { id: 'military', label: 'Vojenské', color: '#10b981' }
+                            ].map(({ id, label, color }) => (
+                                <label
+                                    key={id}
+                                    className="flex items-center gap-2 cursor-pointer group select-none"
+                                >
+                                    <div className="relative flex items-center justify-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={activeTypes[id]}
+                                            onChange={() => toggleType(id)}
+                                            className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
+                                            style={{
+                                                borderColor: activeTypes[id] ? color : 'var(--border)',
+                                                backgroundColor: activeTypes[id] ? color : 'transparent'
+                                            }}
+                                        />
+                                        <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <span
+                                        className="text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                        style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
+                                    >
+                                        {label}
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
 
-                                // Generate days array for matching the grid exactly
-                                const days: Date[] = [];
-                                const curr = new Date(timelineRange.start);
-                                while (curr <= timelineRange.end) {
-                                    days.push(new Date(curr));
-                                    curr.setDate(curr.getDate() + 1);
-                                }
+                        <button
+                            className={`action-button ${showDesignSettings ? 'primary' : ''}`}
+                            onClick={() => setShowDesignSettings(!showDesignSettings)}
+                            title="Nastavení designu"
+                        >
+                            <Settings2 size={16} />
+                            <span>Vzhled</span>
+                        </button>
+                    </div>
 
-                                const isWeekend = (d: Date) => {
-                                    const day = d.getDay();
-                                    return day === 0 || day === 6;
-                                };
-                                const isToday = (d: Date) => {
-                                    const t = new Date();
-                                    return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
-                                };
+                    <div className="header-center flex items-center gap-3">
+                        <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                            <button
+                                className="action-button icon-only"
+                                onClick={handleZoomOut}
+                                title="Oddálit"
+                            >
+                                <ZoomOut size={16} />
+                            </button>
+                            <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
+                                {Math.round((dayWidth / 25) * 100)}%
+                            </span>
+                            <button
+                                className="action-button icon-only"
+                                onClick={handleZoomIn}
+                                title="Přiblížit"
+                            >
+                                <ZoomIn size={16} />
+                            </button>
+                        </div>
+                    </div>
 
-                                const totalDaysWidth = days.length * dayWidth;
+                    <div className="header-right flex items-center gap-4">
+                        <button
+                            className="action-button primary"
+                            onClick={jumpToToday}
+                            title="Skočit na dnešek"
+                        >
+                            <Calendar size={14} />
+                            <span className="hidden lg:inline">Dnešek</span>
+                        </button>
+                    </div>
+                </header>
 
-                                return (
-                                    <>
-                                        {visibleSectors.map((sector, vIdx) => {
-                                            const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
-                                            return (
-                                                <div
-                                                    key={`summary-${sector.id}`}
-                                                    className="timeline-row is-summary"
-                                                    style={{
-                                                        position: 'sticky',
-                                                        top: topOffset,
-                                                        height: 'var(--summary-row-height)',
-                                                        zIndex: 3500 - vIdx,
-                                                        width: 'max-content',
-                                                        minWidth: '100%'
-                                                    }}
-                                                >
-                                                    {/* Block scrolling projects */}
-                                                    <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
+                <div
+                    className="timeline-scroll-wrapper"
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                >
+                    <div className="timeline-content">
+                        <TimelineGrid
+                            startDate={timelineRange.start}
+                            endDate={timelineRange.end}
+                            dayWidth={dayWidth}
+                        >
+                            <div className="timeline-rows">
+                                {/* 1. CATEGORY SUMMARIES (Stacked) */}
+                                {(() => {
+                                    const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+
+                                    // Generate days array for matching the grid exactly
+                                    const days: Date[] = [];
+                                    const curr = new Date(timelineRange.start);
+                                    while (curr <= timelineRange.end) {
+                                        days.push(new Date(curr));
+                                        curr.setDate(curr.getDate() + 1);
+                                    }
+
+                                    const isWeekend = (d: Date) => {
+                                        const day = d.getDay();
+                                        return day === 0 || day === 6;
+                                    };
+                                    const isToday = (d: Date) => {
+                                        const t = new Date();
+                                        return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+                                    };
+
+                                    const totalDaysWidth = days.length * dayWidth;
+
+                                    return (
+                                        <>
+                                            {visibleSectors.map((sector, vIdx) => {
+                                                const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
+                                                return (
                                                     <div
-                                                        className="project-info-sticky"
+                                                        key={`summary-${sector.id}`}
+                                                        className="timeline-row is-summary"
                                                         style={{
-                                                            borderLeft: `10px solid ${sector.color}`,
-                                                            height: '100%',
-                                                            background: `color-mix(in srgb, ${sector.color}, var(--background) 90%)`,
-                                                            zIndex: 2005,
-                                                            fontWeight: 900,
-                                                            color: sector.color,
-                                                            fontSize: '11px',
-                                                            letterSpacing: '0.05em',
-                                                            boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
                                                             position: 'sticky',
-                                                            left: 0
+                                                            top: topOffset,
+                                                            height: 'var(--summary-row-height)',
+                                                            zIndex: 3500 - vIdx,
+                                                            width: 'max-content',
+                                                            minWidth: '100%'
                                                         }}
                                                     >
-                                                        <div className="flex items-center h-full pl-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="uppercase">{sector.label}</span>
-                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
+                                                        {/* Block scrolling projects */}
+                                                        <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
+                                                        <div
+                                                            className="project-info-sticky"
+                                                            style={{
+                                                                borderLeft: `10px solid ${sector.color}`,
+                                                                height: '100%',
+                                                                background: `color-mix(in srgb, ${sector.color}, var(--background) 90%)`,
+                                                                zIndex: 2005,
+                                                                fontWeight: 900,
+                                                                color: sector.color,
+                                                                fontSize: '11px',
+                                                                letterSpacing: '0.05em',
+                                                                boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
+                                                                position: 'sticky',
+                                                                left: 0
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center h-full pl-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="uppercase">{sector.label}</span>
+                                                                    <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
 
-                                                    {/* Grid lines inside summary for parity */}
-                                                    <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
-                                                        {days.map((day, idx) => (
-                                                            <div
-                                                                key={idx}
-                                                                className={`timeline-grid-column ${isWeekend(day) ? 'is-weekend' : ''} ${isToday(day) ? 'is-today' : ''}`}
-                                                                style={{ width: dayWidth }}
+                                                        {/* Grid lines inside summary for parity */}
+                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
+                                                            {days.map((day, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`timeline-grid-column ${isWeekend(day) ? 'is-weekend' : ''} ${isToday(day) ? 'is-today' : ''}`}
+                                                                    style={{ width: dayWidth }}
+                                                                />
+                                                            ))}
+                                                        </div>
+
+                                                        {sector.projects.map(p => (
+                                                            <TimelineBar
+                                                                key={`stack-${p.id}`}
+                                                                id={p.id}
+                                                                name={p.name}
+                                                                project={p}
+                                                                status={p.status}
+                                                                startDate={parseDate(p.created_at) || new Date()}
+                                                                endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
+                                                                timelineStart={timelineRange.start}
+                                                                dayWidth={dayWidth}
+                                                                rowHeight={summaryRowHeight}
+                                                                isCollapsed={true}
+                                                                config={{ colors, milestoneSize, design }}
+                                                                onProjectUpdate={handleProjectUpdate}
+                                                                milestones={allMilestones.filter(m => m.project_id === p.id)}
                                                             />
                                                         ))}
+                                                    </div >
+                                                );
+                                            })}
+
+
+                                            {/* 2. HEAVY DIVIDER */}
+                                            <div
+                                                className="timeline-row p-0"
+                                                style={{
+                                                    position: 'sticky',
+                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)))`,
+                                                    height: '2px',
+                                                    background: '#1a1a1a',
+                                                    borderBottom: 'none',
+                                                    zIndex: 4000,
+                                                    boxShadow: 'none',
+                                                    width: 'max-content',
+                                                    minWidth: '100%'
+                                                }}
+                                            >
+                                                <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
+                                            </div>
+
+                                        </>
+                                    );
+                                })()}
+
+                                {/* 3. INDIVIDUAL PROJECTS */}
+                                {filteredProjects.map((project) => {
+                                    const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
+                                    const sectorColor = sector?.color || '#90caf9';
+
+                                    return (
+                                        <div key={project.id} className="timeline-row is-project">
+                                            <Link
+                                                href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
+                                                className="project-info-sticky transition-colors group"
+                                                style={{ borderLeft: `10px solid ${sectorColor}` }}
+                                            >
+                                                <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
+                                                    <div className="flex items-center justify-between w-full">
+                                                        {rowHeight >= 25 ? (
+                                                            <div className="flex flex-col h-full justify-center">
+                                                                <div className="flex items-center gap-1">
+                                                                    {project.parent_id && (
+                                                                        <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
+                                                                    )}
+                                                                    <span
+                                                                        className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
+                                                                        style={{ textAlign: 'left' }}
+                                                                    >
+                                                                        {project.name}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] truncate font-bold">{project.name}</span>
+                                                        )}
                                                     </div>
 
-                                                    {sector.projects.map(p => (
-                                                        <TimelineBar
-                                                            key={`stack-${p.id}`}
-                                                            id={p.id}
-                                                            name={p.name}
-                                                            project={p}
-                                                            status={p.status}
-                                                            startDate={parseDate(p.created_at) || new Date()}
-                                                            endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
-                                                            timelineStart={timelineRange.start}
-                                                            dayWidth={dayWidth}
-                                                            rowHeight={summaryRowHeight}
-                                                            isCollapsed={true}
-                                                            config={{ colors, milestoneSize, design }}
-                                                            onProjectUpdate={handleProjectUpdate}
-                                                            milestones={allMilestones.filter(m => m.project_id === p.id)}
-                                                        />
-                                                    ))}
-                                                </div >
-                                            );
-                                        })}
-
-
-                                        {/* 2. HEAVY DIVIDER */}
-                                        <div
-                                            className="timeline-row p-0"
-                                            style={{
-                                                position: 'sticky',
-                                                top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)))`,
-                                                height: '2px',
-                                                background: '#1a1a1a',
-                                                borderBottom: 'none',
-                                                zIndex: 4000,
-                                                boxShadow: 'none',
-                                                width: 'max-content',
-                                                minWidth: '100%'
-                                            }}
-                                        >
-                                            <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
-                                        </div>
-
-                                    </>
-                                );
-                            })()}
-
-                            {/* 3. INDIVIDUAL PROJECTS */}
-                            {filteredProjects.map((project) => {
-                                const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
-                                const sectorColor = sector?.color || '#90caf9';
-
-                                return (
-                                    <div key={project.id} className="timeline-row is-project">
-                                        <Link
-                                            href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
-                                            className="project-info-sticky transition-colors group"
-                                            style={{ borderLeft: `10px solid ${sectorColor}` }}
-                                        >
-                                            <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
-                                                <div className="flex items-center justify-between w-full">
-                                                    {rowHeight >= 25 ? (
-                                                        <div className="flex flex-col h-full justify-center">
-                                                            <div className="flex items-center gap-1">
-                                                                {project.parent_id && (
-                                                                    <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
-                                                                )}
-                                                                <span
-                                                                    className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
-                                                                    style={{ textAlign: 'left' }}
-                                                                >
-                                                                    {project.name}
-                                                                </span>
+                                                    {rowHeight >= 80 && (
+                                                        <div className="mt-1 flex flex-col gap-0.5">
+                                                            {(project.serial_number || project.abra_order) && (
+                                                                <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
+                                                                    <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
+                                                                    <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between items-center text-[10px] italic">
+                                                                <span className="text-muted-foreground/60">Stav:</span>
+                                                                <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-[10px] truncate font-bold">{project.name}</span>
                                                     )}
                                                 </div>
+                                            </Link>
 
-                                                {rowHeight >= 80 && (
-                                                    <div className="mt-1 flex flex-col gap-0.5">
-                                                        {(project.serial_number || project.abra_order) && (
-                                                            <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
-                                                                <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
-                                                                <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex justify-between items-center text-[10px] italic">
-                                                            <span className="text-muted-foreground/60">Stav:</span>
-                                                            <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </Link>
-
-                                        <TimelineBar
-                                            id={project.id}
-                                            name={project.name}
-                                            project={project}
-                                            status={project.status}
-                                            startDate={parseDate(project.created_at) || new Date()}
-                                            endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
-                                            timelineStart={timelineRange.start}
-                                            dayWidth={dayWidth}
-                                            rowHeight={rowHeight}
-                                            config={{ colors, milestoneSize, design }}
-                                            onProjectUpdate={handleProjectUpdate}
-                                            milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </TimelineGrid>
+                                            <TimelineBar
+                                                id={project.id}
+                                                name={project.name}
+                                                project={project}
+                                                status={project.status}
+                                                startDate={parseDate(project.created_at) || new Date()}
+                                                endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
+                                                timelineStart={timelineRange.start}
+                                                dayWidth={dayWidth}
+                                                rowHeight={rowHeight}
+                                                config={{ colors, milestoneSize, design }}
+                                                onProjectUpdate={handleProjectUpdate}
+                                                milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </TimelineGrid>
+                    </div >
                 </div >
-            </div >
+            </div>
         </div >
     );
 };
