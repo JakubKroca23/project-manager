@@ -141,19 +141,13 @@
     - Přidána interaktivní minihra s jeřábem ("Crane Game") pro zabavení uživatelů během odstávky.
 - **Hotfix**: Oprava chybějícího importu `Trash2` na stránce Servisu, který způsoboval pád buildu na Vercelu.
 
-## [2026-02-18] - Refaktoring navigace, terminologie a úprava ovládání Timeline
-- **Změna**: Modernizace a sjednocení terminologie napříč aplikací.
-- **Detail**: Výraz "Manažer / Vlastník" nahrazen termínem "Vedoucí projektu" ve všech UI prvcích (vytváření, import, tabulky, detaily).
-- **Změna**: Vylepšení navigace Navbaru.
-- **Detail**: Implementována inteligentní detekce aktivní kategorie (Civilní/Vojenské/Servis) i na detailních stránkách zakázek pomocí parametrů v URL a analýzy cesty (pathname).
-- **Změna**: Redesign ovládání Timeline.
-- **Detail**:
-    - Tlačítka pro vertikální zoom odstraněna z fixní hlavičky.
-    - Implementována transparentní tlačítka pro nezávislou změnu výšky řádků přímo v mřížce (pro souhrnné stacked řádky i jednotlivé zakázky).
-    - Panel "Vzhled" přesunut z fixní boční lišty do inline výsuvného panelu pod hlavičkou, který při otevření odsouvá obsah timeline dolů.
-- **Cleanup**: Odstranění polí "Typ nástavby" a "Výrobní číslo" ze základních informací v detailu projektu pro zvýšení přehlednosti.
-
-## [2026-02-18] - Vylepšení Import Wizardu
-- **Změna**: Přidán interaktivní krok pro výběr řádku s hlavičkou.
-- **Detail**: Uživatel nyní po nahrání souboru vidí náhled prvních 15 řádků a může kliknutím zvolit, který řádek obsahuje názvy sloupců. To výrazně zvyšuje úspěšnost automatického mapování u nestandardních exportů.
-- **UX**: Aktualizován indikátor postupu v hlavičce wizardu (4 kroky místo 3).
+## [2026-02-18] - Priority a úprava vzhledu Timeline
+- **Mechanika priorit**: Každé zakázce lze nyní přiřadit prioritu (1: Urgentní, 2: Normální, 3: Nízká).
+- **Barvy dle priorit**: V nastavení vzhledu časové osy lze pro každou prioritu vybrat specifickou barvu. Tato barva se aplikuje **výhradně na fázi "Montáž"** (phase-buffer-yellow).
+- **Design Timeline**: 
+    - Výška baru se nyní ovládá v procentech vůči výšce řádku (centrováno vertikálně).
+    - Odstraněno horizontální odsazení a stíny barů pro "flat" moderní vzhled.
+    - Přidána možnost zapnout a nastavit šířku obrysu (outline) barů.
+    - Úprava drag-to-scroll: tažení myší je nyní ignorováno v oblasti časové hlavičky (měsíce, týdny, dny).
+- **Milníky**: Kompletně odstraněn milník "Konec montáže" ze systému.
+- **UX**: Tlačítka pro vertikální zoom (+/-) přímo v řádcích jsou nyní stále viditelná (20 % opacity) s poloprůhledným pozadím pro lepší orientaci.
