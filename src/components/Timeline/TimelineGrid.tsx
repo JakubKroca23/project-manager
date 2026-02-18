@@ -7,7 +7,6 @@ interface TimelineGridProps {
     endDate: Date;
     dayWidth: number;
     children?: React.ReactNode;
-    onHeaderWheel?: (e: React.WheelEvent) => void;
 }
 
 const getWeekNumber = (d: Date) => {
@@ -18,7 +17,7 @@ const getWeekNumber = (d: Date) => {
     return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 };
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children, onHeaderWheel }) => {
+const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children }) => {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonthVal = today.getMonth();
@@ -91,7 +90,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
 
     return (
         <div className="timeline-grid">
-            <div className="timeline-grid-header-multi" onWheel={onHeaderWheel}>
+            <div className="timeline-grid-header-multi">
                 {/* Úroveň 1: Měsíce */}
                 <div className="timeline-header-row months">
                     {months.map((m, i) => (

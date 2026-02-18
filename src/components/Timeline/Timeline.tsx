@@ -377,14 +377,6 @@ const Timeline: React.FC = () => {
 
     const [scrollTop, setScrollTop] = useState(0);
 
-    // Unified scroll handler for horizontal scroll on header/summary rows
-    const handleHorizontalWheel = (e: React.WheelEvent) => {
-        if (scrollContainerRef.current) {
-            // Use deltaY for horizontal scroll
-            scrollContainerRef.current.scrollLeft += e.deltaY;
-        }
-    };
-
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const top = e.currentTarget.scrollTop;
         requestAnimationFrame(() => {
@@ -469,72 +461,49 @@ const Timeline: React.FC = () => {
         }
     };
 
-    // Wheel zoom handler
-    const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-        if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            const delta = e.deltaY;
-            if (delta > 0) {
-                setDayWidth(prev => Math.max(prev / 1.1, MIN_DAY_WIDTH));
-            } else {
-                setDayWidth(prev => Math.min(prev * 1.1, MAX_DAY_WIDTH));
+    // Wheel zoom and scroll handler
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleWheelNative = (e: WheelEvent) => {
+            // 1. Shift + Wheel = Horizontal Scroll
+            if (e.shiftKey) {
+                // Let browser handle it or force it if needed
+                // container.scrollLeft += e.deltaY; 
+                return;
             }
-        } else {
-            // Horizontal scroll with wheel
-            if (e.deltaY !== 0 && !e.shiftKey) {
-                // Optional: If you want standard vertical scroll, do nothing here.
-                // If you want to force horizontal scroll on vertical wheel (as requested "koleckem na ose zoomuju horizontalne" - wait, user said "zoomuju horizontalne" which sounds like scaling, but context implies navigation or scaling.
-                // User said: "vrať zpátky to zoomovani jak bylo - koleckem na ose zoomuju horizontalne"
-                // "Zooming horizontally" usually means changing the time scale (dayWidth).
-                // "Vertikalni zoom nech na tlacitkach" -> Vertical zoom (row height?) should stay on buttons.
-                // Let's interpret "zoomuju horizontalne" as changing the day width (time scale) using the wheel.
 
-                // WAIT. Re-reading: "koleckem na ose zoomuju horizontalne"
-                // If he means "SCROLL horizontalne" (navigating time), that's one thing.
-                // If he means "ZOOM horizontalne" (expanding/contracting time), that's another.
-                // Existing layout has buttons for "Out" and "In" (Zoom).
-                // The user says "zoomuju horizontalne".
-                // Usually, "wheel" = vertical scroll. "Shift+wheel" = horizontal scroll. "Ctrl+wheel" = zoom.
-                // The user might want Wheel -> Horizontal Zoom directly? Or Wheel -> Horizontal Scroll?
-                // "vrať zpátky to zoomovani jak bylo" implies it was working before.
-                // Let's look at previous behavior or standard behavior.
-                // If I look at the request: "koleckem na ose zoomuju horizontalne, vertikalni zoom nech na tlacitkach"
-                // "Vertical zoom" probably refers to Row Height (ChevronUp/Down).
-                // "Horizontal zoom" probably refers to Day Width (ZoomIn/ZoomOut).
-                // So he wants Wheel -> change Day Width.
-
-                // Let's implement Wheel -> Change Day Width.
-                // But usually Wheel is for scrolling. If Wheel is Zoom, how does he scroll?
-                // Maybe he means "Scroll horizontally"?
-                // "Zooming" is often confused with "Scrolling" in non-technical terms, OR he actually wants zoom.
-                // BUT "vertikalni zoom nech na tlacitkach" heavily implies that "Horizontal Zoom" matches the "Day Width" controls.
-                // So: Wheel = Change Day Width.
-
+            // 2. Ctrl + Wheel = Vertical Zoom (Row Height)
+            if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
                 const delta = e.deltaY;
-
-                // Calculate zoom focus point (mouse cursor)
-                if (scrollContainerRef.current) {
-                    const container = scrollContainerRef.current;
-                    const rect = container.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-
-                    // Current point in time (days from start) under mouse
-                    // scrollLeft (hidden part) + mouseX (visible part)
-                    const pointDays = (container.scrollLeft + mouseX) / dayWidth;
-
-                    // Store focus point to restore after render
-                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
-                }
-
-                // Zoom logic
-                if (delta > 0) {
-                    setDayWidth(prev => Math.max(prev / 1.05, MIN_DAY_WIDTH));
-                } else {
-                    setDayWidth(prev => Math.min(prev * 1.05, MAX_DAY_WIDTH));
-                }
+                setRowHeight(prev => {
+                    const next = delta > 0 ? prev - 4 : prev + 4;
+                    const clamped = Math.min(100, Math.max(14, next));
+                    return clamped;
+                });
+                return;
             }
-        }
+
+            // 3. Just Wheel = Horizontal Zoom (Day Width)
+            e.preventDefault();
+            const delta = e.deltaY;
+
+            const rect = container.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const pointDays = (container.scrollLeft + mouseX) / dayWidthRef.current;
+            zoomFocus.current = { pointDays, pixelOffset: mouseX };
+
+            if (delta > 0) {
+                setDayWidth(prev => Math.max(prev / 1.05, MIN_DAY_WIDTH));
+            } else {
+                setDayWidth(prev => Math.min(prev * 1.05, MAX_DAY_WIDTH));
+            }
+        };
+
+        container.addEventListener('wheel', handleWheelNative, { passive: false });
+        return () => container.removeEventListener('wheel', handleWheelNative);
     }, []);
 
     const fetchProjects = useCallback(async () => {
@@ -758,13 +727,12 @@ const Timeline: React.FC = () => {
                 ...customStyles,
                 cursor: isDragging ? 'grabbing' : 'grab'
             }}
-            onWheel={handleWheel}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
         >
-            <header className="timeline-header-actions relative" onWheel={handleHorizontalWheel}>
+            <header className="timeline-header-actions relative">
                 <div className="header-left">
                     <div className="search-container">
                         <Search size={16} className="search-icon" />
@@ -1067,7 +1035,6 @@ const Timeline: React.FC = () => {
                         startDate={timelineRange.start}
                         endDate={timelineRange.end}
                         dayWidth={dayWidth}
-                        onHeaderWheel={handleHorizontalWheel}
                     >
                         <div className="timeline-rows">
                             {/* 1. CATEGORY SUMMARIES (Stacked) */}
@@ -1101,7 +1068,6 @@ const Timeline: React.FC = () => {
                                                 <div
                                                     key={`summary-${sector.id}`}
                                                     className="timeline-row"
-                                                    onWheel={handleHorizontalWheel}
                                                     style={{
                                                         position: 'sticky',
                                                         top: topOffset,
