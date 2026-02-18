@@ -187,26 +187,59 @@ export default function ImportWizard() {
     };
 
     const confirmHeaderAndContinue = (index: number) => {
-        const worksheet = XLSX.utils.aoa_to_sheet(rawMatrix);
-        const cols = (rawMatrix[index] as any[]).map(c => String(c || '').trim()).filter(c => c !== '');
+        try {
+            const rawHeaderRow = (rawMatrix[index] as any[]) || [];
 
-        setExcelColumns(cols);
-        setRawData(XLSX.utils.sheet_to_json(worksheet, { range: index }));
+            // Map: trimmed name -> column index
+            const colMap = new Map<string, number>();
+            const cols: string[] = [];
 
-        // Initial mapping
-        const savedMapping = localStorage.getItem(`excel_mapping_${importSource}`);
-        let initialMapping: Record<string, string> = {};
-        if (savedMapping) {
-            try { initialMapping = JSON.parse(savedMapping); } catch { }
-        }
-        PROJECT_FIELDS.forEach(field => {
-            if (!initialMapping[field.key] || !cols.includes(initialMapping[field.key])) {
-                initialMapping[field.key] = findBestMatch(field, cols);
+            rawHeaderRow.forEach((cell, idx) => {
+                if (cell !== null && cell !== undefined) {
+                    const trimmed = String(cell).trim();
+                    if (trimmed) {
+                        colMap.set(trimmed, idx);
+                        cols.push(trimmed);
+                    }
+                }
+            });
+
+            setExcelColumns(cols);
+
+            // Generate rawData manually from matrix to ensure key consistency
+            const dataRows = rawMatrix.slice(index + 1);
+            const jsonData = dataRows.map(row => {
+                const obj: any = {};
+                cols.forEach(colName => {
+                    const colIdx = colMap.get(colName);
+                    if (colIdx !== undefined) {
+                        obj[colName] = row[colIdx];
+                    }
+                });
+                return obj;
+            });
+
+            setRawData(jsonData);
+            console.log("Parsed data:", jsonData.slice(0, 3)); // Debug log
+
+            // Initial mapping
+            const savedMapping = localStorage.getItem(`excel_mapping_${importSource}`);
+            let initialMapping: Record<string, string> = {};
+            if (savedMapping) {
+                try { initialMapping = JSON.parse(savedMapping); } catch { }
             }
-        });
+            PROJECT_FIELDS.forEach(field => {
+                if (!initialMapping[field.key] || !cols.includes(initialMapping[field.key])) {
+                    initialMapping[field.key] = findBestMatch(field, cols);
+                }
+            });
 
-        setMapping(initialMapping);
-        setStep('mapping');
+            setMapping(initialMapping);
+            setStep('mapping');
+        } catch (err) {
+            console.error("Error parsing header:", err);
+            alert("Chyba při zpracování hlavičky.");
+        }
     };
 
     // Helper for chunking arrays
