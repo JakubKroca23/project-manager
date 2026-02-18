@@ -584,14 +584,18 @@
 
 .timeline-phase {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
+  top: calc((100% - var(--bar-height)) / 2);
+  height: var(--bar-height);
   z-index: 5;
   /* Nad mřížkou, pod milníky */
   pointer-events: none;
   border: var(--element-border);
   box-sizing: border-box;
-  border-radius: 4px;
+  border-radius: var(--bar-radius);
+  box-shadow: var(--bar-shadow);
+  opacity: var(--bar-opacity);
+  transform: translateX(var(--bar-inset-x));
+  width: calc(100% - (2 * var(--bar-inset-x)));
 }
 
 .milestone-cell {

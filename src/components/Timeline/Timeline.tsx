@@ -96,19 +96,20 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
-const Tank = ({ size = 24, ...props }: any) => (
+
+
+
+
+
+const FlatbedTruck = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 11h15a2 2 0 0 1 2 2v3a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-3a2 2 0 0 1 2-2z" />
-        <path d="M8 11V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
-        <path d="M14 8h6" />
-        <circle cx="6" cy="16" r="1.5" />
-        <circle cx="10.5" cy="16" r="1.5" />
-        <circle cx="15" cy="16" r="1.5" />
+        <path d="M2 18h20" />
+        <circle cx="6" cy="18" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <path d="M2 18v-5h6l3-4h4v9" />
+        <path d="M15 14h7v4" />
     </svg>
 );
-
-
-
 
 const Crane = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -144,7 +145,7 @@ const Superstructure = ({ size = 24, ...props }: any) => (
 const Hiab = ({ size = 24, ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
         {/* Background square with border */}
-        <path fill="#FDFDFD" stroke="currentColor" strokeWidth="40" d="M709.98,682.51 C490.48,682.52 271.49,682.53 52.50,682.54 C48.33,682.54 44.13,682.78 40.02,682.33 C38.74,682.19 36.78,680.18 36.68,678.91 C36.30,674.11 36.58,669.26 36.58,664.42 C36.60,458.26 36.63,252.10 36.51,45.94 C36.51,40.97 37.56,39.57 42.79,39.58 C209.62,39.77 376.45,39.78 543.28,39.81 C599.78,39.82 656.27,39.78 712.77,39.78 C714.07,39.78 715.37,39.89 717.04,39.97 C717.16,41.61 717.37,43.05 717.37,44.48 C717.39,254.98 717.39,465.47 717.39,675.96 C717.39,682.51 717.38,682.51 709.98,682.51 Z" />
+        <path fill="#000000" stroke="currentColor" strokeWidth="40" d="M709.98,682.51 C490.48,682.52 271.49,682.53 52.50,682.54 C48.33,682.54 44.13,682.78 40.02,682.33 C38.74,682.19 36.78,680.18 36.68,678.91 C36.30,674.11 36.58,669.26 36.58,664.42 C36.60,458.26 36.63,252.10 36.51,45.94 C36.51,40.97 37.56,39.57 42.79,39.58 C209.62,39.77 376.45,39.78 543.28,39.81 C599.78,39.82 656.27,39.78 712.77,39.78 C714.07,39.78 715.37,39.89 717.04,39.97 C717.16,41.61 717.37,43.05 717.37,44.48 C717.39,254.98 717.39,465.47 717.39,675.96 C717.39,682.51 717.38,682.51 709.98,682.51 Z" />
         {/* Bird logo silhouette */}
         <path fill="currentColor" stroke="none" d="M239.325577,244.186447 C203.676422,260.819580 181.076263,297.162354 182.767044,334.754974 C184.659683,376.835571 214.633133,412.044403 255.930511,420.166931 C290.925354,427.049896 321.923950,419.072845 348.072388,394.205811 C348.646942,393.659393 349.350281,393.248383 350.698639,392.254486 C350.876465,394.253387 351.104340,395.619995 351.103790,396.986572 C351.094727,420.319366 350.979187,443.652557 351.102631,466.984528 C351.123352,470.902740 349.982635,472.827637 346.087982,474.136627 C314.852814,484.634644 282.792542,488.090546 250.473999,482.307434 C176.538651,469.077393 127.043213,426.617065 103.475761,355.035187 C90.394173,315.302216 90.995651,275.095520 104.500275,235.729980 C124.083107,178.646637 162.374619,139.218216 219.688461,118.965439 C265.006805,102.951469 309.664490,106.366371 353.827484,123.622246 C379.737000,133.745926 403.279755,147.750900 425.192444,164.987671 C442.542694,178.635559 460.278503,192.182083 479.337524,203.185028 C515.062378,223.809326 554.102417,231.555420 595.280273,226.561981 C615.185608,224.148117 633.773682,217.584396 650.923706,207.098816 C652.627502,206.057114 654.341736,205.031387 656.075623,204.041153 C656.311707,203.906326 656.691223,204.022583 657.474792,204.022583 C657.474792,343.750275 657.474792,483.451508 657.474792,623.471130 C592.401489,623.471130 527.332031,623.471130 461.703094,623.471130 C465.198578,598.751526 472.556335,575.556274 481.364807,553.438538 C470.681000,543.735840 459.901154,534.822144 450.133575,524.910889 C420.921997,495.269623 402.146088,459.562714 389.878693,420.032654 C380.711121,390.491394 375.579071,360.200592 371.022034,329.723511 C367.572266,306.651764 359.240570,285.458252 344.542786,267.071228 C332.136230,251.550446 315.365082,243.249496 296.460724,238.938934 C277.059540,234.515060 258.087372,236.593246 239.325577,244.186447 M405.066071,356.463867 C410.432312,383.842468 418.457458,410.395691 430.494324,435.600952 C445.061768,466.105164 463.614624,493.674988 490.639832,514.752502 C492.789459,516.429016 495.057343,517.953857 496.417114,518.934143 C513.274902,494.606476 529.752014,470.828064 546.346313,446.880646 C544.305969,446.365356 542.040405,445.919800 539.855347,445.221893 C516.372620,437.721619 498.028503,423.066315 483.016296,403.948822 C457.174347,371.040009 444.689209,332.920502 439.677368,291.924713 C438.283508,280.522980 437.043335,269.093719 435.263367,257.750763 C433.873779,248.895523 427.581482,243.368057 419.133240,242.589844 C411.363129,241.874100 404.838959,245.662964 401.942169,253.419128 C400.451782,257.409546 399.698334,261.814636 399.397797,266.087616 C397.282166,296.164215 399.298950,326.010345 405.066071,356.463867 M526.730957,299.152283 C524.841736,300.771179 522.798889,302.243286 521.088745,304.033264 C511.238831,314.342743 509.870361,330.107635 517.726929,341.649139 C526.089478,353.933990 540.631409,358.646790 554.090332,352.992706 C565.409607,348.237457 572.231384,339.693481 573.135559,327.223969 C574.031616,314.867828 568.991577,305.131012 558.450073,298.728607 C548.244873,292.530487 537.709229,292.676788 526.730957,299.152283 z" />
     </svg>
@@ -173,15 +174,15 @@ const ICON_OPTIONS = {
     Play: Play,
     Milestone: Milestone,
     Hiab: Hiab,
-    Tank: Tank
+    FlatbedTruck: FlatbedTruck
 };
 
 // Seznam ikon pro výběr v editoru (dle požadavku uživatele - ty co jsou vidět + nové)
 const VISIBLE_ICONS = [
-    'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
+    'Truck', 'FlatbedTruck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab', 'Tank'
+    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -242,7 +243,7 @@ const Timeline: React.FC = () => {
         military: true,
         service: true
     });
-    const [showHidden, setShowHidden] = useState(false);
+
 
 
     const toggleType = (type: string) => {
@@ -253,6 +254,14 @@ const Timeline: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
     const [summaryRowHeight, setSummaryRowHeight] = useState(36);
+    const [showDesignSettings, setShowDesignSettings] = useState(false);
+    const [design, setDesign] = useState({
+        borderRadius: 4,
+        shadow: '0 2px 4px rgba(0,0,0,0.1)',
+        barHeight: 24, // in px
+        opacity: 1,
+        insetX: 0
+    });
     const timelineRef = useRef<HTMLDivElement>(null);
 
     // Ref for accessing current dayWidth in event listeners
@@ -269,7 +278,7 @@ const Timeline: React.FC = () => {
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
-        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'Truck', showInStack: true },
+        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'FlatbedTruck', showInStack: true },
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
@@ -288,8 +297,7 @@ const Timeline: React.FC = () => {
         setCollapsedSectors(prev => ({ ...prev, [sectorId]: !prev[sectorId] }));
     };
 
-    // Help Modal State
-    const [showHelp, setShowHelp] = useState(false);
+
 
     const fetchSettings = useCallback(async () => {
         try {
@@ -364,7 +372,12 @@ const Timeline: React.FC = () => {
         '--element-border': outline.enabled ? `${outline.width}px solid ${hexToRgba(outline.color, outline.opacity)}` : 'none',
         '--row-height': `${rowHeight}px`,
         '--timeline-row-height': `${rowHeight}px`,
-        '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
+        '--day-width': `${dayWidth}px`,
+        '--bar-radius': `${design.borderRadius}px`,
+        '--bar-shadow': design.shadow,
+        '--bar-height': `${design.barHeight}px`,
+        '--bar-opacity': design.opacity,
+        '--bar-inset-x': `${design.insetX}px`,
     } as React.CSSProperties;
 
 
@@ -684,23 +697,7 @@ const Timeline: React.FC = () => {
         });
 
         // Hide completed projects if showHidden is false
-        if (!showHidden) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            filtered = filtered.filter((p: Project) => {
-                // Skrýt projekty kde je výroba "Dokončeno"
-                if (p.production_status && p.production_status.toLowerCase() === 'dokončeno') {
-                    return false;
-                }
 
-                const handoverDate = parseDate(p.customer_handover);
-                // IF handover exists AND is before today -> Hide it
-                if (handoverDate && handoverDate < today) {
-                    return false;
-                }
-                return true;
-            });
-        }
 
         // Sorting: Hierarchical (Parent + Children together)
         return filtered.sort((a, b) => {
@@ -731,7 +728,7 @@ const Timeline: React.FC = () => {
 
             return (pA.name || '').localeCompare(pB.name || '');
         });
-    }, [projects, searchQuery, activeTypes, showHidden]);
+    }, [projects, searchQuery, activeTypes]);
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
@@ -740,9 +737,9 @@ const Timeline: React.FC = () => {
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7', icon: Wrench },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6', icon: TruckCrane },
-            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981', icon: Tank }
+            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
+            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
+            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
         ];
     }, [filteredProjects]);
 
@@ -806,85 +803,48 @@ const Timeline: React.FC = () => {
                 <div className="header-left">
                     <div className="type-filters flex items-center gap-4">
                         {[
-                            { id: 'service', label: 'Servis', color: '#a855f7', icon: Wrench },
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6', icon: TruckCrane },
-                            { id: 'military', label: 'Vojenské', color: '#10b981', icon: Tank }
-                        ].map(({ id, label, color, icon: Icon }) => (
+                            { id: 'service', label: 'Servis', color: '#a855f7' },
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
+                            { id: 'military', label: 'Vojenské', color: '#10b981' }
+                        ].map(({ id, label, color }) => (
                             <label
                                 key={id}
-                                className="flex items-center gap-1.5 cursor-pointer group select-none"
-                                title={label}
+                                className="flex items-center gap-2 cursor-pointer group select-none"
                             >
                                 <div className="relative flex items-center justify-center">
                                     <input
                                         type="checkbox"
                                         checked={activeTypes[id]}
                                         onChange={() => toggleType(id)}
-                                        className="peer appearance-none w-5 h-5 border-2 rounded-md transition-all shadow-sm"
+                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
                                         style={{
                                             borderColor: activeTypes[id] ? color : 'var(--border)',
                                             backgroundColor: activeTypes[id] ? color : 'transparent'
                                         }}
                                     />
-                                    <div className={`absolute w-3 h-3 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'}`}>
+                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
                                     </div>
                                 </div>
-                                <div
-                                    className={`p-2 rounded-xl transition-all flex items-center justify-center 
-                                        ${activeTypes[id] ? 'scale-110 shadow-md bg-muted/40 ring-1 ring-border/20' : 'scale-100 hover:bg-muted'} 
-                                        hover:scale-125 active:scale-95`}
-                                    style={{
-                                        color: activeTypes[id] ? color : 'var(--muted-foreground)',
-                                        backgroundColor: activeTypes[id] ? `${color}10` : 'transparent'
-                                    }}
+                                <span
+                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
                                 >
-                                    <Icon size={20} strokeWidth={activeTypes[id] ? 2.5 : 2} />
-                                </div>
+                                    {label}
+                                </span>
                             </label>
                         ))}
-
-                        {/* Hidden Projects Toggle */}
-                        <label className="flex items-center gap-2 cursor-pointer group select-none border-l pl-4 border-border/50">
-                            <div className="relative flex items-center justify-center">
-                                <input
-                                    type="checkbox"
-                                    checked={showHidden}
-                                    onChange={() => setShowHidden(!showHidden)}
-                                    className="peer appearance-none w-4 h-4 border-2 rounded transition-all border-muted-foreground peer-checked:bg-muted-foreground peer-checked:border-muted-foreground"
-                                />
-                                <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${showHidden ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-                                Dokončené
-                            </span>
-                        </label>
-                    </div>
-
-                    <div className="timeline-legend">
-                        <div className="legend-group">
-                            <span className="legend-group-title">Legenda:</span>
-                            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--phase-initial)' }}></div> Zahájení</div>
-                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneChassis?.color }}></div> Podvozek</div>
-                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneBody?.color }}></div> Nástavba</div>
-                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneMountingEnd?.color }}></div> Konec Montáže</div>
-                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneHandover?.color }}></div> Předání</div>
-                            <div className="legend-item"><div className="legend-marker" style={{ backgroundColor: colors.milestoneDeadline?.color }}></div> Deadline</div>
-                        </div>
                     </div>
 
                     <button
-                        className="action-button"
-                        onClick={() => setShowHelp(true)}
-                        title="Nápověda a Legenda"
+                        className={`action-button ${showDesignSettings ? 'primary' : ''}`}
+                        onClick={() => setShowDesignSettings(!showDesignSettings)}
+                        title="Nastavení designu"
                     >
-                        <HelpCircle size={16} />
+                        <Settings2 size={16} />
+                        <span>Vzhled</span>
                     </button>
                 </div>
 
@@ -942,157 +902,123 @@ const Timeline: React.FC = () => {
                 </div>
             </header>
 
-            {/* Help / Legend Modal */}
-            {
-                showHelp && (
-                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                        <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-                            <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
-                                <div className="flex items-center gap-2">
-                                    <HelpCircle size={20} className="text-primary" />
-                                    <h3 className="font-bold text-lg">Nápověda a Legenda</h3>
-                                </div>
-                                <button onClick={() => setShowHelp(false)} className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-lg transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="overflow-y-auto p-6 space-y-8 custom-scrollbar">
-
-                                {/* 1. OVLÁDÁNÍ */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <MousePointer2 size={16} /> Navigace a Interakce
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <MoveHorizontal size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Posun osy (Scroll)</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>Kolečko myši:</strong> Klasický posun v čase (vlevo/vpravo) i vertikálně mezi projekty.<br />
-                                                    <strong>Shift + Kolečko:</strong> Rychlejší horizontální posun v čase.<br />
-                                                    <strong>Táhnutí (Scrollbar):</strong> Použijte spodní lištu pro rychlou navigaci.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <ZoomIn size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Zoom (Lupa a Výška)</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>V hlavičce:</strong> Nastavte si hustotu dní (Dne/Měsíce) i výšku řádků pro detailnější náhled.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <MousePointerClick size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Správa Milníků</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>2x Kliknutí:</strong> Rychlé přidání nového milníku na dané datum.<br />
-                                                    <strong>Klik na ikonu:</strong> Editace názvu, data nebo smazání milníku.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
-                                            <div className="bg-background p-2 rounded-md shadow-sm border border-border">
-                                                <Info size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm">Detaily a Rychlý náhled</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    <strong>Najetí myší:</strong> Zobrazí kontextové menu s informacemi o projektu a milníku.
-                                                </p>
-                                            </div>
-                                        </div>
+            {/* Design Settings Sidebar */}
+            {showDesignSettings && (
+                <div className="fixed top-24 right-4 z-[100] w-72 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col max-h-[70vh]">
+                    <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
+                        <span className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                            <Palette size={14} className="text-primary" />
+                            Nastavení Vzhledu
+                        </span>
+                        <button onClick={() => setShowDesignSettings(false)} className="p-1 hover:bg-muted rounded-lg transition-colors">
+                            <X size={16} />
+                        </button>
+                    </div>
+                    <div className="p-4 overflow-y-auto custom-scrollbar space-y-6">
+                        {/* Bar Shape */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Tvar a Rozměry</h4>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                        <span>Zaoblení</span>
+                                        <span className="text-primary">{design.borderRadius}px</span>
                                     </div>
-                                </section>
+                                    <input
+                                        type="range" min="0" max="20" step="1"
+                                        value={design.borderRadius}
+                                        onChange={(e) => setDesign({ ...design, borderRadius: parseInt(e.target.value) })}
+                                        className="w-full accent-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                        <span>Výška Baru (px)</span>
+                                        <span className="text-primary">{design.barHeight}px</span>
+                                    </div>
+                                    <input
+                                        type="range" min="4" max="64" step="2"
+                                        value={design.barHeight}
+                                        onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
+                                        className="w-full accent-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                        <span>Odsazení stran</span>
+                                        <span className="text-primary">{design.insetX}px</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="20" step="1"
+                                        value={design.insetX}
+                                        onChange={(e) => setDesign({ ...design, insetX: parseInt(e.target.value) })}
+                                        className="w-full accent-primary"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                                <div className="h-px bg-border/50" />
-
-                                {/* 2. LEGENDA BAREV (FÁZE A MILNÍKY) */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <Palette size={16} /> Legenda
-                                    </h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {Object.entries(colors).map(([key, conf]) => (
-                                            <div key={key} className="flex items-center gap-3 p-2 rounded-lg border border-border/40 bg-background/50">
-                                                <div
-                                                    className="w-8 h-8 rounded-md shadow-sm border border-border/20 flex items-center justify-center text-white"
-                                                    style={{ backgroundColor: conf.color, opacity: conf.opacity || 1 }}
-                                                >
-                                                    {conf.icon && ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS] ? React.createElement(ICON_OPTIONS[conf.icon as keyof typeof ICON_OPTIONS], { size: 16 }) : null}
-                                                </div>
-                                                <span className="text-sm font-medium">{conf.label}</span>
-                                            </div>
+                        {/* Effects */}
+                        <div className="space-y-3 pt-2 border-t border-border/50">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Efekty a Stíny</h4>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
+                                        <span>Průhlednost</span>
+                                        <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="1" step="0.05"
+                                        value={design.opacity}
+                                        onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary"
+                                    />
+                                </div>
+                                <div className="space-y-2 px-1">
+                                    <span className="text-[10px] font-bold">Styl stínu</span>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            { label: 'Žádný', val: 'none' },
+                                            { label: 'Jemný', val: '0 1px 3px rgba(0,0,0,0.1)' },
+                                            { label: 'Výrazný', val: '0 4px 10px rgba(0,0,0,0.15)' },
+                                            { label: 'Vnitřní', val: 'inset 0 1px 3px rgba(0,0,0,0.1)' }
+                                        ].map(sh => (
+                                            <button
+                                                key={sh.val}
+                                                onClick={() => setDesign({ ...design, shadow: sh.val })}
+                                                className={`text-[10px] py-2 px-1 rounded-md border transition-all ${design.shadow === sh.val ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-muted/50 border-border hover:border-border-muted text-muted-foreground'}`}
+                                            >
+                                                {sh.label}
+                                            </button>
                                         ))}
                                     </div>
-                                </section>
+                                </div>
+                            </div>
+                        </div>
 
-                                <div className="h-px bg-border/50" />
-
-                                {/* 3. LEGENDA MILNÍKŮ */}
-                                <section>
-                                    <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                                        <Flag size={16} /> Legenda milníků
-                                    </h4>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#374151] shadow-sm">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-white opacity-20" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold">Čekající (Standardní)</p>
-                                                <p className="text-[10px] text-muted-foreground leading-tight">Milník v budoucnu nebo v termínu, který zatím nebyl potvrzen.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#22c55e] shadow-sm">
-                                                <Check size={16} className="text-white" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-emerald-600">Splněno (Potvrzeno)</p>
-                                                <p className="text-[10px] text-muted-foreground leading-tight">Zelená barva značí milník, který byl uživatelem ručně potvrzen jako doručený/hotový.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-background/50">
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#ef4444] shadow-sm">
-                                                <AlertTriangle size={16} className="text-white" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-red-600">Po termínu (Upozornění)</p>
-                                                <p className="text-[10px] text-muted-foreground leading-tight">Červená barva svítí, pokud milník není splněn (nepotvrzen) a jeho datum už proběhlo.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-muted/20 italic">
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted border border-border/50 shadow-inner">
-                                                <RotateCcw size={14} className="text-muted-foreground" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-muted-foreground">Ostatní</p>
-                                                <p className="text-[10px] text-muted-foreground leading-tight">Ikonku libovolného milníku lze změnit individuálně pro každou zakázku.</p>
-                                            </div>
+                        {/* Colors */}
+                        <div className="space-y-3 pt-2 border-t border-border/50">
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Barvy Fází</h4>
+                            <div className="grid grid-cols-2 gap-3">
+                                {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
+                                    <div key={key} className="space-y-1">
+                                        <label className="text-[9px] font-bold text-muted-foreground px-1 truncate block">{config.label}</label>
+                                        <div className="flex items-center gap-2 bg-muted/40 p-1.5 rounded-lg border border-border/50">
+                                            <input
+                                                type="color"
+                                                value={config.color}
+                                                onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-none"
+                                            />
+                                            <span className="text-[10px] font-mono opacity-60">{config.color}</span>
                                         </div>
                                     </div>
-                                </section>
-                            </div>
-                            <div className="p-4 border-t border-border bg-muted/20 flex justify-end">
-                                <button onClick={() => setShowHelp(false)} className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors text-sm">
-                                    Rozumím
-                                </button>
+                                ))}
                             </div>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
             <div
                 className="timeline-scroll-wrapper"
@@ -1165,11 +1091,6 @@ const Timeline: React.FC = () => {
                                                         }}
                                                     >
                                                         <div className="flex items-center gap-2 pl-2">
-                                                            {sector.icon && (
-                                                                <div style={{ color: sector.color }}>
-                                                                    <sector.icon size={14} strokeWidth={2.5} />
-                                                                </div>
-                                                            )}
                                                             <span className="uppercase">{sector.label}</span>
                                                             <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                         </div>
@@ -1298,8 +1219,8 @@ const Timeline: React.FC = () => {
                         </div>
                     </TimelineGrid>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 
