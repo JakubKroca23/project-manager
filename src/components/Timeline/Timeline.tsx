@@ -419,8 +419,123 @@ const Timeline: React.FC = () => {
         }
     };
 
-    // Wheel zoom disabled - only button controls are used
-    // Default scroll behavior is preserved (vertical scroll, shift+scroll for horizontal)
+    // --- DRAG TO SCROLL IMPLEMENTATION ---
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStart = useRef({ x: 0, y: 0, left: 0, top: 0 });
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        // Prevent for interactive elements
+        if ((e.target as HTMLElement).closest('button, a, input, select, .timeline-bar')) {
+            return;
+        }
+
+        if (scrollContainerRef.current) {
+            setIsDragging(true);
+            dragStart.current = {
+                x: e.clientX,
+                y: e.clientY,
+                left: scrollContainerRef.current.scrollLeft,
+                top: scrollContainerRef.current.scrollTop
+            };
+            document.body.style.cursor = 'grabbing';
+            document.body.style.userSelect = 'none';
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !scrollContainerRef.current) return;
+
+        e.preventDefault();
+        const dx = e.clientX - dragStart.current.x;
+        const dy = e.clientY - dragStart.current.y;
+
+        scrollContainerRef.current.scrollLeft = dragStart.current.left - dx;
+        scrollContainerRef.current.scrollTop = dragStart.current.top - dy;
+    };
+
+    const handleMouseUp = () => {
+        if (isDragging) {
+            setIsDragging(false);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (isDragging) {
+            setIsDragging(false);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    };
+
+    // Wheel zoom handler
+    const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            const delta = e.deltaY;
+            if (delta > 0) {
+                setDayWidth(prev => Math.max(prev / 1.1, MIN_DAY_WIDTH));
+            } else {
+                setDayWidth(prev => Math.min(prev * 1.1, MAX_DAY_WIDTH));
+            }
+        } else {
+            // Horizontal scroll with wheel
+            if (e.deltaY !== 0 && !e.shiftKey) {
+                // Optional: If you want standard vertical scroll, do nothing here.
+                // If you want to force horizontal scroll on vertical wheel (as requested "koleckem na ose zoomuju horizontalne" - wait, user said "zoomuju horizontalne" which sounds like scaling, but context implies navigation or scaling.
+                // User said: "vrať zpátky to zoomovani jak bylo - koleckem na ose zoomuju horizontalne"
+                // "Zooming horizontally" usually means changing the time scale (dayWidth).
+                // "Vertikalni zoom nech na tlacitkach" -> Vertical zoom (row height?) should stay on buttons.
+                // Let's interpret "zoomuju horizontalne" as changing the day width (time scale) using the wheel.
+
+                // WAIT. Re-reading: "koleckem na ose zoomuju horizontalne"
+                // If he means "SCROLL horizontalne" (navigating time), that's one thing.
+                // If he means "ZOOM horizontalne" (expanding/contracting time), that's another.
+                // Existing layout has buttons for "Out" and "In" (Zoom).
+                // The user says "zoomuju horizontalne".
+                // Usually, "wheel" = vertical scroll. "Shift+wheel" = horizontal scroll. "Ctrl+wheel" = zoom.
+                // The user might want Wheel -> Horizontal Zoom directly? Or Wheel -> Horizontal Scroll?
+                // "vrať zpátky to zoomovani jak bylo" implies it was working before.
+                // Let's look at previous behavior or standard behavior.
+                // If I look at the request: "koleckem na ose zoomuju horizontalne, vertikalni zoom nech na tlacitkach"
+                // "Vertical zoom" probably refers to Row Height (ChevronUp/Down).
+                // "Horizontal zoom" probably refers to Day Width (ZoomIn/ZoomOut).
+                // So he wants Wheel -> change Day Width.
+
+                // Let's implement Wheel -> Change Day Width.
+                // But usually Wheel is for scrolling. If Wheel is Zoom, how does he scroll?
+                // Maybe he means "Scroll horizontally"?
+                // "Zooming" is often confused with "Scrolling" in non-technical terms, OR he actually wants zoom.
+                // BUT "vertikalni zoom nech na tlacitkach" heavily implies that "Horizontal Zoom" matches the "Day Width" controls.
+                // So: Wheel = Change Day Width.
+
+                e.preventDefault();
+                const delta = e.deltaY;
+
+                // Calculate zoom focus point (mouse cursor)
+                if (scrollContainerRef.current) {
+                    const container = scrollContainerRef.current;
+                    const rect = container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+
+                    // Current point in time (days from start) under mouse
+                    // scrollLeft (hidden part) + mouseX (visible part)
+                    const pointDays = (container.scrollLeft + mouseX) / dayWidth;
+
+                    // Store focus point to restore after render
+                    zoomFocus.current = { pointDays, pixelOffset: mouseX };
+                }
+
+                // Zoom logic
+                if (delta > 0) {
+                    setDayWidth(prev => Math.max(prev / 1.05, MIN_DAY_WIDTH));
+                } else {
+                    setDayWidth(prev => Math.min(prev * 1.05, MAX_DAY_WIDTH));
+                }
+            }
+        }
+    }, []);
 
     const fetchProjects = useCallback(async () => {
         try {
@@ -637,7 +752,18 @@ const Timeline: React.FC = () => {
         );
     }
     return (
-        <div className={`timeline-container ${isCompact ? 'mode-compact' : ''}`} style={customStyles}>
+        <div
+            className={`timeline-container ${isCompact ? 'mode-compact' : ''}`}
+            style={{
+                ...customStyles,
+                cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+        >
             <header className="timeline-header-actions relative" onWheel={handleHorizontalWheel}>
                 <div className="header-left">
                     <div className="search-container">
