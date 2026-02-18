@@ -8,6 +8,7 @@ import { useSearch } from '@/providers/SearchProvider';
 import { useActions } from '@/providers/ActionProvider';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
+import { cn } from '@/lib/utils';
 import {
     Search, Calendar, ZoomIn,
     ZoomOut,
@@ -220,6 +221,9 @@ interface IColorsState {
     milestoneMountingEnd: IColorConfig;
     milestoneRevisionEnd?: IColorConfig;
     milestoneStart?: IColorConfig;
+    priority1: IColorConfig;
+    priority2: IColorConfig;
+    priority3: IColorConfig;
 }
 
 interface IOutlineState {
@@ -261,10 +265,9 @@ const Timeline: React.FC = () => {
     const [showDesignSettings, setShowDesignSettings] = useState(false);
     const [design, setDesign] = useState({
         borderRadius: 4,
-        shadow: '0 2px 4px rgba(0,0,0,0.1)',
-        barHeight: 24, // in px
+        barHeight: 70, // in %
         opacity: 1,
-        insetX: 0
+        usePriorityColors: true
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -287,6 +290,9 @@ const Timeline: React.FC = () => {
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
+        priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
+        priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
+        priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
     });
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
@@ -378,10 +384,11 @@ const Timeline: React.FC = () => {
         '--timeline-row-height': `${rowHeight}px`,
         '--day-width': `${dayWidth}px`,
         '--bar-radius': `${design.borderRadius}px`,
-        '--bar-shadow': design.shadow,
-        '--bar-height': `${design.barHeight}px`,
+        '--bar-height': `${design.barHeight}%`,
         '--bar-opacity': design.opacity,
-        '--bar-inset-x': `${design.insetX}px`,
+        '--priority-1-color': colors.priority1.color,
+        '--priority-2-color': colors.priority2.color,
+        '--priority-3-color': colors.priority3.color,
     } as React.CSSProperties;
 
 
@@ -915,10 +922,10 @@ const Timeline: React.FC = () => {
                                     <div>
                                         <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
                                             <span className="text-muted-foreground">Výška Baru</span>
-                                            <span className="text-primary">{design.barHeight}px</span>
+                                            <span className="text-primary">{design.barHeight}%</span>
                                         </div>
                                         <input
-                                            type="range" min="4" max="64" step="2"
+                                            type="range" min="10" max="100" step="5"
                                             value={design.barHeight}
                                             onChange={(e) => setDesign({ ...design, barHeight: parseInt(e.target.value) })}
                                             className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
@@ -926,23 +933,23 @@ const Timeline: React.FC = () => {
                                     </div>
                                     <div>
                                         <div className="flex justify-between text-[10px] font-bold mb-1 px-1">
-                                            <span className="text-muted-foreground">Odsazení</span>
-                                            <span className="text-primary">{design.insetX}px</span>
+                                            <span className="text-muted-foreground">Obrys (středový)</span>
+                                            <span className="text-primary">{outline.width}px</span>
                                         </div>
                                         <input
-                                            type="range" min="0" max="20" step="1"
-                                            value={design.insetX}
-                                            onChange={(e) => setDesign({ ...design, insetX: parseInt(e.target.value) })}
+                                            type="range" min="0" max="4" step="1"
+                                            value={outline.width}
+                                            onChange={(e) => setOutline({ ...outline, width: parseInt(e.target.value), enabled: parseInt(e.target.value) > 0 })}
                                             className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Effects */}
+                            {/* Effects & Priorities */}
                             <div className="flex-1 min-w-[200px] space-y-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Efekty a Stíny</h4>
+                                    <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Priority a Průhlednost</h4>
                                     <div className="h-px flex-1 bg-border/30"></div>
                                 </div>
                                 <div className="space-y-4">
@@ -958,24 +965,20 @@ const Timeline: React.FC = () => {
                                             className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                                         />
                                     </div>
-                                    <div className="space-y-2 px-1">
-                                        <span className="text-[10px] font-bold text-muted-foreground">Styl stínu</span>
-                                        <div className="flex flex-wrap gap-2">
-                                            {[
-                                                { label: 'Žádný', val: 'none' },
-                                                { label: 'Jemný', val: '0 1px 3px rgba(0,0,0,0.1)' },
-                                                { label: 'Výrazný', val: '0 4px 10px rgba(0,0,0,0.15)' },
-                                                { label: 'Vnitřní', val: 'inset 0 1px 3px rgba(0,0,0,0.1)' }
-                                            ].map(sh => (
-                                                <button
-                                                    key={sh.val}
-                                                    onClick={() => setDesign({ ...design, shadow: sh.val })}
-                                                    className={`text-[9px] font-black uppercase tracking-tighter py-1.5 px-3 rounded-md border transition-all ${design.shadow === sh.val ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-background border-border/50 hover:border-primary/50 text-muted-foreground'}`}
-                                                >
-                                                    {sh.label}
-                                                </button>
-                                            ))}
-                                        </div>
+                                    <div className="flex items-center justify-between px-1">
+                                        <span className="text-[10px] font-bold text-muted-foreground">Barvy dle priority</span>
+                                        <button
+                                            onClick={() => setDesign({ ...design, usePriorityColors: !design.usePriorityColors })}
+                                            className={cn(
+                                                "w-8 h-4 rounded-full transition-colors relative",
+                                                design.usePriorityColors ? "bg-primary" : "bg-muted"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform",
+                                                design.usePriorityColors ? "translate-x-4" : "translate-x-0"
+                                            )} />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -986,21 +989,54 @@ const Timeline: React.FC = () => {
                                     <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Barvy Fází</h4>
                                     <div className="h-px flex-1 bg-border/30"></div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-x-4 gap-y-3">
-                                    {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
-                                        <div key={key} className="flex flex-col gap-1">
-                                            <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
-                                            <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
-                                                <input
-                                                    type="color"
-                                                    value={config.color}
-                                                    onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                    className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
-                                                />
-                                                <span className="text-[9px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
-                                            </div>
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                                    {/* Phase Colors */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Fáze Projektu</span>
+                                            <div className="h-px flex-1 bg-border/20"></div>
                                         </div>
-                                    ))}
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {Object.entries(colors).filter(([k]) => k.startsWith('phase')).map(([key, config]) => (
+                                                <div key={key} className="flex flex-col gap-1">
+                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
+                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
+                                                        />
+                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Priority Colors */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Barvy Priorit</span>
+                                            <div className="h-px flex-1 bg-border/20"></div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {Object.entries(colors).filter(([k]) => k.startsWith('priority')).map(([key, config]) => (
+                                                <div key={key} className="flex flex-col gap-1">
+                                                    <label className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-tighter truncate block">{config.label}</label>
+                                                    <div className="flex items-center gap-2 bg-background p-1 pr-2 rounded-lg border border-border/40 group hover:border-primary/30 transition-colors">
+                                                        <input
+                                                            type="color"
+                                                            value={config.color}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                            className="w-5 h-5 rounded cursor-pointer bg-transparent border-none appearance-none overflow-hidden"
+                                                        />
+                                                        <span className="text-[8px] font-mono font-bold opacity-40 group-hover:opacity-100 transition-opacity uppercase">{config.color}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1257,7 +1293,7 @@ const Timeline: React.FC = () => {
                                             timelineStart={timelineRange.start}
                                             dayWidth={dayWidth}
                                             rowHeight={rowHeight}
-                                            config={{ ...colors, milestoneSize }}
+                                            config={{ colors, milestoneSize, design }}
                                             onProjectUpdate={handleProjectUpdate}
                                             milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
                                         />

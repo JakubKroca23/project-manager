@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { X, Loader2, Plus } from 'lucide-react';
+import { X, Loader2, Plus, AlertCircle } from 'lucide-react';
 import { Project } from '@/types/project';
+import { cn } from '@/lib/utils';
 
 interface CreateProjectModalProps {
     isOpen: boolean;
@@ -26,6 +27,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
         category: '',
         serial_number: '',
         body_type: '',
+        priority: 2 as 1 | 2 | 3,
     });
 
     if (!isOpen) return null;
@@ -61,6 +63,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                 category: '',
                 serial_number: '',
                 body_type: '',
+                priority: 2,
             });
         }
         setIsLoading(false);
@@ -171,6 +174,32 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                             className="w-full bg-muted/50 border border-border/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-medium"
                             placeholder="např. Sklápěč, Valník..."
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">Priorita</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[
+                                { id: 1, label: 'Urgentní', color: 'bg-rose-500' },
+                                { id: 2, label: 'Normální', color: 'bg-blue-500' },
+                                { id: 3, label: 'Nízká', color: 'bg-slate-400' }
+                            ].map(p => (
+                                <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, priority: p.id as 1 | 2 | 3 })}
+                                    className={cn(
+                                        "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                                        formData.priority === p.id
+                                            ? "border-primary bg-primary/5 shadow-inner"
+                                            : "border-border/40 bg-muted/10 hover:bg-muted/30"
+                                    )}
+                                >
+                                    <div className={cn("w-2.5 h-2.5 rounded-full shadow-sm", p.color)} />
+                                    <span className={cn("text-[9px] font-black uppercase tracking-tight", formData.priority === p.id ? "text-primary" : "text-muted-foreground")}>{p.label}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="pt-4 flex gap-3">

@@ -9,6 +9,7 @@ export interface Project {
     customer: string;       // Klient
     manager: string;        // Vlastník
     status: ProjectStatus;  // Stav
+    priority?: 1 | 2 | 3;   // Priorita (1: Urgent, 2: Normal, 3: Low)
     deadline?: string;      // Otevřeno od
 
     // CRM Rozšířená pole

@@ -447,6 +447,30 @@ export default function ProjectDetailPage() {
                                 onChange={handleChange}
                             />
 
+                            <Field
+                                label="Priorita"
+                                icon={<AlertCircle size={13} />}
+                                value={isEditing ? p.priority : (
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full",
+                                            p.priority === 1 ? "bg-rose-500" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500"
+                                        )} />
+                                        <span className="text-[11px] font-bold">
+                                            {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
+                                        </span>
+                                    </div>
+                                )}
+                                field="priority"
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                                options={[
+                                    { label: 'Urgentní', value: 1 },
+                                    { label: 'Normální', value: 2 },
+                                    { label: 'Nízká', value: 3 }
+                                ]}
+                            />
+
                         </FieldGrid>
                     </Section>
 
@@ -833,7 +857,7 @@ interface FieldProps {
     isEditing: boolean;
     onChange: (field: keyof Project, value: any) => void;
     highlight?: boolean;
-    options?: string[];
+    options?: (string | { label: string; value: any })[];
 }
 
 function Field({ label, icon, value, field, isEditing, onChange, highlight, options }: FieldProps) {
@@ -846,13 +870,20 @@ function Field({ label, icon, value, field, isEditing, onChange, highlight, opti
                     options ? (
                         <select
                             value={String(value || '')}
-                            onChange={(e) => onChange(field, e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                // Convert back to number if it's a numeric value (for priority)
+                                const numericVal = parseInt(val);
+                                onChange(field, isNaN(numericVal) ? val : numericVal);
+                            }}
                             className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
                         >
                             <option value="">Vyberte...</option>
-                            {options.map(opt => (
-                                <option key={opt} value={opt}>{opt}</option>
-                            ))}
+                            {options.map(opt => {
+                                const label = typeof opt === 'string' ? opt : opt.label;
+                                const val = typeof opt === 'string' ? opt : opt.value;
+                                return <option key={String(val)} value={String(val)}>{label}</option>;
+                            })}
                         </select>
                     ) : (
                         <input

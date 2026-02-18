@@ -806,11 +806,31 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                     if (p.class === 'phase-buffer-orange') opacityStyle.backgroundColor = 'var(--phase-buffer-orange)';
                 }
 
+                // Priority coloring
+                const usePriorityColors = config?.design?.usePriorityColors;
+                const projectPriority = project.priority;
+                let phaseColor = 'var(--' + p.class + ')';
+
+                if (usePriorityColors && projectPriority) {
+                    const priorityKey = `priority${projectPriority}` as keyof typeof config.colors;
+                    const priorityConfig = config.colors[priorityKey];
+                    if (priorityConfig) {
+                        // Use priority color but preserve phase opacity if needed? 
+                        // User said "vybrat jinou barvu pro každou prioritu", so let's use the priority color.
+                        phaseColor = priorityConfig.color;
+                    }
+                }
+
                 return (
                     <div
                         key={`${id}-${p.key}`}
                         className={`timeline-phase ${p.class} flex items-center px-2 overflow-hidden`}
-                        style={{ left, width, ...opacityStyle }}
+                        style={{
+                            left,
+                            width,
+                            ...opacityStyle,
+                            backgroundColor: phaseColor
+                        }}
                         title={`${name}`}
                     >
                     </div>
