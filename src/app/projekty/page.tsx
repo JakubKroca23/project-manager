@@ -297,51 +297,8 @@ export default function ProjektyPage() {
                                     )}
                                 >
                                     <Plus size={10} />
-                                    <span>Nový projekt</span>
+                                    <span>{activeTab === 'service' ? 'Nový servis' : 'Nová zakázka'}</span>
                                 </button>
-
-                                {/* Maintenance: Finish Unplanned Civil Projects */}
-                                {activeTab === 'civil' && (
-                                    <button
-                                        onClick={async () => {
-                                            const projectsToUpdate = tabProjects.filter(p => {
-                                                const hasMilestones =
-                                                    p.chassis_delivery ||
-                                                    p.body_delivery ||
-                                                    p.customer_handover ||
-                                                    p.deadline ||
-                                                    p.custom_fields?.mounting_end_date ||
-                                                    p.custom_fields?.revision_end_date;
-                                                return !hasMilestones && p.status !== 'Dokončeno';
-                                            });
-
-                                            if (projectsToUpdate.length === 0) {
-                                                toast.info('Žádné projekty k aktualizaci.');
-                                                return;
-                                            }
-
-                                            if (confirm(`Opravdu chcete nastavit status "Dokončeno" u ${projectsToUpdate.length} nezařazených projektů?`)) {
-                                                const ids = projectsToUpdate.map(p => p.id);
-                                                const { error } = await supabase
-                                                    .from('projects')
-                                                    .update({ status: 'Dokončeno' })
-                                                    .in('id', ids);
-
-                                                if (error) {
-                                                    toast.error('Chyba při aktualizaci: ' + error.message);
-                                                } else {
-                                                    toast.success(`Aktualizováno ${projectsToUpdate.length} projektů.`);
-                                                    fetchProjects();
-                                                }
-                                            }
-                                        }}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 transition-all"
-                                        title="Nastaví 'Dokončeno' u projektů, které nejsou na časové ose"
-                                    >
-                                        <PackageCheck size={10} />
-                                        <span>Dokončit nezařazené</span>
-                                    </button>
-                                )}
 
                                 {isBulkMode ? (
                                     <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all">
