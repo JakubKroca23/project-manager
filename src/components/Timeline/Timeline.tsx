@@ -195,14 +195,14 @@ interface IColorsState {
     phaseInitial: IColorConfig;
     phaseMounting: IColorConfig;
     phaseBufferYellow: IColorConfig;
-    phaseBufferOrange: IColorConfig;
+    phaseBufferOrange?: IColorConfig;
     milestoneChassis: IColorConfig;
     milestoneBody: IColorConfig;
     milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
     milestoneMountingEnd: IColorConfig;
-    milestoneRevisionEnd: IColorConfig;
-    milestoneStart: IColorConfig;
+    milestoneRevisionEnd?: IColorConfig;
+    milestoneStart?: IColorConfig;
 }
 
 interface IOutlineState {
@@ -355,6 +355,24 @@ const Timeline: React.FC = () => {
         '--day-width': `${dayWidth}px`, // Added for dynamic CSS grid line calculation
     } as React.CSSProperties;
 
+
+
+
+
+
+
+    // Ref pro uchování pozice pro zoom
+    const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
+
+    // Časový rozsah 2025 - 2027
+    const timelineRange = useMemo(() => {
+        const start = new Date(2025, 0, 1); // 1. 1. 2025
+        const end = new Date(2027, 11, 31); // 31. 12. 2027
+        return { start, end };
+    }, []);
+
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
     // Independent vertical zoom via Ctrl + Wheel
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -386,22 +404,6 @@ const Timeline: React.FC = () => {
         container.addEventListener('wheel', handleWheel, { passive: false });
         return () => container.removeEventListener('wheel', handleWheel);
     }, [scrollContainerRef]);
-
-
-
-
-
-    // Ref pro uchování pozice pro zoom
-    const zoomFocus = useRef<{ pointDays: number; pixelOffset: number } | null>(null);
-
-    // Časový rozsah 2025 - 2027
-    const timelineRange = useMemo(() => {
-        const start = new Date(2025, 0, 1); // 1. 1. 2025
-        const end = new Date(2027, 11, 31); // 31. 12. 2027
-        return { start, end };
-    }, []);
-
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Restore scroll position after zoom
     useLayoutEffect(() => {
