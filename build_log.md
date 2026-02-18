@@ -141,7 +141,14 @@
     - Přidána interaktivní minihra s jeřábem ("Crane Game") pro zabavení uživatelů během odstávky.
 - **Hotfix**: Oprava chybějícího importu `Trash2` na stránce Servisu, který způsoboval pád buildu na Vercelu.
 
-## [2026-02-17] - Fix: Obnova přihlašovacích údajů Supabase
-- **Chyba**: Systém hlásil nedostupnost Supabase credentials ("Supabase credentials missing!").
-- **Příčina**: Chybějící soubor `.env.local` v kořenovém adresáři projektu.
-- **Oprava**: Soubor byl nalezen v záložní složce `project-manager-1` a obnoven do aktuálního projektu.
+## [2026-02-18] - Refaktoring navigace, terminologie a úprava ovládání Timeline
+- **Změna**: Modernizace a sjednocení terminologie napříč aplikací.
+- **Detail**: Výraz "Manažer / Vlastník" nahrazen termínem "Vedoucí projektu" ve všech UI prvcích (vytváření, import, tabulky, detaily).
+- **Změna**: Vylepšení navigace Navbaru.
+- **Detail**: Implementována inteligentní detekce aktivní kategorie (Civilní/Vojenské/Servis) i na detailních stránkách zakázek pomocí parametrů v URL a analýzy cesty (pathname).
+- **Změna**: Redesign ovládání Timeline.
+- **Detail**:
+    - Tlačítka pro vertikální zoom odstraněna z fixní hlavičky.
+    - Implementována transparentní tlačítka pro nezávislou změnu výšky řádků přímo v mřížce (pro souhrnné stacked řádky i jednotlivé zakázky).
+    - Panel "Vzhled" přesunut z fixní boční lišty do inline výsuvného panelu pod hlavičkou, který při otevření odsouvá obsah timeline dolů.
+- **Cleanup**: Odstranění polí "Typ nástavby" a "Výrobní číslo" ze základních informací v detailu projektu pro zvýšení přehlednosti.

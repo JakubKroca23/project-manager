@@ -34,6 +34,12 @@
 - [x] Implementace Release Notes modálu.
 - [x] Dynamické načítání verze na obrazovce údržby.
 - [x] Implementace interaktivní minihry s jeřábem pro režim údržby.
+- [x] Globální náhrada "Manažer" -> "Vedoucí projektu".
+- [x] Oprava navigace Navbaru (active category fix).
+- [x] Redesign ovládání vertikálního zoomu v Timeline (in-grid tlačítka).
+- [x] Přesun panelu Vzhled do inline popupu pod hlavičkou.
+- [x] Cleanup základních polí v detailu projektu.
+
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

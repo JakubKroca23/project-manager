@@ -107,3 +107,9 @@
 107:     - Kontejner popupu má nyní definovaný `max-height` a `scroll`, což řeší přetečení u velkého množství ikon nebo dlouhých popisů.
 108: - **Data Clean-up**:
 109:     - Odstraněno pole `body_type` z projektu, jelikož tato data jsou nyní lépe zpracovávána skrze specifické milníky a konfigurace.
+
+111: ## 2026-02-18: Refaktoring terminologie a ovládání Timeline
+112: - **Terminologie**: Provedena globální náhrada 'Manažer' -> 'Vedoucí projektu'.
+113: - **Navigace**: Navbar nyní spolehlivě ukazuje aktivní kategorii i v detailu zakázky.
+114: - **Timeline UX**: Přechod na in-grid ovládání vertikálního zoomu a inline panel nastavení vzhledu.
+115: - **Data Cleanup**: Odstranění méně důležitých polí z primárního pohledu v detailu projektu.
