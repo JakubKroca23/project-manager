@@ -1042,9 +1042,9 @@ const Timeline: React.FC = () => {
                                                 className="w-8 h-8 flex items-center justify-center bg-background border border-border/40 rounded hover:bg-muted/50 transition-colors"
                                                 title="Vybrat ikonu"
                                             >
-                                                {config.icon && ICON_OPTIONS[config.icon] ? (
+                                                {config.icon && ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS] ? (
                                                     (() => {
-                                                        const Icon = ICON_OPTIONS[config.icon];
+                                                        const Icon = ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS];
                                                         return <Icon size={14} />;
                                                     })()
                                                 ) : (
