@@ -467,10 +467,9 @@ const Timeline: React.FC = () => {
             const container = scrollContainerRef.current;
             if (!container) return;
 
-            // Check if event target is inside our timeline
-            // Use ID or class check to be sure
-            const isInsideTimeline = (e.target as HTMLElement).closest('.timeline-container');
-            if (!isInsideTimeline) return;
+            // Check if mouse is over the timeline container or its children
+            const isOverTimeline = (e.target as HTMLElement).closest('.timeline-container');
+            if (!isOverTimeline) return;
 
             // ABSOLUTE BLOCK: Stop all native scrolling on the timeline
             // User requested to use DRAG for scrolling, wheel is ONLY for zoom.
@@ -497,9 +496,10 @@ const Timeline: React.FC = () => {
 
             const currentWidth = dayWidthRef.current;
             const rect = container.getBoundingClientRect();
+            // mouseX relative to viewport start of scroll container
             const mouseX = e.clientX - rect.left;
 
-            // Kolik dní je od začátku osy k pozici myši
+            // Capture exact state BEFORE state changes
             const pointDays = (container.scrollLeft + mouseX) / currentWidth;
             zoomFocus.current = { pointDays, pixelOffset: mouseX };
 
@@ -511,7 +511,7 @@ const Timeline: React.FC = () => {
             }
         };
 
-        // Attachment on window with capture: true is the most aggressive way to block scroll
+        // window capture: true is necessary to beat native scroll on position: sticky elements
         window.addEventListener('wheel', handleWindowWheel, { passive: false, capture: true });
         return () => window.removeEventListener('wheel', handleWindowWheel, { capture: true });
     }, [isLoading]);
