@@ -558,6 +558,14 @@ const Timeline: React.FC = () => {
     useEffect(() => {
         fetchProjects();
         fetchMilestones();
+
+        // Listen for global refresh from ImportWizard
+        const handleGlobalRefresh = () => {
+            fetchProjects();
+            fetchMilestones();
+        };
+        window.addEventListener('projects-updated', handleGlobalRefresh);
+        return () => window.removeEventListener('projects-updated', handleGlobalRefresh);
     }, [fetchProjects, fetchMilestones]);
 
     const handleProjectUpdate = useCallback((updatedProject: Project) => {

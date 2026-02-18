@@ -7,8 +7,8 @@ interface ActionContextType {
     setOnFit: (fn: (() => void) | null) => void;
     onImport: (() => void) | null;
     setOnImport: (fn: (() => void) | null) => void;
-    onRefresh: (() => void) | null;
-    setOnRefresh: (fn: (() => void) | null) => void;
+    isImportWizardOpen: boolean;
+    setIsImportWizardOpen: (open: boolean) => void;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
@@ -16,13 +16,13 @@ const ActionContext = createContext<ActionContextType | undefined>(undefined);
 export function ActionProvider({ children }: { children: ReactNode }) {
     const [onFit, setOnFit] = useState<(() => void) | null>(null);
     const [onImport, setOnImport] = useState<(() => void) | null>(null);
-    const [onRefresh, setOnRefresh] = useState<(() => void) | null>(null);
+    const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
     return (
         <ActionContext.Provider value={{
             onFit, setOnFit,
             onImport, setOnImport,
-            onRefresh, setOnRefresh
+            isImportWizardOpen, setIsImportWizardOpen
         }}>
             {children}
         </ActionContext.Provider>

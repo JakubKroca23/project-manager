@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import ExcelImporter from '@/components/ExcelImporter';
 import { Loader2, Search, Database, X, Plus, PackageCheck, Trash2, CheckCircle2 } from 'lucide-react';
 import { useSearch } from '@/providers/SearchProvider';
 import { toast } from 'sonner';
@@ -203,6 +202,11 @@ export default function ProjektyPage() {
 
     useEffect(() => {
         fetchProjects();
+
+        // Listen for global refresh from ImportWizard
+        const handleGlobalRefresh = () => fetchProjects();
+        window.addEventListener('projects-updated', handleGlobalRefresh);
+        return () => window.removeEventListener('projects-updated', handleGlobalRefresh);
     }, [fetchProjects]);
 
     // All projects for this tab (no search filtering)
@@ -461,7 +465,7 @@ export default function ProjektyPage() {
 
                             </div>
                         }
-                        toolbar={<ExcelImporter onImportSuccess={fetchProjects} projectType={activeTab} />}
+                        toolbar={null}
                         toolbarSubtext={lastImport ? (
                             <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium">
                                 <Database size={10} />

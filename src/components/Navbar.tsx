@@ -15,25 +15,25 @@ const navItems = [
         name: 'ZAKÁZKY',
         icon: Briefcase,
         href: '/projekty',
-        color: '#3b82f6',
-        militaryColor: '#a5d6a7',
-        serviceColor: '#ce93d8',
+        color: '#2563eb', // Blue-600 for better contrast
+        militaryColor: '#059669', // Emerald-600
+        serviceColor: '#9333ea', // Purple-600
         submenu: [
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
             { name: 'VOJENSKÉ', href: '/projekty?type=military' },
             { name: 'SERVIS', href: '/projekty?type=service' },
         ]
     },
-    { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#3b82f6' },
+    { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#2563eb' },
 ];
 export function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter(); // Use this if router is needed, otherwise remove. Added for safety based on import.
     const activeType = searchParams.get('type');
-    const { checkPerm } = usePermissions();
+    const { checkPerm, canImport } = usePermissions();
     const { searchTerm, setSearchTerm } = useSearch();
-    const { onFit, onImport } = useActions();
+    const { onFit, setIsImportWizardOpen } = useActions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -84,7 +84,7 @@ export function Navbar() {
         window.location.href = '/login';
     };
 
-    const activeColor = activeType === 'military' ? '#10b981' : activeType === 'civil' ? '#3b82f6' : activeType === 'service' ? '#a855f7' : null;
+    const activeColor = activeType === 'military' ? '#059669' : activeType === 'civil' ? '#2563eb' : activeType === 'service' ? '#9333ea' : null;
 
     return (
         <nav
@@ -178,8 +178,8 @@ export function Navbar() {
                                                             className={cn(
                                                                 "text-[10px] font-black tracking-[0.2em] transition-all uppercase px-4 py-2 rounded-md flex items-center justify-center border",
                                                                 isSubActive
-                                                                    ? "shadow-sm border-current"
-                                                                    : "text-foreground border-transparent hover:bg-foreground/[0.05]"
+                                                                    ? "shadow-sm border-current bg-background"
+                                                                    : "text-foreground border-transparent hover:bg-foreground/[0.08]"
                                                             )}
                                                             style={{
                                                                 backgroundColor: isSubActive ? `${subActiveColor}20` : undefined,
@@ -276,11 +276,11 @@ export function Navbar() {
                         )}
 
                         {/* Import Button */}
-                        {onImport && pathname?.includes('/projekty') && (
+                        {canImport && (
                             <button
-                                onClick={onImport}
+                                onClick={() => setIsImportWizardOpen(true)}
                                 className="flex items-center justify-center p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-500/20 transition-all active:scale-95 group"
-                                title="Importovat data"
+                                title="Importní Průvodce (Excel)"
                             >
                                 <FileUp size={16} className="group-hover:scale-110 transition-transform" />
                             </button>
