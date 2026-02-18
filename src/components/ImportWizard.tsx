@@ -55,6 +55,8 @@ interface ProjectField {
 interface DiffItem {
     id: string;
     name: string;
+    customer: string;
+    date: string | null;
     changes: { field: string; old: any; new: any }[];
     isNew: boolean;
 }
@@ -306,8 +308,17 @@ export default function ImportWizard() {
             const diffs: DiffItem[] = [];
             projectsToAnalyze.forEach(newP => {
                 const oldP = existingMap.get(newP.id);
+                const mainDate = newP.customer_handover || newP.deadline || newP.body_delivery;
+
                 if (!oldP) {
-                    diffs.push({ id: newP.id, name: newP.name, changes: [], isNew: true });
+                    diffs.push({
+                        id: newP.id,
+                        name: newP.name,
+                        customer: newP.customer,
+                        date: mainDate,
+                        changes: [],
+                        isNew: true
+                    });
                 } else {
                     const changes: { field: string; old: any; new: any }[] = [];
                     ['name', 'customer', 'manager', 'status', 'production_status', 'project_type', 'body_delivery', 'customer_handover', 'chassis_delivery'].forEach(key => {
@@ -317,9 +328,15 @@ export default function ImportWizard() {
                             }
                         }
                     });
-                    if (changes.length > 0 || projectsToAnalyze.length > 0) {
-                        diffs.push({ id: newP.id, name: newP.name, changes, isNew: false });
-                    }
+
+                    diffs.push({
+                        id: newP.id,
+                        name: newP.name,
+                        customer: newP.customer,
+                        date: mainDate,
+                        changes,
+                        isNew: false
+                    });
                 }
             });
 
@@ -540,7 +557,9 @@ export default function ImportWizard() {
                                                 />
                                             </th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Stav</th>
+                                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Klient</th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Projekt/ID</th>
+                                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Termín</th>
                                             <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Změny</th>
                                         </tr>
                                     </thead>
@@ -567,8 +586,16 @@ export default function ImportWizard() {
                                                     }
                                                 </td>
                                                 <td className="px-4 py-3">
+                                                    <div className="text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">{d.customer}</div>
+                                                </td>
+                                                <td className="px-4 py-3">
                                                     <div className="font-bold text-xs">{d.name}</div>
                                                     <div className="text-[9px] font-mono text-muted-foreground">{d.id}</div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="text-[10px] font-medium text-muted-foreground">
+                                                        {d.date ? new Date(d.date).toLocaleDateString('cs-CZ') : '-'}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-3 text-[10px]">
                                                     {d.changes.length > 0 ? (
@@ -578,7 +605,7 @@ export default function ImportWizard() {
                                                             ))}
                                                             {d.changes.length > 3 && <span>+{d.changes.length - 3}</span>}
                                                         </div>
-                                                    ) : <span className="text-muted-foreground">Bez změn polí</span>}
+                                                    ) : <span className="text-muted-foreground">Beze změn</span>}
                                                 </td>
                                             </tr>
                                         ))}
