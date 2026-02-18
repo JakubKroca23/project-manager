@@ -39,35 +39,7 @@ const SafeCellValue: React.FC<{ value: any }> = ({ value }) => {
 };
 
 const columns: ColumnDef<Project>[] = [
-    {
-        id: 'select',
-        header: ({ table }) => (
-            <div className="flex justify-center items-center h-full">
-                <input
-                    type="checkbox"
-                    checked={table.getIsAllPageRowsSelected()}
-                    onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
-                    className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-                />
-            </div>
-        ),
-        cell: ({ row }) => (
-            <div className="flex justify-center items-center h-full">
-                <input
-                    type="checkbox"
-                    checked={row.getIsSelected()}
-                    onChange={(e) => row.toggleSelected(!!e.target.checked)}
-                    className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-                    onClick={(e) => e.stopPropagation()}
-                />
-            </div>
-        ),
-        enableSorting: false,
-        enableHiding: false,
-        size: 50,
-        minSize: 50,
-        maxSize: 80,
-    },
+
     {
         accessorKey: 'id',
         header: 'Kód',

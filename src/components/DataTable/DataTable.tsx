@@ -369,7 +369,7 @@ export function DataTable<TData, TValue>({
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
                                             onClick={() => onRowClick?.(row.original)}
-                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-primary/[0.08] data-[state=selected]:hover:bg-primary/[0.12] ${getRowClassName?.(row.original) || ''}`}
+                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-primary/20 data-[state=selected]:hover:bg-primary/25 data-[state=selected]:shadow-[inset_4px_0_0_hsl(var(--primary))] ${getRowClassName?.(row.original) || ''}`}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <td

@@ -88,8 +88,9 @@ export function Navbar() {
                     className="flex h-12 items-center justify-between gap-1"
                 >
                     {/* Navigation Items - Left Aligned Menu */}
+                    {/* Left: Zakázky */}
                     <div className="flex-1 flex items-center justify-start gap-1">
-                        {filteredNavItems.map((item) => {
+                        {filteredNavItems.filter(i => i.name === 'ZAKÁZKY').map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
                             const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
                             const isService = item.name === 'ZAKÁZKY' && activeType === 'service';
@@ -122,7 +123,7 @@ export function Navbar() {
                                                 <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : undefined }} />
                                             </div>
                                             {activeCategory && isActive && (
-                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-[-4px] z-10 flex justify-center pointer-events-none">
+                                                <div className="absolute top-full left-0 mt-[-4px] z-10 flex justify-center pointer-events-none">
                                                     <span
                                                         className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-full bg-background border shadow-xl whitespace-nowrap"
                                                         style={{
@@ -139,7 +140,7 @@ export function Navbar() {
 
                                         <div
                                             className={cn(
-                                                "absolute top-full left-1/2 -translate-x-1/2 pt-1 z-50 transition-all duration-300 ease-out",
+                                                "absolute top-full left-0 pt-1 z-50 transition-all duration-300 ease-out",
                                                 openSubmenu === item.name
                                                     ? "opacity-100 translate-y-0 pointer-events-auto"
                                                     : "opacity-0 -translate-y-2 pointer-events-none"
@@ -199,13 +200,22 @@ export function Navbar() {
                                     </div>
                                 );
                             }
+                            return null;
+                        })}
+                    </div>
+
+                    {/* Center: Harmonogram */}
+                    <div className="flex-initial flex items-center justify-center gap-1">
+                        {filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => {
+                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                            let activeColor = item.color;
 
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent",
+                                        "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent",
                                         isActive ? "bg-white/5" : ""
                                     )}
                                     style={{
