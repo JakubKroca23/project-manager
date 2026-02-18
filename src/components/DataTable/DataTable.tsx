@@ -16,6 +16,7 @@ import {
 } from '@tanstack/react-table';
 import { ArrowUpDown, Search, Maximize2, RefreshCcw } from 'lucide-react';
 import { ColumnToggle } from './ColumnToggle';
+import { useActions } from '@/providers/ActionProvider';
 
 // dnd-kit
 import {
@@ -168,6 +169,7 @@ export function DataTable<TData, TValue>({
     }, [columnSizing, onColumnSizingChange]);
 
     const tableContainerRef = useRef<HTMLDivElement>(null);
+    const { setOnFit } = useActions();
 
     const table = useReactTable({
         data,
@@ -254,6 +256,11 @@ export function DataTable<TData, TValue>({
         table.setColumnSizing(newSizing);
     }, [table]);
 
+    React.useEffect(() => {
+        setOnFit(() => handleAutoFit);
+        return () => setOnFit(null);
+    }, [handleAutoFit, setOnFit]);
+
     // Reset column sizing to defaults
     const handleResetSizing = useCallback(() => {
         table.resetColumnSizing();
@@ -270,22 +277,6 @@ export function DataTable<TData, TValue>({
 
                     {/* Left-Aligned Actions */}
                     <div className="flex items-center gap-1.5 ml-0">
-                        <button
-                            onClick={handleAutoFit}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 hover:text-emerald-700 border border-emerald-500/20 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
-                            title="Přizpůsobit šířku sloupců"
-                        >
-                            <Maximize2 size={12} />
-                            <span className="hidden sm:inline">Přizpůsobit</span>
-                        </button>
-                        <button
-                            onClick={handleResetSizing}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 hover:text-rose-700 border border-rose-500/20 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all active:scale-[0.97]"
-                            title="Obnovit výchozí šířky"
-                        >
-                            <RefreshCcw size={12} />
-                            <span className="hidden sm:inline">Obnovit</span>
-                        </button>
                         <ColumnToggle table={table} />
                         {toolbar}
                         {toolbarSubtext && (

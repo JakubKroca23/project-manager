@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Search, X } from 'lucide-react';
+import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Search, X, Maximize2, FileUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useSearch } from '@/providers/SearchProvider';
+import { useActions } from '@/providers/ActionProvider';
 
 const navItems = [
     {
@@ -32,6 +33,7 @@ export function Navbar() {
     const activeType = searchParams.get('type');
     const { checkPerm } = usePermissions();
     const { searchTerm, setSearchTerm } = useSearch();
+    const { onFit, onImport } = useActions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -82,8 +84,16 @@ export function Navbar() {
         window.location.href = '/login';
     };
 
+    const activeColor = activeType === 'military' ? '#10b981' : activeType === 'civil' ? '#3b82f6' : activeType === 'service' ? '#a855f7' : null;
+
     return (
-        <nav className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b shadow-xl">
+        <nav
+            className="sticky top-0 z-50 w-full backdrop-blur-md border-b shadow-xl transition-all duration-500"
+            style={{
+                backgroundColor: activeColor ? `${activeColor}10` : 'hsl(var(--background) / 0.95)',
+                borderColor: activeColor ? `${activeColor}20` : 'hsl(var(--border))'
+            }}
+        >
             <div className="w-full px-4">
                 <div
                     className="flex h-12 items-center justify-between gap-1"
@@ -140,14 +150,14 @@ export function Navbar() {
 
                                         <div
                                             className={cn(
-                                                "absolute top-full left-0 pt-1 z-50 transition-all duration-300 ease-out",
+                                                "absolute top-full left-0 pt-2 z-50 transition-all duration-300 ease-out",
                                                 openSubmenu === item.name
                                                     ? "opacity-100 translate-y-0 pointer-events-auto"
                                                     : "opacity-0 -translate-y-2 pointer-events-none"
                                             )}
                                         >
                                             <div
-                                                className="bg-background rounded-md shadow-2xl px-1.5 py-1 flex flex-row items-center gap-0.5 whitespace-nowrap min-w-max border mt-[-1px]"
+                                                className="bg-background rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-1.5 flex flex-row items-center gap-1.5 whitespace-nowrap min-w-max border border-border/60 backdrop-blur-md"
                                             >
                                                 {item.submenu.map((sub) => {
                                                     const isSubMilitary = sub.name === 'VOJENSKÉ';
@@ -166,19 +176,21 @@ export function Navbar() {
                                                             key={sub.name}
                                                             href={sub.href}
                                                             className={cn(
-                                                                "text-[9px] font-bold tracking-[0.15em] transition-all uppercase px-2 py-1 rounded-md flex items-center justify-center border border-transparent",
-                                                                isSubActive ? "text-white" : "text-gray-400"
+                                                                "text-[10px] font-black tracking-[0.2em] transition-all uppercase px-4 py-2 rounded-md flex items-center justify-center border",
+                                                                isSubActive
+                                                                    ? "shadow-sm border-current"
+                                                                    : "text-foreground/60 border-transparent hover:text-foreground hover:bg-foreground/[0.03]"
                                                             )}
                                                             style={{
-                                                                backgroundColor: isSubActive ? `${subActiveColor}33` : undefined,
+                                                                backgroundColor: isSubActive ? `${subActiveColor}20` : undefined,
                                                                 color: isSubActive ? subActiveColor : undefined,
+                                                                borderColor: isSubActive ? `${subActiveColor}40` : undefined,
                                                             }}
                                                             onMouseEnter={(e) => {
                                                                 if (!isSubActive) {
                                                                     e.currentTarget.style.color = subActiveColor!;
-                                                                    e.currentTarget.style.backgroundColor = `${subActiveColor}1a`;
-                                                                    e.currentTarget.style.borderColor = `${subActiveColor}33`;
-                                                                    e.currentTarget.style.boxShadow = `0 0 10px ${subActiveColor}33`;
+                                                                    e.currentTarget.style.backgroundColor = `${subActiveColor}15`;
+                                                                    e.currentTarget.style.borderColor = `${subActiveColor}40`;
                                                                 }
                                                             }}
                                                             onMouseLeave={(e) => {
@@ -186,7 +198,6 @@ export function Navbar() {
                                                                     e.currentTarget.style.color = 'hsl(var(--foreground) / 0.6)';
                                                                     e.currentTarget.style.backgroundColor = 'transparent';
                                                                     e.currentTarget.style.borderColor = 'transparent';
-                                                                    e.currentTarget.style.boxShadow = 'none';
                                                                 }
                                                             }}
                                                             onClick={() => setOpenSubmenu(null)}
@@ -252,6 +263,28 @@ export function Navbar() {
                                 )}
                             </div>
                         </div>
+
+                        {/* Fit Button */}
+                        {onFit && (
+                            <button
+                                onClick={onFit}
+                                className="flex items-center justify-center p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20 transition-all active:scale-95 group"
+                                title="Přizpůsobit zobrazení"
+                            >
+                                <Maximize2 size={16} className="group-hover:scale-110 transition-transform" />
+                            </button>
+                        )}
+
+                        {/* Import Button */}
+                        {onImport && pathname?.includes('/projekty') && (
+                            <button
+                                onClick={onImport}
+                                className="flex items-center justify-center p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-500/20 transition-all active:scale-95 group"
+                                title="Importovat data"
+                            >
+                                <FileUp size={16} className="group-hover:scale-110 transition-transform" />
+                            </button>
+                        )}
 
                         <div className="flex flex-col items-center justify-center">
                             <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>

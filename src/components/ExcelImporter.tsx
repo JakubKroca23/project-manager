@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
 import { Upload, Loader2, CheckCircle, AlertCircle, Lock, X, Table as TableIcon, Settings2, Save, FileSpreadsheet, PlusCircle, AlertTriangle, ArrowRight, Edit2, Clock } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useActions } from '@/providers/ActionProvider';
 
 const cleanNaN = (val: any) => val === "NaN" || val === null || val === undefined ? undefined : val;
 
@@ -103,6 +104,16 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
     const [typeConflictAction, setTypeConflictAction] = useState<'skip' | 'overwrite'>('skip');
 
     const { canImport, isLoading: permsLoading } = usePermissions();
+    const { setOnImport } = useActions();
+
+    useEffect(() => {
+        if (canImport) {
+            setOnImport(() => () => setShowSourceSelect(true));
+        } else {
+            setOnImport(null);
+        }
+        return () => setOnImport(null);
+    }, [canImport, setOnImport]);
 
 
     const findBestMatch = (field: ProjectField, columns: string[]) => {
@@ -583,27 +594,10 @@ export default function ExcelImporter({ onImportSuccess, projectType, lastImport
         });
     };
 
-    if (permsLoading) return <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />;
+    if (permsLoading) return null;
 
     return (
         <>
-            {canImport ? (
-                <button
-                    onClick={() => setShowSourceSelect(true)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all active:scale-[0.97] hover:shadow-md bg-[#0099ee] hover:bg-[#00aaff] text-white
-                    ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={loading}
-                >
-                    {loading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
-                    <span>{loading ? 'Import...' : 'Import'}</span>
-                </button>
-            ) : (
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-lg text-muted-foreground text-[9px] border border-dashed border-border opacity-50">
-                    <Lock size={10} />
-                    <span className="font-bold uppercase tracking-widest">Uzamčeno</span>
-                </div>
-            )}
-
             {message && (
                 <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}>
                     {message.type === 'success' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}

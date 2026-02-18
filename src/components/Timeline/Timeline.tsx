@@ -5,6 +5,7 @@ import './Timeline.css';
 import { supabase } from '@/lib/supabase/client';
 import { Project, Milestone as ProjectMilestone } from '@/types/project';
 import { useSearch } from '@/providers/SearchProvider';
+import { useActions } from '@/providers/ActionProvider';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
 import {
@@ -223,6 +224,7 @@ const Timeline: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const { searchTerm: searchQuery } = useSearch();
+    const { setOnFit } = useActions();
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
         civil: true,
         military: true,
@@ -238,6 +240,7 @@ const Timeline: React.FC = () => {
     const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
     const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
+    const timelineRef = useRef<HTMLDivElement>(null);
 
     // Ref for accessing current dayWidth in event listeners
     const dayWidthRef = useRef(dayWidth);
@@ -728,6 +731,21 @@ const Timeline: React.FC = () => {
         }
     }, [isLoading]);
 
+    const handleFitVertical = useCallback(() => {
+        if (!timelineRef.current) return;
+        const bodyHeight = timelineRef.current.offsetHeight - (Object.keys(activeTypes).length * 80);
+        const totalRows = filteredProjects.length + 6;
+        if (totalRows <= 0) return;
+        const targetHeight = Math.floor(bodyHeight / totalRows);
+        const newHeight = Math.max(14, Math.min(100, targetHeight));
+        setRowHeight(newHeight);
+    }, [filteredProjects.length, activeTypes, timelineRef]);
+
+    useEffect(() => {
+        setOnFit(() => handleFitVertical);
+        return () => setOnFit(null);
+    }, [handleFitVertical, setOnFit]);
+
     const isCompact = dayWidth < 18;
 
     if (isLoading) {
@@ -739,6 +757,7 @@ const Timeline: React.FC = () => {
     }
     return (
         <div
+            ref={timelineRef}
             className={`timeline-container ${isCompact ? 'mode-compact' : ''}`}
             style={{
                 ...customStyles,
