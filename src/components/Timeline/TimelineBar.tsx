@@ -328,10 +328,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             { key: 'deadline', date: t_deadline!, label: 'Deadline', class: 'deadline', icon: customIcons['deadline'] },
         ];
 
-        // Add dynamic end milestones if they are relevant (mountingStart exists)
-        if (mountingStart && mountingEnd) {
-            raw.push({ key: 'mounting_end', date: mountingEnd, label: 'Konec Montáže', class: 'mounting_end', icon: customIcons['mounting_end'] });
-        }
+        // Milestones prop can still contain custom milestones
 
 
 
@@ -696,7 +693,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 {[
                                     { id: 'chassis', label: 'Podvozek' },
                                     { id: 'body', label: 'Nástavba' },
-                                    { id: 'mounting_end', label: 'Konec Montáže' },
                                     { id: 'handover', label: 'Předání', },
                                     { id: 'deadline', label: 'Deadline' },
                                 ].map(type => (
@@ -811,12 +807,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const projectPriority = project.priority;
                 let phaseColor = 'var(--' + p.class + ')';
 
-                if (usePriorityColors && projectPriority) {
+                if (usePriorityColors && projectPriority && p.class === 'phase-buffer-yellow') {
                     const priorityKey = `priority${projectPriority}` as keyof typeof config.colors;
                     const priorityConfig = config.colors[priorityKey];
                     if (priorityConfig) {
-                        // Use priority color but preserve phase opacity if needed? 
-                        // User said "vybrat jinou barvu pro každou prioritu", so let's use the priority color.
                         phaseColor = priorityConfig.color;
                     }
                 }

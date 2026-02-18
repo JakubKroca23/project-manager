@@ -218,7 +218,6 @@ interface IColorsState {
     milestoneBody: IColorConfig;
     milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
-    milestoneMountingEnd: IColorConfig;
     milestoneRevisionEnd?: IColorConfig;
     milestoneStart?: IColorConfig;
     priority1: IColorConfig;
@@ -289,7 +288,6 @@ const Timeline: React.FC = () => {
         milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
         milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
-        milestoneMountingEnd: { color: '#eab308', opacity: 1, label: 'Konec Montáže', icon: 'Wrench', showInStack: false },
         priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
         priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
         priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
@@ -1202,18 +1200,20 @@ const Timeline: React.FC = () => {
                                             className="project-info-sticky transition-colors group"
                                             style={{ borderLeft: `10px solid ${sectorColor}` }}
                                         >
-                                            <div className="absolute top-1 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col z-50">
+                                            <div className="absolute top-0 right-0 opacity-20 group-hover:opacity-100 transition-opacity flex flex-col z-[2001] bg-background/80 rounded-bl-lg border-l border-b border-border/20">
                                                 <button
                                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.min(120, prev + 4)); }}
-                                                    className="w-4 h-4 flex items-center justify-center text-black/20 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                    className="w-5 h-5 flex items-center justify-center text-foreground hover:bg-primary/10 transition-all"
+                                                    title="Zvětšit výšku řádku"
                                                 >
-                                                    <Plus size={10} />
+                                                    <Plus size={12} />
                                                 </button>
                                                 <button
                                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRowHeight(prev => Math.max(12, prev - 4)); }}
-                                                    className="w-4 h-4 flex items-center justify-center text-black/20 hover:text-black hover:bg-black/5 rounded transition-all"
+                                                    className="w-5 h-5 flex items-center justify-center text-foreground hover:bg-primary/10 transition-all"
+                                                    title="Zmenšit výšku řádku"
                                                 >
-                                                    <Minus size={10} />
+                                                    <Minus size={12} />
                                                 </button>
                                             </div>
                                             <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
