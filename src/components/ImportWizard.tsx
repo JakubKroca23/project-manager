@@ -81,7 +81,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'serial_number', label: 'Výrobní číslo / VIN', defaultAliases: ['výrobní číslo', 'vč', 'vin', 'výr. č.'] },
 ];
 
-type ImportSource = 'raynet' | 'group' | 'custom';
+type ImportSource = 'excel' | 'pdf' | 'dxf' | 'glb' | 'word' | 'image';
 type ProjectType = 'civil' | 'military' | 'service' | 'specific';
 
 export default function ImportWizard() {
@@ -90,7 +90,7 @@ export default function ImportWizard() {
 
     const [step, setStep] = useState<'type' | 'source' | 'header-selection' | 'mapping' | 'duplicates' | 'conflicts' | 'diff' | 'success'>('type');
     const [projectType, setProjectType] = useState<ProjectType | null>(null);
-    const [importSource, setImportSource] = useState<ImportSource>('raynet');
+    const [importSource, setImportSource] = useState<ImportSource>('excel');
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -489,17 +489,20 @@ export default function ImportWizard() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
                                 {[
-                                    { id: 'raynet' as ImportSource, label: 'Raynet CRM', desc: 'Export z obchodního systému' },
-                                    { id: 'group' as ImportSource, label: 'Tabulka Group', desc: 'Interní formátování zakázek' },
-                                    { id: 'custom' as ImportSource, label: 'Vlastní', desc: 'Libovolná tabulka s mapováním' }
+                                    { id: 'excel' as ImportSource, label: 'Excel Tabulka', desc: 'Import dat z Excelu (.xlsx, .xls, .csv)' },
+                                    // { id: 'pdf' as ImportSource, label: 'PDF Dokument', desc: 'TBA' },
+                                    // { id: 'dxf' as ImportSource, label: 'DXF Výkres', desc: 'TBA' },
+                                    // { id: 'glb' as ImportSource, label: '3D Model (GLB)', desc: 'TBA' },
+                                    // { id: 'word' as ImportSource, label: 'Word Dokument', desc: 'TBA' },
+                                    // { id: 'image' as ImportSource, label: 'Obrázek', desc: 'TBA' },
                                 ].map((s) => (
                                     <button
                                         key={s.id}
                                         onClick={() => handleSourceSelect(s.id)}
-                                        className="p-6 rounded-2xl bg-muted/30 border border-border hover:border-primary hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group"
+                                        className="p-6 rounded-2xl bg-muted/30 border border-border hover:border-primary hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group w-full"
                                     >
                                         <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                            <Upload size={18} />
+                                            <FileSpreadsheet size={18} />
                                         </div>
                                         <div>
                                             <div className="text-sm font-black uppercase tracking-tight">{s.label}</div>
@@ -878,6 +881,6 @@ export default function ImportWizard() {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
             `}</style>
-        </div>
+        </div >
     );
 }
