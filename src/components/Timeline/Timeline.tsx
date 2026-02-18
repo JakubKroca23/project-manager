@@ -469,8 +469,6 @@ const Timeline: React.FC = () => {
         const handleWheelNative = (e: WheelEvent) => {
             // 1. Shift + Wheel = Horizontal Scroll
             if (e.shiftKey) {
-                // Let browser handle it or force it if needed
-                // container.scrollLeft += e.deltaY; 
                 return;
             }
 
@@ -479,6 +477,8 @@ const Timeline: React.FC = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 const delta = e.deltaY;
+                if (delta === 0) return;
+
                 setRowHeight(prev => {
                     const next = delta > 0 ? prev - 4 : prev + 4;
                     const clamped = Math.min(100, Math.max(14, next));
@@ -488,11 +488,12 @@ const Timeline: React.FC = () => {
             }
 
             // 3. Just Wheel = Horizontal Zoom (Day Width)
-            // Agresivně zamezíme scrollu stránky a osy
+            const delta = e.deltaY;
+            if (delta === 0) return;
+
             e.preventDefault();
             e.stopPropagation();
 
-            const delta = e.deltaY;
             const currentWidth = dayWidthRef.current;
 
             // Výpočet pozice pro zoom na kurzor
@@ -507,7 +508,7 @@ const Timeline: React.FC = () => {
             if (delta > 0) {
                 // Zoom out
                 setDayWidth(prev => Math.max(prev / 1.1, MIN_DAY_WIDTH));
-            } else {
+            } else if (delta < 0) {
                 // Zoom in
                 setDayWidth(prev => Math.min(prev * 1.1, MAX_DAY_WIDTH));
             }
@@ -515,7 +516,7 @@ const Timeline: React.FC = () => {
 
         container.addEventListener('wheel', handleWheelNative, { passive: false });
         return () => container.removeEventListener('wheel', handleWheelNative);
-    }, []);
+    }, [isLoading]);
 
     const fetchProjects = useCallback(async () => {
         try {
