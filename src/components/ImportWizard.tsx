@@ -979,15 +979,106 @@ export default function ImportWizard() {
                             </div>
                         </div>
                     )}
-                </div>
-            </div>
 
-            <style jsx global>{`
+                    {/* CONFLICTS Resolution */}
+                    {step === 'conflicts' && (
+                        <div className="space-y-6 animate-in fade-in">
+                            <div className="text-center space-y-2">
+                                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center text-destructive mx-auto mb-4">
+                                    <AlertCircle size={32} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight">Konflikt typů projektů</h3>
+                                <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                                    Nalezeno {typeConflictGroups.length} projektů, které již existují v systému pod jiným typem než <strong>{projectType}</strong>.
+                                </p>
+                            </div>
+
+                            <div className="overflow-hidden rounded-2xl border border-border bg-muted/5">
+                                <div className="bg-destructive/10 px-6 py-4 flex items-center gap-4">
+                                    <AlertCircle className="text-destructive shrink-0" size={20} />
+                                    <div className="text-xs text-destructive font-medium">
+                                        Tyto projekty nebudou importovány, pokud nezvolíte přepsání. Změna typu projektu může ovlivnit dostupná data.
+                                    </div>
+                                </div>
+                                <div className="max-h-[40vh] overflow-y-auto divide-y divide-border/50">
+                                    {typeConflictGroups.map((p, idx) => (
+                                        <div key={idx} className="px-6 py-3 flex items-center justify-between hover:bg-muted/20 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">{p.id}</div>
+                                                <div className="text-xs font-medium">Existující typ: <span className="font-bold uppercase text-foreground">{p.project_type}</span></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto pt-4">
+                                <button
+                                    onClick={() => {
+                                        setTypeConflictAction('skip');
+                                        // Remove conflicting projects from preparedProjects
+                                        const conflictingIds = new Set(typeConflictGroups.map(c => c.id));
+                                        const filteredProjects = preparedProjects.filter(p => !conflictingIds.has(p.id));
+                                        setPreparedProjects(filteredProjects);
+
+                                        if (filteredProjects.length === 0) {
+                                            alert("Po přeskočení konfliktů nezbyly žádné projekty k importu.");
+                                            setStep('mapping');
+                                        } else {
+                                            analyzeDiffs(filteredProjects);
+                                        }
+                                    }}
+                                    className={cn(
+                                        "p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]",
+                                        typeConflictAction === 'skip' ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/50"
+                                    )}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-background border flex items-center justify-center text-muted-foreground">
+                                        <ArrowRight size={14} className="rotate-45" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-black uppercase tracking-widest">Přeskočit konflikty</div>
+                                        <div className="text-[10px] text-muted-foreground mt-1">Nahrát pouze bezproblémové projekty</div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setTypeConflictAction('overwrite');
+                                        // Update project_type for conflicting projects in preparedProjects
+                                        const conflictingIds = new Set(typeConflictGroups.map(c => c.id));
+                                        const updatedProjects = preparedProjects.map(p => {
+                                            if (conflictingIds.has(p.id) && projectType) {
+                                                return { ...p, project_type: projectType };
+                                            }
+                                            return p;
+                                        });
+                                        setPreparedProjects(updatedProjects);
+                                        analyzeDiffs(updatedProjects);
+                                    }}
+                                    className={cn(
+                                        "p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]",
+                                        typeConflictAction === 'overwrite' ? "border-destructive bg-destructive/5 shadow-md" : "border-border hover:border-destructive/50"
+                                    )}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-background border flex items-center justify-center text-destructive">
+                                        <Shield size={14} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-black uppercase tracking-widest text-destructive">Přepsat typ</div>
+                                        <div className="text-[10px] text-muted-foreground mt-1">Změnit typ u existujících projektů</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
             `}</style>
-        </div >
-    );
+                </div >
+                );
 }
