@@ -1253,11 +1253,7 @@ const Timeline: React.FC = () => {
                                                             left: 0
                                                         }}
                                                     >
-                                                        <div className="flex items-center justify-between w-full h-full pl-2 pr-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="uppercase">{sector.label}</span>
-                                                                <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
-                                                            </div>
+                                                        <div className="flex items-center h-full pl-2">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="uppercase">{sector.label}</span>
                                                                 <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
