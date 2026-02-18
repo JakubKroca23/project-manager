@@ -458,8 +458,8 @@ const Timeline: React.FC = () => {
     const dragStart = useRef({ x: 0, y: 0, left: 0, top: 0 });
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        // Prevent for interactive elements
-        if ((e.target as HTMLElement).closest('button, a, input, select, .timeline-bar')) {
+        // Prevent for interactive elements or when clicking the date header
+        if ((e.target as HTMLElement).closest('button, a, input, select, .timeline-bar, .timeline-grid-header-multi')) {
             return;
         }
 
