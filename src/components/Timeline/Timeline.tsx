@@ -964,9 +964,9 @@ const Timeline: React.FC = () => {
                 </div>
             </header>
 
-            {/* Design Settings Panel - Floating Sidebar */}
+            {/* Design Settings Panel - Floating Sidebar (LEFT) */}
             {showDesignSettings && (
-                <div className="absolute top-[70px] right-4 w-[320px] bg-background/95 backdrop-blur-sm border border-border shadow-2xl rounded-xl z-[4000] flex flex-col max-h-[calc(100vh-140px)] animate-in slide-in-from-right-5 fade-in duration-300">
+                <div className="absolute top-0 left-0 h-full w-[320px] bg-background/95 backdrop-blur-sm border-r border-border shadow-2xl z-[4000] flex flex-col animate-in slide-in-from-left-5 fade-in duration-300">
                     <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
                         <div className="flex items-center gap-2">
                             <Settings2 size={14} className="text-primary" />
