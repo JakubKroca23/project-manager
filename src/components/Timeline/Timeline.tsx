@@ -813,13 +813,14 @@ const Timeline: React.FC = () => {
                 <div className="header-left">
                     <div className="type-filters flex items-center gap-4">
                         {[
-                            { id: 'service', label: 'Servis', color: '#a855f7' },
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                            { id: 'military', label: 'Vojenské', color: '#10b981' }
-                        ].map(({ id, label, color }) => (
+                            { id: 'service', label: 'Servis', color: '#a855f7', icon: Wrench },
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6', icon: Truck },
+                            { id: 'military', label: 'Vojenské', color: '#10b981', icon: ShieldCheck }
+                        ].map(({ id, label, color, icon: Icon }) => (
                             <label
                                 key={id}
-                                className="flex items-center gap-2 cursor-pointer group select-none"
+                                className="flex items-center gap-1.5 cursor-pointer group select-none"
+                                title={label}
                             >
                                 <div className="relative flex items-center justify-center">
                                     <input
@@ -838,12 +839,14 @@ const Timeline: React.FC = () => {
                                         </svg>
                                     </div>
                                 </div>
-                                <span
-                                    className="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                    style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
+                                <div
+                                    className="p-1.5 rounded-md transition-all flex items-center justify-center hover:bg-muted"
+                                    style={{
+                                        color: activeTypes[id] ? color : 'var(--muted-foreground)'
+                                    }}
                                 >
-                                    {label}
-                                </span>
+                                    <Icon size={16} strokeWidth={activeTypes[id] ? 2.5 : 2} />
+                                </div>
                             </label>
                         ))}
 
