@@ -90,6 +90,7 @@ interface DataTableProps<TData, TValue> {
     toolbarSubtext?: React.ReactNode;
     getRowClassName?: (row: TData) => string;
     onRowSelectionChange?: (selection: any) => void;
+    rowSelection?: any;
     enableMultiSelect?: boolean;
 }
 
@@ -113,12 +114,13 @@ export function DataTable<TData, TValue>({
     toolbarSubtext,
     getRowClassName,
     onRowSelectionChange,
+    rowSelection: externalRowSelection,
     enableMultiSelect = false,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = React.useState({});
+    const [internalRowSelection, setInternalRowSelection] = React.useState({});
     const [internalColumnOrder, setInternalColumnOrder] = React.useState<ColumnOrderState>([]);
     const [internalColumnSizing, setInternalColumnSizing] = React.useState<ColumnSizingState>({});
 
@@ -127,6 +129,7 @@ export function DataTable<TData, TValue>({
     const columnVisibility = externalColumnVisibility ?? internalColumnVisibility;
     const columnOrder = externalColumnOrder ?? internalColumnOrder;
     const columnSizing = externalColumnSizing ?? internalColumnSizing;
+    const rowSelection = externalRowSelection ?? internalRowSelection;
 
     const handleSortingChange = useCallback((updaterOrValue: SortingState | ((prev: SortingState) => SortingState)) => {
         const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(sorting) : updaterOrValue;
@@ -176,12 +179,11 @@ export function DataTable<TData, TValue>({
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: handleVisibilityChange as any,
         onRowSelectionChange: (updater) => {
-            setRowSelection(updater);
+            const newValue = typeof updater === 'function' ? updater(rowSelection) : updater;
             if (onRowSelectionChange) {
-                // We need to calculate the new selection state to pass it up
-                // Function updater pattern: updater(oldState) -> newState
-                const newSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
-                onRowSelectionChange(newSelection);
+                onRowSelectionChange(newValue);
+            } else {
+                setInternalRowSelection(newValue);
             }
         },
         onColumnOrderChange: handleColumnOrderChange as any,
@@ -367,7 +369,7 @@ export function DataTable<TData, TValue>({
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
                                             onClick={() => onRowClick?.(row.original)}
-                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-muted ${getRowClassName?.(row.original) || ''}`}
+                                            className={`border-b transition-all duration-150 group/row ${onRowClick ? 'cursor-pointer hover:bg-primary/[0.04] hover:shadow-[inset_3px_0_0_hsl(var(--primary))] active:bg-primary/[0.06]' : 'hover:bg-muted/50'} data-[state=selected]:bg-primary/[0.08] data-[state=selected]:hover:bg-primary/[0.12] ${getRowClassName?.(row.original) || ''}`}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <td

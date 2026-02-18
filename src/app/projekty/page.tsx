@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ExcelImporter from '@/components/ExcelImporter';
-import { Loader2, Search, Database, X, Plus, PackageCheck } from 'lucide-react';
+import { Loader2, Search, Database, X, Plus, PackageCheck, Trash2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/DataTable/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
@@ -42,31 +42,31 @@ const columns: ColumnDef<Project>[] = [
     {
         id: 'select',
         header: ({ table }) => (
-            <div className="px-1">
+            <div className="flex justify-center items-center h-full">
                 <input
                     type="checkbox"
                     checked={table.getIsAllPageRowsSelected()}
                     onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
                 />
             </div>
         ),
         cell: ({ row }) => (
-            <div className="px-1">
+            <div className="flex justify-center items-center h-full">
                 <input
                     type="checkbox"
                     checked={row.getIsSelected()}
                     onChange={(e) => row.toggleSelected(!!e.target.checked)}
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
         ),
         enableSorting: false,
         enableHiding: false,
-        size: 30, // Fixed small width
-        minSize: 30,
-        maxSize: 30,
+        size: 50,
+        minSize: 50,
+        maxSize: 80,
     },
     {
         accessorKey: 'id',
@@ -172,14 +172,15 @@ export default function ProjektyPage() {
     const [projects, setProjects] = useState<Project[]>([]);
     const searchParams = useSearchParams();
     const typeParam = searchParams.get('type');
-    const activeTab = (typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military';
+    const activeTab = (typeParam === 'service' ? 'service' : typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military' | 'service';
 
     const [searchTerm, setSearchTerm] = useState('');
     const [searchTags, setSearchTags] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastImport, setLastImport] = useState<ImportInfo | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [rowSelection, setRowSelection] = useState({});
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+    const [isBulkMode, setIsBulkMode] = useState(false);
     const tableSettings = useTableSettings(`projects-${activeTab}`);
     const router = useRouter();
 
@@ -336,9 +337,11 @@ export default function ProjektyPage() {
                                     <span
                                         className={cn(
                                             "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all",
-                                            activeTab === 'military'
-                                                ? "bg-[#1a1a1a] text-emerald-500 border-emerald-500/20 shadow-emerald-500/10"
-                                                : "bg-[#1a1a1a] text-blue-500 border-blue-500/20 shadow-blue-500/10"
+                                            activeTab === 'service'
+                                                ? "bg-[#1a1a1a] text-purple-500 border-purple-500/20 shadow-purple-500/10"
+                                                : activeTab === 'military'
+                                                    ? "bg-[#1a1a1a] text-emerald-500 border-emerald-500/20 shadow-emerald-500/10"
+                                                    : "bg-[#1a1a1a] text-blue-500 border-blue-500/20 shadow-blue-500/10"
                                         )}
                                     >
                                         <Database size={10} className="opacity-80" />
@@ -355,9 +358,11 @@ export default function ProjektyPage() {
                                     onClick={() => setIsModalOpen(true)}
                                     className={cn(
                                         "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all hover:scale-105 active:scale-95",
-                                        activeTab === 'military'
-                                            ? "bg-emerald-600 text-white border-emerald-500/20 shadow-emerald-500/10"
-                                            : "bg-blue-600 text-white border-blue-500/20 shadow-blue-500/10"
+                                        activeTab === 'service'
+                                            ? "bg-purple-600 text-white border-purple-500/20 shadow-purple-500/10"
+                                            : activeTab === 'military'
+                                                ? "bg-emerald-600 text-white border-emerald-500/20 shadow-emerald-500/10"
+                                                : "bg-blue-600 text-white border-blue-500/20 shadow-blue-500/10"
                                     )}
                                 >
                                     <Plus size={10} />
@@ -407,36 +412,87 @@ export default function ProjektyPage() {
                                     </button>
                                 )}
 
-                                {Object.keys(rowSelection).length > 0 && (
+                                {isBulkMode ? (
+                                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all">
+                                        <button
+                                            onClick={() => {
+                                                setIsBulkMode(false);
+                                                setRowSelection({});
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-all"
+                                        >
+                                            <X size={10} />
+                                            <span>Zrušit</span>
+                                        </button>
+
+                                        {Object.keys(rowSelection).length > 0 && (
+                                            <button
+                                                onClick={async () => {
+                                                    const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
+                                                    const count = selectedProjects.length;
+
+                                                    if (confirm(`Opravdu chcete nenávratně smazat ${count} vybraných zakázek?`)) {
+                                                        const ids = selectedProjects.map(p => p.id);
+                                                        const { error } = await supabase
+                                                            .from('projects')
+                                                            .delete()
+                                                            .in('id', ids);
+
+                                                        if (error) {
+                                                            toast.error('Chyba při mazání: ' + error.message);
+                                                        } else {
+                                                            toast.success(`Smazáno ${count} zakázek.`);
+                                                            setRowSelection({});
+                                                            setIsBulkMode(false);
+                                                            fetchProjects();
+                                                        }
+                                                    }
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-600 text-white border border-rose-500/20 shadow-lg shadow-rose-500/20 hover:bg-rose-700 transition-all animate-in zoom-in-95"
+                                            >
+                                                <Trash2 size={10} />
+                                                <span>Smazat ({Object.keys(rowSelection).length})</span>
+                                            </button>
+                                        )}
+
+                                        {Object.keys(rowSelection).length > 0 && (
+                                            <button
+                                                onClick={async () => {
+                                                    const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
+                                                    const count = selectedProjects.length;
+
+                                                    if (confirm(`Opravdu změnit stav výroby na "Dokončeno" u ${count} položek?`)) {
+                                                        const ids = selectedProjects.map(p => p.id);
+                                                        const { error } = await supabase
+                                                            .from('projects')
+                                                            .update({ production_status: 'Dokončeno' })
+                                                            .in('id', ids);
+
+                                                        if (error) {
+                                                            toast.error('Chyba: ' + error.message);
+                                                        } else {
+                                                            toast.success('Hromadná úprava dokončena');
+                                                            setRowSelection({});
+                                                            setIsBulkMode(false);
+                                                            fetchProjects();
+                                                        }
+                                                    }
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all animate-in fade-in"
+                                            >
+                                                <PackageCheck size={10} />
+                                                <span>Dokončit ({Object.keys(rowSelection).length})</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
                                     <button
-                                        onClick={async () => {
-                                            const selectedIndices = Object.keys(rowSelection).map(Number);
-                                            // Note: rowSelection keys are indices from filteredProjects
-                                            // But standard useReactTable with our config might use index as ID if not specified otherwise in getRowId
-                                            // By default getRowId is index. Let's filter filteredProjects by index
-
-                                            const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx as keyof typeof rowSelection]);
-
-                                            if (confirm(`Opravdu změnit stav výroby na "Dokončeno" u ${selectedProjects.length} položek?`)) {
-                                                const ids = selectedProjects.map(p => p.id);
-                                                const { error } = await supabase
-                                                    .from('projects')
-                                                    .update({ production_status: 'Dokončeno' })
-                                                    .in('id', ids);
-
-                                                if (error) {
-                                                    toast.error('Chyba: ' + error.message);
-                                                } else {
-                                                    toast.success('Hromadná úprava dokončena');
-                                                    setRowSelection({});
-                                                    fetchProjects();
-                                                }
-                                            }
-                                        }}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 hover:bg-emerald-500/10 transition-all animate-in fade-in zoom-in-50"
+                                        onClick={() => setIsBulkMode(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-border bg-background text-muted-foreground hover:bg-muted transition-all"
+                                        title="Zapne režim pro hromadné označování a mazání"
                                     >
-                                        <PackageCheck size={10} />
-                                        <span>Dokončit vybrané ({Object.keys(rowSelection).length})</span>
+                                        <CheckCircle2 size={10} />
+                                        <span>Hromadné akce</span>
                                     </button>
                                 )}
 
@@ -473,7 +529,20 @@ export default function ProjektyPage() {
                                 Poslední import: {lastImport.date} · {lastImport.user}
                             </span>
                         ) : null}
-                        onRowClick={(row) => router.push(`/projekty/${row.id}`)}
+                        onRowClick={(row) => {
+                            if (isBulkMode) {
+                                // Find index of this row in filteredProjects to toggle selection
+                                const idx = filteredProjects.findIndex(p => p.id === row.id);
+                                if (idx !== -1) {
+                                    setRowSelection(prev => ({
+                                        ...prev,
+                                        [idx]: !prev[idx]
+                                    }));
+                                }
+                                return;
+                            }
+                            router.push(`/projekty/${row.id}`);
+                        }}
                         searchValue={searchTerm}
                         columnOrder={tableSettings.columnOrder}
                         onColumnOrderChange={tableSettings.setColumnOrder}
@@ -485,8 +554,10 @@ export default function ProjektyPage() {
                         onColumnSizingChange={tableSettings.setColumnSizing}
                         enableMultiSelect={true}
                         onRowSelectionChange={setRowSelection}
-                        headerClassName={activeTab === 'military' ? 'bg-emerald-100 text-emerald-900' : 'bg-blue-100 text-blue-900'}
+                        rowSelection={rowSelection}
+                        headerClassName={activeTab === 'service' ? 'bg-purple-100 text-purple-900' : activeTab === 'military' ? 'bg-emerald-100 text-emerald-900' : 'bg-blue-100 text-blue-900'}
                         getRowClassName={(row: Project) => {
+                            if (row.project_type === 'service') return 'bg-purple-500/5 hover:bg-purple-500/10 active:bg-purple-500/20';
                             if (row.project_type === 'military') return 'bg-emerald-500/5 hover:bg-emerald-500/10 active:bg-emerald-500/20';
                             if (row.project_type === 'civil') return 'bg-blue-500/5 hover:bg-blue-500/10 active:bg-blue-500/20';
                             return '';

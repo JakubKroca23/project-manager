@@ -10,19 +10,20 @@ import { ThemeToggle } from './ThemeToggle';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const navItems = [
-    { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#3b82f6' },
     {
         name: 'ZAKÁZKY',
         icon: Briefcase,
         href: '/projekty',
         color: '#3b82f6',
-        militaryColor: '#10b981',
+        militaryColor: '#a5d6a7',
+        serviceColor: '#ce93d8',
         submenu: [
             { name: 'CIVILNÍ', href: '/projekty?type=civil' },
             { name: 'VOJENSKÉ', href: '/projekty?type=military' },
+            { name: 'SERVIS', href: '/projekty?type=service' },
         ]
     },
-    { name: 'SERVIS', icon: Wrench, href: '/servis', color: '#f59e0b' },
+    { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#3b82f6' },
 ];
 export function Navbar() {
     const pathname = usePathname();
@@ -35,9 +36,8 @@ export function Navbar() {
             case 'HARMONOGRAM': return checkPerm('timeline');
             case 'ZAKÁZKY':
                 const hasMainAccess = checkPerm('projects');
-                const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military');
+                const hasAnySubAccess = checkPerm('projects_civil') || checkPerm('projects_military') || checkPerm('service');
                 return hasMainAccess && hasAnySubAccess;
-            case 'SERVIS': return checkPerm('service');
             default: return true;
         }
     });
@@ -47,7 +47,7 @@ export function Navbar() {
     const [systemVersion, setSystemVersion] = useState<string>('v1.0.0-alpha');
 
     // Active Category Label
-    const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : null;
+    const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : activeType === 'service' ? 'SERVIS' : null;
 
 
 
@@ -87,17 +87,16 @@ export function Navbar() {
                 <div
                     className="flex h-12 items-center justify-between gap-1"
                 >
-                    {/* Left side spacer to help center the menu */}
-                    <div className="flex-1 invisible sm:visible"></div>
-
-                    {/* Navigation Items - Centered Menu */}
-                    <div className="flex items-center justify-center gap-1">
+                    {/* Navigation Items - Left Aligned Menu */}
+                    <div className="flex-1 flex items-center justify-start gap-1">
                         {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
                             const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
+                            const isService = item.name === 'ZAKÁZKY' && activeType === 'service';
 
                             let activeColor = item.color;
                             if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
+                            if (isService && item.serviceColor) activeColor = item.serviceColor;
 
                             if (item.submenu) {
                                 return (
@@ -151,12 +150,15 @@ export function Navbar() {
                                             >
                                                 {item.submenu.map((sub) => {
                                                     const isSubMilitary = sub.name === 'VOJENSKÉ';
+                                                    const isSubService = sub.name === 'SERVIS';
                                                     let subActiveColor = item.color;
                                                     if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;
+                                                    if (isSubService && item.serviceColor) subActiveColor = item.serviceColor;
 
                                                     const isSubActive =
                                                         (sub.href.includes('type=military') && activeType === 'military') ||
-                                                        (sub.href.includes('type=civil') && activeType === 'civil');
+                                                        (sub.href.includes('type=civil') && activeType === 'civil') ||
+                                                        (sub.href.includes('type=service') && activeType === 'service');
 
                                                     return (
                                                         <Link
