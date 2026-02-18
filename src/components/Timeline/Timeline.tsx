@@ -283,6 +283,7 @@ const Timeline: React.FC = () => {
         return 36;
     });
     const [showDesignSettings, setShowDesignSettings] = useState(false);
+    const [openIconSelector, setOpenIconSelector] = useState<string | null>(null);
     const [design, setDesign] = useState({
         borderRadius: 4,
         barHeight: 70, // in %
@@ -1035,13 +1036,49 @@ const Timeline: React.FC = () => {
                                         <div className="flex-1 flex flex-col min-w-0">
                                             <span className="text-[9px] font-bold truncate text-muted-foreground">{config.label}</span>
                                         </div>
-                                        <select
-                                            value={config.icon || ""}
-                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, icon: e.target.value as any } })}
-                                            className="w-[100px] h-5 bg-background border border-border/40 rounded text-[9px] px-1 outline-none"
-                                        >
-                                            {VISIBLE_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
-                                        </select>
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setOpenIconSelector(openIconSelector === key ? null : key)}
+                                                className="w-8 h-8 flex items-center justify-center bg-background border border-border/40 rounded hover:bg-muted/50 transition-colors"
+                                                title="Vybrat ikonu"
+                                            >
+                                                {config.icon && ICON_OPTIONS[config.icon] ? (
+                                                    (() => {
+                                                        const Icon = ICON_OPTIONS[config.icon];
+                                                        return <Icon size={14} />;
+                                                    })()
+                                                ) : (
+                                                    <div className="w-3 h-3 bg-muted-foreground/30 rounded-full" />
+                                                )}
+                                            </button>
+
+                                            {openIconSelector === key && (
+                                                <>
+                                                    <div
+                                                        className="fixed inset-0 z-[5000]"
+                                                        onClick={() => setOpenIconSelector(null)}
+                                                    />
+                                                    <div className="absolute right-0 top-full mt-1 p-2 bg-popover border border-border shadow-xl rounded-lg z-[5001] w-[180px] grid grid-cols-4 gap-1 animate-in zoom-in-95 duration-200">
+                                                        {VISIBLE_ICONS.map(iconName => {
+                                                            const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                                            return (
+                                                                <button
+                                                                    key={iconName}
+                                                                    onClick={() => {
+                                                                        setColors({ ...colors, [key]: { ...config, icon: iconName as any } });
+                                                                        setOpenIconSelector(null);
+                                                                    }}
+                                                                    className={`p-1.5 rounded hover:bg-muted flex items-center justify-center transition-colors ${config.icon === iconName ? 'bg-primary/20 text-primary' : 'text-muted-foreground'}`}
+                                                                    title={iconName}
+                                                                >
+                                                                    {Icon && <Icon size={16} />}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
