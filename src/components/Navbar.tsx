@@ -124,13 +124,13 @@ export function Navbar() {
                                                 isActive ? "bg-primary/10" : "hover:bg-primary/5"
                                             )}
                                             style={{
-                                                color: isActive ? activeColor : 'hsl(var(--foreground) / 0.8)',
+                                                color: isActive ? activeColor : 'hsl(var(--foreground))',
                                             }}
                                         >
                                             <div className="flex items-center gap-2">
-                                                <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.6)' }} className="group-hover:opacity-100" />
+                                                <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} className="group-hover:opacity-100" />
                                                 <span className="text-xs font-bold tracking-wider hidden sm:inline">{item.name}</span>
-                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.5)' }} />
+                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.7)' }} />
                                             </div>
                                             {activeCategory && isActive && (
                                                 <div className="absolute top-full left-0 mt-[-4px] z-10 flex justify-center pointer-events-none">
@@ -179,7 +179,7 @@ export function Navbar() {
                                                                 "text-[10px] font-black tracking-[0.2em] transition-all uppercase px-4 py-2 rounded-md flex items-center justify-center border",
                                                                 isSubActive
                                                                     ? "shadow-sm border-current"
-                                                                    : "text-foreground/60 border-transparent hover:text-foreground hover:bg-foreground/[0.03]"
+                                                                    : "text-foreground border-transparent hover:bg-foreground/[0.05]"
                                                             )}
                                                             style={{
                                                                 backgroundColor: isSubActive ? `${subActiveColor}20` : undefined,
@@ -195,7 +195,7 @@ export function Navbar() {
                                                             }}
                                                             onMouseLeave={(e) => {
                                                                 if (!isSubActive) {
-                                                                    e.currentTarget.style.color = 'hsl(var(--foreground) / 0.6)';
+                                                                    e.currentTarget.style.color = 'hsl(var(--foreground))';
                                                                     e.currentTarget.style.backgroundColor = 'transparent';
                                                                     e.currentTarget.style.borderColor = 'transparent';
                                                                 }
@@ -227,13 +227,13 @@ export function Navbar() {
                                     href={item.href}
                                     className={cn(
                                         "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border",
-                                        isActive ? "bg-primary/10 border-primary/30" : "border-transparent text-foreground/70 hover:bg-primary/5 hover:border-primary/20"
+                                        isActive ? "bg-primary/10 border-primary/30" : "border-transparent text-foreground hover:bg-primary/5 hover:border-primary/20"
                                     )}
                                     style={{
                                         color: isActive ? activeColor : undefined,
                                     }}
                                 >
-                                    <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.6)' }} />
+                                    <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} />
                                     <span className="hidden sm:inline">{item.name}</span>
                                 </Link>
                             );
