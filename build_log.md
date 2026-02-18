@@ -152,3 +152,8 @@
     - Implementována transparentní tlačítka pro nezávislou změnu výšky řádků přímo v mřížce (pro souhrnné stacked řádky i jednotlivé zakázky).
     - Panel "Vzhled" přesunut z fixní boční lišty do inline výsuvného panelu pod hlavičkou, který při otevření odsouvá obsah timeline dolů.
 - **Cleanup**: Odstranění polí "Typ nástavby" a "Výrobní číslo" ze základních informací v detailu projektu pro zvýšení přehlednosti.
+
+## [2026-02-18] - Vylepšení Import Wizardu
+- **Změna**: Přidán interaktivní krok pro výběr řádku s hlavičkou.
+- **Detail**: Uživatel nyní po nahrání souboru vidí náhled prvních 15 řádků a může kliknutím zvolit, který řádek obsahuje názvy sloupců. To výrazně zvyšuje úspěšnost automatického mapování u nestandardních exportů.
+- **UX**: Aktualizován indikátor postupu v hlavičce wizardu (4 kroky místo 3).

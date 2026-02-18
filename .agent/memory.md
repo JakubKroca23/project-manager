@@ -113,3 +113,4 @@
 113: - **Navigace**: Navbar nyní spolehlivě ukazuje aktivní kategorii i v detailu zakázky.
 114: - **Timeline UX**: Přechod na in-grid ovládání vertikálního zoomu a inline panel nastavení vzhledu.
 115: - **Data Cleanup**: Odstranění méně důležitých polí z primárního pohledu v detailu projektu.
+116: - **Import Wizard Enhancements**: Implementován vizuální výběr hlavičkového řádku z náhledu dat, což řeší problémy s importem souborů obsahujících úvodní prázdné řádky nebo metadata.

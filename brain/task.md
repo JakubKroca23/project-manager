@@ -39,6 +39,7 @@
 - [x] Redesign ovládání vertikálního zoomu v Timeline (in-grid tlačítka).
 - [x] Přesun panelu Vzhled do inline popupu pod hlavičkou.
 - [x] Cleanup základních polí v detailu projektu.
+- [x] Vylepšení Import Wizardu (výběr hlavičky z náhledu).
 
 
 ## Budoucí úkoly (Backlog)
