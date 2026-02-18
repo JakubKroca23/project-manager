@@ -237,6 +237,8 @@ const Timeline: React.FC = () => {
         setActiveTypes((prev: Record<string, boolean>) => ({ ...prev, [type]: !prev[type] }));
     };
 
+    const [dayWidth, setDayWidth] = useState(DEFAULT_DAY_WIDTH);
+    const [isLoading, setIsLoading] = useState(true);
     const [rowHeight, setRowHeight] = useState(32);
     const [summaryRowHeight, setSummaryRowHeight] = useState(36);
     const timelineRef = useRef<HTMLDivElement>(null);
