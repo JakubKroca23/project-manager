@@ -96,6 +96,17 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
     </svg>
 );
 
+const Tank = ({ size = 24, ...props }: any) => (
+    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 11h15a2 2 0 0 1 2 2v3a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-3a2 2 0 0 1 2-2z" />
+        <path d="M8 11V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
+        <path d="M14 8h6" />
+        <circle cx="6" cy="16" r="1.5" />
+        <circle cx="10.5" cy="16" r="1.5" />
+        <circle cx="15" cy="16" r="1.5" />
+    </svg>
+);
+
 
 
 
@@ -161,7 +172,8 @@ const ICON_OPTIONS = {
     Superstructure: Superstructure,
     Play: Play,
     Milestone: Milestone,
-    Hiab: Hiab
+    Hiab: Hiab,
+    Tank: Tank
 };
 
 // Seznam ikon pro výběr v editoru (dle požadavku uživatele - ty co jsou vidět + nové)
@@ -169,7 +181,7 @@ const VISIBLE_ICONS = [
     'Truck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
     'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
     'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab'
+    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab', 'Tank'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
@@ -373,37 +385,7 @@ const Timeline: React.FC = () => {
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Independent vertical zoom via Ctrl + Wheel
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
 
-        const handleWheel = (e: WheelEvent) => {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                const delta = e.deltaY > 0 ? -4 : 4;
-                const target = e.target as HTMLElement;
-                const summaryRow = target.closest('.is-summary');
-                const projectRow = target.closest('.is-project');
-
-                if (summaryRow) {
-                    setSummaryRowHeight(prev => Math.min(120, Math.max(12, prev + delta)));
-                } else if (projectRow) {
-                    setRowHeight(prev => Math.min(120, Math.max(12, prev + delta)));
-                } else {
-                    // Default horizontal zoom if not over a specific row
-                    const currentWidth = dayWidthRef.current;
-                    const next = delta > 0 ? Math.min(currentWidth * 1.15, MAX_DAY_WIDTH) : Math.max(currentWidth / 1.15, MIN_DAY_WIDTH);
-                    if (next !== currentWidth) {
-                        setDayWidth(next);
-                    }
-                }
-            }
-        };
-
-        container.addEventListener('wheel', handleWheel, { passive: false });
-        return () => container.removeEventListener('wheel', handleWheel);
-    }, [scrollContainerRef]);
 
     // Restore scroll position after zoom
     useLayoutEffect(() => {
@@ -524,11 +506,22 @@ const Timeline: React.FC = () => {
                 const delta = e.deltaY;
                 if (delta === 0) return;
 
-                setRowHeight(prev => {
-                    const next = delta > 0 ? prev - 4 : prev + 4;
-                    const clamped = Math.min(100, Math.max(14, next));
-                    return clamped;
-                });
+                const target = e.target as HTMLElement;
+                const summaryRow = target.closest('.is-summary');
+                const projectRow = target.closest('.is-project');
+
+                if (summaryRow) {
+                    setSummaryRowHeight(prev => {
+                        const next = delta > 0 ? prev - 4 : prev + 4;
+                        return Math.min(120, Math.max(12, next));
+                    });
+                } else {
+                    // Default behavior for projects or anything else
+                    setRowHeight(prev => {
+                        const next = delta > 0 ? prev - 4 : prev + 4;
+                        return Math.min(120, Math.max(12, next));
+                    });
+                }
                 return;
             }
 
@@ -747,9 +740,9 @@ const Timeline: React.FC = () => {
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
         return [
-            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
-            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
+            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7', icon: Wrench },
+            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6', icon: TruckCrane },
+            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981', icon: Tank }
         ];
     }, [filteredProjects]);
 
@@ -814,8 +807,8 @@ const Timeline: React.FC = () => {
                     <div className="type-filters flex items-center gap-4">
                         {[
                             { id: 'service', label: 'Servis', color: '#a855f7', icon: Wrench },
-                            { id: 'civil', label: 'Civilní', color: '#3b82f6', icon: Truck },
-                            { id: 'military', label: 'Vojenské', color: '#10b981', icon: ShieldCheck }
+                            { id: 'civil', label: 'Civilní', color: '#3b82f6', icon: TruckCrane },
+                            { id: 'military', label: 'Vojenské', color: '#10b981', icon: Tank }
                         ].map(({ id, label, color, icon: Icon }) => (
                             <label
                                 key={id}
@@ -827,25 +820,28 @@ const Timeline: React.FC = () => {
                                         type="checkbox"
                                         checked={activeTypes[id]}
                                         onChange={() => toggleType(id)}
-                                        className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
+                                        className="peer appearance-none w-5 h-5 border-2 rounded-md transition-all shadow-sm"
                                         style={{
                                             borderColor: activeTypes[id] ? color : 'var(--border)',
                                             backgroundColor: activeTypes[id] ? color : 'transparent'
                                         }}
                                     />
-                                    <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                                    <div className={`absolute w-3 h-3 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'}`}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
                                     </div>
                                 </div>
                                 <div
-                                    className="p-1.5 rounded-md transition-all flex items-center justify-center hover:bg-muted"
+                                    className={`p-2 rounded-xl transition-all flex items-center justify-center 
+                                        ${activeTypes[id] ? 'scale-110 shadow-md bg-muted/40 ring-1 ring-border/20' : 'scale-100 hover:bg-muted'} 
+                                        hover:scale-125 active:scale-95`}
                                     style={{
-                                        color: activeTypes[id] ? color : 'var(--muted-foreground)'
+                                        color: activeTypes[id] ? color : 'var(--muted-foreground)',
+                                        backgroundColor: activeTypes[id] ? `${color}10` : 'transparent'
                                     }}
                                 >
-                                    <Icon size={16} strokeWidth={activeTypes[id] ? 2.5 : 2} />
+                                    <Icon size={20} strokeWidth={activeTypes[id] ? 2.5 : 2} />
                                 </div>
                             </label>
                         ))}
@@ -1169,6 +1165,11 @@ const Timeline: React.FC = () => {
                                                         }}
                                                     >
                                                         <div className="flex items-center gap-2 pl-2">
+                                                            {sector.icon && (
+                                                                <div style={{ color: sector.color }}>
+                                                                    <sector.icon size={14} strokeWidth={2.5} />
+                                                                </div>
+                                                            )}
                                                             <span className="uppercase">{sector.label}</span>
                                                             <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
                                                         </div>
