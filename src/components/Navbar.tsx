@@ -121,26 +121,27 @@ export function Navbar() {
                                     >
                                         <button
                                             className={cn(
-                                                "flex flex-col items-center justify-center px-4 py-1 rounded-md transition-all duration-200 uppercase whitespace-nowrap",
-                                                isActive ? "bg-primary/10" : "hover:bg-primary/5"
+                                                "relative flex flex-col items-center justify-center px-4 py-1.5 rounded-lg transition-all duration-200 uppercase whitespace-nowrap border-2",
+                                                isActive ? "bg-primary/[0.08] shadow-sm" : "hover:bg-primary/5 border-transparent"
                                             )}
                                             style={{
                                                 color: isActive ? activeColor : 'hsl(var(--foreground))',
+                                                borderColor: isActive ? `${activeColor}44` : 'transparent',
                                             }}
                                         >
                                             <div className="flex items-center gap-2">
-                                                <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} className="group-hover:opacity-100" />
-                                                <span className="text-xs font-bold tracking-wider hidden sm:inline">{item.name}</span>
+                                                <item.icon size={19} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} className="group-hover:opacity-100" />
+                                                <span className="text-[13px] font-black tracking-tight hidden sm:inline">{item.name}</span>
                                                 <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.7)' }} />
                                             </div>
                                             {activeCategory && isActive && (
-                                                <div className="absolute top-full left-0 mt-[-4px] z-10 flex justify-center pointer-events-none">
+                                                <div className="absolute top-[110%] left-1/2 -translate-x-1/2 z-10 flex justify-center pointer-events-none">
                                                     <span
-                                                        className="text-[9px] font-bold tracking-[0.15em] uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-full bg-background border shadow-xl whitespace-nowrap"
+                                                        className="text-[10px] font-black tracking-[0.2em] uppercase animate-in fade-in slide-in-from-top-1 px-4 py-1.5 rounded-xl bg-background border-2 shadow-2xl shadow-black/20 whitespace-nowrap"
                                                         style={{
                                                             color: activeColor,
-                                                            borderColor: `${activeColor}33`,
-                                                            boxShadow: `0 4px 12px ${activeColor}20`
+                                                            borderColor: activeColor,
+                                                            backgroundColor: 'hsl(var(--background))'
                                                         }}
                                                     >
                                                         {activeCategory}
