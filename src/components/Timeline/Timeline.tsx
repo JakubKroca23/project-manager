@@ -11,7 +11,7 @@ import TimelineBar from './TimelineBar';
 import { cn } from '@/lib/utils';
 import {
     Search, Calendar, ZoomIn,
-    ZoomOut,
+    ZoomOut, Loader2,
     X, Plus, Minus,
     RotateCcw,
     ChevronDown,
