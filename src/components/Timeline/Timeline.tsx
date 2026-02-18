@@ -240,7 +240,10 @@ const Timeline: React.FC = () => {
 
     // Ref for accessing current dayWidth in event listeners
     const dayWidthRef = useRef(dayWidth);
-    useEffect(() => {
+
+    // CRITICAL: Update ref synchronously after render to ensure event handlers have fresh state
+    // immediately for the next event in the loop.
+    useLayoutEffect(() => {
         dayWidthRef.current = dayWidth;
     }, [dayWidth]);
 
@@ -371,6 +374,9 @@ const Timeline: React.FC = () => {
             const { pointDays, pixelOffset } = zoomFocus.current;
             const newScrollLeft = pointDays * dayWidth - pixelOffset;
             scrollContainerRef.current.scrollLeft = newScrollLeft;
+
+            // Do not clear immediately if multiple effects run? 
+            // Actually it is safer to clear to avoid stale restoration.
             zoomFocus.current = null;
         }
     }, [dayWidth]);
@@ -514,7 +520,7 @@ const Timeline: React.FC = () => {
         // window capture: true is necessary to beat native scroll on position: sticky elements
         window.addEventListener('wheel', handleWindowWheel, { passive: false, capture: true });
         return () => window.removeEventListener('wheel', handleWindowWheel, { capture: true });
-    }, [isLoading]);
+    }, []);
 
     const fetchProjects = useCallback(async () => {
         try {
