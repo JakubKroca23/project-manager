@@ -392,6 +392,12 @@ const Timeline: React.FC = () => {
                 }
                 if (s.outline) setOutline(s.outline);
                 if (s.milestoneSize) setMilestoneSize(s.milestoneSize);
+                if (s.design) {
+                    setDesign(prev => ({
+                        ...prev,
+                        ...s.design
+                    }));
+                }
             }
         } catch (err) {
             console.error('Error fetching settings:', err);
