@@ -777,33 +777,60 @@ const Timeline: React.FC = () => {
 
 
         // Sorting: Hierarchical (Parent + Children together)
+        // Sorting: Urgency (Earliest Date) with Hierarchy preserved
+        // The goal: "Most urgent on top (earliest date), Future at bottom"
+        // Key requirement: "Stacked" groups (Parent + Children) move together based on the EARLIEST date in the group.
+
         return filtered.sort((a, b) => {
             // 1. Identify Root ID for both
             const rootA = a.parent_id || a.id;
             const rootB = b.parent_id || b.id;
 
-            // 2. If same root, sort Parent first, then Children by Name
+            // 2. Helper to get urgency score for a ROOT project (min date of root + all children)
+            const getGroupUrgency = (rootId: string) => {
+                // Find root in the FULL 'projects' list to ensure we have data even if filtered out visually?
+                // Actually, for sorting to work correctly with the displayed list, we should look at 'projects' 
+                // because the 'urgency' is an intrinsic property of the project family, not just visible items.
+
+                const root = projects.find(p => p.id === rootId);
+                if (!root) return 4102444800000; // Fallback if root missing
+
+                // Find all children in FULL list
+                const children = projects.filter(p => p.parent_id === rootId);
+
+                // Collect dates of Root + Children
+                const dates = [root, ...children].map(p => getSortDate(p));
+
+                // Return the Earliest date (Min)
+                return Math.min(...dates);
+            };
+
+            // 3. Compare Group Urgencies
+            // Optimization: If we already calculated this for a frame, good. But here we recalculate.
+            // For 50 projects it's negligible.
+            const scoreA = getGroupUrgency(rootA);
+            const scoreB = getGroupUrgency(rootB);
+
+            if (scoreA !== scoreB) {
+                return scoreA - scoreB; // Earliest date first (Ascending)
+            }
+
+            // 4. If same Group Urgency (e.g. same root or coincidentally same date)
+            // If same root, enforce Parent -> Children order
             if (rootA === rootB) {
-                if (a.id === rootA) return -1; // A is parent -> first
-                if (b.id === rootB) return 1;  // B is parent -> first
+                if (a.id === rootA) return -1; // Parent first
+                if (b.id === rootB) return 1;  // Parent first
+
+                // Both are children, sort by their own date
+                const dateA = getSortDate(a);
+                const dateB = getSortDate(b);
+                if (dateA !== dateB) return dateA - dateB;
+
                 return (a.name || '').localeCompare(b.name || '');
             }
 
-            // 3. If different roots, sort by Root Project's Date
-            // We need to find the root project to get its date
-            // Optimization: If projects are fully loaded, we might find them. 
-            // If not found (filtered out), fallback to own date.
-
-            const pA = projects.find(p => p.id === rootA) || a;
-            const pB = projects.find(p => p.id === rootB) || b;
-
-            const dateA = getSortDate(pA);
-            const dateB = getSortDate(pB);
-
-            const diff = dateA - dateB;
-            if (diff !== 0) return diff;
-
-            return (pA.name || '').localeCompare(pB.name || '');
+            // If different roots but same score, sort by name
+            return (a.name || '').localeCompare(b.name || '');
         });
     }, [projects, searchQuery, activeTypes]);
 
@@ -1198,195 +1225,127 @@ const Timeline: React.FC = () => {
                             dayWidth={dayWidth}
                         >
                             <div className="timeline-rows">
-                                {/* 1. CATEGORY SUMMARIES (Stacked) */}
                                 {(() => {
-                                    const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+                                    // FLATTEN AND SORT PROJECTS FOR DISPLAY
+                                    // 1. We want to display:
+                                    //    - Standalone projects (no children)
+                                    //    - Sub-projects (children)
+                                    //    - WE DO NOT WANT TO DISPLAY PARENT PROJECTS if they have children.
 
-                                    // Generate days array for matching the grid exactly
-                                    const days: Date[] = [];
-                                    const curr = new Date(timelineRange.start);
-                                    while (curr <= timelineRange.end) {
-                                        days.push(new Date(curr));
-                                        curr.setDate(curr.getDate() + 1);
-                                    }
+                                    const projectsToDisplay: Project[] = [];
+                                    const parentIdsWithChildren = new Set<string>();
 
-                                    const isWeekend = (d: Date) => {
-                                        const day = d.getDay();
-                                        return day === 0 || day === 6;
-                                    };
-                                    const isToday = (d: Date) => {
-                                        const t = new Date();
-                                        return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
-                                    };
+                                    // Identify parents that have children in the full list
+                                    projects.forEach(p => {
+                                        if (p.parent_id) {
+                                            parentIdsWithChildren.add(p.parent_id);
+                                        }
+                                    });
 
-                                    const totalDaysWidth = days.length * dayWidth;
+                                    filteredProjects.forEach(p => {
+                                        // If p is a child (has parent_id), show it.
+                                        if (p.parent_id) {
+                                            projectsToDisplay.push(p);
+                                            return;
+                                        }
 
-                                    return (
-                                        <>
-                                            {visibleSectors.map((sector, vIdx) => {
-                                                const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
-                                                return (
-                                                    <div
-                                                        key={`summary-${sector.id}`}
-                                                        className="timeline-row is-summary"
-                                                        style={{
-                                                            position: 'sticky',
-                                                            top: topOffset,
-                                                            height: 'var(--summary-row-height)',
-                                                            zIndex: 3500 - vIdx,
-                                                            width: 'max-content',
-                                                            minWidth: '100%'
-                                                        }}
-                                                    >
-                                                        {/* Block scrolling projects */}
-                                                        <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
-                                                        <div
-                                                            className="project-info-sticky"
-                                                            style={{
-                                                                borderLeft: `10px solid ${sector.color}`,
-                                                                height: '100%',
-                                                                background: `color-mix(in srgb, ${sector.color}, var(--background) 90%)`,
-                                                                zIndex: 2005,
-                                                                fontWeight: 900,
-                                                                color: sector.color,
-                                                                fontSize: '11px',
-                                                                letterSpacing: '0.05em',
-                                                                boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
-                                                                position: 'sticky',
-                                                                left: 0
-                                                            }}
-                                                        >
-                                                            <div className="flex items-center h-full pl-2">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="uppercase">{sector.label}</span>
-                                                                    <span className="text-[10px] text-muted-foreground font-mono opacity-90">({sector.projects.length})</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                        // If p is a parent (no parent_id)
+                                        // Check if it has children.
+                                        // If it has children -> SKIP IT (user request: "mateřskou zakazku tam vubec neplantej")
+                                        if (parentIdsWithChildren.has(p.id)) {
+                                            return;
+                                        }
 
-                                                        {/* Grid lines inside summary for parity */}
-                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
-                                                            {days.map((day, idx) => (
-                                                                <div
-                                                                    key={idx}
-                                                                    className={`timeline-grid-column ${isWeekend(day) ? 'is-weekend' : ''} ${isToday(day) ? 'is-today' : ''}`}
-                                                                    style={{ width: dayWidth }}
-                                                                />
-                                                            ))}
-                                                        </div>
+                                        // If it has no children -> Show it (it is a standalone project)
+                                        projectsToDisplay.push(p);
+                                    });
 
-                                                        {sector.projects.map(p => (
-                                                            <TimelineBar
-                                                                key={`stack-${p.id}`}
-                                                                id={p.id}
-                                                                name={p.name}
-                                                                project={p}
-                                                                status={p.status}
-                                                                startDate={parseDate(p.created_at) || new Date()}
-                                                                endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
-                                                                timelineStart={timelineRange.start}
-                                                                dayWidth={dayWidth}
-                                                                rowHeight={summaryRowHeight}
-                                                                isCollapsed={true}
-                                                                config={{ colors, milestoneSize, design }}
-                                                                onProjectUpdate={handleProjectUpdate}
-                                                                milestones={allMilestones.filter(m => m.project_id === p.id)}
-                                                            />
-                                                        ))}
-                                                    </div >
-                                                );
-                                            })}
+                                    // 2. SORT EVERYTHING BY URGENCY (Earliest Date)
+                                    projectsToDisplay.sort((a, b) => {
+                                        const dateA = getSortDate(a);
+                                        const dateB = getSortDate(b);
+                                        if (dateA !== dateB) return dateA - dateB;
+                                        return (a.name || '').localeCompare(b.name || '');
+                                    });
 
+                                    return projectsToDisplay.map((project) => {
+                                        const sectorId = project.project_type || 'civil';
+                                        const sectorColor =
+                                            sectorId === 'service' ? '#a855f7' :
+                                                sectorId === 'military' ? '#10b981' : '#3b82f6';
 
-                                            {/* 2. HEAVY DIVIDER */}
-                                            <div
-                                                className="timeline-row p-0"
-                                                style={{
-                                                    position: 'sticky',
-                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)))`,
-                                                    height: '2px',
-                                                    background: '#1a1a1a',
-                                                    borderBottom: 'none',
-                                                    zIndex: 4000,
-                                                    boxShadow: 'none',
-                                                    width: 'max-content',
-                                                    minWidth: '100%'
-                                                }}
-                                            >
-                                                <div className="h-full bg-[#1a1a1a]" style={{ width: 250 + totalDaysWidth }}></div>
-                                            </div>
+                                        // For child projects, maybe we want to show "Parent Name > Child Name" or similar context?
+                                        // Current design: just project name.
+                                        // The user said "jednotlive subzakazky dle ks jsou validni".
 
-                                        </>
-                                    );
-                                })()}
+                                        return (
+                                            <div key={project.id} className="timeline-row is-project">
+                                                <Link
+                                                    href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
+                                                    className="project-info-sticky transition-colors group"
+                                                    style={{ borderLeft: `10px solid ${sectorColor}` }}
+                                                >
+                                                    <div className="project-info-content pr-2 pl-1">
+                                                        <div className="flex items-center justify-between w-full">
+                                                            {rowHeight >= 25 ? (
+                                                                <div className="flex flex-col h-full justify-center">
+                                                                    <div className="flex items-center gap-1">
+                                                                        <span
+                                                                            className={`project-name w-full text-left ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'} ${project.parent_id ? 'text-[12px]' : '!font-bold text-[13px]'}`}
+                                                                            style={{ textAlign: 'left' }}
+                                                                        >
+                                                                            {project.name}
+                                                                        </span>
+                                                                    </div>
 
-                                {/* 3. INDIVIDUAL PROJECTS */}
-                                {filteredProjects.map((project) => {
-                                    const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
-                                    const sectorColor = sector?.color || '#90caf9';
-
-                                    return (
-                                        <div key={project.id} className="timeline-row is-project">
-                                            <Link
-                                                href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
-                                                className="project-info-sticky transition-colors group"
-                                                style={{ borderLeft: `10px solid ${sectorColor}` }}
-                                            >
-                                                <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
-                                                    <div className="flex items-center justify-between w-full">
-                                                        {rowHeight >= 25 ? (
-                                                            <div className="flex flex-col h-full justify-center">
-                                                                <div className="flex items-center gap-1">
-                                                                    {project.parent_id && (
-                                                                        <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
-                                                                    )}
-                                                                    <span
-                                                                        className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
-                                                                        style={{ textAlign: 'left' }}
-                                                                    >
-                                                                        {project.name}
+                                                                    {/* Optional context: Show parent name if it's a child and row is tall enough? */}
+                                                                    {/* {project.parent_id && rowHeight >= 50 && (
+                                                                    <span className="text-[10px] text-muted-foreground truncate">
+                                                                         {projects.find(x => x.id === project.parent_id)?.name}
                                                                     </span>
+                                                                )} */}
+
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-[10px] truncate font-bold">{project.name}</span>
+                                                            )}
+                                                        </div>
+
+                                                        {rowHeight >= 80 && (
+                                                            <div className="mt-1 flex flex-col gap-0.5">
+                                                                {(project.serial_number || project.abra_order) && (
+                                                                    <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
+                                                                        <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
+                                                                        <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex justify-between items-center text-[10px] italic">
+                                                                    <span className="text-muted-foreground/60">Stav:</span>
+                                                                    <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
                                                                 </div>
                                                             </div>
-                                                        ) : (
-                                                            <span className="text-[10px] truncate font-bold">{project.name}</span>
                                                         )}
                                                     </div>
+                                                </Link>
 
-                                                    {rowHeight >= 80 && (
-                                                        <div className="mt-1 flex flex-col gap-0.5">
-                                                            {(project.serial_number || project.abra_order) && (
-                                                                <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
-                                                                    <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
-                                                                    <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
-                                                                </div>
-                                                            )}
-                                                            <div className="flex justify-between items-center text-[10px] italic">
-                                                                <span className="text-muted-foreground/60">Stav:</span>
-                                                                <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </Link>
-
-                                            <TimelineBar
-                                                id={project.id}
-                                                name={project.name}
-                                                project={project}
-                                                status={project.status}
-                                                startDate={parseDate(project.created_at) || new Date()}
-                                                endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
-                                                timelineStart={timelineRange.start}
-                                                dayWidth={dayWidth}
-                                                rowHeight={rowHeight}
-                                                config={{ colors, milestoneSize, design }}
-                                                onProjectUpdate={handleProjectUpdate}
-                                                milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
-                                            />
-                                        </div>
-                                    );
-                                })}
+                                                <TimelineBar
+                                                    id={project.id}
+                                                    name={project.name}
+                                                    project={project}
+                                                    status={project.status}
+                                                    startDate={parseDate(project.created_at) || new Date()}
+                                                    endDate={parseDate(project.deadline) || parseDate(project.customer_handover) || new Date()}
+                                                    timelineStart={timelineRange.start}
+                                                    dayWidth={dayWidth}
+                                                    rowHeight={rowHeight}
+                                                    config={{ colors, milestoneSize, design }}
+                                                    onProjectUpdate={handleProjectUpdate}
+                                                    milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === project.id)}
+                                                />
+                                            </div>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </TimelineGrid>
                     </div >
