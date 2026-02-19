@@ -236,8 +236,31 @@ export default function ProjectDetailPage() {
         }
     };
 
+    const validateProject = (proj: Project): { isValid: boolean, missing: string[] } => {
+        const missing = [];
+        if (!proj.name) missing.push('Název zakázky');
+        if (!proj.customer) missing.push('Zákazník');
+        if (!proj.manager) missing.push('Vedoucí projektu');
+        if (!proj.priority) missing.push('Priorita');
+        if (!proj.category) missing.push('Kategorie');
+        if (!proj.abra_project) missing.push('Abra Zakázka');
+        // if (!proj.abra_order) missing.push('Abra Objednávka'); // Optional?
+
+        return { isValid: missing.length === 0, missing };
+    };
+
     const handleSave = async () => {
         if (!editedProject) return;
+
+        // Validation only when activating
+        if (editedProject.status === 'Aktivní' && project?.status !== 'Aktivní') {
+            const { isValid, missing } = validateProject(editedProject);
+            if (!isValid) {
+                alert(`Nelze aktivovat zakázku. Chybí tato pole:\n- ${missing.join('\n- ')}`);
+                return;
+            }
+        }
+
         setSaving(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -602,8 +625,103 @@ export default function ProjectDetailPage() {
                         </FieldGrid>
                     </Section>
 
-                    {/* ═══ 4. ABRA PROPOJENÍ ═══ */}
+                    {/* ═══ 4. ABRA PROPOJENÍ (Empty now) ═══ */}
                 </div>
+
+                {/* ═══ 3.5 TECHNICKÁ SPECIFIKACE ═══ */}
+                <Section icon={<ClipboardList size={15} />} title="Technická specifikace" color="blue" fullWidth>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
+                        {/* Column 1: Config */}
+                        <div className="space-y-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/50 pb-1">Dokumentace</h4>
+
+                            {/* Trailerwin */}
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50">
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold flex items-center gap-2">
+                                        <Truck size={14} className="text-primary" /> Trailerwin
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">Výpočet zatížení a rozložení</span>
+                                </div>
+                                {isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleCustomFieldChange('trailerwin_done', !p.custom_fields?.trailerwin_done)}
+                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors ${p.custom_fields?.trailerwin_done ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${p.custom_fields?.trailerwin_done ? 'translate-x-4' : 'translate-x-0'}`} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${p.custom_fields?.trailerwin_done ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
+                                        {p.custom_fields?.trailerwin_done ? 'Hotovo' : 'Ne'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Výkresová dokumentace */}
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50">
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold flex items-center gap-2">
+                                        <FileText size={14} className="text-primary" /> Výkresová dokumentace
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">Schválený výkres od zákazníka</span>
+                                </div>
+                                {isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleCustomFieldChange('drawings_done', !p.custom_fields?.drawings_done)}
+                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors ${p.custom_fields?.drawings_done ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${p.custom_fields?.drawings_done ? 'translate-x-4' : 'translate-x-0'}`} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${p.custom_fields?.drawings_done ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
+                                        {p.custom_fields?.drawings_done ? 'Hotovo' : 'Ne'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Column 2: Accessories */}
+                        <div className="space-y-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/50 pb-1">Příslušenství</h4>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground/70">Příslušenství k nástavbě</label>
+                                {isEditing ? (
+                                    <textarea
+                                        value={p.custom_fields?.body_accessories || ''}
+                                        onChange={(e) => handleCustomFieldChange('body_accessories', e.target.value)}
+                                        className="w-full text-xs font-medium bg-background border border-border rounded-lg p-2 h-20 outline-none focus:ring-1 focus:ring-primary/20 resize-none"
+                                        placeholder="- Majáky&#10;- Pracovní světla&#10;- Box na nářadí..."
+                                    />
+                                ) : (
+                                    <div className="text-xs whitespace-pre-line text-foreground/80 min-h-[1.5rem] p-2 bg-muted/10 rounded-lg border border-border/30">
+                                        {p.custom_fields?.body_accessories || '—'}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase text-muted-foreground/70">Příslušenství na podvozek</label>
+                                {isEditing ? (
+                                    <textarea
+                                        value={p.custom_fields?.chassis_accessories || ''}
+                                        onChange={(e) => handleCustomFieldChange('chassis_accessories', e.target.value)}
+                                        className="w-full text-xs font-medium bg-background border border-border rounded-lg p-2 h-20 outline-none focus:ring-1 focus:ring-primary/20 resize-none"
+                                        placeholder="- Tažné zařízení&#10;- Zakládací klíny..."
+                                    />
+                                ) : (
+                                    <div className="text-xs whitespace-pre-line text-foreground/80 min-h-[1.5rem] p-2 bg-muted/10 rounded-lg border border-border/30">
+                                        {p.custom_fields?.chassis_accessories || '—'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </Section>
 
 
                 {/* ═══ 4.2 VOZIDLA V ZAKÁZCE (Military Parent) ═══ */}
