@@ -9,6 +9,62 @@ import { useAdmin, ADMIN_EMAIL, type UserRequest, type UserProfile } from '@/hoo
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
 import { ActivityLogSection } from '@/components/profile/ActivityLogSection';
+import { Gamepad2 } from 'lucide-react';
+
+const MaintenanceGameToggle = ({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) => {
+    const [enabled, setEnabled] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSetting = async () => {
+            const { data } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'maintenance_minigame')
+                .maybeSingle();
+            if (data?.settings?.enabled) {
+                setEnabled(true);
+            }
+            setLoading(false);
+        };
+        fetchSetting();
+    }, []);
+
+    const toggleGame = async () => {
+        const newVal = !enabled;
+        setEnabled(newVal);
+        const { error } = await supabase
+            .from('app_settings')
+            .upsert(
+                {
+                    id: 'maintenance_minigame',
+                    settings: { enabled: newVal },
+                    updated_at: new Date().toISOString()
+                },
+                { onConflict: 'id' as any }
+            );
+
+        if (error) {
+            showToast('Nepodařilo se změnit nastavení minihry', 'error');
+            setEnabled(!newVal);
+        } else {
+            showToast(`Minihra ${newVal ? 'povolena' : 'zakázána'}`, 'success');
+        }
+    };
+
+    if (loading) return <Loader2 size={16} className="animate-spin text-muted-foreground" />;
+
+    return (
+        <button
+            onClick={toggleGame}
+            className={`relative w-11 h-6 rounded-full transition-all duration-300 ${enabled ? 'bg-indigo-500' : 'bg-gray-400'}`}
+        >
+            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${enabled ? 'translate-x-5' : 'translate-x-0'}`}>
+                {enabled && <Gamepad2 size={10} className="text-indigo-500" />}
+            </div>
+        </button>
+    );
+};
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -489,6 +545,19 @@ export default function ProfilePage() {
                                                             {isSavingSystemInfo ? <Loader2 size={12} className="animate-spin" /> : 'Uložit'}
                                                         </button>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Minigame Toggle - Only for Admin */}
+                                        {currentUserProfile?.email === ADMIN_EMAIL && (
+                                            <div className="bg-white dark:bg-muted/30 p-4 rounded-xl border border-indigo-500/10 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[11px] font-bold text-foreground">Minihra při údržbě</p>
+                                                        <p className="text-[10px] text-muted-foreground">Povolit fyzikální hru na obrazovce údržby</p>
+                                                    </div>
+                                                    <MaintenanceGameToggle showToast={showToast} />
                                                 </div>
                                             </div>
                                         )}
