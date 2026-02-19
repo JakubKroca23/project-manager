@@ -826,6 +826,7 @@ const Timeline: React.FC = () => {
 
 
         return [
+            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: filteredProjects, color: '#6366f1' }, // Indigo for total
             { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
             { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
@@ -1212,7 +1213,7 @@ const Timeline: React.FC = () => {
                             <div className="timeline-rows">
                                 {/* 1. CATEGORY SUMMARIES (Stacked) */}
                                 {(() => {
-                                    const visibleSectors = sectorizedProjects.filter(s => activeTypes[s.id]);
+                                    const visibleSectors = sectorizedProjects.filter(s => s.id === 'total' || activeTypes[s.id]);
 
                                     // Generate days array for matching the grid exactly
                                     const days: Date[] = [];
@@ -1237,17 +1238,19 @@ const Timeline: React.FC = () => {
                                         <>
                                             {visibleSectors.map((sector, vIdx) => {
                                                 const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
+                                                const isTotal = sector.id === 'total';
                                                 return (
                                                     <div
                                                         key={`summary-${sector.id}`}
-                                                        className="timeline-row is-summary"
+                                                        className={cn("timeline-row is-summary", isTotal && "is-total-summary")}
                                                         style={{
                                                             position: 'sticky',
                                                             top: topOffset,
                                                             height: 'var(--summary-row-height)',
-                                                            zIndex: 3500 - vIdx,
+                                                            zIndex: isTotal ? 3600 : 3500 - vIdx,
                                                             width: 'max-content',
-                                                            minWidth: '100%'
+                                                            minWidth: '100%',
+                                                            backgroundColor: isTotal ? 'rgba(99, 102, 241, 0.05)' : undefined
                                                         }}
                                                     >
                                                         {/* Block scrolling projects */}
