@@ -31,6 +31,23 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+/**
+ * Utility to apply opacity to a hex color
+ */
+const applyOpacity = (color: string, opacity: number) => {
+    if (!color || opacity === 1 || color === 'transparent') return color;
+    if (color.startsWith('#')) {
+        let hex = color.length === 4
+            ? '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3]
+            : color;
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return color;
+};
+
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 const HookLoader = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
     <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
@@ -802,7 +819,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 let opacityStyle: React.CSSProperties = {};
                 if (isCollapsed) {
                     opacityStyle = {
-                        opacity: 0.15, // Reduced for better distinguishability of stacked orders (1, 2, 4-5)
+                        opacity: config?.design?.stackedOpacity ?? 0.15, // Using global setting from design config
                         zIndex: 1,
                         mixBlendMode: 'multiply',
                         borderLeft: '1px solid rgba(255,255,255,0.4)',
@@ -944,7 +961,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            opacity: globalIconOpacity
+                                            // opacity: globalIconOpacity // REMOVED: Applied to colors below instead
                                         }}
                                         // title removed in favor of hover popup
                                         onMouseEnter={(e) => {
@@ -965,14 +982,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             <div className="flex items-center justify-center w-full h-full">
                                                 <div
                                                     className={`${isStartVal ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full`}
-                                                    style={{ backgroundColor: milestoneColor }}
+                                                    style={{ backgroundColor: applyOpacity(milestoneColor, globalIconOpacity) }}
                                                 />
                                             </div>
                                         ) : (
                                             <Icon
                                                 size={iconSize}
-                                                fgColor={globalIconColor}
-                                                bgColor={statusColor}
+                                                fgColor={applyOpacity(globalIconColor, globalIconOpacity)}
+                                                bgColor={applyOpacity(statusColor, globalIconOpacity)}
                                                 // color={milestoneColor} // Removed to avoid overriding fgColor in some icons if specific props used
                                                 // fill={IconKey === 'Play' ? milestoneColor : 'none'} // Play icon fill
                                                 strokeWidth={2.5}

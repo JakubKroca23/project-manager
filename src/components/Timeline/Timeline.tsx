@@ -67,6 +67,23 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+/**
+ * Utility to apply opacity to a hex color
+ */
+const applyOpacity = (color: string, opacity: number) => {
+    if (!color || opacity === 1 || color === 'transparent') return color;
+    if (color.startsWith('#')) {
+        let hex = color.length === 4
+            ? '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3]
+            : color;
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return color;
+};
+
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 const HookLoader = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
     <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
@@ -325,7 +342,8 @@ const Timeline: React.FC = () => {
         opacity: 1,
         usePriorityColors: true,
         iconColor: '#000000',
-        iconOpacity: 1
+        iconOpacity: 1,
+        stackedOpacity: 0.15
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -968,13 +986,25 @@ const Timeline: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-[10px] font-bold mb-1.5">
-                                        <span className="text-muted-foreground">Průhlednost</span>
+                                        <span className="text-muted-foreground">Průhlednost - Standard</span>
                                         <span className="text-primary">{Math.round(design.opacity * 100)}%</span>
                                     </div>
                                     <input
                                         type="range" min="0" max="1" step="0.05"
                                         value={design.opacity}
                                         onChange={(e) => setDesign({ ...design, opacity: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Průhlednost - Stacked</span>
+                                        <span className="text-primary">{Math.round((design.stackedOpacity || 0.15) * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="1" step="0.05"
+                                        value={design.stackedOpacity || 0.15}
+                                        onChange={(e) => setDesign({ ...design, stackedOpacity: parseFloat(e.target.value) })}
                                         className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                                     />
                                 </div>
@@ -1115,10 +1145,9 @@ const Timeline: React.FC = () => {
                                                                 return (
                                                                     <Icon
                                                                         size={24}
-                                                                        fgColor={design.iconColor || "#000000"}
-                                                                        bgColor={config.color}
-                                                                        className="opacity-[var(--icon-opacity)]"
-                                                                        style={{ opacity: design.iconOpacity ?? 1 }}
+                                                                        fgColor={applyOpacity(design.iconColor || "#000000", design.iconOpacity ?? 1)}
+                                                                        bgColor={applyOpacity(config.color, design.iconOpacity ?? 1)}
+                                                                        className="milestone-svg"
                                                                     />
                                                                 );
                                                             })()
@@ -1148,8 +1177,8 @@ const Timeline: React.FC = () => {
                                                                         >
                                                                             {Icon && <Icon
                                                                                 size={20}
-                                                                                fgColor={design.iconColor || "#000000"}
-                                                                                bgColor={config.color}
+                                                                                fgColor={applyOpacity(design.iconColor || "#000000", design.iconOpacity ?? 1)}
+                                                                                bgColor={applyOpacity(config.color, design.iconOpacity ?? 1)}
                                                                             />}
                                                                         </button>
                                                                     );
