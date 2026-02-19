@@ -392,10 +392,11 @@ export default function ProjectDetailPage() {
             <div className="max-w-[1400px] mx-auto px-4 py-4 pb-16 space-y-4">
 
                 {/* ── HEADER ── */}
-                <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="bg-muted/30 border border-border/50 rounded-2xl p-6 mb-6">
+                    <div className="space-y-4">
+                        {/* Row 1: Badges & Status */}
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ${p.project_type === 'military'
                                 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                                 : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 }`}>
@@ -405,28 +406,152 @@ export default function ProjectDetailPage() {
                                 <select
                                     value={p.project_type}
                                     onChange={(e) => handleChange('project_type', e.target.value)}
-                                    className="text-[10px] bg-muted border border-border rounded px-2 py-0.5 outline-none"
+                                    className="text-[10px] bg-background border border-border rounded px-2 py-0.5 outline-none font-bold"
                                 >
                                     <option value="civil">Civil</option>
                                     <option value="military">Vojenské</option>
                                 </select>
                             )}
-                            <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">{project.id}</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-                                <span className={`w-1.5 h-1.5 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-background border border-border rounded text-[10px] font-mono text-muted-foreground shadow-sm">
+                                <Hash size={10} />
+                                {project.id}
+                            </div>
+                            <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">
+                                <span className={`w-2 h-2 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
                                 {project.status}
                             </span>
                         </div>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                value={p.name}
-                                onChange={(e) => handleChange('name', e.target.value)}
-                                className="text-lg font-bold w-full bg-muted/30 border border-border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary/20 outline-none"
-                            />
-                        ) : (
-                            <h1 className="text-lg font-bold text-foreground leading-snug">{project.name}</h1>
-                        )}
+
+                        {/* Row 2: Title */}
+                        <div className="max-w-4xl">
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    value={p.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    className="text-3xl font-black w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-2 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="Název zakázky"
+                                />
+                            ) : (
+                                <h1 className="text-3xl font-black text-foreground leading-tight tracking-tight">{project.name}</h1>
+                            )}
+                        </div>
+
+                        {/* Row 3: Metadata Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 pt-4 border-t border-border/40">
+                            {/* Abra Project */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Zakázka</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={p.abra_project || ''}
+                                        onChange={(e) => handleChange('abra_project', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                                        <Hash size={13} className="text-primary/50" />
+                                        {p.abra_project || '—'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Abra Order */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Objednávka</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={p.abra_order || ''}
+                                        onChange={(e) => handleChange('abra_order', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                                        <Hash size={13} className="text-primary/50" />
+                                        {p.abra_order || '—'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Customer */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Zákazník</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={p.customer || ''}
+                                        onChange={(e) => handleChange('customer', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                                        <Building2 size={13} className="text-primary/50" />
+                                        {p.customer || '—'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Manager */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Vedoucí projektu</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={p.manager || ''}
+                                        onChange={(e) => handleChange('manager', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                                        <User size={13} className="text-primary/50" />
+                                        {p.manager || '—'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Category */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Kategorie</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={p.category || ''}
+                                        onChange={(e) => handleChange('category', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    />
+                                ) : (
+                                    <CategoryChip value={p.category} className="text-[10px] px-2 py-0.5" />
+                                )}
+                            </div>
+
+                            {/* Priority */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Priorita</label>
+                                {isEditing ? (
+                                    <select
+                                        value={p.priority || 2}
+                                        onChange={(e) => handleChange('priority', parseInt(e.target.value))}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                    >
+                                        <option value={1}>Urgentní</option>
+                                        <option value={2}>Normální</option>
+                                        <option value={3}>Nízká</option>
+                                    </select>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn(
+                                            "w-2 h-2 rounded-full",
+                                            p.priority === 1 ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+                                        )} />
+                                        <span className="text-xs font-bold">
+                                            {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -434,46 +559,6 @@ export default function ProjectDetailPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
                     {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
-                    <Section icon={<FileText size={15} />} title="Základní informace" color="blue">
-                        <FieldGrid>
-                            <Field label="Vedoucí projektu" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
-
-                            <Field
-                                label="Kategorie"
-                                icon={<Tag size={13} />}
-                                value={isEditing ? p.category : <CategoryChip value={p.category} className="text-[11px] px-3 py-1" />}
-                                field="category"
-                                isEditing={isEditing}
-                                onChange={handleChange}
-                            />
-
-                            <Field
-                                label="Priorita"
-                                icon={<AlertCircle size={13} />}
-                                value={isEditing ? p.priority : (
-                                    <div className="flex items-center gap-2">
-                                        <div className={cn(
-                                            "w-1.5 h-1.5 rounded-full",
-                                            p.priority === 1 ? "bg-rose-500" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500"
-                                        )} />
-                                        <span className="text-[11px] font-bold">
-                                            {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
-                                        </span>
-                                    </div>
-                                )}
-                                field="priority"
-                                isEditing={isEditing}
-                                onChange={handleChange}
-                                options={[
-                                    { label: 'Urgentní', value: 1 },
-                                    { label: 'Normální', value: 2 },
-                                    { label: 'Nízká', value: 3 }
-                                ]}
-                            />
-
-                        </FieldGrid>
-                    </Section>
 
                     {/* ═══ 2. HARMONOGRAM ═══ */}
                     <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
@@ -518,12 +603,6 @@ export default function ProjectDetailPage() {
                     </Section>
 
                     {/* ═══ 4. ABRA PROPOJENÍ ═══ */}
-                    <Section icon={<Globe size={15} />} title="ABRA propojení" color="purple">
-                        <FieldGrid>
-                            <Field label="Číslo zakázky" icon={<Hash size={13} />} value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Číslo objednávky" icon={<Hash size={13} />} value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={handleChange} />
-                        </FieldGrid>
-                    </Section>
                 </div>
 
 
