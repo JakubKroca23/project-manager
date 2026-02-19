@@ -271,6 +271,7 @@ const Timeline: React.FC = () => {
         military: true,
         service: true
     });
+    const [isStackedRowsCollapsed, setIsStackedRowsCollapsed] = useState(false);
 
 
 
@@ -824,12 +825,23 @@ const Timeline: React.FC = () => {
         const civil = filteredProjects.filter(p => p.project_type === 'civil' || !p.project_type);
         const military = filteredProjects.filter(p => p.project_type === 'military');
 
+        if (isStackedRowsCollapsed) {
+            return [
+                {
+                    id: 'all',
+                    label: 'VŠECHNY ZAKÁZKY (SOUHRN)',
+                    projects: [...service, ...civil, ...military],
+                    color: '#6366f1' // Indigo
+                }
+            ];
+        }
+
         return [
             { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
             { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
             { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
         ];
-    }, [filteredProjects]);
+    }, [filteredProjects, isStackedRowsCollapsed]);
 
     const jumpToToday = () => {
         if (scrollContainerRef.current) {
@@ -1232,9 +1244,24 @@ const Timeline: React.FC = () => {
 
                                     const totalDaysWidth = days.length * dayWidth;
 
+                                    // Pre-calculate loads for each sector
+                                    const sectorLoads = sectorizedProjects.map(sector => {
+                                        return days.map(day => {
+                                            const d = day.getTime();
+                                            return sector.projects.filter(p => {
+                                                const start = (parseDate(p.created_at) || new Date()).getTime();
+                                                const deadlineDate = parseDate(p.deadline) || parseDate(p.customer_handover) || new Date();
+                                                const end = deadlineDate.getTime();
+                                                return d >= start && d <= end;
+                                            }).length;
+                                        });
+                                    });
+
                                     return (
                                         <>
                                             {visibleSectors.map((sector, vIdx) => {
+                                                const sectorIdx = sectorizedProjects.findIndex(s => s.id === sector.id);
+                                                const load = sectorLoads[sectorIdx];
                                                 const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
                                                 return (
                                                     <div
@@ -1246,11 +1273,35 @@ const Timeline: React.FC = () => {
                                                             height: 'var(--summary-row-height)',
                                                             zIndex: 3500 - vIdx,
                                                             width: 'max-content',
-                                                            minWidth: '100%'
+                                                            minWidth: '100%',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setIsStackedRowsCollapsed(!isStackedRowsCollapsed);
                                                         }}
                                                     >
                                                         {/* Block scrolling projects */}
                                                         <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
+
+                                                        {/* HEATMAP LAYER */}
+                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1, opacity: 0.15 }}>
+                                                            {days.map((day, idx) => {
+                                                                const count = load[idx];
+                                                                if (count === 0) return <div key={idx} style={{ width: dayWidth }} />;
+                                                                return (
+                                                                    <div
+                                                                        key={idx}
+                                                                        style={{
+                                                                            width: dayWidth,
+                                                                            backgroundColor: sector.color,
+                                                                            opacity: Math.min(0.2 + (count * 0.2), 1)
+                                                                        }}
+                                                                    />
+                                                                );
+                                                            })}
+                                                        </div>
+
                                                         <div
                                                             className="project-info-sticky"
                                                             style={{
@@ -1276,7 +1327,7 @@ const Timeline: React.FC = () => {
                                                         </div>
 
                                                         {/* Grid lines inside summary for parity */}
-                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
+                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 2 }}>
                                                             {days.map((day, idx) => (
                                                                 <div
                                                                     key={idx}
@@ -1284,6 +1335,26 @@ const Timeline: React.FC = () => {
                                                                     style={{ width: dayWidth }}
                                                                 />
                                                             ))}
+                                                        </div>
+
+                                                        {/* LOAD HISTOGRAM (Mini bars at bottom) */}
+                                                        <div className="absolute inset-x-0 bottom-[1px] flex items-end pointer-events-none" style={{ height: '8px', zIndex: 3 }}>
+                                                            {days.map((_, idx) => {
+                                                                const count = load[idx];
+                                                                if (count === 0) return <div key={idx} style={{ width: dayWidth }} />;
+                                                                return (
+                                                                    <div
+                                                                        key={idx}
+                                                                        style={{
+                                                                            width: dayWidth,
+                                                                            height: `${Math.min(count * 2, 8)}px`,
+                                                                            backgroundColor: sector.color,
+                                                                            opacity: 0.6,
+                                                                            borderRadius: '1px'
+                                                                        }}
+                                                                    />
+                                                                );
+                                                            })}
                                                         </div>
 
                                                         {sector.projects.map(p => (
