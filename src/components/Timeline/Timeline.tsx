@@ -807,9 +807,6 @@ const Timeline: React.FC = () => {
 
         // Sorting: Hierarchical (Parent + Children together)
         return filtered.sort((a, b) => {
-            return (a.name || '').localeCompare(b.name || '');
-            // Simple sorting by Urgency (Date)
-            // Most urgent (earliest date) first.
             const dateA = getSortDate(a);
             const dateB = getSortDate(b);
 
