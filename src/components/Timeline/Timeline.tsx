@@ -323,7 +323,9 @@ const Timeline: React.FC = () => {
         borderRadius: 4,
         barHeight: 70, // in %
         opacity: 1,
-        usePriorityColors: true
+        usePriorityColors: true,
+        iconColor: '#000000',
+        iconOpacity: 1
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -976,6 +978,38 @@ const Timeline: React.FC = () => {
                                         className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                                     />
                                 </div>
+
+                                {/* Global Icon Settings */}
+                                <div className="p-3 bg-muted/20 rounded-lg border border-border/30 space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase">Barva Ikon</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-mono opacity-50">{design.iconColor}</span>
+                                            <div className="w-5 h-5 rounded-md border border-border/50 overflow-hidden relative shadow-sm">
+                                                <input
+                                                    type="color"
+                                                    value={design.iconColor || "#000000"}
+                                                    onChange={(e) => setDesign({ ...design, iconColor: e.target.value })}
+                                                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0"
+                                                />
+                                                <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: design.iconColor || "#000000" }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                            <span className="text-muted-foreground uppercase">Průhlednost Ikon</span>
+                                            <span className="text-primary">{Math.round((design.iconOpacity || 1) * 100)}%</span>
+                                        </div>
+                                        <input
+                                            type="range" min="0" max="1" step="0.05"
+                                            value={design.iconOpacity ?? 1}
+                                            onChange={(e) => setDesign({ ...design, iconOpacity: parseFloat(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border/30">
                                     <span className="text-[10px] font-bold text-muted-foreground">Barvy dle priority</span>
                                     <button
@@ -1081,8 +1115,10 @@ const Timeline: React.FC = () => {
                                                                 return (
                                                                     <Icon
                                                                         size={24}
-                                                                        fgColor="#000000"
+                                                                        fgColor={design.iconColor || "#000000"}
                                                                         bgColor={config.color}
+                                                                        className="opacity-[var(--icon-opacity)]"
+                                                                        style={{ opacity: design.iconOpacity ?? 1 }}
                                                                     />
                                                                 );
                                                             })()
@@ -1112,7 +1148,7 @@ const Timeline: React.FC = () => {
                                                                         >
                                                                             {Icon && <Icon
                                                                                 size={20}
-                                                                                fgColor="#000000"
+                                                                                fgColor={design.iconColor || "#000000"}
                                                                                 bgColor={config.color}
                                                                             />}
                                                                         </button>
@@ -1121,34 +1157,6 @@ const Timeline: React.FC = () => {
                                                             </div>
                                                         </>
                                                     )}
-                                                </div>
-                                            </div>
-
-                                            {/* Icon Colors */}
-                                            <div className="flex items-center gap-3 pl-1">
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className="w-3 h-3 rounded-full border border-border/50 overflow-hidden relative shadow-sm">
-                                                        <input
-                                                            type="color"
-                                                            value={config.iconBgColor || "#ffffff"}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, iconBgColor: e.target.value } })}
-                                                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0"
-                                                        />
-                                                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: config.iconBgColor || "#ffffff" }} />
-                                                    </div>
-                                                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Pozadí</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className="w-3 h-3 rounded-full border border-border/50 overflow-hidden relative shadow-sm">
-                                                        <input
-                                                            type="color"
-                                                            value={config.iconColor || config.color}
-                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, iconColor: e.target.value } })}
-                                                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0"
-                                                        />
-                                                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: config.iconColor || config.color }} />
-                                                    </div>
-                                                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Popředí</span>
                                                 </div>
                                             </div>
                                         </div>

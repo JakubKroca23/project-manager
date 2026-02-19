@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus } from 'lucide-react';
+import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus, Activity } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import { useAdmin, ADMIN_EMAIL, type UserRequest, type UserProfile } from '@/hooks/useAdmin';
@@ -373,10 +373,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Activity History */}
-                <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                    <ActivityLogSection isAdmin={isAdmin} profiles={profiles} />
-                </div>
+                {/* Activity History - REMOVED from here, moved to Admin Panel */}
 
                 {/* Settings Popup Modal */}
                 {showSettings && (
@@ -810,6 +807,16 @@ export default function ProfilePage() {
                                         ) : (
                                             <div className="p-8 text-center text-sm text-muted-foreground italic">Žádní uživatelé k zobrazení.</div>
                                         )}
+                                    </div>
+                                </div>
+                                {/* --- SYSTEM LOGS --- */}
+                                <div className="space-y-3 pt-4 border-t border-border mt-6">
+                                    <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest px-1">
+                                        <Activity size={14} />
+                                        <span>Systémové logy</span>
+                                    </div>
+                                    <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+                                        <ActivityLogSection isAdmin={isAdmin} profiles={profiles} />
                                     </div>
                                 </div>
                             </div>

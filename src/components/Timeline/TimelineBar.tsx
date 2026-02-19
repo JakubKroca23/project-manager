@@ -929,6 +929,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const isStartVal = m.class === 'start';
                                 const isSmallMilestone = isPhaseEndVal || isStartVal;
 
+                                // Global icon settings
+                                const globalIconColor = config?.design?.iconColor || '#000000';
+                                const globalIconOpacity = config?.design?.iconOpacity ?? 1;
+
                                 return (
                                     <div
                                         key={m.key}
@@ -939,7 +943,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             zIndex: idx,
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            opacity: globalIconOpacity
                                         }}
                                         // title removed in favor of hover popup
                                         onMouseEnter={(e) => {
@@ -966,10 +971,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         ) : (
                                             <Icon
                                                 size={iconSize}
-                                                fgColor="#000000"
+                                                fgColor={globalIconColor}
                                                 bgColor={statusColor}
-                                                color={milestoneColor}
-                                                fill={IconKey === 'Play' ? milestoneColor : 'none'}
+                                                // color={milestoneColor} // Removed to avoid overriding fgColor in some icons if specific props used
+                                                // fill={IconKey === 'Play' ? milestoneColor : 'none'} // Play icon fill
                                                 strokeWidth={2.5}
                                                 className="milestone-svg"
                                             />

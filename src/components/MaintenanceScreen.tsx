@@ -215,23 +215,17 @@ export default function MaintenanceScreen({ estimatedEnd }: MaintenanceScreenPro
 
             <div className="text-center space-y-2 max-w-md px-4 relative z-10">
                 <h1 className="text-3xl font-black tracking-tight text-foreground uppercase drop-shadow-sm">
-                    {isGameActive ? "Oops! Gravity Failure" : "Probíhá aktualizace"}
+                    Probíhá aktualizace
                 </h1>
                 <p className="text-muted-foreground text-sm font-medium">
-                    {isGameActive ? (
-                        "Systém se rozpadl! Zkuste pochytat elementy myší!"
-                    ) : (
+                    Systém je momentálně v režimu údržby.
+                    <br />
+                    {estimatedEnd ? (
                         <>
-                            Systém je momentálně v režimu údržby.
-                            <br />
-                            {estimatedEnd ? (
-                                <>
-                                    Očekávaný návrat do provozu v <strong>{new Date(estimatedEnd).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</strong>.
-                                </>
-                            ) : (
-                                'Prosím, zkuste to znovu za chvíli.'
-                            )}
+                            Očekávaný návrat do provozu v <strong>{new Date(estimatedEnd).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</strong>.
                         </>
+                    ) : (
+                        'Prosím, zkuste to znovu za chvíli.'
                     )}
                 </p>
             </div>
