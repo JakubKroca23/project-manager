@@ -618,7 +618,8 @@ const Timeline: React.FC = () => {
                 return false;
             }
 
-            return activeTypes[type] === true;
+            // return activeTypes[type] === true; // REMOVED: Filtering logic moved to render time
+            return true;
         });
 
         // Helper pro normalizaci (odstranění diakritiky)
@@ -1161,6 +1162,12 @@ const Timeline: React.FC = () => {
                                 {filteredProjects.map((project) => {
                                     const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
                                     const sectorColor = sector?.color || '#90caf9';
+
+                                    // Check visibility based on activeTypes -> REMOVED per user request
+                                    /* 
+                                    const type = project.project_type || 'civil';
+                                    if (!activeTypes[type]) return null;
+                                    */
 
                                     return (
                                         <div key={project.id} className="timeline-row is-project">
