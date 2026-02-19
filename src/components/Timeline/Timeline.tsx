@@ -717,8 +717,8 @@ const Timeline: React.FC = () => {
         filtered = filtered.filter((p: Project) => {
             const type = p.project_type || 'civil';
 
-            // Special rule for Military: Hide parents without children
-            if (type === 'military' && !p.parent_id && !parentIds.has(p.id)) {
+            // Special rule for Military: Hide all parent projects, show only sub-projects
+            if (type === 'military' && !p.parent_id) {
                 return false;
             }
 
