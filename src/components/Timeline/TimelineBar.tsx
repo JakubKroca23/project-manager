@@ -7,176 +7,45 @@ import { supabase } from '@/lib/supabase/client';
 import { Project, Milestone as ProjectMilestone } from '@/types/project';
 import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
-    Cog, Wrench, Zap, Cpu, Activity, Package, Box, HardHat,
-    Construction, Factory, Pickaxe, Settings2, ShieldCheck,
-    Container, Anchor, Component, Drill, Settings,
-    Clock, Flag, Star, Info, MessageSquare, FileText,
-    Camera, MapPin, PenTool, Lightbulb, Rocket,
-    Coffee, FileSignature, Paintbrush, BadgeCheck, Shield, Send,
-    PackageCheck,
-    X,
-    Trash2,
-    Plus,
-    Briefcase,
-    Building2,
-    Globe,
-    TrendingUp,
-    Euro,
-    Warehouse,
-    Landmark,
-    Users,
-    Laptop,
-    Phone,
-    Mail
+    Wrench, Package, Box, Factory, ShieldCheck, Drill, Settings,
+    X, Trash2, Plus, Briefcase, Building2, Globe, TrendingUp,
+    Euro, Warehouse, Landmark, Users, Laptop, Phone, Mail, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-/**
- * Utility to apply opacity to a hex color
- */
-const applyOpacity = (color: string, opacity: number) => {
-    if (!color || opacity === 1 || color === 'transparent') return color;
-    if (color.startsWith('#')) {
-        let hex = color.length === 4
-            ? '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3]
-            : color;
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    }
-    return color;
-};
-
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
-const HookLoader = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 17h18" />
-            <circle cx="7" cy="18" r="2" />
-            <circle cx="17" cy="18" r="2" />
-            <path d="M2 17h2v-4h4v4h2" />
-            <path d="M18 17h4v-6h-4z" />
-            <path d="M13 14l5-5h3" />
+
+const Hiab = ({ size = 24, ...props }: any) => (
+    <div style={{ backgroundColor: '#FFFFFF', border: '2px solid #000000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size, padding: '1px' }}>
+        <svg width="100%" height="100%" viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#030303" d="M1,719 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
+            <path fill="#FDFDFD" d="M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
+            <path fill="#020202" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,396.9 C351.1,396.9 351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z M405.0,356.4 C410.4,383.8 418.4,410.3 430.4,435.6 C445.0,466.1 463.6,493.6 490.6,514.7 C492.7,516.4 495.0,517.9 496.4,518.9 C513.2,494.6 529.7,470.8 546.3,446.8 C544.3,446.3 542.0,445.9 539.8,445.2 C516.3,437.7 498.0,423.0 483.0,403.9 C457.1,371.0 444.6,332.9 439.6,291.9 C438.2,280.5 437.0,269.0 435.2,257.7 C433.8,248.8 427.5,243.3 419.1,242.5 C411.3,241.8 404.8,245.6 401.9,253.4 C400.4,257.4 399.6,261.8 399.3,266.0 C397.2,296.1 399.2,326.0 405.0,356.4 Z M526.7,299.1 M526.7,299.1 C524.8,300.7 522.7,302.2 521.0,304.0 C511.2,314.3 509.8,330.1 517.7,341.6 C526.0,353.9 540.6,358.6 554.0,352.9 C565.4,348.2 572.2,339.6 573.1,327.2 C574.0,314.8 568.9,305.1 558.4,298.7 C548.2,292.5 537.7,292.6 526.7,299.1 Z" />
         </svg>
     </div>
 );
 
-const HydraulicCrane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 17h18" />
-            <circle cx="7" cy="18" r="2" />
-            <circle cx="17" cy="18" r="2" />
-            <path d="M2 17h2v-4h4v4h2" />
-            <path d="M12 13l4-7 5 1" />
-        </svg>
-    </div>
-);
-
-const HydraulicPlatform = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 17h18" />
-            <circle cx="7" cy="18" r="2" />
-            <circle cx="17" cy="18" r="2" />
-            <path d="M3 17v-3h4v3" />
-            <path d="M10 17l3-6 3 6" />
-            <path d="M11 11l2-4 2 4" />
-            <path d="M11 7h4" />
-        </svg>
-    </div>
-);
-
-const TruckCrane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 17h20" />
-            <circle cx="6" cy="18" r="2" />
-            <circle cx="14" cy="18" r="2" />
-            <circle cx="18" cy="18" r="2" />
-            <path d="M2 17v-4h4l3 3h5v-3l7-5" />
-        </svg>
-    </div>
-);
-
-const FlatbedTruck = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {/* Cab */}
-            <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
-            <path d="M2 12h7" />
-            {/* Flatbed - LOWERED from y=14 to y=16 */}
-            <path d="M9 16h13v2H9z" />
-            {/* 3 Axles (Wheels) */}
-            <circle cx="5.5" cy="18" r="2" />
-            <circle cx="14.5" cy="18" r="2" />
-            <circle cx="19.5" cy="18" r="2" />
-        </svg>
-    </div>
-);
-
-
-
-
-const Crane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 21h16" />
-            <path d="M12 21V3" />
-            <path d="M12 3l8 4" />
-            <path d="M12 3H4" />
-            <path d="M4 3v4" />
-            <path d="M12 7H8" />
-            <path d="M8 3v4" />
-        </svg>
-    </div>
-);
-
-const Superstructure = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
-        <path fill={fgColor} stroke="none" d="M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
-    </svg>
-);
-
-const Hiab = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <path fill={bgColor} stroke="none" d="M1,719 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
-        <path fill="#FFFFFF" stroke="none" d="M709.98,682.51 C490.48,682.52 271.49,682.53 52.50,682.54 C48.33,682.54 44.13,682.78 40.02,682.33 C38.74,682.19 36.78,680.18 36.68,678.91 C36.30,674.11 36.58,669.26 36.58,664.42 C36.60,458.26 36.63,252.10 36.51,45.94 C36.51,40.97 37.56,39.57 42.79,39.58 C209.62,39.77 376.45,39.78 543.28,39.81 C599.78,39.82 656.27,39.78 712.77,39.78 C714.07,39.78 715.37,39.89 717.04,39.97 C717.16,41.61 717.37,43.05 717.37,44.48 C717.39,254.98 717.39,465.47 717.39,675.96 C717.39,682.51 717.38,682.51 709.98,682.51 Z" />
-        <path fill={fgColor} stroke="none" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,396.9 C351.1,396.9 351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z" />
-    </svg>
-);
-
-const wrapLucide = (Icon: any) => ({ size = 24, fgColor = '#000000', bgColor = 'transparent', ...props }: any) => (
-    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <Icon size={size - 4} color={fgColor} {...props} />
+const wrapLucide = (Icon: any) => ({ size = 24, ...props }: any) => (
+    <div style={{ backgroundColor: '#FFFFFF', border: '2px solid #000000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size, padding: '2px' }}>
+        <Icon size={size - 6} color="#000000" strokeWidth={3} {...props} />
     </div>
 );
 
 const ICON_OPTIONS = {
     Truck: wrapLucide(Truck),
-    FlatbedTruck: FlatbedTruck,
     Hammer: wrapLucide(Hammer),
     ThumbsUp: wrapLucide(ThumbsUp),
     AlertTriangle: wrapLucide(AlertTriangle),
+    Play: wrapLucide(Play),
     Check: wrapLucide(Check),
+    Milestone: wrapLucide(Milestone),
     Wrench: wrapLucide(Wrench),
-    Zap: wrapLucide(Zap),
     Package: wrapLucide(Package),
     Factory: wrapLucide(Factory),
     ShieldCheck: wrapLucide(ShieldCheck),
     Box: wrapLucide(Box),
     Drill: wrapLucide(Drill),
     Settings: wrapLucide(Settings),
-    HookLoader: HookLoader,
-    HydraulicCrane: HydraulicCrane,
-    HydraulicPlatform: HydraulicPlatform,
-    TruckCrane: TruckCrane,
-    Crane: Crane,
-    Superstructure: Superstructure,
-    Play: wrapLucide(Play),
-    Milestone: wrapLucide(Milestone),
     Hiab: Hiab,
     Briefcase: wrapLucide(Briefcase),
     Building2: wrapLucide(Building2),
@@ -188,10 +57,7 @@ const ICON_OPTIONS = {
     Users: wrapLucide(Users),
     Laptop: wrapLucide(Laptop),
     Phone: wrapLucide(Phone),
-    Mail: wrapLucide(Mail),
-    Star: wrapLucide(Star),
-    Rocket: wrapLucide(Rocket),
-    Coffee: wrapLucide(Coffee)
+    Mail: wrapLucide(Mail)
 };
 
 interface IPhase {
@@ -946,24 +812,20 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 const isStartVal = m.class === 'start';
                                 const isSmallMilestone = isPhaseEndVal || isStartVal;
 
-                                // Global icon settings
-                                const globalIconColor = config?.design?.iconColor || '#000000';
-                                const globalIconOpacity = config?.design?.iconOpacity ?? 1;
+                                // Milestone icon rendering
+                                const IconComponent = m.icon ? ICON_OPTIONS[m.icon as keyof typeof ICON_OPTIONS] : null;
 
                                 return (
                                     <div
                                         key={m.key}
                                         className={`milestone-icon cursor-pointer transition-transform ${isSmallMilestone ? 'hover:scale-105' : 'hover:scale-125'}`}
                                         style={{
-                                            color: milestoneColor,
                                             transform: `scale(${isHovered ? 1.6 : 1.1})`,
                                             zIndex: idx,
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            // opacity: globalIconOpacity // REMOVED: Applied to colors below instead
+                                            justifyContent: 'center'
                                         }}
-                                        // title removed in favor of hover popup
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();
                                             handleMouseEnter(m, rect);
@@ -982,18 +844,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             <div className="flex items-center justify-center w-full h-full">
                                                 <div
                                                     className={`${isStartVal ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full`}
-                                                    style={{ backgroundColor: applyOpacity(milestoneColor, globalIconOpacity) }}
+                                                    style={{ backgroundColor: statusColor, border: '1px solid #000000' }}
                                                 />
                                             </div>
                                         ) : (
                                             <Icon
                                                 size={iconSize}
-                                                fgColor={applyOpacity(globalIconColor, globalIconOpacity)}
-                                                bgColor={applyOpacity(statusColor, globalIconOpacity)}
-                                                // color={milestoneColor} // Removed to avoid overriding fgColor in some icons if specific props used
-                                                // fill={IconKey === 'Play' ? milestoneColor : 'none'} // Play icon fill
-                                                strokeWidth={2.5}
-                                                className="milestone-svg"
                                             />
                                         )}
                                     </div>
@@ -1082,9 +938,6 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 <div className="flex items-center gap-2 min-w-0">
                                     <Icon
                                         size={16}
-                                        fgColor="#000000"
-                                        bgColor={statusColor}
-                                        color={milestoneColor}
                                         className="shrink-0"
                                     />
                                     <div className="flex flex-col min-w-0">
