@@ -49,7 +49,21 @@ import {
     MoveHorizontal,
     MousePointerClick,
     Palette,
-    Flag
+    Flag,
+    Briefcase,
+    Building2,
+    Globe,
+    TrendingUp,
+    Euro,
+    Warehouse,
+    Landmark,
+    Users,
+    Laptop,
+    Phone,
+    Mail,
+    Star,
+    Rocket,
+    Coffee
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -147,6 +161,7 @@ const Hiab = ({ size = 24, ...props }: any) => (
 
 const ICON_OPTIONS = {
     Truck: Truck,
+    FlatbedTruck: FlatbedTruck,
     Hammer: Hammer,
     ThumbsUp: ThumbsUp,
     AlertTriangle: AlertTriangle,
@@ -168,15 +183,29 @@ const ICON_OPTIONS = {
     Play: Play,
     Milestone: Milestone,
     Hiab: Hiab,
-    FlatbedTruck: FlatbedTruck
+    Briefcase: Briefcase,
+    Building2: Building2,
+    Globe: Globe,
+    TrendingUp: TrendingUp,
+    Euro: Euro,
+    Warehouse: Warehouse,
+    Landmark: Landmark,
+    Users: Users,
+    Laptop: Laptop,
+    Phone: Phone,
+    Mail: Mail,
+    Star: Star,
+    Rocket: Rocket,
+    Coffee: Coffee
 };
 
-// Seznam ikon pro výběr v editoru (dle požadavku uživatele - ty co jsou vidět + nové)
+// Seznam ikon pro výběr v editoru
 const VISIBLE_ICONS = [
-    'Truck', 'FlatbedTruck', 'Hammer', 'ThumbsUp', 'AlertTriangle', 'Check',
-    'Wrench', 'Zap', 'Package', 'Factory', 'ShieldCheck',
-    'Box', 'Drill', 'Settings', 'HookLoader', 'HydraulicCrane',
-    'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure', 'Milestone', 'Hiab'
+    'Truck', 'FlatbedTruck', 'Hiab', 'HookLoader', 'HydraulicCrane', 'HydraulicPlatform', 'TruckCrane', 'Crane', 'Superstructure',
+    'Hammer', 'Wrench', 'Drill', 'Settings', 'Zap', 'Package', 'Box', 'Factory', 'Warehouse',
+    'Briefcase', 'Building2', 'Globe', 'Landmark', 'Users', 'TrendingUp', 'Euro',
+    'Laptop', 'Phone', 'Mail', 'Star', 'Rocket', 'Coffee',
+    'ThumbsUp', 'Check', 'ShieldCheck', 'AlertTriangle', 'Play', 'Milestone'
 ];
 
 // Rozsah plynulého zoomu (šířka dne v px)
