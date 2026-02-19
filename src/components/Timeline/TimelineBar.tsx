@@ -116,21 +116,22 @@ const Crane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', .
     </div>
 );
 
-const Superstructure = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
+const Superstructure = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
         <path fill={fgColor} stroke="none" d="M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
     </svg>
 );
 
-const Hiab = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
+const Hiab = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
-        <path fill={fgColor} stroke="none" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,395.6 351.1,396.9 C351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z" />
+        <path fill={bgColor} stroke="none" d="M1,719 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
+        <path fill="#FFFFFF" stroke="none" d="M709.98,682.51 C490.48,682.52 271.49,682.53 52.50,682.54 C48.33,682.54 44.13,682.78 40.02,682.33 C38.74,682.19 36.78,680.18 36.68,678.91 C36.30,674.11 36.58,669.26 36.58,664.42 C36.60,458.26 36.63,252.10 36.51,45.94 C36.51,40.97 37.56,39.57 42.79,39.58 C209.62,39.77 376.45,39.78 543.28,39.81 C599.78,39.82 656.27,39.78 712.77,39.78 C714.07,39.78 715.37,39.89 717.04,39.97 C717.16,41.61 717.37,43.05 717.37,44.48 C717.39,254.98 717.39,465.47 717.39,675.96 C717.39,682.51 717.38,682.51 709.98,682.51 Z" />
+        <path fill={fgColor} stroke="none" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,396.9 C351.1,396.9 351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z" />
     </svg>
 );
 
-const wrapLucide = (Icon: any) => ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+const wrapLucide = (Icon: any) => ({ size = 24, fgColor = '#000000', bgColor = 'transparent', ...props }: any) => (
     <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
         <Icon size={size - 4} color={fgColor} {...props} />
     </div>
@@ -801,7 +802,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 let opacityStyle: React.CSSProperties = {};
                 if (isCollapsed) {
                     opacityStyle = {
-                        opacity: 0.45,
+                        opacity: 0.15, // Reduced for better distinguishability of stacked orders (1, 2, 4-5)
                         zIndex: 1,
                         mixBlendMode: 'multiply',
                         borderLeft: '1px solid rgba(255,255,255,0.4)',
@@ -916,17 +917,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 today.setHours(0, 0, 0, 0);
                                 const isOverdue = !isCompleted && m.date < today;
 
-                                // Fallback to config colors
-                                const stateColors = {
-                                    pending: config?.colors?.statePending?.color || '#374151',
-                                    completed: config?.colors?.stateCompleted?.color || '#22c55e',
-                                    overdue: config?.colors?.stateOverdue?.color || '#ef4444'
-                                };
+                                // Status color for icon background
+                                const statusColor = isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e')
+                                    : isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444')
+                                        : (config?.colors?.statePending?.color || '#374151');
 
-                                let milestoneColor = stateColors.pending;
-                                if (isCompleted) milestoneColor = stateColors.completed;
-                                else if (isOverdue) milestoneColor = stateColors.overdue;
-                                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color;
+                                // Category color for label and line
+                                let milestoneColor = milestoneConfig?.color || statusColor;
 
                                 const isPhaseEndVal = m.class === 'mounting_end' || m.class === 'revision_end';
                                 const isStartVal = m.class === 'start';
@@ -969,8 +966,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         ) : (
                                             <Icon
                                                 size={iconSize}
-                                                fgColor={milestoneConfig?.iconColor || milestoneColor}
-                                                bgColor={milestoneConfig?.iconBgColor || 'transparent'}
+                                                fgColor="#000000"
+                                                bgColor={statusColor}
                                                 color={milestoneColor}
                                                 fill={IconKey === 'Play' ? milestoneColor : 'none'}
                                                 strokeWidth={2.5}
@@ -1009,10 +1006,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 today.setHours(0, 0, 0, 0);
                 const isOverdue = !isCompleted && m.date < today;
 
-                let milestoneColor = '#374151';
-                if (isCompleted) milestoneColor = '#22c55e';
-                else if (isOverdue) milestoneColor = '#ef4444';
-                else if (milestoneConfig?.color) milestoneColor = milestoneConfig.color;
+                // Status color for icon background
+                const statusColor = isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e')
+                    : isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444')
+                        : (config?.colors?.statePending?.color || '#374151');
+
+                // Category color for label
+                let milestoneColor = milestoneConfig?.color || statusColor;
 
                 const IconKey = (m.icon || milestoneConfig?.icon) as keyof typeof ICON_OPTIONS;
                 const Icon = ICON_OPTIONS[IconKey] || ICON_OPTIONS['Milestone'];
@@ -1060,8 +1060,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 <div className="flex items-center gap-2 min-w-0">
                                     <Icon
                                         size={16}
-                                        fgColor={milestoneConfig?.iconColor || milestoneColor}
-                                        bgColor={milestoneConfig?.iconBgColor || 'transparent'}
+                                        fgColor="#000000"
+                                        bgColor={statusColor}
                                         color={milestoneColor}
                                         className="shrink-0"
                                     />

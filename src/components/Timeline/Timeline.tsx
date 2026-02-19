@@ -154,21 +154,21 @@ const Crane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', .
     </div>
 );
 
-const Superstructure = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
+const Superstructure = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
         <path fill={fgColor} stroke="none" d="M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
     </svg>
 );
 
-const Hiab = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
+const Hiab = ({ size = 24, fgColor = '#000000', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
         <path fill={fgColor} stroke="none" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,395.6 351.1,396.9 C351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z" />
     </svg>
 );
 
-const wrapLucide = (Icon: any) => ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+const wrapLucide = (Icon: any) => ({ size = 24, fgColor = '#000000', bgColor = 'transparent', ...props }: any) => (
     <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
         <Icon size={size - 4} color={fgColor} {...props} />
     </div>
@@ -356,10 +356,10 @@ const Timeline: React.FC = () => {
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
-        milestoneChassis: { color: '#f97316', iconColor: '#ffffff', iconBgColor: '#f97316', opacity: 1, label: 'Podvozek', icon: 'FlatbedTruck', showInStack: true },
-        milestoneBody: { color: '#a855f7', iconColor: '#ffffff', iconBgColor: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
-        milestoneHandover: { color: '#3b82f6', iconColor: '#ffffff', iconBgColor: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
-        milestoneDeadline: { color: '#ef4444', iconColor: '#ffffff', iconBgColor: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
+        milestoneChassis: { color: '#f97316', iconColor: '#000000', iconBgColor: '#f97316', opacity: 1, label: 'Podvozek', icon: 'FlatbedTruck', showInStack: true },
+        milestoneBody: { color: '#a855f7', iconColor: '#000000', iconBgColor: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
+        milestoneHandover: { color: '#3b82f6', iconColor: '#000000', iconBgColor: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
+        milestoneDeadline: { color: '#ef4444', iconColor: '#000000', iconBgColor: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
         priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
         priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
@@ -1081,8 +1081,8 @@ const Timeline: React.FC = () => {
                                                                 return (
                                                                     <Icon
                                                                         size={24}
-                                                                        fgColor={config.iconColor || config.color}
-                                                                        bgColor={config.iconBgColor || 'transparent'}
+                                                                        fgColor="#000000"
+                                                                        bgColor={config.color}
                                                                     />
                                                                 );
                                                             })()
@@ -1112,8 +1112,8 @@ const Timeline: React.FC = () => {
                                                                         >
                                                                             {Icon && <Icon
                                                                                 size={20}
-                                                                                fgColor={config.iconColor || config.color}
-                                                                                bgColor={config.iconBgColor || 'transparent'}
+                                                                                fgColor="#000000"
+                                                                                bgColor={config.color}
                                                                             />}
                                                                         </button>
                                                                     );

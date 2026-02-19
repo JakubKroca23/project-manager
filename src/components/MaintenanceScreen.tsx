@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Wrench } from 'lucide-react';
+import { RefreshCw, Wrench, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface MaintenanceScreenProps {
@@ -57,13 +57,25 @@ export default function MaintenanceScreen({ estimatedEnd }: MaintenanceScreenPro
                 </p>
             </div>
 
-            <button
-                onClick={handleRefresh}
-                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold text-sm shadow-xl hover:scale-105 transition-transform active:scale-95"
-            >
-                <RefreshCw className="h-4 w-4" />
-                Obnovit stránku
-            </button>
+            <div className="flex items-center gap-3">
+                <button
+                    onClick={handleRefresh}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold text-sm shadow-xl hover:scale-105 transition-transform active:scale-95"
+                >
+                    <RefreshCw className="h-4 w-4" />
+                    Obnovit stránku
+                </button>
+                <button
+                    onClick={async () => {
+                        await supabase.auth.signOut();
+                        window.location.href = '/login';
+                    }}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-muted text-muted-foreground rounded-full font-bold text-sm shadow-md hover:bg-muted/80 transition-all active:scale-95"
+                >
+                    <LogOut className="h-4 w-4" />
+                    Odhlásit se
+                </button>
+            </div>
 
             <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/50 uppercase tracking-widest pt-8">
                 <span className="animate-pulse">System Update</span>
