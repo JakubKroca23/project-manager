@@ -10,6 +10,8 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useSearch } from '@/providers/SearchProvider';
 import { useActions } from '@/providers/ActionProvider';
 
+import { ThemeToggle } from './ThemeToggle';
+
 const navItems = [
     {
         name: 'ZAKÁZKY',
@@ -293,6 +295,8 @@ export function Navbar() {
                         <div className="flex flex-col items-center justify-center">
                             <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>
                         </div>
+
+                        <ThemeToggle className="hover:bg-primary/10 border-border/40" />
 
                         <Link href="/profile" className="no-underline">
                             <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
