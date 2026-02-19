@@ -15,15 +15,24 @@ import { toast } from 'sonner';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
-const Hiab = ({ size = 24 }: any) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <img src="/hiab.svg" alt="Hiab" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-    </div>
+const Hiab = ({ size = 24, color }: any) => (
+    <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size,
+        backgroundColor: color || '#000000',
+        maskImage: `url(/hiab.svg)`,
+        maskSize: 'contain',
+        maskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        WebkitMaskImage: `url(/hiab.svg)`,
+        WebkitMaskSize: 'contain',
+        WebkitMaskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+    }} />
 );
 
-const wrapLucide = (Icon: any) => ({ size = 24, ...props }: any) => (
+const wrapLucide = (Icon: any) => ({ size = 24, color, ...props }: any) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <Icon size={size - 6} color="#000000" strokeWidth={3} {...props} />
+        <Icon size={size - 6} color={color || "#000000"} strokeWidth={3} {...props} />
     </div>
 );
 
@@ -799,7 +808,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 // Status color for icon background
                                 const statusColor = isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e')
                                     : isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444')
-                                        : (config?.colors?.statePending?.color || '#374151');
+                                        : (milestoneConfig?.color || config?.colors?.statePending?.color || '#374151');
 
                                 // Category color for label and line
                                 let milestoneColor = milestoneConfig?.color || statusColor;
@@ -846,6 +855,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         ) : (
                                             <Icon
                                                 size={iconSize}
+                                                color={statusColor}
                                             />
                                         )}
                                     </div>
@@ -881,9 +891,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const isOverdue = !isCompleted && m.date < today;
 
                 // Status color for icon background
+                // Status color for icon background
                 const statusColor = isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e')
                     : isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444')
-                        : (config?.colors?.statePending?.color || '#374151');
+                        : (milestoneConfig?.color || config?.colors?.statePending?.color || '#374151');
 
                 // Category color for label
                 let milestoneColor = milestoneConfig?.color || statusColor;
@@ -935,6 +946,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     <Icon
                                         size={16}
                                         className="shrink-0"
+                                        color={statusColor} // Match the timeline icon color
                                     />
                                     <div className="flex flex-col min-w-0">
                                         <span className="font-black text-xs uppercase tracking-tight truncate" style={{ color: milestoneColor }}>

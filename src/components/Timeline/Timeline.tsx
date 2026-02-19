@@ -24,15 +24,24 @@ import Link from 'next/link';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
-const Hiab = ({ size = 24 }: any) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <img src="/hiab.svg" alt="Hiab" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-    </div>
+const Hiab = ({ size = 24, color }: any) => (
+    <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size,
+        backgroundColor: color || '#000000',
+        maskImage: `url(/hiab.svg)`,
+        maskSize: 'contain',
+        maskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        WebkitMaskImage: `url(/hiab.svg)`,
+        WebkitMaskSize: 'contain',
+        WebkitMaskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+    }} />
 );
 
-const wrapLucide = (Icon: any) => ({ size = 24, ...props }: any) => (
+const wrapLucide = (Icon: any) => ({ size = 24, color, ...props }: any) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
-        <Icon size={size - 6} color="#000000" strokeWidth={3} {...props} />
+        <Icon size={size - 6} color={color || "#000000"} strokeWidth={3} {...props} />
     </div>
 );
 
@@ -155,17 +164,12 @@ const Timeline: React.FC = () => {
     const [rowHeight, setRowHeight] = useState(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('timeline_rowHeight');
-            return saved ? parseInt(saved) : 32;
+            return saved ? parseInt(saved) : 34; // Default to 34px per user request
         }
-        return 32;
+        return 34;
     });
-    const [summaryRowHeight, setSummaryRowHeight] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('timeline_summaryRowHeight');
-            return saved ? parseInt(saved) : 36;
-        }
-        return 36;
-    });
+    // Summary row height fixed at 34px by user request
+    const summaryRowHeight = 34;
     const [showDesignSettings, setShowDesignSettings] = useState(false);
     const [openIconSelector, setOpenIconSelector] = useState<string | null>(null);
     const [design, setDesign] = useState({
@@ -497,10 +501,8 @@ const Timeline: React.FC = () => {
                 const projectRow = target.closest('.is-project');
 
                 if (summaryRow) {
-                    setSummaryRowHeight(prev => {
-                        const next = delta > 0 ? prev - 4 : prev + 4;
-                        return Math.min(120, Math.max(12, next));
-                    });
+                    // Summary rows have fixed height now, do nothing
+                    return;
                 } else {
                     // Default behavior for projects or anything else
                     setRowHeight(prev => {
