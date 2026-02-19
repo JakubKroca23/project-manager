@@ -68,47 +68,55 @@ import {
 import Link from 'next/link';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
-const HookLoader = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 17h18" />
-        <circle cx="7" cy="18" r="2" />
-        <circle cx="17" cy="18" r="2" />
-        <path d="M2 17h2v-4h4v4h2" />
-        <path d="M18 17h4v-6h-4z" />
-        <path d="M13 14l5-5h3" />
-    </svg>
+const HookLoader = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 17h18" />
+            <circle cx="7" cy="18" r="2" />
+            <circle cx="17" cy="18" r="2" />
+            <path d="M2 17h2v-4h4v4h2" />
+            <path d="M18 17h4v-6h-4z" />
+            <path d="M13 14l5-5h3" />
+        </svg>
+    </div>
 );
 
-const HydraulicCrane = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 17h18" />
-        <circle cx="7" cy="18" r="2" />
-        <circle cx="17" cy="18" r="2" />
-        <path d="M2 17h2v-4h4v4h2" />
-        <path d="M12 13l4-7 5 1" />
-    </svg>
+const HydraulicCrane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 17h18" />
+            <circle cx="7" cy="18" r="2" />
+            <circle cx="17" cy="18" r="2" />
+            <path d="M2 17h2v-4h4v4h2" />
+            <path d="M12 13l4-7 5 1" />
+        </svg>
+    </div>
 );
 
-const HydraulicPlatform = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 17h18" />
-        <circle cx="7" cy="18" r="2" />
-        <circle cx="17" cy="18" r="2" />
-        <path d="M3 17v-3h4v3" />
-        <path d="M10 17l3-6 3 6" />
-        <path d="M11 11l2-4 2 4" />
-        <path d="M11 7h4" />
-    </svg>
+const HydraulicPlatform = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 17h18" />
+            <circle cx="7" cy="18" r="2" />
+            <circle cx="17" cy="18" r="2" />
+            <path d="M3 17v-3h4v3" />
+            <path d="M10 17l3-6 3 6" />
+            <path d="M11 11l2-4 2 4" />
+            <path d="M11 7h4" />
+        </svg>
+    </div>
 );
 
-const TruckCrane = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 17h20" />
-        <circle cx="6" cy="18" r="2" />
-        <circle cx="14" cy="18" r="2" />
-        <circle cx="18" cy="18" r="2" />
-        <path d="M2 17v-4h4l3 3h5v-3l7-5" />
-    </svg>
+const TruckCrane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 17h20" />
+            <circle cx="6" cy="18" r="2" />
+            <circle cx="14" cy="18" r="2" />
+            <circle cx="18" cy="18" r="2" />
+            <path d="M2 17v-4h4l3 3h5v-3l7-5" />
+        </svg>
+    </div>
 );
 
 
@@ -116,87 +124,94 @@ const TruckCrane = ({ size = 24, ...props }: any) => (
 
 
 
-const FlatbedTruck = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {/* Cab */}
-        <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
-        <path d="M2 12h7" />
-        {/* Flatbed */}
-        <path d="M9 14h13v4H9z" />
-        {/* 3 Axles (Wheels) */}
-        <circle cx="5.5" cy="18" r="2" />
-        <circle cx="14.5" cy="18" r="2" />
-        <circle cx="19.5" cy="18" r="2" />
-    </svg>
+const FlatbedTruck = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {/* Cab */}
+            <path d="M2 18V9c0-1 1-2 2-2h3c1 0 2 1 2 2v9" />
+            <path d="M2 12h7" />
+            {/* Flatbed */}
+            <path d="M9 14h13v4H9z" />
+            {/* 3 Axles (Wheels) */}
+            <circle cx="5.5" cy="18" r="2" />
+            <circle cx="14.5" cy="18" r="2" />
+            <circle cx="19.5" cy="18" r="2" />
+        </svg>
+    </div>
 );
 
-const Crane = ({ size = 24, ...props }: any) => (
-    <svg width={size} height={size} {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 21h16" />
-        <path d="M12 21V3" />
-        <path d="M12 3l8 4" />
-        <path d="M12 3H4" />
-        <path d="M4 3v4" />
-        <path d="M12 7H8" />
-        <path d="M8 3v4" />
-    </svg>
+const Crane = ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <svg width={size - 4} height={size - 4} {...props} viewBox="0 0 24 24" fill="none" stroke={fgColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 21h16" />
+            <path d="M12 21V3" />
+            <path d="M12 3l8 4" />
+            <path d="M12 3H4" />
+            <path d="M4 3v4" />
+            <path d="M12 7H8" />
+            <path d="M8 3v4" />
+        </svg>
+    </div>
 );
 
-const Superstructure = ({ size = 24, ...props }: any) => (
+const Superstructure = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <path fill="currentColor" stroke="none" d="M1.000000,719.000000 C1.000000,480.305298 1.000000,241.610611 1.458877,2.563841 C3.083466,2.234620 4.249180,2.277543 5.414892,2.277472 C251.967224,2.262367 498.519562,2.245386 745.071899,2.212702 C748.063049,2.212305 751.054138,2.008735 754.379395,2.190670 C754.916687,4.776751 755.297546,7.072153 755.297729,9.367578 C755.312805,243.420898 755.300293,477.474213 755.272644,711.527527 C755.272339,714.011108 755.051025,716.494629 754.481934,718.977051 C752.198853,718.986023 750.366760,719.005188 748.534607,719.005188 C499.356415,719.004333 250.178207,719.002136 1.000000,719.000000 M710.484558,682.519592 C717.382812,682.514832 717.397461,682.514832 717.397400,675.968628 C717.395813,465.474792 717.391846,254.980927 717.373535,44.487080 C717.373413,43.051239 717.167297,41.615414 717.041809,39.975128 C715.375916,39.898144 714.076355,39.785503 712.776794,39.785595 C656.278442,39.789574 599.780151,39.821056 543.281799,39.812984 C376.453217,39.789158 209.624588,39.779362 42.796196,39.582157 C37.561188,39.575974 36.512508,39.978024 36.515289,45.945698 C36.630692,252.106094 36.602631,458.266602 36.588947,664.427063 C36.588627,669.260132 36.308804,674.111877 36.685020,678.913757 C36.784760,680.186768 38.745804,682.192627 40.020535,682.332947 C44.138775,682.786255 48.335388,682.541382 52.501797,682.541199 C271.495605,682.532410 490.489410,682.521240 710.484558,682.519592 z" />
-        <path fill="currentColor" stroke="none" d="M754.932861,718.978210 C755.051025,716.494629 755.272339,714.011108 755.272644,711.527527 C755.300293,477.474213 755.312805,243.420898 755.297729,9.367578 C755.297546,7.072153 754.916687,4.776751 754.382629,1.964943 C754.051697,1.448549 754.000000,1.000000 754.000000,1.000000 C755.654358,1.048076 757.871765,0.378559 757.024292,3.506584 C756.856018,4.127662 757.000000,4.833333 757.000000,5.500000 C757.000000,242.166672 757.001831,478.833344 756.958679,715.500000 C756.958435,717.000061 756.333313,718.500000 755.524780,719.741821 C755.010559,719.315186 754.971680,719.146729 754.932861,718.978210 z" />
-        <path fill="currentColor" opacity="0.5" stroke="none" d="M239.325577,244.186447 C203.676422,260.819580 181.076263,297.162354 182.767044,334.754974 C184.659683,376.835571 214.633133,412.044403 255.930511,420.166931 C290.925354,427.049896 321.923950,419.072845 348.072388,394.205811 C348.646942,393.659393 349.350281,393.248383 350.698639,392.254486 C350.876465,394.253387 351.104340,395.619995 351.103790,396.986572 C351.094727,420.319366 350.979187,443.652557 351.102631,466.984528 C351.123352,470.902740 349.982635,472.827637 346.087982,474.136627 C314.852814,484.634644 282.792542,488.090546 250.473999,482.307434 C176.538651,469.077393 127.043213,426.617065 103.475761,355.035187 C90.394173,315.302216 90.995651,275.095520 104.500275,235.729980 C124.083107,178.646637 162.374619,139.218216 219.688461,118.965439 C265.006805,102.951469 309.664490,106.366371 353.827484,123.622246 C379.737000,133.745926 403.279755,147.750900 425.192444,164.987671 C442.542694,178.635559 460.278503,192.182083 479.337524,203.185028 C515.062378,223.809326 554.102417,231.555420 595.280273,226.561981 C615.185608,224.148117 633.773682,217.584396 650.923706,207.098816 C652.627502,206.057114 654.341736,205.031387 656.075623,204.041153 C656.311707,203.906326 656.691223,204.022583 657.474792,204.022583 C657.474792,343.750275 657.474792,483.451508 657.474792,623.471130 C592.401489,623.471130 527.332031,623.471130 461.703094,623.471130 C465.198578,598.751526 472.556335,575.556274 481.364807,553.438538 C470.681000,543.735840 459.901154,534.822144 450.133575,524.910889 C420.921997,495.269623 402.146088,459.562714 389.878693,420.032654 C380.711121,390.491394 375.579071,360.200592 371.022034,329.723511 C367.572266,306.651764 359.240570,285.458252 344.542786,267.071228 C332.136230,251.550446 315.365082,243.249496 296.460724,238.938934 C277.059540,234.515060 258.087372,236.593246 239.325577,244.186447 M405.066071,356.463867 C410.432312,383.842468 418.457458,410.395691 430.494324,435.600952 C445.061768,466.105164 463.614624,493.674988 490.639832,514.752502 C492.789459,516.429016 495.057343,517.953857 496.417114,518.934143 C513.274902,494.606476 529.752014,470.828064 546.346313,446.880646 C544.305969,446.365356 542.040405,445.919800 539.855347,445.221893 C516.372620,437.721619 498.028503,423.066315 483.016296,403.948822 C457.174347,371.040009 444.689209,332.920502 439.677368,291.924713 C438.283508,280.522980 437.043335,269.093719 435.263367,257.750763 C433.873779,248.895523 427.581482,243.368057 419.133240,242.589844 C411.363129,241.874100 404.838959,245.662964 401.942169,253.419128 C400.451782,257.409546 399.698334,261.814636 399.397797,266.087616 C397.282166,296.164215 399.298950,326.010345 405.066071,356.463867 M526.730957,299.152283 C524.841736,300.771179 522.798889,302.243286 521.088745,304.033264 C511.238831,314.342743 509.870361,330.107635 517.726929,341.649139 C526.089478,353.933990 540.631409,358.646790 554.090332,352.992706 C565.409607,348.237457 572.231384,339.693481 573.135559,327.223969 C574.031616,314.867828 568.991577,305.131012 558.450073,298.728607 C548.244873,292.530487 537.709229,292.676788 526.730957,299.152283 z" />
+        <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
+        <path fill={fgColor} stroke="none" d="M710.4,682.5 C717.3,682.5 717.3,682.5 717.3,675.9 C717.3,465.4 717.3,254.9 717.3,44.4 C717.3,43.0 717.1,41.6 717.0,39.9 C715.3,39.8 714.0,39.7 712.7,39.7 C656.2,39.7 599.7,39.8 543.2,39.8 C376.4,39.7 209.6,39.7 42.7,39.5 C37.5,39.5 36.5,40.9 36.5,45.9 C36.6,252.1 36.6,458.2 36.5,664.4 C36.5,669.2 36.3,674.1 36.6,678.9 C36.7,680.1 38.7,682.1 40.0,682.3 C44.1,682.7 48.3,682.5 52.5,682.5 C271.4,682.5 490.4,682.5 710.4,682.5 Z" />
     </svg>
 );
 
-const Hiab = ({ size = 24, ...props }: any) => (
+const Hiab = ({ size = 24, fgColor = 'currentColor', bgColor = '#FFFFFF', ...props }: any) => (
     <svg width={size} height={size} {...props} viewBox="0 0 756 719" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        {/* Background square with border */}
-        <path fill="#000000" stroke="currentColor" strokeWidth="40" d="M709.98,682.51 C490.48,682.52 271.49,682.53 52.50,682.54 C48.33,682.54 44.13,682.78 40.02,682.33 C38.74,682.19 36.78,680.18 36.68,678.91 C36.30,674.11 36.58,669.26 36.58,664.42 C36.60,458.26 36.63,252.10 36.51,45.94 C36.51,40.97 37.56,39.57 42.79,39.58 C209.62,39.77 376.45,39.78 543.28,39.81 C599.78,39.82 656.27,39.78 712.77,39.78 C714.07,39.78 715.37,39.89 717.04,39.97 C717.16,41.61 717.37,43.05 717.37,44.48 C717.39,254.98 717.39,465.47 717.39,675.96 C717.39,682.51 717.38,682.51 709.98,682.51 Z" />
-        {/* Bird logo silhouette */}
-        <path fill="currentColor" stroke="none" d="M239.325577,244.186447 C203.676422,260.819580 181.076263,297.162354 182.767044,334.754974 C184.659683,376.835571 214.633133,412.044403 255.930511,420.166931 C290.925354,427.049896 321.923950,419.072845 348.072388,394.205811 C348.646942,393.659393 349.350281,393.248383 350.698639,392.254486 C350.876465,394.253387 351.104340,395.619995 351.103790,396.986572 C351.094727,420.319366 350.979187,443.652557 351.102631,466.984528 C351.123352,470.902740 349.982635,472.827637 346.087982,474.136627 C314.852814,484.634644 282.792542,488.090546 250.473999,482.307434 C176.538651,469.077393 127.043213,426.617065 103.475761,355.035187 C90.394173,315.302216 90.995651,275.095520 104.500275,235.729980 C124.083107,178.646637 162.374619,139.218216 219.688461,118.965439 C265.006805,102.951469 309.664490,106.366371 353.827484,123.622246 C379.737000,133.745926 403.279755,147.750900 425.192444,164.987671 C442.542694,178.635559 460.278503,192.182083 479.337524,203.185028 C515.062378,223.809326 554.102417,231.555420 595.280273,226.561981 C615.185608,224.148117 633.773682,217.584396 650.923706,207.098816 C652.627502,206.057114 654.341736,205.031387 656.075623,204.041153 C656.311707,203.906326 656.691223,204.022583 657.474792,204.022583 C657.474792,343.750275 657.474792,483.451508 657.474792,623.471130 C592.401489,623.471130 527.332031,623.471130 461.703094,623.471130 C465.198578,598.751526 472.556335,575.556274 481.364807,553.438538 C470.681000,543.735840 459.901154,534.822144 450.133575,524.910889 C420.921997,495.269623 402.146088,459.562714 389.878693,420.032654 C380.711121,390.491394 375.579071,360.200592 371.022034,329.723511 C367.572266,306.651764 359.240570,285.458252 344.542786,267.071228 C332.136230,251.550446 315.365082,243.249496 296.460724,238.938934 C277.059540,234.515060 258.087372,236.593246 239.325577,244.186447 M405.066071,356.463867 C410.432312,383.842468 418.457458,410.395691 430.494324,435.600952 C445.061768,466.105164 463.614624,493.674988 490.639832,514.752502 C492.789459,516.429016 495.057343,517.953857 496.417114,518.934143 C513.274902,494.606476 529.752014,470.828064 546.346313,446.880646 C544.305969,446.365356 542.040405,445.919800 539.855347,445.221893 C516.372620,437.721619 498.028503,423.066315 483.016296,403.948822 C457.174347,371.040009 444.689209,332.920502 439.677368,291.924713 C438.283508,280.522980 437.043335,269.093719 435.263367,257.750763 C433.873779,248.895523 427.581482,243.368057 419.133240,242.589844 C411.363129,241.874100 404.838959,245.662964 401.942169,253.419128 C400.451782,257.409546 399.698334,261.814636 399.397797,266.087616 C397.282166,296.164215 399.298950,326.010345 405.066071,356.463867 M526.730957,299.152283 C524.841736,300.771179 522.798889,302.243286 521.088745,304.033264 C511.238831,314.342743 509.870361,330.107635 517.726929,341.649139 C526.089478,353.933990 540.631409,358.646790 554.090332,352.992706 C565.409607,348.237457 572.231384,339.693481 573.135559,327.223969 C574.031616,314.867828 568.991577,305.131012 558.450073,298.728607 C548.244873,292.530487 537.709229,292.676788 526.730957,299.152283 z" />
+        <path fill={bgColor} stroke="none" d="M1.0,719.0 C1.0,480.3 1.0,241.6 1.4,2.5 C3.0,2.2 4.2,2.2 5.4,2.2 C251.9,2.2 498.5,2.2 745.0,2.2 C748.0,2.2 751.0,2.0 754.3,2.1 C754.9,4.7 755.2,7.0 755.2,9.3 C755.3,243.4 755.3,477.4 755.2,711.5 C755.2,714.0 755.0,716.4 754.4,718.9 C752.1,718.9 750.3,719.0 748.5,719.0 C499.3,719.0 250.1,719.0 1.0,719.0 Z" />
+        <path fill={fgColor} stroke="none" d="M239.3,244.1 C203.6,260.8 181.0,297.1 182.7,334.7 C184.6,376.8 214.6,412.0 255.9,420.1 C290.9,427.0 321.9,419.0 348.0,394.2 C348.6,393.6 349.3,393.2 350.6,392.2 C350.8,394.2 351.1,395.6 351.1,396.9 C351.0,420.3 351.0,443.6 351.1,466.9 C351.1,470.9 349.9,472.8 346.0,474.1 C314.8,484.6 282.7,488.0 250.4,482.3 C176.5,469.0 127.0,426.6 103.4,355.0 C90.3,315.3 90.9,275.0 104.5,235.7 C124.0,178.6 162.3,139.2 219.6,118.9 C265.0,102.9 309.6,106.3 353.8,123.6 C379.7,133.7 403.2,147.7 425.1,164.9 C442.5,178.6 460.2,192.1 479.3,203.1 C515.0,223.8 554.1,231.5 595.2,226.5 C615.1,224.1 633.7,217.5 650.9,207.0 C652.6,206.0 654.3,205.0 656.0,204.0 C656.3,203.9 656.6,204.0 657.4,204.0 C657.4,343.7 657.4,483.4 657.4,623.4 C592.4,623.4 527.3,623.4 461.7,623.4 C465.1,598.7 472.5,575.5 481.3,553.4 C470.6,543.7 459.9,534.8 450.1,524.9 C420.9,495.2 402.1,459.5 389.8,420.0 C380.7,390.4 375.5,360.2 371.0,329.7 C367.5,306.6 359.2,285.4 344.5,267.0 C332.1,251.5 315.3,243.2 296.4,238.9 C277.0,234.5 258.0,236.5 239.3,244.1 Z" />
     </svg>
+);
+
+const wrapLucide = (Icon: any) => ({ size = 24, fgColor = 'currentColor', bgColor = 'transparent', ...props }: any) => (
+    <div style={{ backgroundColor: bgColor, borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <Icon size={size - 4} color={fgColor} {...props} />
+    </div>
 );
 
 const ICON_OPTIONS = {
-    Truck: Truck,
+    Truck: wrapLucide(Truck),
     FlatbedTruck: FlatbedTruck,
-    Hammer: Hammer,
-    ThumbsUp: ThumbsUp,
-    AlertTriangle: AlertTriangle,
-    Check: Check,
-    Wrench: Wrench,
-    Zap: Zap,
-    Package: Package,
-    Factory: Factory,
-    ShieldCheck: ShieldCheck,
-    Box: Box,
-    Drill: Drill,
-    Settings: Settings,
+    Hammer: wrapLucide(Hammer),
+    ThumbsUp: wrapLucide(ThumbsUp),
+    AlertTriangle: wrapLucide(AlertTriangle),
+    Check: wrapLucide(Check),
+    Wrench: wrapLucide(Wrench),
+    Zap: wrapLucide(Zap),
+    Package: wrapLucide(Package),
+    Factory: wrapLucide(Factory),
+    ShieldCheck: wrapLucide(ShieldCheck),
+    Box: wrapLucide(Box),
+    Drill: wrapLucide(Drill),
+    Settings: wrapLucide(Settings),
     HookLoader: HookLoader,
     HydraulicCrane: HydraulicCrane,
     HydraulicPlatform: HydraulicPlatform,
     TruckCrane: TruckCrane,
     Crane: Crane,
     Superstructure: Superstructure,
-    Play: Play,
-    Milestone: Milestone,
+    Play: wrapLucide(Play),
+    Milestone: wrapLucide(Milestone),
     Hiab: Hiab,
-    Briefcase: Briefcase,
-    Building2: Building2,
-    Globe: Globe,
-    TrendingUp: TrendingUp,
-    Euro: Euro,
-    Warehouse: Warehouse,
-    Landmark: Landmark,
-    Users: Users,
-    Laptop: Laptop,
-    Phone: Phone,
-    Mail: Mail,
-    Star: Star,
-    Rocket: Rocket,
-    Coffee: Coffee
+    Briefcase: wrapLucide(Briefcase),
+    Building2: wrapLucide(Building2),
+    Globe: wrapLucide(Globe),
+    TrendingUp: wrapLucide(TrendingUp),
+    Euro: wrapLucide(Euro),
+    Warehouse: wrapLucide(Warehouse),
+    Landmark: wrapLucide(Landmark),
+    Users: wrapLucide(Users),
+    Laptop: wrapLucide(Laptop),
+    Phone: wrapLucide(Phone),
+    Mail: wrapLucide(Mail),
+    Star: wrapLucide(Star),
+    Rocket: wrapLucide(Rocket),
+    Coffee: wrapLucide(Coffee)
 };
 
 // Seznam ikon pro výběr v editoru
@@ -220,7 +235,9 @@ const parseDate = (dateStr: string | undefined): Date | null => {
 };
 
 interface IColorConfig {
-    color: string;
+    color: string;           // Main color for bars/text
+    iconColor?: string;      // Icon foreground
+    iconBgColor?: string;    // Icon background/box
     opacity: number;
     label: string;
     icon?: keyof typeof ICON_OPTIONS;
@@ -339,10 +356,10 @@ const Timeline: React.FC = () => {
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
         phaseMounting: { color: '#4ade80', opacity: 0.35, label: 'Příprava', showInStack: true },
         phaseBufferYellow: { color: '#facc15', opacity: 0.5, label: 'Montáž', showInStack: true },
-        milestoneChassis: { color: '#f97316', opacity: 1, label: 'Podvozek', icon: 'FlatbedTruck', showInStack: true },
-        milestoneBody: { color: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
-        milestoneHandover: { color: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
-        milestoneDeadline: { color: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
+        milestoneChassis: { color: '#f97316', iconColor: '#ffffff', iconBgColor: '#f97316', opacity: 1, label: 'Podvozek', icon: 'FlatbedTruck', showInStack: true },
+        milestoneBody: { color: '#a855f7', iconColor: '#ffffff', iconBgColor: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Superstructure', showInStack: true },
+        milestoneHandover: { color: '#3b82f6', iconColor: '#ffffff', iconBgColor: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
+        milestoneDeadline: { color: '#ef4444', iconColor: '#ffffff', iconBgColor: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
         priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
         priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
         priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
@@ -1040,58 +1057,99 @@ const Timeline: React.FC = () => {
                                     .filter(([k]) => k.startsWith('milestone'))
                                     .filter(([k]) => !['milestoneStart', 'milestoneRevisionEnd', 'milestoneServiceStart', 'milestoneServiceEnd', 'milestoneMountingEnd'].includes(k))
                                     .map(([key, config]) => (
-                                        <div key={key} className="flex items-center gap-2 p-1.5 bg-muted/20 rounded border border-border/20">
-                                            <input
-                                                type="color"
-                                                value={config.color}
-                                                onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
-                                                className="w-5 h-5 min-w-[20px] rounded cursor-pointer bg-transparent border-none p-0"
-                                            />
-                                            <div className="flex-1 flex flex-col min-w-0">
-                                                <span className="text-[9px] font-bold truncate text-muted-foreground">{config.label}</span>
-                                            </div>
-                                            <div className="relative">
-                                                <button
-                                                    onClick={() => setOpenIconSelector(openIconSelector === key ? null : key)}
-                                                    className="w-8 h-8 flex items-center justify-center bg-background border border-border/40 rounded hover:bg-muted/50 transition-colors"
-                                                    title="Vybrat ikonu"
-                                                >
-                                                    {config.icon && ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS] ? (
-                                                        (() => {
-                                                            const Icon = ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS];
-                                                            return <Icon size={14} />;
-                                                        })()
-                                                    ) : (
-                                                        <div className="w-3 h-3 bg-muted-foreground/30 rounded-full" />
-                                                    )}
-                                                </button>
-
-                                                {openIconSelector === key && (
-                                                    <>
-                                                        <div
-                                                            className="fixed inset-0 z-[5000]"
-                                                            onClick={() => setOpenIconSelector(null)}
-                                                        />
-                                                        <div className="absolute right-0 top-full mt-1 p-2 bg-popover border border-border shadow-xl rounded-lg z-[5001] w-[180px] grid grid-cols-4 gap-1 animate-in zoom-in-95 duration-200">
-                                                            {VISIBLE_ICONS.map(iconName => {
-                                                                const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                        <div key={key} className="flex flex-col gap-2 p-2 bg-muted/20 rounded border border-border/20">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={config.color}
+                                                    onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                                    className="w-5 h-5 min-w-[20px] rounded cursor-pointer bg-transparent border-none p-0"
+                                                    title="Barva milníku"
+                                                />
+                                                <div className="flex-1 flex flex-col min-w-0">
+                                                    <span className="text-[10px] font-black uppercase truncate text-foreground">{config.label}</span>
+                                                </div>
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={() => setOpenIconSelector(openIconSelector === key ? null : key)}
+                                                        className="w-10 h-10 flex items-center justify-center bg-background border border-border/40 rounded-lg hover:bg-muted/50 transition-colors shadow-sm"
+                                                        title="Vybrat ikonu"
+                                                    >
+                                                        {config.icon && ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS] ? (
+                                                            (() => {
+                                                                const Icon = ICON_OPTIONS[config.icon as keyof typeof ICON_OPTIONS];
                                                                 return (
-                                                                    <button
-                                                                        key={iconName}
-                                                                        onClick={() => {
-                                                                            setColors({ ...colors, [key]: { ...config, icon: iconName as any } });
-                                                                            setOpenIconSelector(null);
-                                                                        }}
-                                                                        className={`p-1.5 rounded hover:bg-muted flex items-center justify-center transition-colors ${config.icon === iconName ? 'bg-primary/20 text-primary' : 'text-muted-foreground'}`}
-                                                                        title={iconName}
-                                                                    >
-                                                                        {Icon && <Icon size={16} />}
-                                                                    </button>
+                                                                    <Icon
+                                                                        size={24}
+                                                                        fgColor={config.iconColor || config.color}
+                                                                        bgColor={config.iconBgColor || 'transparent'}
+                                                                    />
                                                                 );
-                                                            })}
-                                                        </div>
-                                                    </>
-                                                )}
+                                                            })()
+                                                        ) : (
+                                                            <div className="w-4 h-4 bg-muted-foreground/30 rounded-full" />
+                                                        )}
+                                                    </button>
+
+                                                    {openIconSelector === key && (
+                                                        <>
+                                                            <div
+                                                                className="fixed inset-0 z-[5000]"
+                                                                onClick={() => setOpenIconSelector(null)}
+                                                            />
+                                                            <div className="absolute right-0 top-full mt-1 p-2 bg-popover border border-border shadow-xl rounded-lg z-[5001] w-[220px] grid grid-cols-5 gap-1 animate-in zoom-in-95 duration-200">
+                                                                {VISIBLE_ICONS.map(iconName => {
+                                                                    const Icon = ICON_OPTIONS[iconName as keyof typeof ICON_OPTIONS];
+                                                                    return (
+                                                                        <button
+                                                                            key={iconName}
+                                                                            onClick={() => {
+                                                                                setColors({ ...colors, [key]: { ...config, icon: iconName as any } });
+                                                                                setOpenIconSelector(null);
+                                                                            }}
+                                                                            className={`p-1.5 rounded hover:bg-muted flex items-center justify-center transition-colors ${config.icon === iconName ? 'bg-primary/20 text-primary' : 'text-muted-foreground'}`}
+                                                                            title={iconName}
+                                                                        >
+                                                                            {Icon && <Icon
+                                                                                size={20}
+                                                                                fgColor={config.iconColor || config.color}
+                                                                                bgColor={config.iconBgColor || 'transparent'}
+                                                                            />}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Icon Colors */}
+                                            <div className="flex items-center gap-3 pl-1">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-3 h-3 rounded-full border border-border/50 overflow-hidden relative shadow-sm">
+                                                        <input
+                                                            type="color"
+                                                            value={config.iconBgColor || "#ffffff"}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, iconBgColor: e.target.value } })}
+                                                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0"
+                                                        />
+                                                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: config.iconBgColor || "#ffffff" }} />
+                                                    </div>
+                                                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Pozadí</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-3 h-3 rounded-full border border-border/50 overflow-hidden relative shadow-sm">
+                                                        <input
+                                                            type="color"
+                                                            value={config.iconColor || config.color}
+                                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, iconColor: e.target.value } })}
+                                                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0"
+                                                        />
+                                                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: config.iconColor || config.color }} />
+                                                    </div>
+                                                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Popředí</span>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
