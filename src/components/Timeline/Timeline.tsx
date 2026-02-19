@@ -141,10 +141,22 @@ const Timeline: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const { searchTerm: searchQuery } = useSearch();
     const { setOnFit } = useActions();
-    const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>({
-        civil: true,
-        military: true,
-        service: true
+    const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('timeline_activeFilter');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error('Failed to parse timeline_activeFilter', e);
+                }
+            }
+        }
+        return {
+            civil: true,
+            military: true,
+            service: true
+        };
     });
 
 
@@ -204,6 +216,12 @@ const Timeline: React.FC = () => {
             localStorage.setItem('timeline_summaryRowHeight', summaryRowHeight.toString());
         }
     }, [summaryRowHeight]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('timeline_activeFilter', JSON.stringify(activeTypes));
+        }
+    }, [activeTypes]);
 
     // Color Configuration State
     const [colors, setColors] = useState<IColorsState>({
@@ -709,8 +727,11 @@ const Timeline: React.FC = () => {
             today.setHours(0, 0, 0, 0);
             const diffDays = Math.floor((today.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
 
+            const containerWidth = scrollContainerRef.current.clientWidth;
+            const offset = containerWidth / 2; // Center the view
+
             scrollContainerRef.current.scrollTo({
-                left: diffDays * dayWidth - 400,
+                left: diffDays * dayWidth - offset,
                 behavior: 'smooth'
             });
         }

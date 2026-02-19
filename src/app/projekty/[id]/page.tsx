@@ -368,41 +368,40 @@ export default function ProjectDetailPage() {
             {/* ── Sticky Top Bar ── */}
             <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50">
                 <div
-                    className="absolute top-0 left-0 right-0 h-[3px] transition-colors duration-500"
-                    style={{ backgroundColor: typeColor, boxShadow: `0 0 10px ${typeColor}44` }}
+                    className="absolute top-0 left-0 right-0 h-[2px] transition-colors duration-500"
+                    style={{ backgroundColor: typeColor, boxShadow: `0 0 8px ${typeColor}33` }}
                 />
-                <div className="max-w-[1400px] mx-auto px-4 h-11 flex items-center justify-between">
+                <div className="max-w-[1400px] mx-auto px-4 h-10 flex items-center justify-between">
                     <button
                         onClick={() => router.push('/projekty')}
-                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
-                        style={{ color: typeColor }}
+                        className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-muted/50 hover:bg-muted transition-all border border-transparent hover:border-border/50 text-muted-foreground hover:text-foreground"
                     >
-                        <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                        <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
                         Zpět
                     </button>
 
                     <div className="flex items-center gap-2">
-                        {!isEditing && canEdit && (
+                        {isEditing && (
                             <button
                                 onClick={handleDeleteProject}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-all"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-all"
                             >
                                 <Trash2 size={12} /> Smazat
                             </button>
                         )}
                         {isEditing ? (
                             <>
-                                <button onClick={handleCancel} disabled={saving} className="px-4 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
+                                <button onClick={handleCancel} disabled={saving} className="px-3 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
                                     <X size={12} /> Zrušit
                                 </button>
-                                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-90">
+                                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-90 shadow-sm">
                                     {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
                                     Uložit
                                 </button>
                             </>
                         ) : (
                             canEdit && (
-                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-muted hover:bg-primary/10 hover:text-primary text-[10px] font-bold uppercase tracking-wider transition-all">
+                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary/10 hover:bg-primary/20 text-primary border border-primary/10 text-[10px] font-bold uppercase tracking-wider transition-all">
                                     <Edit2 size={12} /> Upravit
                                 </button>
                             )
@@ -415,11 +414,11 @@ export default function ProjectDetailPage() {
             <div className="max-w-[1400px] mx-auto px-4 py-4 pb-16 space-y-4">
 
                 {/* ── HEADER ── */}
-                <div className="bg-muted/30 border border-border/50 rounded-2xl p-6 mb-6">
-                    <div className="space-y-4">
+                <div className="bg-muted/30 border border-border/50 rounded-xl p-4 mb-4 shadow-sm">
+                    <div className="space-y-3">
                         {/* Row 1: Badges & Status */}
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ${p.project_type === 'military'
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
                                 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                                 : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 }`}>
@@ -429,146 +428,146 @@ export default function ProjectDetailPage() {
                                 <select
                                     value={p.project_type}
                                     onChange={(e) => handleChange('project_type', e.target.value)}
-                                    className="text-[10px] bg-background border border-border rounded px-2 py-0.5 outline-none font-bold"
+                                    className="text-[9px] bg-background border border-border rounded px-1.5 py-0.5 outline-none font-bold"
                                 >
                                     <option value="civil">Civil</option>
                                     <option value="military">Vojenské</option>
                                 </select>
                             )}
-                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-background border border-border rounded text-[10px] font-mono text-muted-foreground shadow-sm">
-                                <Hash size={10} />
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-background border border-border rounded text-[9px] font-mono text-muted-foreground shadow-sm">
+                                <Hash size={9} />
                                 {project.id}
                             </div>
-                            <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">
-                                <span className={`w-2 h-2 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
+                            <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-600 ml-1.5">
+                                <span className={`w-1.5 h-1.5 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
                                 {project.status}
                             </span>
                         </div>
 
                         {/* Row 2: Title */}
-                        <div className="max-w-4xl">
+                        <div className="max-w-4xl -mt-0.5">
                             {isEditing ? (
                                 <input
                                     type="text"
                                     value={p.name}
                                     onChange={(e) => handleChange('name', e.target.value)}
-                                    className="text-3xl font-black w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-2 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    className="text-xl font-black w-full bg-background/50 border border-primary/20 rounded-md px-2 py-1 focus:ring-2 focus:ring-primary/10 transition-all outline-none"
                                     placeholder="Název zakázky"
                                 />
                             ) : (
-                                <h1 className="text-3xl font-black text-foreground leading-tight tracking-tight">{project.name}</h1>
+                                <h1 className="text-xl font-black text-foreground leading-normal tracking-tight">{project.name}</h1>
                             )}
                         </div>
 
                         {/* Row 3: Metadata Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 pt-4 border-t border-border/40">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-3 pt-3 border-t border-border/40">
                             {/* Abra Project */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Zakázka</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Zakázka</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.abra_project || ''}
                                         onChange={(e) => handleChange('abra_project', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     />
                                 ) : (
-                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                                        <Hash size={13} className="text-primary/50" />
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+                                        <Hash size={11} className="text-primary/50" />
                                         {p.abra_project || '—'}
                                     </div>
                                 )}
                             </div>
 
                             {/* Abra Order */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Objednávka</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Objednávka</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.abra_order || ''}
                                         onChange={(e) => handleChange('abra_order', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     />
                                 ) : (
-                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                                        <Hash size={13} className="text-primary/50" />
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+                                        <Hash size={11} className="text-primary/50" />
                                         {p.abra_order || '—'}
                                     </div>
                                 )}
                             </div>
 
                             {/* Customer */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Zákazník</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Zákazník</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.customer || ''}
                                         onChange={(e) => handleChange('customer', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     />
                                 ) : (
-                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                                        <Building2 size={13} className="text-primary/50" />
-                                        {p.customer || '—'}
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground truncate">
+                                        <Building2 size={11} className="text-primary/50 shrink-0" />
+                                        <span className="truncate">{p.customer || '—'}</span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Manager */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Vedoucí projektu</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Vedoucí projektu</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.manager || ''}
                                         onChange={(e) => handleChange('manager', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     />
                                 ) : (
-                                    <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                                        <User size={13} className="text-primary/50" />
-                                        {p.manager || '—'}
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground truncate">
+                                        <User size={11} className="text-primary/50 shrink-0" />
+                                        <span className="truncate">{p.manager || '—'}</span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Category */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Kategorie</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Kategorie</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.category || ''}
                                         onChange={(e) => handleChange('category', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     />
                                 ) : (
-                                    <CategoryChip value={p.category} className="text-[10px] px-2 py-0.5" />
+                                    <CategoryChip value={p.category} className="text-[9px] px-2 py-0.5" />
                                 )}
                             </div>
 
                             {/* Priority */}
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 block">Priorita</label>
+                            <div className="space-y-0.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Priorita</label>
                                 {isEditing ? (
                                     <select
                                         value={p.priority || 2}
                                         onChange={(e) => handleChange('priority', parseInt(e.target.value))}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border rounded-lg px-2 py-1.5 outline-none"
+                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
                                     >
                                         <option value={1}>Urgentní</option>
                                         <option value={2}>Normální</option>
                                         <option value={3}>Nízká</option>
                                     </select>
                                 ) : (
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
                                         <div className={cn(
-                                            "w-2 h-2 rounded-full",
-                                            p.priority === 1 ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+                                            "w-1.5 h-1.5 rounded-full",
+                                            p.priority === 1 ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.4)]" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.4)]"
                                         )} />
-                                        <span className="text-xs font-bold">
+                                        <span className="text-[10px] font-bold">
                                             {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
                                         </span>
                                     </div>
