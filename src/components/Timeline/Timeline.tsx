@@ -687,20 +687,23 @@ const Timeline: React.FC = () => {
         return searchFilteredProjects;
     }, [searchFilteredProjects]);
 
-    // Grupa projektů do sektorů
+    // Color mapping for sectors and projects
+    const SECTOR_COLORS: Record<string, string> = {
+        total: '#6366f1',
+        civil: '#90caf9',
+        military: '#1b5e20', // Tmavě zelená dle požadavku
+        service: '#a855f7'
+    };
+
+    // Grupa projektů do sektorů (Pouze ty, které chceme jako SUMÁRNÍ ŘÁDKY nahoře)
     const sectorizedProjects = useMemo(() => {
-        const total = searchFilteredProjects;
-        const civil = searchFilteredProjects.filter(p => !p.project_type || p.project_type === 'civil');
-        const military = searchFilteredProjects.filter(p => p.project_type === 'military');
         const service = searchFilteredProjects.filter(p => p.project_type === 'service');
 
         return [
-            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: total, color: '#6366f1' },
-            { id: 'civil', label: 'CIVILNÍ', projects: civil, color: '#90caf9' },
-            { id: 'military', label: 'VOJENSKÉ', projects: military, color: '#1b5e20' }, // Dark Green per user request
-            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' }
-        ];
-    }, [searchFilteredProjects]);
+            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: searchFilteredProjects, color: SECTOR_COLORS.total },
+            { id: 'service', label: 'SERVIS', projects: service, color: SECTOR_COLORS.service }
+        ].filter(s => s.id === 'total' || activeTypes[s.id]);
+    }, [searchFilteredProjects, activeTypes]);
 
     const jumpToToday = () => {
         if (scrollContainerRef.current) {
@@ -1073,7 +1076,7 @@ const Timeline: React.FC = () => {
                             <div className="timeline-rows">
                                 {/* 1. CATEGORY SUMMARIES (Stacked) */}
                                 {(() => {
-                                    const visibleSectors = sectorizedProjects.filter(s => s.id === 'total' || activeTypes[s.id]);
+                                    const visibleSectors = sectorizedProjects;
 
                                     // Generate days array for matching the grid exactly
                                     const days: Date[] = [];
@@ -1256,10 +1259,9 @@ const Timeline: React.FC = () => {
                                     );
                                 })()}
 
-                                {/* 3. INDIVIDUAL PROJECTS */}
                                 {filteredProjects.map((project) => {
-                                    const sector = sectorizedProjects.find(s => s.id === (project.project_type || 'civil'));
-                                    const sectorColor = sector?.color || '#90caf9';
+                                    const type = project.project_type || 'civil';
+                                    const sectorColor = SECTOR_COLORS[type] || SECTOR_COLORS.civil;
 
                                     // Check visibility based on activeTypes -> REMOVED per user request
                                     /* 
