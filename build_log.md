@@ -28,7 +28,7 @@
 ## [2026-02-05] - UI Timeline úpravy
 - **Změna**: Odstranění hlavičky Timeline a legendy (`src/app/page.tsx`).
 - **Detail**: Odstraněn nadpis "Timeline 2026" s popiskem a legenda (Podvozek, Nástavba, Předání). 
-- **Změna**: Sjednocení hlavičky Timeline se stylem ProjectList.
+- **Změna**: Sjednocení hlavičke Timeline se stylem ProjectList.
 - **Detail**: Přidáno vyhledávací pole s ikonou Search (z `lucide-react`) a filtrování projektů. Zoom controls přesunuty doprava. Použitý layout `table-header-actions` pro konzistentní vzhled.
 
 ## [2026-02-06] - UI Polishing
@@ -51,7 +51,7 @@
 - **Změna**: Inteligentní Navbar a vizuální kontinuita.
 - **Detail**: Navbar nyní detekuje typ projektu v detailu a zvýrazňuje správnou kategorii i bez URL parametrů. V detailu projektu přidán horní barevný pruh odpovídající kategorii.
 - **Změna**: Sjednocení barevné palety napříč aplikací.
-- **Detail**: Barvy v Timeline (sektory, fáze, milníky) byly sjednoceny s barvami v Navbaru a Login stránce (Military: #a5d6a7, Service: #ce93d8, Civil: #90caf9).
+- **Detail**: Barvy v Timeline (sektory, fáze, milníky) byly sjednoceny s barvami v Navbary a Login stránce (Military: #a5d6a7, Service: #ce93d8, Civil: #90caf9).
 - **Změna**: Redesign Login stránky.
 - **Login Design**: Modernizován nadpis na "PLÁNOVÁNÍ ZAKÁZEK" s důrazem na čistý korporátní styl.
 
@@ -90,7 +90,7 @@
 - **Změna**: Multitooltip a vylepšení "Stacked" řádků.
 - **Detail**: V souhrnných řádcích se nyní při nahromadění milníků zobrazují všechny tooltipy najednou pod sebou. Odstraněna mřížka v těchto řádcích pro větší čistotu.
 - **Změna**: Oprava visibility tooltipů.
-- **Detail**: Nastaven `z-index: 10000` a `overflow: visible` pro souhrnné řádky, čímž bylo vyřešeno schovávání tooltipů pod zakázkami.
+- **Detail**: Nastaven `z-index: 10000` and `overflow: visible` pro souhrnné řádky, čímž bylo vyřešeno schovávání tooltipů pod zakázkami.
 
 ## [2026-02-12] - Implementace sekcí Výroba a Nákup
 - **Nové stránky**: Vytvořeny routy `/vyroba` a `/nakup`.
@@ -101,7 +101,7 @@
 ## [2026-02-16] - Timeline Visual Fixes (Crane & Stacked Rows)
 - **Ikony**: Přidání ikony `Crane` (jeřáb) do `ICON_OPTIONS` v `Timeline.tsx` a `TimelineBar.tsx`.
 - **Stacked Rows Visibility**: Oprava problému, kdy bílé pozadí souhrnných řádků ("stacked" hot zones) v hlavičkách sektorů zakrývalo obsah. 
-- **Detail**: V `TimelineBar.tsx` nastaveno `background: 'transparent'` (místo `var(--background)`) pro komponenty v režimu `isCollapsed`. Tím je zajištěno, že při překryvu více projektů v jednom řádku (summary) jsou viditelné všechny indikátory.
+- **Detail**: v `TimelineBar.tsx` nastaveno `background: 'transparent'` (místo `var(--background)`) pro komponenty v režimu `isCollapsed`. Tím je zajištěno, že při překryvu více projektů v jednom řádku (summary) jsou viditelné všechny indikátory.
 
 ## [2026-02-17] - Timeline Legend & Milestone Refinements
 - **Změna**: Implementace Nápovědy a Legendy.
@@ -164,5 +164,14 @@
     - Promazány nepotřebné CSS proměnné a zastaralá barevná logika milníků.
 - **Změna**: Oprava TypeScript/JSX chyb.
 - **Detail**: Doplněny chybějící typové anotace pro parametry v mapování a filtrech, čímž byly vyřešeny "implicitly has any type" chyby.
-d a t e :   M o d i f i e d   H i a b   i c o n   t o   b e   t r a n s p a r e n t   b y   r e m o v i n g   w h i t e   a n d   g r e y   p a t h s   i n   T i m e l i n e . t s x ,   T i m e l i n e B a r . t s x ,   a n d   h i a b . s v g .  
- 
+- **Změna**: Modernizace ikony Hiab (odstranění bílých a šedých částí, zachování pouze černé geometrie).
+
+## [2026-02-21] - Timeline Header & Sidebar Refinement
+- **Změna**: Integrace čísel dnů do řádku CELKEM.
+- **Detail**: Dny jsou nyní součástí sumárního řádku "CELKEM", což šetří vertikální prostor. Čísla dnů a názvy mají bílé vytažení (text-shadow) a jsou zobrazeny s prioritou čitelnosti nad grafem.
+- **Změna**: Redesign levého sloupce zakázek.
+- **Detail**: Každý řádek nyní zobrazuje číslo zakázky (OP-ID), jméno zákazníka a vedoucího projektu. Zobrazení informací je dynamické a přizpůsobuje se aktuální výšce řádku (zoomu).
+- **Změna**: Optimalizace indikátoru "Dnes".
+- **Detail**: Dnešní den je zvýrazněn 4px červeným rámečkem. Svislá červená linka nyní začíná až pod hlavičkou dnů a schovává se pod sticky sloupec zakázek (z-index fix).
+- **Změna**: Úprava výšek sumárních řádků.
+- **Detail**: Výška řádku CELKEM zvýšena na 29px a řádku SERVIS na 40px pro lepší přehlednost stacked barů.

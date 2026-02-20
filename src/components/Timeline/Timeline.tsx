@@ -689,9 +689,15 @@ const Timeline: React.FC = () => {
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
+        const total = searchFilteredProjects;
+        const civil = searchFilteredProjects.filter(p => !p.project_type || p.project_type === 'civil');
+        const military = searchFilteredProjects.filter(p => p.project_type === 'military');
         const service = searchFilteredProjects.filter(p => p.project_type === 'service');
+
         return [
-            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: searchFilteredProjects, color: '#6366f1' }, // Indigo for total
+            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: total, color: '#6366f1' },
+            { id: 'civil', label: 'CIVILNÍ', projects: civil, color: '#90caf9' },
+            { id: 'military', label: 'VOJENSKÉ', projects: military, color: '#1b5e20' }, // Dark Green per user request
             { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' }
         ];
     }, [searchFilteredProjects]);
@@ -1085,6 +1091,7 @@ const Timeline: React.FC = () => {
                                         const t = new Date();
                                         return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
                                     };
+                                    const isWeekStart = (d: Date) => d.getDay() === 1; // Pondělí
 
                                     const totalDaysWidth = days.length * dayWidth;
 
@@ -1193,7 +1200,12 @@ const Timeline: React.FC = () => {
                                                             {days.map((day: Date, idx: number) => (
                                                                 <div
                                                                     key={idx}
-                                                                    className={`timeline-grid-column ${isWeekend(day) ? 'is-weekend' : ''} ${isToday(day) ? 'is-today' : ''}`}
+                                                                    className={cn(
+                                                                        `timeline-grid-column`,
+                                                                        isWeekend(day) && 'is-weekend',
+                                                                        isToday(day) && 'is-today',
+                                                                        isWeekStart(day) && 'is-week-start'
+                                                                    )}
                                                                     style={{ width: dayWidth }}
                                                                 />
                                                             ))}
@@ -1262,11 +1274,13 @@ const Timeline: React.FC = () => {
                                                 className="project-info-sticky transition-colors group"
                                                 style={{ borderLeft: `10px solid ${sectorColor}` }}
                                             >
-                                                <div className={`project-info-content pr-2 min-w-0 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
+                                                <div className="project-info-content pr-2 min-w-0 pl-1">
                                                     <div className="flex flex-col h-full justify-center overflow-hidden py-0.5">
                                                         {/* Priority: OP# and Customer */}
                                                         <div className="flex items-center gap-1.5 min-w-0">
-                                                            <span className="text-[9px] font-black bg-black/10 px-1 rounded-[2px] shrink-0 text-foreground/80">OP-{project.id}</span>
+                                                            <span className="text-[9px] font-black bg-black/10 px-1 rounded-[2px] shrink-0 text-foreground/80">
+                                                                OP-{project.parent_id || project.id}
+                                                            </span>
                                                             {project.customer && (
                                                                 <span className="text-[10px] font-bold text-muted-foreground truncate" title={project.customer}>{project.customer}</span>
                                                             )}
@@ -1287,7 +1301,7 @@ const Timeline: React.FC = () => {
 
                                                         {/* Manager - Show if height >= 48 */}
                                                         {rowHeight >= 48 && project.manager && (
-                                                            <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter truncate italic mt-0.5">
+                                                            <span className="text-[9px] font-bold text-black uppercase tracking-tighter truncate italic mt-0.5">
                                                                 {project.manager}
                                                             </span>
                                                         )}

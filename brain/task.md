@@ -46,7 +46,10 @@
 - [x] Rozšíření Import Wizardu o možnost "K ZAKÁZCE".
 - [x] Sjednocení ikon milníků do černé barvy a odstranění glow efektu v Timeline.
 - [x] Fix TypeScript "implicitly any" chyb v `Timeline.tsx` u mapování a filtrů.
-
+- [x] Integrace čísel dnů do sumárního řádku CELKEM (Header consolidation).
+- [x] Dynamický redesign levého sloupce zakázek (OP#, Zákazník, Název, Vedoucí).
+- [x] Vylepšení indikátoru "Dnes" (4px rameček, z-index fix svislé linky).
+- [x] Úprava výšek sumárních řádků (29px CELKEM, 40px SERVIS).
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

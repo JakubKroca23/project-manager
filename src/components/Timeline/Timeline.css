@@ -829,6 +829,11 @@
   background: var(--timeline-weekend-bg);
 }
 
+.timeline-grid-column.is-week-start {
+  border-left: 1px solid #94a3b8;
+  /* Tmavší šedá pro začátek týdne (mřížka po týdnech) */
+}
+
 /* VERTIKÁLNÍ LINKA DNES - NOVÁ IMPLEMENTACE NAD OBJEKTY */
 .timeline-today-indicator {
   position: absolute;

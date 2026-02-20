@@ -89,6 +89,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
         return day === 0 || day === 6;
     };
 
+    const isWeekStart = (date: Date) => date.getDay() === 1; // Pondělí
+
     return (
         <div className="timeline-grid">
             <div className="timeline-grid-header-multi">
@@ -148,7 +150,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                     {days.map((day, idx) => (
                         <div
                             key={idx}
-                            className={`timeline-grid-column ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''}`}
+                            className={`timeline-grid-column ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''} ${isWeekStart(day) ? 'is-week-start' : ''}`}
                             style={{ width: dayWidth }}
                         />
                     ))}

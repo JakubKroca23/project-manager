@@ -87,8 +87,6 @@
     - Při souběhu více milníků v jeden den se tooltipy v "stacked" řádcích řadí vertikálně pod sebe, aby byly všechny čitelné.
     - Visibility fix: Použití `z-index: 10000` a `overflow: visible` pro kontejner souhrnných řádků zajišťuje, že tooltipy nejsou překryty projekty při scrollování.
 
-
-
 ## 2026-02-16: Timeline Visual Fixes (Crane & Stacked Rows)
 - **Ikony**: Do sady ikon přidána `Crane` (jeřáb) pro specifické vizualizace v Timeline.
 - **Stacked Layout Fix**: Opraveno vykreslování souhrnných řádků (hot zones) v hlavičkách sektorů. Původní nastavení pozadí (`var(--background)`) způsobovalo překryv obsahu.
@@ -96,28 +94,40 @@
 - **Nápověda a Legenda**: Implementováno modální okno s přehledem ovládání (myš, klávesnice) a vysvětlivkami barev fází i ikon milníků.
 - **Milestone Dot Rendering**: Speciální vykreslování pro "Konec montáže" a "Konec revize" (pouze malé tečky) pro vizuální odlehčení grafu.
 - **Portal Rendering**: Detailní popup milníku/projektu se nyní vykresluje do `document.body` přes React Portal, což zaručuje jeho viditelnost nad všemi vrstvami (Z-Index fix).
-99: 
-100: ## 2026-02-17: Custom Milestones & UI Polish
-101: - **Milestone Architecture (v2)**: 
-102:     - Přidána podpora pro ikony v tabulce `project_milestones` (sloupec `icon`).
-103:     - Rozšířen Milestone form o interaktivní výběr z 15+ ikon (`lucide-react`).
-104:     - Barvy milníků jsou nyní sémantické: Červená pro rozpracované, Zelená pro hotové.
-105: - **Timeline Popup Logic**:
-106:     - Implementována inteligentní detekce viewportu (`isNearBottom`). Popup se dynamicky otevírá nahoru/dolů, aby nebyl oříznut.
-107:     - Kontejner popupu má nyní definovaný `max-height` a `scroll`, což řeší přetečení u velkého množství ikon nebo dlouhých popisů.
-108: - **Data Clean-up**:
-109:     - Odstraněno pole `body_type` z projektu, jelikož tato data jsou nyní lépe zpracovávána skrze specifické milníky a konfigurace.
 
-111: ## 2026-02-18: Refaktoring terminologie a ovládání Timeline
-112: - **Terminologie**: Provedena globální náhrada 'Manažer' -> 'Vedoucí projektu'.
-113: - **Navigace**: Navbar nyní spolehlivě ukazuje aktivní kategorii i v detailu zakázky.
-114: - **Timeline UX**: Přechod na in-grid ovládání vertikálního zoomu a inline panel nastavení vzhledu.
-115: - **Data Cleanup**: Odstranění méně důležitých polí z primárního pohledu v detailu projektu.
-116: - **Import Wizard Enhancements**: Implementován vizuální výběr hlavičkového řádku z náhledu dat, což řeší problémy s importem souborů obsahujících úvodní prázdné řádky nebo metadata.
+## 2026-02-17: Custom Milestones & UI Polish
+- **Milestone Architecture (v2)**: 
+    - Přidána podpora pro ikony v tabulce `project_milestones` (sloupec `icon`).
+    - Rozšířen Milestone form o interaktivní výběr z 15+ ikon (`lucide-react`).
+    - Barvy milníků jsou nyní sémantické: Červená pro rozpracované, Zelená pro hotové.
+- **Timeline Popup Logic**:
+    - Implementována inteligentní detekce viewportu (`isNearBottom`). Popup se dynamicky otevírá nahoru/dolů, aby nebyl oříznut.
+    - Kontejner popupu má nyní definovaný `max-height` a `scroll`, což řeší přetečení u velkého množství ikon nebo dlouhých popisů.
+- **Data Clean-up**:
+    - Odstraněno pole `body_type` z projektu, jelikož tato data jsou nyní lépe zpracovávána skrze specifické milníky a konfigurace.
+
+## 2026-02-18: Refaktoring terminologie a ovládání Timeline
+- **Terminologie**: Provedena globální náhrada 'Manažer' -> 'Vedoucí projektu'.
+- **Navigace**: Navbar nyní spolehlivě ukazuje aktivní kategorii i v detailu zakázky.
+- **Timeline UX**: Přechod na in-grid ovládání vertikálního zoomu a inline panel nastavení vzhledu.
+- **Data Cleanup**: Odstranění méně důležitých polí z primárního pohledu v detailu projektu.
+- **Import Wizard Enhancements**: Implementován vizuální výběr hlavičkového řádku z náhledu dat, což řeší problémy s importem souborů obsahujících úvodní prázdné řádky nebo metadata.
 
 ## 2026-02-20: Timeline UI - Milestone Modernization
 - **Milestone Visual System**: Rozhodnuto o sjednocení všech ikon milníků do černé barvy (#000000) pro maximální čitelnost na různobarevných fázích.
 - **Graphic Polish**: Odstraněna záře (glow/drop-shadow) z milníků v CSS, což dává grafu čistší a modernější "flat" design.
 - **State Cleanup**: Barevná logika pro milníky byla odstraněna ze stavu komponent a CSS proměnných, čímž se zjednodušila architektura barev v Timeline.
-d a t e :   S i m p l i f i e d   H i a b   i c o n   b y   r e m o v i n g   n o n - b l a c k   p a t h s   i n   c o m p o n e n t s   a n d   a s s e t s .  
- 
+
+## 2026-02-21: Timeline Header & Sidebar Polish
+- **UI Architecture**: Merged day numbers and names into the sticky 'CELKEM' (Total) summary row, reducing the header's total height and saving vertical space.
+- **Visual Design**: 
+    - Implemented a white text-shadow outline for day numbers/names to ensure readability over colored bars.
+    - Updated 'Today' indicator to a 4px red border around the header cell with a glow effect.
+    - Adjusted the vertical 'Today' line to start below the header (z-index 1500) so it doesn't overlap header text or the sticky sidebar.
+- **Sidebar (Project Info)**: 
+    - Implemented a dynamic display in the project sidebar.
+    - Now shows `OP-{ID}`, `Customer Name`, `Project Name`, and `Manager` depending on the current row height.
+    - Prioritizes `OP` and `Customer` in compact views.
+- **Layout Adjustments**: 
+    - Increased 'CELKEM' row height to 29px and 'SERVIS' to 40px to better accommodate content and stacked objects.
+    - Updated `handleFitVertical` to include these new fixed heights in available space calculations.
