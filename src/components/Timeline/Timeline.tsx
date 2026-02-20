@@ -185,8 +185,8 @@ const Timeline: React.FC = () => {
         }
         return 65;
     });
-    // Summary row height fixed at 34px by user request
-    const summaryRowHeight = 34;
+    // Summary row height fixed at 20px by user request
+    const summaryRowHeight = 20;
     const [showDesignSettings, setShowDesignSettings] = useState(false);
     const [openIconSelector, setOpenIconSelector] = useState<string | null>(null);
     const [design, setDesign] = useState({
@@ -749,13 +749,14 @@ const Timeline: React.FC = () => {
 
     const handleFitVertical = useCallback(() => {
         if (!timelineRef.current) return;
-        const bodyHeight = timelineRef.current.offsetHeight - (Object.keys(activeTypes).length * 80);
-        const totalRows = filteredProjects.length + 6;
+        const visibleSectorsCount = sectorizedProjects.filter(s => s.id === 'total' || activeTypes[s.id]).length;
+        const bodyHeight = timelineRef.current.offsetHeight - (visibleSectorsCount * summaryRowHeight);
+        const totalRows = filteredProjects.length + 2; // Offset for spacing
         if (totalRows <= 0) return;
         const targetHeight = Math.floor(bodyHeight / totalRows);
         const newHeight = Math.max(14, Math.min(100, targetHeight));
         setRowHeight(newHeight);
-    }, [filteredProjects.length, activeTypes, timelineRef]);
+    }, [filteredProjects.length, activeTypes, timelineRef, sectorizedProjects, summaryRowHeight]);
 
     useEffect(() => {
         setOnFit(() => handleFitVertical);
