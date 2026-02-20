@@ -628,23 +628,18 @@ const Timeline: React.FC = () => {
         return d ? d.getTime() : 4102444800000; // Far future
     };
 
-    const filteredProjects = useMemo((): Project[] => {
+    // Projects filtered by search and basic rules, but NOT by activeTypes toggles (for "Total" summary)
+    const searchFilteredProjects = useMemo((): Project[] => {
         let filtered = projects;
 
-        // Pre-calculate parents that have children
-        const parentIds = new Set(projects.map(p => p.parent_id).filter(Boolean));
-
-        // Filtr podle aktivních typů a subzakázek
+        // Special rule for Military: Hide all parent projects, show only sub-projects
         filtered = filtered.filter((p: Project) => {
-            const type = p.project_type || 'civil';
-
-            // Special rule for Military: Hide all parent projects, show only sub-projects
-            if (type === 'military' && !p.parent_id) {
+            const isMilitary = p.project_type === 'military' || p.category?.toLowerCase() === 'vojenské';
+            if (isMilitary && !p.parent_id) {
                 return false;
             }
-
-            return activeTypes[type] === true;
-        }) as Project[];
+            return true;
+        });
 
         // Helper pro normalizaci (odstranění diakritiky)
         const normalize = (str: string) =>
@@ -656,22 +651,11 @@ const Timeline: React.FC = () => {
             const terms = query.split(/\s+/);
             filtered = filtered.filter((p: Project) => {
                 const searchTerms = [
-                    p.name,
-                    p.customer,
-                    p.id,
-                    p.abra_project,
-                    p.abra_order,
-                    p.serial_number,
-                    p.manager,
-                    p.status,
-                    p.category,
-                    p.production_status,
-                    p.mounting_company,
-                    p.body_type,
-                    p.body_setup
+                    p.name, p.customer, p.id, p.abra_project, p.abra_order,
+                    p.serial_number, p.manager, p.status, p.category,
+                    p.production_status, p.mounting_company, p.body_type, p.body_setup
                 ].map(term => normalize(term || ''));
 
-                // Prohledávání i v custom_fields
                 const customTerms = p.custom_fields ? Object.values(p.custom_fields)
                     .filter(v => typeof v === 'string')
                     .map(v => normalize(v as string)) : [];
@@ -681,49 +665,39 @@ const Timeline: React.FC = () => {
             });
         }
 
-        // Filter projects that only have the 'start' (closed_at) milestone
+        // Filter projects that only have the 'start' milestone
         filtered = filtered.filter((p: Project) => {
             const hasOtherMilestones =
-                p.chassis_delivery ||
-                p.body_delivery ||
-                p.customer_handover ||
-                p.deadline ||
-                p.custom_fields?.mounting_end_date ||
-                p.custom_fields?.revision_end_date;
-
+                p.chassis_delivery || p.body_delivery || p.customer_handover ||
+                p.deadline || p.custom_fields?.mounting_end_date || p.custom_fields?.revision_end_date;
             return !!hasOtherMilestones;
         });
 
-        // Hide completed projects if showHidden is false
-
-
-        // Sorting: Hierarchical (Parent + Children together)
+        // Sorting: Hierarchical
         return filtered.sort((a: Project, b: Project) => {
             const dateA = getSortDate(a);
             const dateB = getSortDate(b);
-
-            if (dateA !== dateB) {
-                return dateA - dateB;
-            }
-
+            if (dateA !== dateB) return dateA - dateB;
             return (a.name || '').localeCompare(b.name || '');
         });
-    }, [projects, searchQuery, activeTypes]);
+    }, [projects, searchQuery]);
+
+    // Final list of projects to display in the grid (respects type toggles)
+    const filteredProjects = useMemo((): Project[] => {
+        return searchFilteredProjects.filter((p: Project) => {
+            const type = p.project_type || 'civil';
+            return activeTypes[type] === true;
+        });
+    }, [searchFilteredProjects, activeTypes]);
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
-        const service = filteredProjects.filter(p => p.project_type === 'service');
-        const civil = filteredProjects.filter(p => p.project_type === 'civil' || !p.project_type);
-        const military = filteredProjects.filter(p => p.project_type === 'military');
-
-
+        const service = searchFilteredProjects.filter(p => p.project_type === 'service');
         return [
-            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: filteredProjects, color: '#6366f1' }, // Indigo for total
-            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' },
-            { id: 'civil', label: 'CIVILNÍ ZAKÁZKY', projects: civil, color: '#3b82f6' },
-            { id: 'military', label: 'VOJENSKÉ ZAKÁZKY', projects: military, color: '#10b981' }
+            { id: 'total', label: 'CELKEM (VŠECHNY ZAKÁZKY)', projects: searchFilteredProjects, color: '#6366f1' }, // Indigo for total
+            { id: 'service', label: 'SERVIS', projects: service, color: '#a855f7' }
         ];
-    }, [filteredProjects]);
+    }, [searchFilteredProjects]);
 
     const jumpToToday = () => {
         if (scrollContainerRef.current) {
@@ -1168,7 +1142,8 @@ const Timeline: React.FC = () => {
                                                             zIndex: isTotal ? 3600 : 3500 - vIdx,
                                                             width: 'max-content',
                                                             minWidth: '100%',
-                                                            backgroundColor: isTotal ? 'rgba(99, 102, 241, 0.05)' : undefined
+                                                            backgroundColor: isTotal ? 'rgba(99, 102, 241, 0.05)' : undefined,
+                                                            borderBottom: isTotal ? '2px solid #374151' : undefined // 2px dark gray divider
                                                         }}
                                                     >
                                                         {/* Block scrolling projects */}
