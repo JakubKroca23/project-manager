@@ -352,7 +352,7 @@ const Timeline: React.FC = () => {
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
 
-    const headerHeight = dayWidth > 12 ? 66 : 42;
+    const headerHeight = 38; // Months (20) + Weeks (18)
 
     const customStyles = {
         '--timeline-header-height': `${headerHeight}px`,
@@ -720,10 +720,10 @@ const Timeline: React.FC = () => {
 
     const handleFitVertical = useCallback(() => {
         if (!timelineRef.current) return;
-        // Celkem (20px) + Servis (25px) + 2px divider = 47px
-        const summaryAreaHeight = 20 + (activeTypes.service ? 25 : 0) + 2;
+        // Header (38) + Celkem/Days (24) + Divider (2) + Servis (25) = 89px
+        const summaryAreaHeight = 38 + 24 + 2 + (activeTypes.service ? 25 : 0);
         const bodyHeight = timelineRef.current.offsetHeight - summaryAreaHeight;
-        const totalRows = filteredProjects.length + 2; // Offset for spacing
+        const totalRows = filteredProjects.length + 2;
         if (totalRows <= 0) return;
         const targetHeight = Math.floor(bodyHeight / totalRows);
         const newHeight = Math.max(14, Math.min(100, targetHeight));
@@ -1062,6 +1062,7 @@ const Timeline: React.FC = () => {
                             startDate={timelineRange.start}
                             endDate={timelineRange.end}
                             dayWidth={dayWidth}
+                            showDays={false}
                         >
                             <div className="timeline-rows">
                                 {/* 1. CATEGORY SUMMARIES (Stacked) */}
@@ -1091,10 +1092,10 @@ const Timeline: React.FC = () => {
                                         <>
                                             {visibleSectors.map((sector, vIdx) => {
                                                 const isTotal = sector.id === 'total';
-                                                const sHeight = isTotal ? 20 : 25;
+                                                const sHeight = isTotal ? 24 : 25;
                                                 const topOffset = isTotal
-                                                    ? 'var(--timeline-header-height)'
-                                                    : 'calc(var(--timeline-header-height) + 20px + 2px)';
+                                                    ? '38px' // Static top for Total (Months 20 + Weeks 18)
+                                                    : 'calc(38px + 24px + 2px)';
 
                                                 return (
                                                     <div
@@ -1107,10 +1108,33 @@ const Timeline: React.FC = () => {
                                                             zIndex: isTotal ? 3600 : 3500 - vIdx,
                                                             width: 'max-content',
                                                             minWidth: '100%',
-                                                            backgroundColor: isTotal ? 'rgba(99, 102, 241, 0.05)' : undefined,
+                                                            backgroundColor: isTotal ? 'var(--background)' : undefined,
                                                             borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
                                                         }}
                                                     >
+                                                        {/* Day Numbers for Total Row */}
+                                                        {isTotal && dayWidth > 12 && (
+                                                            <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 5 }}>
+                                                                <div style={{ width: 250, flexShrink: 0 }} /> {/* Sidebar spacer */}
+                                                                {days.map((day, idx) => {
+                                                                    const showDayName = dayWidth > 35;
+                                                                    return (
+                                                                        <div
+                                                                            key={idx}
+                                                                            className={cn(
+                                                                                "flex flex-col items-center justify-center border-r border-border/20 text-muted-foreground/60 font-bold",
+                                                                                isToday(day) && "text-primary bg-primary/5",
+                                                                                isWeekend(day) && "bg-muted/10"
+                                                                            )}
+                                                                            style={{ width: dayWidth, fontSize: dayWidth < 20 ? '9px' : '11px' }}
+                                                                        >
+                                                                            {showDayName && <span className="text-[7px] leading-none opacity-40 uppercase">{day.toLocaleDateString('cs-CZ', { weekday: 'short' })}</span>}
+                                                                            <span>{day.getDate()}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
                                                         {/* Block scrolling projects */}
                                                         <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
 

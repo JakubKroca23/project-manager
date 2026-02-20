@@ -7,6 +7,7 @@ interface TimelineGridProps {
     endDate: Date;
     dayWidth: number;
     children?: React.ReactNode;
+    showDays?: boolean;
 }
 
 const getWeekNumber = (d: Date) => {
@@ -17,7 +18,7 @@ const getWeekNumber = (d: Date) => {
     return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 };
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children }) => {
+const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children, showDays = true }) => {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonthVal = today.getMonth();
@@ -117,8 +118,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                     ))}
                 </div>
 
-                {/* Úroveň 3: Dny - Skrýt při velmi malém zoomu */}
-                {dayWidth > 12 && (
+                {/* Úroveň 3: Dny - Skrýt při velmi malém zoomu nebo pokud je zakázáno */}
+                {dayWidth > 12 && showDays && (
                     <div className="timeline-header-row days">
                         {days.map((day, idx) => {
                             const showDayName = dayWidth > 35;
