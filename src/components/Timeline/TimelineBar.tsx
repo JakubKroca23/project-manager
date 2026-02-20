@@ -743,26 +743,15 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const mLeft = getDatePos(date);
                 const isHovered = activeCell === dateKey;
 
-                // Dynamic icon size: adjust more reasonably at extreme zoom
-                // Dynamic icon size: adjust more reasonably at extreme zoom
-                // Dynamic icon size: adjust more reasonably at extreme zoom
-                const baseSize = config?.milestoneSize || 22;
-                let iconSize = baseSize;
+                // icon size is baseRowHeight * (sizePercent / 100)
+                const sizePercent = config?.milestoneSize || 65;
+                let iconSize = rowHeight * (sizePercent / 100);
 
-                // Horizontal zoom scaling (compact icons when days are narrow)
+                // Horizontal zoom scaling (compact icons when days are narrow to avoid overlap)
                 if (dayWidth < 10) {
-                    iconSize = Math.max(12, baseSize * 0.6);
+                    iconSize = Math.max(12, iconSize * 0.6);
                 } else if (dayWidth < 25) {
-                    iconSize = Math.max(16, baseSize * 0.8);
-                }
-
-                // Vertical zoom scaling (larger icons when rows are tall)
-                // Aggressive scaling for better visibility
-                if (rowHeight > 32) {
-                    const verticalScale = (rowHeight / 32) * 1.25;
-                    iconSize = iconSize * verticalScale;
-                } else if (rowHeight < 24) {
-                    iconSize = iconSize * 0.8;
+                    iconSize = Math.max(16, iconSize * 0.8);
                 }
 
                 return (

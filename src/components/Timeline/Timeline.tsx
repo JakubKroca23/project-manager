@@ -176,6 +176,15 @@ const Timeline: React.FC = () => {
         }
         return 34;
     });
+
+    // Global Milestone Size (%)
+    const [milestoneSize, setMilestoneSize] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('timeline_milestoneSize');
+            return saved ? parseInt(saved) : 65;
+        }
+        return 65;
+    });
     // Summary row height fixed at 34px by user request
     const summaryRowHeight = 34;
     const [showDesignSettings, setShowDesignSettings] = useState(false);
@@ -219,6 +228,12 @@ const Timeline: React.FC = () => {
         }
     }, [activeTypes]);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('timeline_milestoneSize', milestoneSize.toString());
+        }
+    }, [milestoneSize]);
+
     // Color Configuration State
     const [colors, setColors] = useState<IColorsState>({
         phaseInitial: { color: '#bae6fd', opacity: 0.4, label: 'Zahájení', showInStack: false },
@@ -241,10 +256,6 @@ const Timeline: React.FC = () => {
 
     const [outline, setOutline] = useState<IOutlineState>({ enabled: true, width: 1, color: '#000000', opacity: 0.2, showInStack: true });
 
-    // Global Milestone Size
-    const [milestoneSize, setMilestoneSize] = useState<number>(34);
-
-    // Collapsed Sectors State
     const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
 
     const toggleSector = (sectorId: string) => {
@@ -871,6 +882,24 @@ const Timeline: React.FC = () => {
                                             design.usePriorityColors ? "translate-x-3.5" : "translate-x-0"
                                         )} />
                                     </button>
+                                </div>
+
+                                <div className="h-px bg-border/40 my-1" />
+
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Velikost ikon</span>
+                                        <span className="text-primary">{milestoneSize}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="30" max="150" step="5"
+                                        value={milestoneSize}
+                                        onChange={(e) => setMilestoneSize(parseInt(e.target.value))}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="text-[8px] text-muted-foreground/60 mt-1 italic">
+                                        V % vůči výšce řádku ({Math.round(rowHeight * (milestoneSize / 100))}px)
+                                    </div>
                                 </div>
                             </div>
                         </div>
