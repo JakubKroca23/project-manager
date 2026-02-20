@@ -120,8 +120,9 @@ interface IColorsState {
     milestoneBody: IColorConfig;
     milestoneHandover: IColorConfig;
     milestoneDeadline: IColorConfig;
-    milestoneRevisionEnd?: IColorConfig;
-    milestoneStart?: IColorConfig;
+    milestoneMountingEnd: IColorConfig;
+    milestoneRevisionEnd: IColorConfig;
+    milestoneStart: IColorConfig;
     priority1: IColorConfig;
     priority2: IColorConfig;
     priority3: IColorConfig;
