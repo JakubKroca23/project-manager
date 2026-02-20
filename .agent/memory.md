@@ -119,3 +119,5 @@
 - **Milestone Visual System**: Rozhodnuto o sjednocení všech ikon milníků do černé barvy (#000000) pro maximální čitelnost na různobarevných fázích.
 - **Graphic Polish**: Odstraněna záře (glow/drop-shadow) z milníků v CSS, což dává grafu čistší a modernější "flat" design.
 - **State Cleanup**: Barevná logika pro milníky byla odstraněna ze stavu komponent a CSS proměnných, čímž se zjednodušila architektura barev v Timeline.
+d a t e :   S i m p l i f i e d   H i a b   i c o n   b y   r e m o v i n g   n o n - b l a c k   p a t h s   i n   c o m p o n e n t s   a n d   a s s e t s .  
+ 

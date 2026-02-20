@@ -164,3 +164,5 @@
     - Promazány nepotřebné CSS proměnné a zastaralá barevná logika milníků.
 - **Změna**: Oprava TypeScript/JSX chyb.
 - **Detail**: Doplněny chybějící typové anotace pro parametry v mapování a filtrech, čímž byly vyřešeny "implicitly has any type" chyby.
+d a t e :   M o d i f i e d   H i a b   i c o n   t o   b e   t r a n s p a r e n t   b y   r e m o v i n g   w h i t e   a n d   g r e y   p a t h s   i n   T i m e l i n e . t s x ,   T i m e l i n e B a r . t s x ,   a n d   h i a b . s v g .  
+ 
