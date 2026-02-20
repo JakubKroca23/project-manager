@@ -166,7 +166,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                                 className="timeline-today-indicator"
                                 style={{
                                     left: diffDays * dayWidth + (dayWidth / 2),
-                                    top: 0,
+                                    top: '29px',
                                     bottom: 0
                                 }}
                             />

@@ -834,7 +834,7 @@
   position: absolute;
   width: 3px;
   background: var(--timeline-today-line);
-  z-index: 5000;
+  z-index: 1500;
   pointer-events: none;
   transform: translateX(-50%);
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);

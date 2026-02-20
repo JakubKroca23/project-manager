@@ -1124,7 +1124,7 @@ const Timeline: React.FC = () => {
                                                                             key={idx}
                                                                             className={cn(
                                                                                 "flex flex-col items-center justify-center border-r border-border/10",
-                                                                                today ? "border-2 border-red-500 rounded-md shadow-[0_0_10px_rgba(239,68,68,0.5)] bg-red-500/5 mx-[1px]" : "",
+                                                                                today ? "border-[4px] border-red-500 rounded-md shadow-[0_0_15px_rgba(239,68,68,0.6)] bg-red-500 mx-[1px]" : "",
                                                                                 isWeekend(day) && "bg-muted/10"
                                                                             )}
                                                                             style={{ width: dayWidth }}
@@ -1133,7 +1133,7 @@ const Timeline: React.FC = () => {
                                                                                 {showDayName && (
                                                                                     <span className={cn(
                                                                                         "text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm shadow-sm",
-                                                                                        today ? "text-red-600 bg-white" : "text-muted-foreground/60 bg-white/90"
+                                                                                        today ? "text-white bg-black/20" : "text-muted-foreground/60 bg-white/90"
                                                                                     )}>
                                                                                         {day.toLocaleDateString('cs-CZ', { weekday: 'short' })}
                                                                                     </span>
@@ -1141,11 +1141,13 @@ const Timeline: React.FC = () => {
                                                                                 <span
                                                                                     className={cn(
                                                                                         "flex items-center justify-center shrink-0",
-                                                                                        today ? "text-red-600 font-black" : "text-foreground font-black"
+                                                                                        today ? "text-white font-black" : "text-foreground font-black"
                                                                                     )}
                                                                                     style={{
                                                                                         fontSize: dayWidth < 20 ? '9px' : '12px',
-                                                                                        textShadow: '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff'
+                                                                                        textShadow: today
+                                                                                            ? '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000, 0px 1px 0 #000, 0px -1px 0 #000, 1px 0px 0 #000, -1px 0px 0 #000'
+                                                                                            : '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff'
                                                                                     }}
                                                                                 >
                                                                                     {day.getDate()}
