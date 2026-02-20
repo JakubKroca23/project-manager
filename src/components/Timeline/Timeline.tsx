@@ -24,11 +24,11 @@ import Link from 'next/link';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
-const Hiab = ({ size = 24, color }: any) => {
+const Hiab = ({ size = 24, color, ...props }: any) => {
     // Lucide icons use size-6 internally to create padding. We do the same.
     const innerSize = size - 6;
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }} {...props}>
             <svg
                 version="1.1"
                 id="Layer_1"
@@ -241,6 +241,9 @@ const Timeline: React.FC = () => {
         milestoneBody: { color: '#a855f7', iconColor: '#000000', iconBgColor: '#a855f7', opacity: 1, label: 'Nástavba', icon: 'Hiab', showInStack: true },
         milestoneHandover: { color: '#3b82f6', iconColor: '#000000', iconBgColor: '#3b82f6', opacity: 1, label: 'Předání', icon: 'ThumbsUp', showInStack: true },
         milestoneDeadline: { color: '#ef4444', iconColor: '#000000', iconBgColor: '#ef4444', opacity: 1, label: 'Deadline', icon: 'AlertTriangle', showInStack: true },
+        milestoneMountingEnd: { color: '#4ade80', iconColor: '#000000', iconBgColor: '#4ade80', opacity: 1, label: 'Konec Přípravy', icon: 'Package', showInStack: false },
+        milestoneRevisionEnd: { color: '#facc15', iconColor: '#000000', iconBgColor: '#facc15', opacity: 1, label: 'Konec Montáže', icon: 'Factory', showInStack: false },
+        milestoneStart: { color: '#bae6fd', iconColor: '#000000', iconBgColor: '#bae6fd', opacity: 1, label: 'Příjem', icon: 'Zap', showInStack: false },
         priority1: { color: '#ef4444', opacity: 1, label: 'Urgentní' },
         priority2: { color: '#3b82f6', opacity: 1, label: 'Normální' },
         priority3: { color: '#94a3b8', opacity: 1, label: 'Nízká' },
@@ -953,7 +956,11 @@ const Timeline: React.FC = () => {
                                 {[
                                     { key: 'milestoneChassis', label: 'Podvozek' },
                                     { key: 'milestoneBody', label: 'Nástavba' },
-                                    { key: 'milestoneHandover', label: 'Předání' }
+                                    { key: 'milestoneHandover', label: 'Předání' },
+                                    { key: 'milestoneDeadline', label: 'Deadline' },
+                                    { key: 'milestoneMountingEnd', label: 'Konec přípravy' },
+                                    { key: 'milestoneRevisionEnd', label: 'Konec montáže' },
+                                    { key: 'milestoneStart', label: 'Příjem' }
                                 ].map(({ key, label }) => {
                                     const config = (colors as any)[key];
                                     if (!config) return null;

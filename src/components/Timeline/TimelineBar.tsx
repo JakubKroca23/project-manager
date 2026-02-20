@@ -867,8 +867,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                     style={{ backgroundColor: statusColor, border: '1px solid #000000' }}
                                                 />
                                             </div>
-                                        ) : IconComponent ? (
-                                            <IconComponent
+                                        ) : Icon ? (
+                                            <Icon
                                                 size={iconSize}
                                                 color={milestoneConfig?.iconColor || '#000000'}
                                             />
