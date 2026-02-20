@@ -682,13 +682,10 @@ const Timeline: React.FC = () => {
         });
     }, [projects, searchQuery]);
 
-    // Final list of projects to display in the grid (respects type toggles)
+    // Final list of projects to display in the grid (shows everything, filters removed)
     const filteredProjects = useMemo((): Project[] => {
-        return searchFilteredProjects.filter((p: Project) => {
-            const type = p.project_type || 'civil';
-            return activeTypes[type] === true;
-        });
-    }, [searchFilteredProjects, activeTypes]);
+        return searchFilteredProjects;
+    }, [searchFilteredProjects]);
 
     // Grupa projektů do sektorů
     const sectorizedProjects = useMemo(() => {
@@ -723,14 +720,15 @@ const Timeline: React.FC = () => {
 
     const handleFitVertical = useCallback(() => {
         if (!timelineRef.current) return;
-        const visibleSectorsCount = sectorizedProjects.filter(s => s.id === 'total' || activeTypes[s.id]).length;
-        const bodyHeight = timelineRef.current.offsetHeight - (visibleSectorsCount * summaryRowHeight);
+        // Celkem (20px) + Servis (25px) + 2px divider = 47px
+        const summaryAreaHeight = 20 + (activeTypes.service ? 25 : 0) + 2;
+        const bodyHeight = timelineRef.current.offsetHeight - summaryAreaHeight;
         const totalRows = filteredProjects.length + 2; // Offset for spacing
         if (totalRows <= 0) return;
         const targetHeight = Math.floor(bodyHeight / totalRows);
         const newHeight = Math.max(14, Math.min(100, targetHeight));
         setRowHeight(newHeight);
-    }, [filteredProjects.length, activeTypes, timelineRef, sectorizedProjects, summaryRowHeight]);
+    }, [filteredProjects.length, activeTypes.service, timelineRef]);
 
     useEffect(() => {
         setOnFit(() => handleFitVertical);
@@ -1010,43 +1008,6 @@ const Timeline: React.FC = () => {
             <div className="flex flex-col flex-1 h-full min-w-0 relative">
                 <header className="timeline-header-actions relative border-b border-border/40">
                     <div className="header-left">
-                        <div className="type-filters flex items-center gap-4">
-                            {[
-                                { id: 'service', label: 'Servis', color: '#a855f7' },
-                                { id: 'civil', label: 'Civilní', color: '#3b82f6' },
-                                { id: 'military', label: 'Vojenské', color: '#10b981' }
-                            ].map(({ id, label, color }) => (
-                                <label
-                                    key={id}
-                                    className="flex items-center gap-2 cursor-pointer group select-none"
-                                >
-                                    <div className="relative flex items-center justify-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={activeTypes[id]}
-                                            onChange={() => toggleType(id)}
-                                            className="peer appearance-none w-4 h-4 border-2 rounded transition-all"
-                                            style={{
-                                                borderColor: activeTypes[id] ? color : 'var(--border)',
-                                                backgroundColor: activeTypes[id] ? color : 'transparent'
-                                            }}
-                                        />
-                                        <div className={`absolute w-2.5 h-2.5 text-white flex items-center justify-center transition-all ${activeTypes[id] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <span
-                                        className="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                        style={{ color: activeTypes[id] ? color : 'var(--muted-foreground)' }}
-                                    >
-                                        {label}
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-
                         <button
                             className={`action-button ${showDesignSettings ? 'primary' : ''}`}
                             onClick={() => setShowDesignSettings(!showDesignSettings)}
@@ -1129,8 +1090,12 @@ const Timeline: React.FC = () => {
                                     return (
                                         <>
                                             {visibleSectors.map((sector, vIdx) => {
-                                                const topOffset = `calc(var(--timeline-header-height) + (${vIdx} * var(--summary-row-height)))`;
                                                 const isTotal = sector.id === 'total';
+                                                const sHeight = isTotal ? 20 : 25;
+                                                const topOffset = isTotal
+                                                    ? 'var(--timeline-header-height)'
+                                                    : 'calc(var(--timeline-header-height) + 20px + 2px)';
+
                                                 return (
                                                     <div
                                                         key={`summary-${sector.id}`}
@@ -1138,12 +1103,12 @@ const Timeline: React.FC = () => {
                                                         style={{
                                                             position: 'sticky',
                                                             top: topOffset,
-                                                            height: 'var(--summary-row-height)',
+                                                            height: sHeight,
                                                             zIndex: isTotal ? 3600 : 3500 - vIdx,
                                                             width: 'max-content',
                                                             minWidth: '100%',
                                                             backgroundColor: isTotal ? 'rgba(99, 102, 241, 0.05)' : undefined,
-                                                            borderBottom: isTotal ? '2px solid #374151' : undefined // 2px dark gray divider
+                                                            borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
                                                         }}
                                                     >
                                                         {/* Block scrolling projects */}
@@ -1188,14 +1153,14 @@ const Timeline: React.FC = () => {
                                                             <TimelineBar
                                                                 key={`stack-${p.id}`}
                                                                 id={p.id}
-                                                                name={p.name}
+                                                                name={p.id}
                                                                 project={p}
                                                                 status={p.status}
                                                                 startDate={parseDate(p.created_at) || new Date()}
                                                                 endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
                                                                 timelineStart={timelineRange.start}
                                                                 dayWidth={dayWidth}
-                                                                rowHeight={summaryRowHeight}
+                                                                rowHeight={isTotal ? 20 : 25}
                                                                 isCollapsed={true}
                                                                 config={{ colors, milestoneSize, design }}
                                                                 onProjectUpdate={handleProjectUpdate}
@@ -1212,7 +1177,7 @@ const Timeline: React.FC = () => {
                                                 className="timeline-row p-0"
                                                 style={{
                                                     position: 'sticky',
-                                                    top: `calc(var(--timeline-header-height) + (${visibleSectors.length} * var(--summary-row-height)))`,
+                                                    top: `calc(var(--timeline-header-height) + ${20 + (activeTypes.service ? 25 : 0) + 2}px)`,
                                                     height: '2px',
                                                     background: '#1a1a1a',
                                                     borderBottom: 'none',
