@@ -114,3 +114,8 @@
 114: - **Timeline UX**: Přechod na in-grid ovládání vertikálního zoomu a inline panel nastavení vzhledu.
 115: - **Data Cleanup**: Odstranění méně důležitých polí z primárního pohledu v detailu projektu.
 116: - **Import Wizard Enhancements**: Implementován vizuální výběr hlavičkového řádku z náhledu dat, což řeší problémy s importem souborů obsahujících úvodní prázdné řádky nebo metadata.
+
+## 2026-02-20: Timeline UI - Milestone Modernization
+- **Milestone Visual System**: Rozhodnuto o sjednocení všech ikon milníků do černé barvy (#000000) pro maximální čitelnost na různobarevných fázích.
+- **Graphic Polish**: Odstraněna záře (glow/drop-shadow) z milníků v CSS, což dává grafu čistší a modernější "flat" design.
+- **State Cleanup**: Barevná logika pro milníky byla odstraněna ze stavu komponent a CSS proměnných, čímž se zjednodušila architektura barev v Timeline.

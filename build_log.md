@@ -155,3 +155,12 @@
 ## [2026-02-18] - Import Wizard Expansion
 - **Nový typ importu**: Do prvního kroku (výběr typu) přidána možnost **"DOPLNĚNÍ K ZAKÁZCE"**.
 - **Design**: Tato volba je vizuálně menší a subtilnější, aby nenarušovala hlavní trojici (Civilní/Vojenské/Servis), ale připravuje systém na budoucí importy dokumentace a výkresů ke konkrétním existujícím zakázkám.
+
+## [2026-02-20] - Timeline Icon Color Update & Cleanup
+- **Změna**: Všechy ikony milníků v Timeline jsou nyní vynuceně černé.
+- **Detail**:
+    - Odstraněna dynamická barva ikon v `Timeline.tsx` i `TimelineBar.tsx` (nastaveno fixně `#000000`).
+    - Z `Timeline.css` byly odstraněny drop-shadow efekty (glow), milníky jsou nyní čisté černé ikony.
+    - Promazány nepotřebné CSS proměnné a zastaralá barevná logika milníků.
+- **Změna**: Oprava TypeScript/JSX chyb.
+- **Detail**: Doplněny chybějící typové anotace pro parametry v mapování a filtrech, čímž byly vyřešeny "implicitly has any type" chyby.

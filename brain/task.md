@@ -44,6 +44,8 @@
 - [x] Implementace priorit zakázek (1-3) a mechanika barev dle priorit.
 - [x] Úprava nastavení vzhledu časové osy (procentuální výška, obrysy, odstranění stínů).
 - [x] Rozšíření Import Wizardu o možnost "K ZAKÁZCE".
+- [x] Sjednocení ikon milníků do černé barvy a odstranění glow efektu v Timeline.
+- [x] Fix TypeScript "implicitly any" chyb v `Timeline.tsx` u mapování a filtrů.
 
 
 ## Budoucí úkoly (Backlog)

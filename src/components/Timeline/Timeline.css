@@ -628,33 +628,10 @@
   z-index: 20;
 }
 
-.milestone-part.chassis {
-  background-color: var(--milestone-chassis);
-}
 
-.milestone-part.body {
-  background-color: var(--milestone-body);
-}
-
-.milestone-part.handover {
-  background-color: var(--milestone-handover);
-}
-
-.milestone-part.deadline {
-  background-color: var(--milestone-deadline);
-}
-
-.milestone-part.service-start {
-  background-color: var(--milestone-service-start);
-}
-
-.milestone-part.service-end {
-  background-color: var(--milestone-service-end);
-}
 
 .milestone-icon {
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  filter: drop-shadow(0 0 1px white) drop-shadow(0 0 2px white) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   position: relative;
   pointer-events: auto !important;
   cursor: pointer;
@@ -666,13 +643,11 @@
 .milestone-icon.is-hovering {
   transform: scale(1.6);
   z-index: 1000;
-  filter: drop-shadow(0 0 2px white) drop-shadow(0 0 4px white) drop-shadow(0 0 8px white) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
 }
 
 .milestone-svg {
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 1px white);
 }
 
 /* DETAILED TOOLTIP */
