@@ -843,8 +843,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             borderRadius: '50%',
                                             width: isSmallMilestone ? iconSize + 2 : iconSize + 6,
                                             height: isSmallMilestone ? iconSize + 2 : iconSize + 6,
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)',
-                                            border: '1px solid rgba(0,0,0,0.1)'
+                                            pointerEvents: 'auto',
+                                            transition: 'transform 0.2s ease-out'
                                         }}
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();
@@ -869,8 +869,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             </div>
                                         ) : Icon ? (
                                             <Icon
-                                                size={iconSize}
-                                                color={milestoneConfig?.iconColor || '#000000'}
+                                                size={iconSize + 2}
+                                                color={isCompleted || isOverdue ? statusColor : (milestoneConfig?.color || statusColor)}
                                             />
                                         ) : null}
                                     </div>
