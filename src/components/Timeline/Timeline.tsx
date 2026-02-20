@@ -24,21 +24,29 @@ import Link from 'next/link';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
-const Hiab = ({ size = 24, color }: any) => (
-    <svg
-        version="1.1"
-        id="Layer_1"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 756 719"
-        width={size}
-        height={size}
-        style={{ minWidth: size, minHeight: size }}
-    >
-        {/* Only the elephant paths, forced to black (or passed color if we want it to be configurable) */}
-        <path fill="#000000" opacity="1" stroke="none" d="M404.985992,356.043945 C399.298950,326.010345 397.282166,296.164215 399.397797,266.087616 C399.698334,261.814636 400.451782,257.409546 401.942169,253.419128 C404.838959,245.662964 411.363129,241.874100 419.133240,242.589844 C427.581482,243.368057 433.873779,248.895523 435.263367,257.750763 C437.043335,269.093719 438.283508,280.522980 439.677368,291.924713 C444.689209,332.920502 457.174347,371.040009 483.016296,403.948822 C498.028503,423.066315 516.372620,437.721619 539.855347,445.221893 C542.040405,445.919800 544.305969,446.365356 546.346313,446.880646 C529.752014,470.828064 513.274902,494.606476 496.417114,518.934143 C495.057343,517.953857 492.789459,516.429016 490.639832,514.752502 C463.614624,493.674988 445.061768,466.105164 430.494324,435.600952 C418.457458,410.395691 410.432312,383.842468 404.985992,356.043945 z" />
-        <path fill="#000000" opacity="1" stroke="none" d="M527.041626,298.965088 C537.709229,292.676788 548.244873,292.530487 558.450073,298.728607 C568.991577,305.131012 574.031616,314.867828 573.135559,327.223969 C572.231384,339.693481 565.409607,348.237457 554.090332,352.992706 C540.631409,358.646790 526.089478,353.933990 517.726929,341.649139 C509.870361,330.107635 511.238831,314.342743 521.088745,304.033264 C522.798889,302.243286 524.841736,300.771179 527.041626,298.965088 z" />
-    </svg>
-);
+const Hiab = ({ size = 24, color }: any) => {
+    // Lucide icons use size-6 internally to create padding. We do the same.
+    const innerSize = size - 6;
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+            <svg
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 756 719"
+                width={innerSize}
+                height={innerSize}
+                style={{ minWidth: innerSize, minHeight: innerSize }}
+            >
+                {/* Outer frame/border path */}
+                <path fill={color || "#000000"} opacity="1" stroke="none" d="M1.000000,719.000000 C1.000000,480.305298 1.000000,241.610611 1.458877,2.563841 C3.083466,2.234620 4.249180,2.277543 5.414892,2.277472 C251.967224,2.262367 498.519562,2.245386 745.071899,2.212702 C748.063049,2.212305 751.054138,2.008735 754.379395,2.190670 C754.916687,4.776751 755.297546,7.072153 755.297729,9.367578 C755.312805,243.420898 755.300293,477.474213 755.272644,711.527527 C755.272339,714.011108 755.051025,716.494629 754.481934,718.977051 C752.198853,718.986023 750.366760,719.005188 748.534607,719.005188 C499.356415,719.004333 250.178207,719.002136 1.000000,719.000000 M710.484558,682.519592 C717.382812,682.514832 717.397461,682.514832 717.397400,675.968628 C717.395813,465.474792 717.391846,254.980927 717.373535,44.487080 C717.373413,43.051239 717.167297,41.615414 717.041809,39.975128 C715.375916,39.898144 714.076355,39.785503 712.776794,39.785595 C656.278442,39.789574 599.780151,39.821056 543.281799,39.812984 C376.453217,39.789158 209.624588,39.779362 42.796196,39.582157 C37.561188,39.575974 36.512508,40.978024 36.515289,45.945698 C36.630692,252.106094 36.602631,458.266602 36.588947,664.427063 C36.588627,669.260132 36.308804,674.111877 36.685020,678.913757 C36.784760,680.186768 38.745804,682.192627 40.020535,682.332947 C44.138775,682.786255 48.335388,682.541382 52.501797,682.541199 C271.495605,682.532410 490.489410,682.521240 710.484558,682.519592 z" />
+                {/* Elephant paths */}
+                <path fill={color || "#000000"} d="M404.985992,356.043945 C399.298950,326.010345 397.282166,296.164215 399.397797,266.087616 C399.698334,261.814636 400.451782,257.409546 401.942169,253.419128 C404.838959,245.662964 411.363129,241.874100 419.133240,242.589844 C427.581482,243.368057 433.873779,248.895523 435.263367,257.750763 C437.043335,269.093719 438.283508,280.522980 439.677368,291.924713 C444.689209,332.920502 457.174347,371.040009 483.016296,403.948822 C498.028503,423.066315 516.372620,437.721619 539.855347,445.221893 C542.040405,445.919800 544.305969,446.365356 546.346313,446.880646 C529.752014,470.828064 513.274902,494.606476 496.417114,518.934143 C495.057343,517.953857 492.789459,516.429016 490.639832,514.752502 C463.614624,493.674988 445.061768,466.105164 430.494324,435.600952 C418.457458,410.395691 410.432312,383.842468 404.985992,356.043945 z" />
+                <path fill={color || "#000000"} d="M527.041626,298.965088 C537.709229,292.676788 548.244873,292.530487 558.450073,298.728607 C568.991577,305.131012 574.031616,314.867828 573.135559,327.223969 C572.231384,339.693481 565.409607,348.237457 554.090332,352.992706 C540.631409,358.646790 526.089478,353.933990 517.726929,341.649139 C509.870361,330.107635 511.238831,314.342743 521.088745,304.033264 C522.798889,302.243286 524.841736,300.771179 527.041626,298.965088 z" />
+            </svg>
+        </div>
+    );
+};
 
 const wrapLucide = (Icon: any) => ({ size = 24, color, ...props }: any) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
@@ -966,24 +974,42 @@ const Timeline: React.FC = () => {
                                                         className="w-8 h-8 rounded-full flex items-center justify-center shadow-inner border border-white/10"
                                                         style={{ backgroundColor: config.color }}
                                                     >
-                                                        <IconComponent size={20} color="#000000" />
+                                                        <IconComponent size={config.icon === 'Hiab' ? 18 : 20} color={config.iconColor || "#000000"} className={config.icon === 'Hiab' ? 'border border-black/20 rounded-full' : ''} />
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase tracking-tight text-muted-foreground">{label}</span>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-4 h-4 rounded overflow-hidden relative border border-border/50">
-                                                        <div className="absolute inset-0" style={{ backgroundColor: config.color }} />
-                                                        <input
-                                                            type="color"
-                                                            value={config.color}
-                                                            onChange={(e) => {
-                                                                e.stopPropagation();
-                                                                setColors({ ...colors, [key]: { ...config, color: e.target.value } });
-                                                            }}
-                                                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0 border-none"
-                                                        />
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col gap-1 items-center">
+                                                        <span className="text-[7px] text-muted-foreground uppercase font-bold">Pozadí</span>
+                                                        <div className="w-5 h-5 rounded overflow-hidden relative border border-border/50">
+                                                            <div className="absolute inset-0" style={{ backgroundColor: config.color }} />
+                                                            <input
+                                                                type="color"
+                                                                value={config.color}
+                                                                onChange={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setColors({ ...colors, [key]: { ...config, color: e.target.value } });
+                                                                }}
+                                                                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0 border-none"
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <ChevronDown size={12} className={cn("transition-transform duration-200", isOpen && "rotate-180")} />
+                                                    <div className="flex flex-col gap-1 items-center">
+                                                        <span className="text-[7px] text-muted-foreground uppercase font-bold">Ikona</span>
+                                                        <div className="w-5 h-5 rounded overflow-hidden relative border border-border/50">
+                                                            <div className="absolute inset-0" style={{ backgroundColor: config.iconColor || "#000000" }} />
+                                                            <input
+                                                                type="color"
+                                                                value={config.iconColor || "#000000"}
+                                                                onChange={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setColors({ ...colors, [key]: { ...config, iconColor: e.target.value } });
+                                                                }}
+                                                                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer p-0 border-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <ChevronDown size={12} className={cn("ml-2 transition-transform duration-200", isOpen && "rotate-180")} />
                                                 </div>
                                             </div>
 
@@ -1011,7 +1037,8 @@ const Timeline: React.FC = () => {
                                                         );
                                                     })}
                                                 </div>
-                                            )}
+                                            )
+                                            }
                                         </div>
                                     );
                                 })}
