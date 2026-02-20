@@ -720,8 +720,8 @@ const Timeline: React.FC = () => {
 
     const handleFitVertical = useCallback(() => {
         if (!timelineRef.current) return;
-        // Header (38) + Celkem/Days (24) + Divider (2) + Servis (25) = 89px
-        const summaryAreaHeight = 38 + 24 + 2 + (activeTypes.service ? 25 : 0);
+        // Header (38) + Celkem/Days (29) + Divider (2) + Servis (40) = 109px
+        const summaryAreaHeight = 38 + 29 + 2 + (activeTypes.service ? 40 : 0);
         const bodyHeight = timelineRef.current.offsetHeight - summaryAreaHeight;
         const totalRows = filteredProjects.length + 2;
         if (totalRows <= 0) return;
@@ -1092,10 +1092,10 @@ const Timeline: React.FC = () => {
                                         <>
                                             {visibleSectors.map((sector, vIdx) => {
                                                 const isTotal = sector.id === 'total';
-                                                const sHeight = isTotal ? 24 : 25;
+                                                const sHeight = isTotal ? 29 : 40;
                                                 const topOffset = isTotal
                                                     ? '38px' // Static top for Total (Months 20 + Weeks 18)
-                                                    : 'calc(38px + 24px + 2px)';
+                                                    : 'calc(38px + 29px + 2px)';
 
                                                 return (
                                                     <div
@@ -1124,7 +1124,7 @@ const Timeline: React.FC = () => {
                                                                             key={idx}
                                                                             className={cn(
                                                                                 "flex flex-col items-center justify-center border-r border-border/10",
-                                                                                today && "bg-primary/5",
+                                                                                today ? "border-2 border-red-500 rounded-md shadow-[0_0_10px_rgba(239,68,68,0.5)] bg-red-500/5 mx-[1px]" : "",
                                                                                 isWeekend(day) && "bg-muted/10"
                                                                             )}
                                                                             style={{ width: dayWidth }}
@@ -1132,8 +1132,8 @@ const Timeline: React.FC = () => {
                                                                             <div className="flex flex-col items-center gap-0 translate-y-[1px]">
                                                                                 {showDayName && (
                                                                                     <span className={cn(
-                                                                                        "text-[7px] leading-tight font-black uppercase mb-[-1px]",
-                                                                                        today ? "text-primary px-1 rounded-sm bg-background" : "text-muted-foreground/50"
+                                                                                        "text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm shadow-sm",
+                                                                                        today ? "text-red-600 bg-white" : "text-muted-foreground/60 bg-white/90"
                                                                                     )}>
                                                                                         {day.toLocaleDateString('cs-CZ', { weekday: 'short' })}
                                                                                     </span>
@@ -1141,7 +1141,7 @@ const Timeline: React.FC = () => {
                                                                                 <span
                                                                                     className={cn(
                                                                                         "flex items-center justify-center shrink-0",
-                                                                                        today ? "text-primary font-black" : "text-foreground font-black"
+                                                                                        today ? "text-red-600 font-black" : "text-foreground font-black"
                                                                                     )}
                                                                                     style={{
                                                                                         fontSize: dayWidth < 20 ? '9px' : '12px',
@@ -1205,7 +1205,7 @@ const Timeline: React.FC = () => {
                                                                 endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
                                                                 timelineStart={timelineRange.start}
                                                                 dayWidth={dayWidth}
-                                                                rowHeight={isTotal ? 20 : 25}
+                                                                rowHeight={isTotal ? 29 : 40}
                                                                 isCollapsed={true}
                                                                 config={{ colors, milestoneSize, design }}
                                                                 onProjectUpdate={handleProjectUpdate}
@@ -1222,7 +1222,7 @@ const Timeline: React.FC = () => {
                                                 className="timeline-row p-0"
                                                 style={{
                                                     position: 'sticky',
-                                                    top: `calc(var(--timeline-header-height) + ${20 + (activeTypes.service ? 25 : 0) + 2}px)`,
+                                                    top: `calc(var(--timeline-header-height) + ${29 + (activeTypes.service ? 40 : 0) + 2}px)`,
                                                     height: '2px',
                                                     background: '#1a1a1a',
                                                     borderBottom: 'none',
