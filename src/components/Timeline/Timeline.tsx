@@ -1112,29 +1112,6 @@ const Timeline: React.FC = () => {
                                                             borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
                                                         }}
                                                     >
-                                                        {/* Day Numbers for Total Row */}
-                                                        {isTotal && dayWidth > 12 && (
-                                                            <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 5 }}>
-                                                                <div style={{ width: 250, flexShrink: 0 }} /> {/* Sidebar spacer */}
-                                                                {days.map((day, idx) => {
-                                                                    const showDayName = dayWidth > 35;
-                                                                    return (
-                                                                        <div
-                                                                            key={idx}
-                                                                            className={cn(
-                                                                                "flex flex-col items-center justify-center border-r border-border/20 text-muted-foreground/60 font-bold",
-                                                                                isToday(day) && "text-primary bg-primary/5",
-                                                                                isWeekend(day) && "bg-muted/10"
-                                                                            )}
-                                                                            style={{ width: dayWidth, fontSize: dayWidth < 20 ? '9px' : '11px' }}
-                                                                        >
-                                                                            {showDayName && <span className="text-[7px] leading-none opacity-40 uppercase">{day.toLocaleDateString('cs-CZ', { weekday: 'short' })}</span>}
-                                                                            <span>{day.getDate()}</span>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        )}
                                                         {/* Block scrolling projects */}
                                                         <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
 
@@ -1184,13 +1161,40 @@ const Timeline: React.FC = () => {
                                                                 endDate={parseDate(p.deadline) || parseDate(p.customer_handover) || new Date()}
                                                                 timelineStart={timelineRange.start}
                                                                 dayWidth={dayWidth}
-                                                                rowHeight={isTotal ? 20 : 25}
+                                                                rowHeight={isTotal ? 24 : 25}
                                                                 isCollapsed={true}
                                                                 config={{ colors, milestoneSize, design }}
                                                                 onProjectUpdate={handleProjectUpdate}
                                                                 milestones={allMilestones.filter((m: ProjectMilestone) => m.project_id === p.id)}
                                                             />
                                                         ))}
+
+                                                        {/* Elegant Day Numbers for Total Row - Always on top */}
+                                                        {isTotal && dayWidth > 12 && (
+                                                            <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 100 }}>
+                                                                <div style={{ width: 250, flexShrink: 0 }} /> {/* Sidebar spacer */}
+                                                                {days.map((day, idx) => (
+                                                                    <div
+                                                                        key={idx}
+                                                                        className={cn(
+                                                                            "flex items-center justify-center border-r border-border/10",
+                                                                            isToday(day) ? "bg-primary/20" : isWeekend(day) ? "bg-muted/5 text-muted-foreground/30" : "text-muted-foreground/40"
+                                                                        )}
+                                                                        style={{ width: dayWidth }}
+                                                                    >
+                                                                        <span
+                                                                            className={cn(
+                                                                                "flex items-center justify-center rounded-full bg-background/80 shadow-[0_0_2px_rgba(255,255,255,0.8)] px-1 font-black",
+                                                                                isToday(day) && "bg-primary text-primary-foreground shadow-none"
+                                                                            )}
+                                                                            style={{ minWidth: '16px', height: '16px', fontSize: dayWidth < 20 ? '8px' : '10px' }}
+                                                                        >
+                                                                            {day.getDate()}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div >
                                                 );
                                             })}
