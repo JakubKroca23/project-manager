@@ -1115,7 +1115,6 @@ const Timeline: React.FC = () => {
                                                         {/* Day Numbers for Total Row - High Z-index to pop over everything */}
                                                         {isTotal && dayWidth > 12 && (
                                                             <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 50 }}>
-                                                                <div style={{ width: 250, flexShrink: 0 }} /> {/* Sidebar spacer */}
                                                                 {days.map((day, idx) => {
                                                                     const showDayName = dayWidth > 35;
                                                                     const today = isToday(day);
@@ -1134,23 +1133,19 @@ const Timeline: React.FC = () => {
                                                                                 {showDayName && (
                                                                                     <span className={cn(
                                                                                         "text-[7px] leading-tight font-black uppercase mb-[-1px]",
-                                                                                        today ? "text-primary" : "text-muted-foreground/50"
+                                                                                        today ? "text-primary px-1 rounded-sm bg-background" : "text-muted-foreground/50"
                                                                                     )}>
                                                                                         {day.toLocaleDateString('cs-CZ', { weekday: 'short' })}
                                                                                     </span>
                                                                                 )}
                                                                                 <span
                                                                                     className={cn(
-                                                                                        "flex items-center justify-center rounded-full shrink-0",
-                                                                                        today ? "bg-primary text-white" : "text-foreground bg-background"
+                                                                                        "flex items-center justify-center shrink-0",
+                                                                                        today ? "text-primary font-black" : "text-foreground font-black"
                                                                                     )}
                                                                                     style={{
-                                                                                        width: '18px',
-                                                                                        height: '18px',
-                                                                                        fontSize: dayWidth < 20 ? '9px' : '11px',
-                                                                                        fontWeight: 900,
-                                                                                        border: '3px solid white',
-                                                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                                                        fontSize: dayWidth < 20 ? '9px' : '12px',
+                                                                                        textShadow: '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff'
                                                                                     }}
                                                                                 >
                                                                                     {day.getDate()}
