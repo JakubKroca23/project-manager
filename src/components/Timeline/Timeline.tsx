@@ -1132,9 +1132,12 @@ const Timeline: React.FC = () => {
                                                                             <div className="flex flex-col items-center gap-0 translate-y-[1px]">
                                                                                 {showDayName && (
                                                                                     <span className={cn(
-                                                                                        "text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm shadow-sm",
-                                                                                        today ? "text-white bg-black/20" : "text-muted-foreground/60 bg-white/90"
-                                                                                    )}>
+                                                                                        "text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm",
+                                                                                        today ? "text-white bg-black/20" : "text-white"
+                                                                                    )}
+                                                                                        style={{
+                                                                                            textShadow: '1px 1px 1px #000, -1px 1px 1px #000, 1px -1px 1px #000, -1px -1px 1px #000'
+                                                                                        }}>
                                                                                         {day.toLocaleDateString('cs-CZ', { weekday: 'short' })}
                                                                                     </span>
                                                                                 )}
@@ -1259,41 +1262,36 @@ const Timeline: React.FC = () => {
                                                 className="project-info-sticky transition-colors group"
                                                 style={{ borderLeft: `10px solid ${sectorColor}` }}
                                             >
-                                                <div className={`project-info-content pr-2 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
-                                                    <div className="flex items-center justify-between w-full">
-                                                        {rowHeight >= 25 ? (
-                                                            <div className="flex flex-col h-full justify-center">
-                                                                <div className="flex items-center gap-1">
-                                                                    {project.parent_id && (
-                                                                        <div className="w-2 h-2 border-l border-b border-muted-foreground/50 rounded-bl-sm mb-1" />
-                                                                    )}
-                                                                    <span
-                                                                        className={`project-name w-full text-left ${project.parent_id ? 'text-[11px] text-muted-foreground' : 'text-[13px] !font-bold'} ${rowHeight >= 45 ? 'is-wrapped' : 'truncate'}`}
-                                                                        style={{ textAlign: 'left' }}
-                                                                    >
-                                                                        {project.name}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-[10px] truncate font-bold">{project.name}</span>
+                                                <div className={`project-info-content pr-2 min-w-0 ${project.parent_id ? 'pl-5' : 'pl-1'}`}>
+                                                    <div className="flex flex-col h-full justify-center overflow-hidden py-0.5">
+                                                        {/* Priority: OP# and Customer */}
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                            <span className="text-[9px] font-black bg-black/10 px-1 rounded-[2px] shrink-0 text-foreground/80">OP-{project.id}</span>
+                                                            {project.customer && (
+                                                                <span className="text-[10px] font-bold text-muted-foreground truncate" title={project.customer}>{project.customer}</span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Project Name - Show if height >= 28 */}
+                                                        {rowHeight >= 28 && (
+                                                            <span
+                                                                className={cn(
+                                                                    "text-[11px] font-bold leading-tight truncate mt-0.5",
+                                                                    project.parent_id ? "text-muted-foreground/80 font-medium" : "text-foreground"
+                                                                )}
+                                                                title={project.name}
+                                                            >
+                                                                {project.name}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Manager - Show if height >= 48 */}
+                                                        {rowHeight >= 48 && project.manager && (
+                                                            <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter truncate italic mt-0.5">
+                                                                {project.manager}
+                                                            </span>
                                                         )}
                                                     </div>
-
-                                                    {rowHeight >= 80 && (
-                                                        <div className="mt-1 flex flex-col gap-0.5">
-                                                            {(project.serial_number || project.abra_order) && (
-                                                                <div className="flex justify-between items-center text-[9px] bg-black/5 px-1.5 py-0.5 rounded">
-                                                                    <span className="text-muted-foreground/60 font-bold">SN/OBJ:</span>
-                                                                    <span className="font-mono font-bold text-black/60">{project.serial_number || project.abra_order}</span>
-                                                                </div>
-                                                            )}
-                                                            <div className="flex justify-between items-center text-[10px] italic">
-                                                                <span className="text-muted-foreground/60">Stav:</span>
-                                                                <span className="truncate max-w-[120px] font-medium text-muted-foreground" title={project.status}>{project.status}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </Link>
 
