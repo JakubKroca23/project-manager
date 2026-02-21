@@ -247,3 +247,5 @@
     - **Admin Panel**: Přidána sekce "Katalog příslušenství" do administrace, umožňující plné CRUD operace nad globálními položkami.
     - **Procurement (v2)**: Modul v detailu projektu nyní obsahuje sekci "Katalog příslušenství (Předvolby)", kde lze jedním kliknutím (Yes/No) přidávat nebo odebírat standardní položky k zakázce.
     - **UI**: Použity nové ikony (`Bookmark`, `Smartphone`) a sytější barevné akcenty pro indikaci aktivních prémiových doplňků.
+    - **Admin UX**: Přidáno tlačítko "Nastavení katalogu (Admin)" přímo do Procurement modulu v detailu zakázky pro okamžitou změnu globálních předvoleb.
+- **Lokalizace**: Sjednocena terminologie – pole v CRM identifikované jako "Datum uzavření" je nyní v celém systému (Gantt, tabulky, detaily) označováno jako **"Zahájení"**, protože reprezentuje start realizace zakázky.

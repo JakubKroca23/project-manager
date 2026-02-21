@@ -14,6 +14,8 @@
 - [x] Implementace Mini Timeline v detailu zakázky.
 - [x] Nový modul "Položky k objednání" (Procurement) s integrací do Supabase.
 - [x] Refaktoring monolitického `page.tsx` do samostatných komponent.
+- [x] Sjednocení terminologie (Uzavření -> Zahájení) napříč aplikací.
+- [x] Integrace správy globálního katalogu příslušenství do detailu zakázky pro Adminy.
 - [x] Fix buildu na Vercelu (chybějící importy).
 
 ## Hotové úkoly (Done)

@@ -16,9 +16,14 @@ import {
     Bookmark,
     ChevronDown,
     ChevronUp,
-    Smartphone
+    Smartphone,
+    Settings2,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePermissions } from '@/hooks/usePermissions';
+import { AccessoryCatalogSection } from '@/components/profile/AccessoryCatalogSection';
+import { createPortal } from 'react-dom';
 
 interface ProjectDetailOrderingProps {
     projectId: string;
@@ -31,8 +36,10 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
     const [newItemName, setNewItemName] = useState('');
     const [isAdding, setIsAdding] = useState(false);
     const [showCatalog, setShowCatalog] = useState(false);
+    const [isCatalogAdminOpen, setIsCatalogAdminOpen] = useState(false);
 
     const { items: catalogItems, loading: loadingCatalog } = useAccessoryCatalog();
+    const { isAdmin } = usePermissions();
 
     useEffect(() => {
         fetchItems();
@@ -149,34 +156,46 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                 </button>
 
                 {showCatalog && (
-                    <div className="mt-4 grid grid-cols-2 gap-2 pb-2 animate-in fade-in slide-in-from-top-2">
-                        {catalogItems.length === 0 ? (
-                            <p className="col-span-2 text-[9px] italic text-slate-400 p-2">V katalogu není nic předvoleno.</p>
-                        ) : (
-                            catalogItems.map(cItem => {
-                                const isActive = items.some(i => i.name === cItem.name);
-                                return (
-                                    <button
-                                        key={cItem.id}
-                                        onClick={() => toggleCatalogItem(cItem)}
-                                        className={cn(
-                                            "flex items-center justify-between px-3 py-2 rounded-xl border text-[10px] font-bold transition-all",
-                                            isActive
-                                                ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-[1.02]"
-                                                : "bg-white border-slate-200 text-slate-600 hover:border-primary/30"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-2 truncate pr-2">
-                                            {cItem.is_smart ? <Smartphone size={10} /> : <Package size={10} />}
-                                            <span className="truncate">{cItem.name}</span>
-                                        </div>
-                                        <div className={cn(
-                                            "w-2.5 h-2.5 rounded-full border-2",
-                                            isActive ? "bg-white border-white" : "border-slate-300"
-                                        )} />
-                                    </button>
-                                );
-                            })
+                    <div className="mt-4 space-y-3 pb-2 animate-in fade-in slide-in-from-top-2">
+                        <div className="grid grid-cols-2 gap-2">
+                            {catalogItems.length === 0 ? (
+                                <p className="col-span-2 text-[9px] italic text-slate-400 p-2">V katalogu není nic předvoleno.</p>
+                            ) : (
+                                catalogItems.map(cItem => {
+                                    const isActive = items.some(i => i.name === cItem.name);
+                                    return (
+                                        <button
+                                            key={cItem.id}
+                                            onClick={() => toggleCatalogItem(cItem)}
+                                            className={cn(
+                                                "flex items-center justify-between px-3 py-2 rounded-xl border text-[10px] font-bold transition-all",
+                                                isActive
+                                                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-[1.02]"
+                                                    : "bg-white border-slate-200 text-slate-600 hover:border-primary/30"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-2 truncate pr-2">
+                                                {cItem.is_smart ? <Smartphone size={10} /> : <Package size={10} />}
+                                                <span className="truncate">{cItem.name}</span>
+                                            </div>
+                                            <div className={cn(
+                                                "w-2.5 h-2.5 rounded-full border-2",
+                                                isActive ? "bg-white border-white" : "border-slate-300"
+                                            )} />
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => setIsCatalogAdminOpen(true)}
+                                className="w-full py-2 border border-dashed border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest text-primary/40 hover:text-primary hover:bg-primary/5 hover:border-primary/40 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Settings2 size={12} />
+                                Nastavení katalogu (Admin)
+                            </button>
                         )}
                     </div>
                 )}
@@ -306,6 +325,28 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> Dodáno
                 </div>
             </div>
+            {/* Admin Catalog Management Modal */}
+            {isCatalogAdminOpen && createPortal(
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-background border border-border w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+                        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Settings2 className="text-primary" size={18} />
+                                </div>
+                                <h2 className="text-sm font-bold uppercase tracking-wider">Správa globálního katalogu</h2>
+                            </div>
+                            <button onClick={() => setIsCatalogAdminOpen(false)} className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-slate-200">
+                            <AccessoryCatalogSection />
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }
