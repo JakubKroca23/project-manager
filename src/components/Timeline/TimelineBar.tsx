@@ -887,14 +887,24 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const topPos = isNearBottom ? 'auto' : editPopup.y + 10;
                 const bottomPos = isNearBottom ? Math.max(10, (window.innerHeight - editPopup.y) + 35) : 'auto';
 
+                const type = project.project_type || 'civil';
+                const sectorLabels: Record<string, string> = {
+                    civil: 'Civilní',
+                    military: 'Vojenské',
+                    service: 'Servis',
+                    industrial: 'Průmysl',
+                    business: 'Business'
+                };
+                const sectorColor = SECTOR_COLORS[type] || SECTOR_COLORS.civil;
+
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-2 transition-opacity duration-200"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200"
                         style={{
                             left: Math.min(editPopup.x - 100, window.innerWidth - 300),
                             top: topPos,
                             bottom: bottomPos,
-                            width: 240,
+                            width: 260,
                             maxWidth: '90vw'
                         }}
                         onMouseEnter={() => {
@@ -906,7 +916,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         onMouseLeave={handleMouseLeave}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex flex-col gap-3 relative pb-1">
+                        <div className="flex flex-col gap-2 relative">
                             <button
                                 onClick={() => setEditPopup(null)}
                                 className="absolute -top-1 -right-1 text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors outline-none z-10"
@@ -914,34 +924,40 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 <X size={14} />
                             </button>
 
-                            {/* DATUM | IKONA | NAZEV */}
-                            <div className="flex flex-col items-center gap-2 pt-1">
-                                <span className="text-xs font-black text-black bg-muted/50 px-3 py-1 rounded-full border border-border/50">
-                                    {new Date(m.date).toLocaleDateString('cs-CZ')}
+                            {/* Row 1: KATEGORIE */}
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className="text-[9px] font-black uppercase px-2 py-0.5 rounded-[4px] text-white shadow-sm"
+                                    style={{ backgroundColor: sectorColor }}
+                                >
+                                    {sectorLabels[type] || type}
                                 </span>
-                                <div className="flex flex-col items-center gap-1 text-center mt-1">
-                                    <Icon
-                                        size={28}
-                                        className="mb-1"
-                                        color="#000000"
-                                    />
-                                    <span className="font-black text-[13px] uppercase tracking-tighter text-black leading-none">
-                                        {m.label}
-                                    </span>
-                                    {(m.class === 'body' || m.class === 'chassis') && project.body_type && (
-                                        <span className="text-[10px] font-bold text-muted-foreground/80 mt-1 italic">
-                                            {project.body_type}
-                                        </span>
-                                    )}
-                                </div>
+                                <span className="text-[9px] font-black text-muted-foreground/50 font-mono">
+                                    #{project.id}
+                                </span>
+                            </div>
+
+                            {/* Row 2: DATUM | IKONA | NAZEV (V jednom řádku) */}
+                            <div className="flex items-center gap-2 pt-1 border-b border-border/50 pb-2">
+                                <span className="text-[11px] font-black text-black bg-muted/80 px-2 py-0.5 rounded shrink-0">
+                                    {new Date(m.date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}
+                                </span>
+                                <Icon
+                                    size={18}
+                                    className="shrink-0"
+                                    color="#000000"
+                                />
+                                <span className="font-black text-[11px] uppercase tracking-tighter text-black truncate">
+                                    {m.label}
+                                </span>
                             </div>
                         </div>
 
                         {!isDeleteConfirm && !isEditingDate && !isIconPickerOpen && (
-                            <div className="flex flex-col gap-2 mt-1">
+                            <div className="flex flex-col gap-2">
                                 <div className="flex gap-2">
                                     <button
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-muted/60 hover:bg-muted text-foreground transition-all border border-border group"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-all border border-border group"
                                         onClick={() => setIsEditingDate(true)}
                                         disabled={isUpdating}
                                     >
@@ -950,12 +966,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     </button>
 
                                     <button
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all border group ${isCompleted ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border-emerald-500/20'}`}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all border group ${isCompleted
+                                            ? 'bg-emerald-500 text-white border-emerald-600'
+                                            : 'bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-500 shadow-sm'}`}
                                         onClick={() => toggleMilestoneCompletion(m.key)}
                                         disabled={isUpdating}
                                     >
-                                        <ShieldCheck size={14} className={isCompleted ? 'text-emerald-600' : 'text-emerald-500 group-hover:scale-110 transition-transform'} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{isCompleted ? 'Hotovo' : 'Potvrdit'}</span>
+                                        <ShieldCheck size={14} className={isCompleted ? 'text-white' : 'text-yellow-950 group-hover:scale-110 transition-transform'} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{isCompleted ? 'Doručeno' : 'Potvrdit'}</span>
                                     </button>
                                 </div>
 
