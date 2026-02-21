@@ -11,13 +11,16 @@ import {
     Truck,
     ClipboardList,
     AlertCircle,
-    ArrowLeft
+    ArrowLeft,
+    Info,
+    LayoutGrid
 } from 'lucide-react';
 
 import { usePermissions } from '@/hooks/usePermissions';
 import { ProjectDetailHeader } from '@/components/ProjectDetail/ProjectDetailHeader';
 import { ProjectDetailStats } from '@/components/ProjectDetail/ProjectDetailStats';
 import { ProjectDetailOrdering } from '@/components/ProjectDetail/ProjectDetailOrdering';
+import { ProjectMiniTimeline } from '@/components/ProjectDetail/ProjectMiniTimeline';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -147,7 +150,7 @@ export default function ProjectDetailPage() {
     );
 
     return (
-        <div className="h-full overflow-y-auto bg-background text-foreground">
+        <div className="h-full flex flex-col bg-background text-foreground overflow-hidden">
             <ProjectDetailHeader
                 project={p}
                 typeColor={typeColor}
@@ -159,35 +162,47 @@ export default function ProjectDetailPage() {
                 onDelete={handleDeleteProject}
             />
 
-            <div className="max-w-[1400px] mx-auto px-4 py-6 space-y-6">
-                {/* ── HEADER ── */}
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-black tracking-tight">
-                            {isEditing ? (
-                                <input
-                                    value={p.name}
-                                    onChange={(e) => handleChange('name', e.target.value)}
-                                    className="bg-transparent border-b border-primary/20 outline-none w-full"
-                                />
-                            ) : project.name}
-                        </h1>
-                    </div>
-                    <ProjectDetailStats project={p} isEditing={isEditing} onChange={handleChange} />
-                </div>
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full">
 
-                {/* ── SECTIONS GRID ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* ── LEVÁ STRANA (Detaily a Timeline) ── */}
+                <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
 
-                    {/* LEVÝ SLOUPEC (Harmonogram & Specifikace) - 7 sloupců */}
-                    <div className="lg:col-span-7 space-y-6">
+                    {/* HLAVNÍ INFO MODUL (Sloučené detaily) */}
+                    <section className="bg-muted/10 border border-border/50 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-4 border-b border-border/50 bg-background/50 flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className={cn(
+                                    "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border",
+                                    p.project_type === 'military'
+                                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                        : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                                )}>
+                                    {p.project_type === 'military' ? 'Vojenské' : p.project_type === 'service' ? 'Servis' : 'Civil'}
+                                </span>
+                                <h1 className="text-xl font-black tracking-tight">
+                                    {isEditing ? (
+                                        <input
+                                            value={p.name}
+                                            onChange={(e) => handleChange('name', e.target.value)}
+                                            className="bg-transparent border-b border-primary/20 outline-none w-full"
+                                        />
+                                    ) : project.name}
+                                </h1>
+                            </div>
+                            <ProjectDetailStats project={p} isEditing={isEditing} onChange={handleChange} />
+                        </div>
+                    </section>
 
-                        {/* HARMONOGRAM */}
+                    {/* MINI TIMELINE */}
+                    <ProjectMiniTimeline project={p} />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* HARMONOGRAM (Detailed) */}
                         <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
                             <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                                <CalendarDays size={14} /> Harmonogram a termíny
+                                <CalendarDays size={14} /> Harmonogram
                             </h3>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 gap-4">
                                 <DateField label="Příjem" value={p.deadline} field="deadline" />
                                 <DateField label="Podvozek" value={p.chassis_delivery} field="chassis_delivery" />
                                 <DateField label="Nástavba" value={p.body_delivery} field="body_delivery" />
@@ -199,9 +214,9 @@ export default function ProjectDetailPage() {
                         {/* SPECIFIKACE */}
                         <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
                             <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                                <ClipboardList size={14} /> Technická specifikace
+                                <ClipboardList size={14} /> Specifikace
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
                                 <div className="space-y-1">
                                     <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Typ nástavby</label>
                                     <input
@@ -222,26 +237,29 @@ export default function ProjectDetailPage() {
                                         placeholder="S/N"
                                     />
                                 </div>
-                                <div className="md:col-span-2 space-y-1">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Poznámka</label>
-                                    <textarea
-                                        readOnly={!isEditing}
-                                        value={p.note || ''}
-                                        onChange={(e) => handleChange('note', e.target.value)}
-                                        className="w-full text-xs font-medium bg-background/50 border border-border/50 rounded px-2 py-1.5 outline-none min-h-[80px]"
-                                        placeholder="Interní poznámka k zakázce..."
-                                    />
-                                </div>
                             </div>
                         </section>
                     </div>
 
-                    {/* PRAVÝ SLOUPEC (Objednávky) - 5 sloupců */}
-                    <div className="lg:col-span-5">
-                        <ProjectDetailOrdering projectId={project.id} isEditing={isEditing} />
-                    </div>
-
+                    <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2 shadow-sm">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+                            <Info size={12} /> Poznámka
+                        </label>
+                        <textarea
+                            readOnly={!isEditing}
+                            value={p.note || ''}
+                            onChange={(e) => handleChange('note', e.target.value)}
+                            className="w-full text-xs font-medium bg-background/50 border border-border/50 rounded px-2 py-1.5 outline-none min-h-[100px]"
+                            placeholder="Interní poznámka k zakázce..."
+                        />
+                    </section>
                 </div>
+
+                {/* ── PRAVÁ STRANA (Objednávky) ── */}
+                <div className="lg:w-[400px] xl:w-[450px] p-4 lg:p-6 lg:border-l border-border/50 bg-background/50">
+                    <ProjectDetailOrdering projectId={project.id} isEditing={isEditing} />
+                </div>
+
             </div>
         </div>
     );
