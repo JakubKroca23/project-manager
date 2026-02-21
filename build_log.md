@@ -222,5 +222,20 @@
 - **Změna**: Vizuální zvýraznění kritického nahromadění projektů (Stacking).
 - **Detail**:
     - **Detekce překryvu**: V sumárních řádcích (Celkem, Servis) se nyní automaticky vypočítává počet souběžných projektů pro každý den.
-    - **Vizuální efekt**: Pokud se v jednom čase překrývají **3 a více projektů**, daná oblast v řádku se razantně ztmaví (gba(0,0,0,0.45)).
+    - **Vizuální efekt**: Pokud se v jednom čase překrývají **3 a více projektů**, daná oblast v řádku se razantně ztmaví (gba(0,0,0,0.45)).
     - **Účel**: Okamžitá identifikace kapacitně vytížených období přímo na časové ose bez nutnosti rozbalovat detaily.
+
+## [2026-02-21] - Redesign Detailu Projektu & Procurement Modul
+- **Změna**: Kompletní redesign stránky detailu projektu.
+- **Detail**:
+    - **Původní monolitický page.tsx** (přes 1200 řádků) byl rozdělen do čistých komponent v `src/components/ProjectDetail/`.
+    - **Vizuální štýl**: Implementován čistý a kontrastní **Glassmorphism design** (světlý režim, vysoký kontrast, rozostřené pozadí).
+    - **Mini Timeline**: Do horní části detailu přidána vizualizace průběhu konkrétní zakázky (výřez z hlavní časové osy) s indikátorem "Dnes".
+    - **ProjectDetailHeader**: Nová kompaktní lišta s akčními tlačítky a indikátorem kategorie.
+    - **ProjectDetailStats**: Sloučení primárních informací o projektu (Abra ID, Zákazník, Vedoucí, Priorita) do přehledných boxů.
+- **Změna**: Nový Procurement modul (Položky k objednání).
+- **Detail**:
+    - **Databáze**: Vytvořena tabulka `project_items` v Supabase pro sledování komponentů (Příslušenství, Podvozky, Nástavby).
+    - **UI**: Interaktivní panel na pravé straně s rychlým přepínáním stavů (K objednání -> Objednáno -> Dodáno) a vazeb (Samostatně, S podvozkem, S nástavbou).
+    - **Flexibilita**: Modul zabírá celou pravou stranu pro snadnou správu i při delším seznamu položek.
+- **Oprava**: Vyřešen chybějící import ikony `Hash` v detailu projektu, který způsoboval pád buildu.

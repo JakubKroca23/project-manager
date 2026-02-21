@@ -6,6 +6,13 @@
 - [ ] Ověření funkčnosti `user_action_logs` v Supabase dashboardu.
 
 ## Hotové úkoly (Done)
+- [x] Redesign detailu projektu (Glassmorphism, High-contrast).
+- [x] Implementace Mini Timeline v detailu zakázky.
+- [x] Nový modul "Položky k objednání" (Procurement) s integrací do Supabase.
+- [x] Refaktoring monolitického `page.tsx` do samostatných komponent.
+- [x] Fix buildu na Vercelu (chybějící importy).
+
+## Hotové úkoly (Done)
 - [x] Detekce `isAdmin` na základě role v DB (`profiles`).
 - [x] Přesun triggeru Admin Panelu do modálu Nastavení.
 - [x] Real-time synchronizace rolí uživatele.

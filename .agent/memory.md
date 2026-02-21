@@ -149,3 +149,14 @@
     - **Milestone Popups**: Added premium slide-in animations (sliding from the icon). Implemented a 150ms "grace period" on mouse-leave to prevent accidental closing, making the interface more robust and accessible.
     - **Stacking Density Indicator**: In high-density areas (where 3+ projects overlap in a summary row), a drastically darker background (`rgba(0,0,0,0.4)`) is applied. This "heatmaps" capacity bottlenecks directly in the collapsed view.
 - **Maintenance**: Fixed a code-integrity issue in `TimelineBar.tsx` by adding the missing `cn` utility import.
+
+## 2026-02-21: Project Detail Revamp & Procurement (Glassmorphism)
+- **Architecture (Componentization)**: Refactored the monolithic `page.tsx` of project details into a modular structure under `src/components/ProjectDetail/`.
+- **UI/UX Redesign**:
+    - **Glassmorphism**: Applied a high-contrast light glassmorphism style (backdrop-blur, clean borders, high readability).
+    - **Mini Timeline**: Integrated a task-specific progress visualization at the top of the detail page, maintaining visual consistency with the main timeline.
+    - **Layout**: Consolidated project metadata into an efficient header and stat boxes, freeing up space for content.
+- **Procurement Module**:
+    - **Data Layer**: Introduced the `project_items` table in Supabase to track orderable components (Chassis, Bodies, Accessories).
+    - **Real-time Interaction**: Implemented a dedicated sidebar for managing project items with quick-toggle statuses and source linking.
+- **Hotfix**: Resolved a Vercel build failure caused by a missing `Hash` icon import in the redesigned page.
