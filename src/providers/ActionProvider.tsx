@@ -5,8 +5,16 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface ActionContextType {
     onFit: (() => void) | null;
     setOnFit: (fn: (() => void) | null) => void;
-    onImport: (() => void) | null;
-    setOnImport: (fn: (() => void) | null) => void;
+    onJumpToToday: (() => void) | null;
+    setOnJumpToToday: (fn: (() => void) | null) => void;
+    onZoomIn: (() => void) | null;
+    setOnZoomIn: (fn: (() => void) | null) => void;
+    onZoomOut: (() => void) | null;
+    setOnZoomOut: (fn: (() => void) | null) => void;
+    onToggleDesign: (() => void) | null;
+    setOnToggleDesign: (fn: (() => void) | null) => void;
+    dayWidth: number;
+    setDayWidth: (w: number) => void;
     isImportWizardOpen: boolean;
     setIsImportWizardOpen: (open: boolean) => void;
 }
@@ -15,13 +23,21 @@ const ActionContext = createContext<ActionContextType | undefined>(undefined);
 
 export function ActionProvider({ children }: { children: ReactNode }) {
     const [onFit, setOnFit] = useState<(() => void) | null>(null);
-    const [onImport, setOnImport] = useState<(() => void) | null>(null);
+    const [onJumpToToday, setOnJumpToToday] = useState<(() => void) | null>(null);
+    const [onZoomIn, setOnZoomIn] = useState<(() => void) | null>(null);
+    const [onZoomOut, setOnZoomOut] = useState<(() => void) | null>(null);
+    const [onToggleDesign, setOnToggleDesign] = useState<(() => void) | null>(null);
+    const [dayWidth, setDayWidth] = useState(25);
     const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
     return (
         <ActionContext.Provider value={{
             onFit, setOnFit,
-            onImport, setOnImport,
+            onJumpToToday, setOnJumpToToday,
+            onZoomIn, setOnZoomIn,
+            onZoomOut, setOnZoomOut,
+            onToggleDesign, setOnToggleDesign,
+            dayWidth, setDayWidth,
             isImportWizardOpen, setIsImportWizardOpen
         }}>
             {children}

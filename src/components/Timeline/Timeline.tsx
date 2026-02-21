@@ -136,7 +136,7 @@ const Timeline: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const { searchTerm: searchQuery } = useSearch();
-    const { setOnFit } = useActions();
+    const { setOnFit, setOnJumpToToday, setOnZoomIn, setOnZoomOut, setOnToggleDesign, setDayWidth: setGlobalDayWidth } = useActions();
     const [activeTypes, setActiveTypes] = useState<Record<string, boolean>>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('timeline_activeFilter');
@@ -205,6 +205,7 @@ const Timeline: React.FC = () => {
     // immediately for the next event in the loop.
     useLayoutEffect(() => {
         dayWidthRef.current = dayWidth;
+        setGlobalDayWidth(dayWidth);
         if (typeof window !== 'undefined') {
             localStorage.setItem('timeline_dayWidth', dayWidth.toString());
         }
@@ -741,8 +742,19 @@ const Timeline: React.FC = () => {
 
     useEffect(() => {
         setOnFit(() => handleFitVertical);
-        return () => setOnFit(null);
-    }, [handleFitVertical, setOnFit]);
+        setOnJumpToToday(() => jumpToToday);
+        setOnZoomIn(() => handleZoomIn);
+        setOnZoomOut(() => handleZoomOut);
+        setOnToggleDesign(() => () => setShowDesignSettings(prev => !prev));
+
+        return () => {
+            setOnFit(null);
+            setOnJumpToToday(null);
+            setOnZoomIn(null);
+            setOnZoomOut(null);
+            setOnToggleDesign(null);
+        };
+    }, [handleFitVertical, setOnFit, setOnJumpToToday, setOnZoomIn, setOnZoomOut, setOnToggleDesign]);
 
     const isCompact = dayWidth < 18;
 
@@ -1015,52 +1027,6 @@ const Timeline: React.FC = () => {
             }
 
             <div className="flex flex-col flex-1 h-full min-w-0 relative">
-                <header className="timeline-header-actions relative border-b border-border/40">
-                    <div className="header-left">
-                        <button
-                            className={`action-button ${showDesignSettings ? 'primary' : ''}`}
-                            onClick={() => setShowDesignSettings(!showDesignSettings)}
-                            title="Nastavení designu"
-                        >
-                            <Settings2 size={16} />
-                            <span>Vzhled</span>
-                        </button>
-                    </div>
-
-                    <div className="header-center flex items-center gap-3">
-                        <div className="zoom-controls flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                            <button
-                                className="action-button icon-only"
-                                onClick={handleZoomOut}
-                                title="Oddálit"
-                            >
-                                <ZoomOut size={16} />
-                            </button>
-                            <span className="text-[10px] font-mono text-muted-foreground min-w-[32px] text-center select-none">
-                                {Math.round((dayWidth / 25) * 100)}%
-                            </span>
-                            <button
-                                className="action-button icon-only"
-                                onClick={handleZoomIn}
-                                title="Přiblížit"
-                            >
-                                <ZoomIn size={16} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="header-right flex items-center gap-4">
-                        <button
-                            className="action-button primary"
-                            onClick={jumpToToday}
-                            title="Skočit na dnešek"
-                        >
-                            <Calendar size={14} />
-                            <span className="hidden lg:inline">Dnešek</span>
-                        </button>
-                    </div>
-                </header>
-
                 <div
                     className="timeline-scroll-wrapper"
                     ref={scrollContainerRef}

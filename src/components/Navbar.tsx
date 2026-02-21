@@ -4,9 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Search, X, Maximize2, FileUp } from 'lucide-react';
+import { Factory, Wrench, Calendar, Briefcase, User, LogOut, ShoppingCart, ChevronDown, Search, X, Maximize2, FileUp, ZoomIn, ZoomOut, Settings2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useSearch } from '@/providers/SearchProvider';
 import { useActions } from '@/providers/ActionProvider';
 
@@ -35,8 +36,9 @@ export function Navbar() {
     const activeTypeFromParams = searchParams.get('type');
     const activeType = activeTypeFromParams || (pathname?.startsWith('/servis') ? 'service' : null);
     const { checkPerm, canImport } = usePermissions();
+    const { isAdmin } = useAdmin();
     const { searchTerm, setSearchTerm } = useSearch();
-    const { onFit, setIsImportWizardOpen } = useActions();
+    const { onFit, onJumpToToday, onZoomIn, onZoomOut, onToggleDesign, dayWidth, setIsImportWizardOpen } = useActions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -54,8 +56,6 @@ export function Navbar() {
 
     // Active Category Label
     const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : activeType === 'service' ? 'SERVIS' : null;
-
-
 
     useEffect(() => {
         // User email logic
@@ -219,8 +219,18 @@ export function Navbar() {
                         })}
                     </div>
 
-                    {/* Center: Harmonogram */}
+                    {/* Center: Harmonogram & Today */}
                     <div className="flex-none flex items-center justify-center gap-1">
+                        {onJumpToToday && (
+                            <button
+                                onClick={onJumpToToday}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
+                                title="Skočit na dnešek"
+                            >
+                                <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
+                                <span className="hidden lg:inline">Dnes</span>
+                            </button>
+                        )}
                         {filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
                             let activeColor = item.color;
@@ -268,15 +278,37 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        {/* Fit Button */}
+                        {/* Zoom Controls */}
+                        {onZoomIn && onZoomOut && (
+                            <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
+                                <button
+                                    onClick={onZoomOut}
+                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Oddálit"
+                                >
+                                    <ZoomOut size={14} />
+                                </button>
+                                <span className="text-[9px] font-mono text-muted-foreground min-w-[32px] text-center select-none uppercase">
+                                    {Math.round((dayWidth / 25) * 100)}%
+                                </span>
+                                <button
+                                    onClick={onZoomIn}
+                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Přiblížit"
+                                >
+                                    <ZoomIn size={14} />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Fit Button (Small/Icon only) */}
                         {onFit && (
                             <button
                                 onClick={onFit}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground text-[10px] font-bold uppercase tracking-wider hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
+                                className="p-2 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
                                 title="Přizpůsobit zobrazení"
                             >
                                 <Maximize2 size={14} className="group-hover:scale-110 transition-transform" />
-                                <span className="hidden sm:inline">Přizpůsobit</span>
                             </button>
                         )}
 
@@ -298,13 +330,28 @@ export function Navbar() {
 
                         <ThemeToggle className="hover:bg-primary/10 border-border/40" />
 
-                        <Link href="/profile" className="no-underline">
-                            <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
-                                <span className="text-white text-xs font-bold tracking-wider uppercase">
-                                    {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
-                                </span>
-                            </div>
-                        </Link>
+                        <div className="flex items-center gap-1.5">
+                            {onToggleDesign && (
+                                <button
+                                    onClick={onToggleDesign}
+                                    className={cn(
+                                        "p-2 rounded-md transition-all active:scale-95",
+                                        isAdmin ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20" : "bg-muted/40 text-muted-foreground hover:bg-muted border border-border/40"
+                                    )}
+                                    title="Nastavení vzhledu"
+                                >
+                                    <Settings2 size={16} />
+                                </button>
+                            )}
+
+                            <Link href="/profile" className="no-underline">
+                                <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
+                                    <span className="text-white text-xs font-bold tracking-wider uppercase">
+                                        {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
+                                    </span>
+                                </div>
+                            </Link>
+                        </div>
 
                         <div className="flex items-center gap-2 pl-3 border-l border-border">
                             <IconButton
@@ -321,7 +368,6 @@ export function Navbar() {
         </nav>
     );
 };
-
 export default Navbar;
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
