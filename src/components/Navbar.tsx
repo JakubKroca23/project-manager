@@ -103,27 +103,8 @@ export function Navbar() {
                 <div
                     className="flex h-12 items-center justify-between gap-1"
                 >
-                    {/* Left: Ovládací prvky (Toolbar, Dnes) */}
+                    {/* Left: Navigace (Harmonogram, Zakázky) */}
                     <div className="flex-1 flex items-center justify-start gap-1">
-                        {customToolbar && (
-                            <div className="flex items-center gap-2 px-3 border-r border-border/50 mr-2">
-                                {customToolbar}
-                            </div>
-                        )}
-                        {onJumpToToday && (
-                            <button
-                                onClick={onJumpToToday}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
-                                title="Skočit na dnešek"
-                            >
-                                <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
-                                <span className="hidden lg:inline">Dnes</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Center: Zakázky & Harmonogram (Order depends on activity) */}
-                    <div className="flex-none flex items-center justify-center gap-1">
                         {(() => {
                             const zakazkyItem = filteredNavItems.find(i => i.name === 'ZAKÁZKY');
                             const harmonogramItem = filteredNavItems.find(i => i.name === 'HARMONOGRAM');
@@ -176,7 +157,7 @@ export function Navbar() {
 
                                         <div
                                             className={cn(
-                                                "absolute top-full left-1/2 -translate-x-1/2 pt-2 z-[20100] transition-all duration-300 ease-out",
+                                                "absolute top-full left-0 pt-2 z-[20100] transition-all duration-300 ease-out",
                                                 openSubmenu === item.name
                                                     ? "opacity-100 translate-y-0 pointer-events-auto"
                                                     : "opacity-0 -translate-y-2 pointer-events-none"
@@ -261,13 +242,27 @@ export function Navbar() {
                                 );
                             };
 
-                            // Swap order so active is always "more in the middle" (usually second in flex-center)
-                            if (isProjectsActive) {
-                                return [renderHarmonogram(), renderZakazky()];
-                            } else {
-                                return [renderZakazky(), renderHarmonogram()];
-                            }
+                            return [renderHarmonogram(), renderZakazky()];
                         })()}
+                    </div>
+
+                    {/* Center: Ovládací prvky (Toolbar, Dnes) */}
+                    <div className="flex-none flex items-center justify-center gap-1">
+                        {customToolbar && (
+                            <div className="flex items-center gap-2 px-3 border-r border-border/50 mr-2">
+                                {customToolbar}
+                            </div>
+                        )}
+                        {onJumpToToday && (
+                            <button
+                                onClick={onJumpToToday}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
+                                title="Skočit na dnešek"
+                            >
+                                <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
+                                <span className="hidden lg:inline">Dnes</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Right: Search & Tools */}

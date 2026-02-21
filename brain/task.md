@@ -64,3 +64,5 @@
 - **[x] Optimalizace animací a odezvy popupů v Timeline.**
 - **[x] Dynamický swap pozic v Navbaru (Zakázky do středu, Timeline vlevo).**
 - **[x] Reorganizace Navbaru (ovládání vlevo, navigace uprostřed).**
+- **[x] Oprava popupu milníků (animace "výjezdu" z ikony + přístupnost myší).**
+- **[x] Kompletní reorganizace Navbaru (Harmonogram/Zakázky vlevo, Ovládání uprostřed).**

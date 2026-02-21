@@ -205,3 +205,16 @@
     - **Levá strana**: Přesunuty veškeré ovládací prvky specifické pro stránku (customToolbar) a tlačítko "Dnes". Tím je uvolněn prostor pro navigaci.
     - **Střed**: Zde se nyní nachází pouze hlavní navigace (Zakázky a Harmonogram).
     - **Dynamické centrování**: Aktivní položka se vždy posouvá blíže ke středu (prohazují se pozice). Pokud jsi v Zakázkách, jsou vpravo od Harmonogramu (blíže centru), pokud v Harmonogramu, jsou vpravo od Zakázek.
+
+- **Oprava**: Vylepšení interakce a animace popupu milníků.
+- **Detail**:
+    - **Animace**: Popup nyní "vyjíždí" přímo z ikony milníku (použit slide-in a origin dle pozice nahoře/dole).
+    - **Dostupnost**: Zmenšena mezera mezi ikonou a popupem (na 5px) a vrácena krátká prodleva 150ms při opuštění myší.
+    - **Výsledek**: Interakce je plynulá, popup nezmizí okamžitě, což umožňuje pohodlný přesun myši do těla popupu.
+
+- **Změna**: Finální reorganizace Navbaru (Navigace vlevo, Ovládání ve středu).
+- **Detail**:
+    - **Levá strana**: Přesunuta navigace (Harmonogram a Zakázky) s pevným pořadím.
+    - **Střed**: Přesunuty ovládací prvky specifické pro stránku (Toolbar, tlačítko Dnes).
+    - **Pravá strana**: Zůstává vyhledávání a systémové nástroje.
+- **Oprava**: Doplněn chybějící import cn v TimelineBar.tsx.

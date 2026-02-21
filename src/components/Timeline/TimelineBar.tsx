@@ -12,6 +12,7 @@ import {
     Euro, Warehouse, Landmark, Users, Laptop, Phone, Mail, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
@@ -157,10 +158,12 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     };
 
     const handleMouseLeave = () => {
-        // Remove delay for a snappier feel as requested
-        if (!isEditingDate && !isDeleteConfirm && !isIconPickerOpen) {
-            setEditPopup(null);
-        }
+        // Reduced grace period to 150ms for a snappier but accessible feel
+        hoverTimeoutRef.current = setTimeout(() => {
+            if (!isEditingDate && !isDeleteConfirm && !isIconPickerOpen) {
+                setEditPopup(null);
+            }
+        }, 150);
     };
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -883,8 +886,8 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 // Calculate vertical position (check bounds)
                 const isNearBottom = (window.innerHeight - editPopup.y) < 400;
                 // Since we use Portal, coordinates are absolute to viewport, which matches clientRect
-                const topPos = isNearBottom ? 'auto' : editPopup.y + 10;
-                const bottomPos = isNearBottom ? Math.max(10, (window.innerHeight - editPopup.y) + 35) : 'auto';
+                const topPos = isNearBottom ? 'auto' : editPopup.y + 5;
+                const bottomPos = isNearBottom ? Math.max(10, (window.innerHeight - editPopup.y) + 30) : 'auto';
 
                 const type = project.project_type || 'civil';
                 const SECTOR_COLORS: Record<string, string> = {
@@ -905,7 +908,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200"
+                        className={cn(
+                            "fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200",
+                            isNearBottom ? "slide-in-from-bottom-2 origin-bottom" : "slide-in-from-top-2 origin-top"
+                        )}
                         style={{
                             left: Math.min(editPopup.x - 100, window.innerWidth - 300),
                             top: topPos,
