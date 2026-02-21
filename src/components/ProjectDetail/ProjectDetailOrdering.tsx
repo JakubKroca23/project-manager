@@ -9,13 +9,11 @@ import {
     Truck,
     Box,
     Zap,
-    MoreVertical,
     Trash2,
     CheckCircle2,
     Clock,
     AlertCircle,
-    ShoppingCart,
-    Link as LinkIcon
+    ShoppingCart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -93,19 +91,11 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
         }
     }
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'Dodáno': return <CheckCircle2 size={12} className="text-emerald-500" />;
-            case 'Objednáno': return <Clock size={12} className="text-blue-500" />;
-            default: return <AlertCircle size={12} className="text-amber-500" />;
-        }
-    };
-
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Dodáno': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
-            case 'Objednáno': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-            default: return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+            case 'Dodáno': return 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30';
+            case 'Objednáno': return 'bg-blue-600/20 text-blue-400 border-blue-500/30';
+            default: return 'bg-amber-600/20 text-amber-400 border-amber-500/30';
         }
     };
 
@@ -118,65 +108,67 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
     };
 
     return (
-        <div className="bg-muted/30 border border-border/50 rounded-xl overflow-hidden flex flex-col h-full shadow-sm">
-            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between bg-background/50">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-500/10 text-blue-600 rounded-lg">
-                        <ShoppingCart size={16} />
+        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl">
+            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20">
+                        <ShoppingCart size={18} />
                     </div>
                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-widest">Položky k objednání</h3>
-                        <p className="text-[10px] text-muted-foreground font-medium">Správa komponentů a příslušenství</p>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-zinc-100">Procurement / Položky</h3>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">Správa komponentů</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full border border-border/50">
+                    <span className="text-[10px] font-black text-zinc-400 bg-zinc-800 px-2.5 py-1 rounded-full border border-zinc-700">
                         {items.filter(i => i.status === 'Dodáno').length} / {items.length}
                     </span>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-[300px]">
+            <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-[400px]">
                 {loading ? (
-                    <div className="flex items-center justify-center h-20 text-muted-foreground animate-pulse text-[10px] uppercase font-black tracking-widest">
+                    <div className="flex items-center justify-center h-20 text-zinc-600 animate-pulse text-[10px] uppercase font-black tracking-widest">
                         Načítám seznam...
                     </div>
                 ) : items.length === 0 && !isAdding ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-2 opacity-50">
-                        <Package size={24} className="text-muted-foreground" />
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Žádné položky</p>
+                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-30">
+                        <Package size={32} className="text-zinc-500" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Žádné položky k objednání</p>
                     </div>
                 ) : (
                     <>
                         {items.map(item => (
                             <div
                                 key={item.id}
-                                className="group flex items-center justify-between p-2.5 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-all shadow-sm"
+                                className="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all shadow-md"
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => {
                                             const nextStatus = item.status === 'K objednání' ? 'Objednáno' : item.status === 'Objednáno' ? 'Dodáno' : 'K objednání';
                                             updateItem(item.id, { status: nextStatus });
                                         }}
                                         className={cn(
-                                            "w-6 h-6 rounded-md flex items-center justify-center transition-all",
-                                            item.status === 'Dodáno' ? "bg-emerald-500/20 text-emerald-600" : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                            "w-7 h-7 rounded-lg flex items-center justify-center transition-all border",
+                                            item.status === 'Dodáno'
+                                                ? "bg-emerald-600/30 text-emerald-400 border-emerald-500/40"
+                                                : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700"
                                         )}
                                     >
-                                        {item.status === 'Dodáno' ? <CheckCircle2 size={14} /> : <div className="w-2.5 h-2.5 rounded-full border-2 border-current opacity-30" />}
+                                        {item.status === 'Dodáno' ? <CheckCircle2 size={16} /> : <div className="w-2.5 h-2.5 rounded-full border-2 border-current opacity-30" />}
                                     </button>
 
                                     <div className="flex flex-col">
                                         <span className={cn(
-                                            "text-xs font-bold",
-                                            item.status === 'Dodáno' && "line-through text-muted-foreground"
+                                            "text-[13px] font-black tracking-tight",
+                                            item.status === 'Dodáno' ? "text-zinc-500 line-through" : "text-zinc-100"
                                         )}>
                                             {item.name}
                                         </span>
-                                        <div className="flex items-center gap-2 mt-0.5">
+                                        <div className="flex items-center gap-2 mt-1.5">
                                             <span className={cn(
-                                                "text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border",
+                                                "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border",
                                                 getStatusColor(item.status)
                                             )}>
                                                 {item.status}
@@ -186,7 +178,7 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                                                     const nextSource = item.source === 'Samostatně' ? 'S podvozkem' : item.source === 'S podvozkem' ? 'S nástavbou' : 'Samostatně';
                                                     updateItem(item.id, { source: nextSource });
                                                 }}
-                                                className="text-[8px] font-bold text-muted-foreground/70 flex items-center gap-1 hover:text-foreground transition-colors bg-muted/50 px-1.5 py-0.5 rounded"
+                                                className="text-[8px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 hover:text-zinc-300 transition-colors bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700"
                                             >
                                                 {getSourceIcon(item.source)}
                                                 {item.source}
@@ -198,9 +190,9 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => deleteItem(item.id)}
-                                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all"
+                                        className="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
                                     >
-                                        <Trash2 size={14} />
+                                        <Trash2 size={15} />
                                     </button>
                                 </div>
                             </div>
@@ -209,7 +201,7 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                 )}
 
                 {isAdding ? (
-                    <div className="flex flex-col gap-2 p-3 bg-muted/20 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
+                    <div className="flex flex-col gap-3 p-4 bg-zinc-900 border border-primary/30 rounded-xl animate-in fade-in slide-in-from-top-2">
                         <input
                             autoFocus
                             type="text"
@@ -218,38 +210,36 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                             onKeyDown={(e) => e.key === 'Enter' && addItem()}
                             onBlur={() => !newItemName && setIsAdding(false)}
                             placeholder="Název položky..."
-                            className="text-xs font-bold bg-background border border-border rounded px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary/10"
+                            className="text-xs font-bold bg-zinc-950 border border-zinc-800 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
                         />
                         <div className="flex items-center justify-between">
-                            <span className="text-[9px] text-muted-foreground font-medium">Stiskni Enter pro přidání</span>
-                            <div className="flex items-center gap-1">
-                                <button onClick={() => setIsAdding(false)} className="px-2 py-1 text-[9px] font-black uppercase tracking-widest hover:bg-muted rounded">Zrušit</button>
-                                <button onClick={addItem} className="px-2 py-1 bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest rounded shadow-sm">Přidat</button>
+                            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Enter pro potvrzení</span>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setIsAdding(false)} className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors">Zrušit</button>
+                                <button onClick={addItem} className="px-3 py-1.5 bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg hover:opacity-90 transition-all">Přidat</button>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <button
                         onClick={() => setIsAdding(true)}
-                        className="w-full py-2 border border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/5 rounded-lg flex items-center justify-center gap-1.5 text-muted-foreground hover:text-primary transition-all group"
+                        className="w-full py-4 border border-dashed border-zinc-800 hover:border-primary/50 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-2.5 text-zinc-500 hover:text-primary transition-all group"
                     >
-                        <Plus size={14} className="group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Přidat položku</span>
+                        <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Nová položka</span>
                     </button>
                 )}
             </div>
 
-            <div className="p-3 bg-muted/20 border-t border-border/30 flex items-center justify-between">
-                <div className="flex gap-2">
-                    <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500" /> K objednání
-                    </div>
-                    <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Objednáno
-                    </div>
-                    <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Dodáno
-                    </div>
+            <div className="p-4 bg-zinc-900 border-t border-zinc-800 flex items-center justify-center gap-6">
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" /> K objednání
+                </div>
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" /> Objednáno
+                </div>
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" /> Dodáno
                 </div>
             </div>
         </div>

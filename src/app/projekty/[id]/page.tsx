@@ -13,7 +13,8 @@ import {
     AlertCircle,
     ArrowLeft,
     Info,
-    LayoutGrid
+    LayoutGrid,
+    StickyNote
 } from 'lucide-react';
 
 import { usePermissions } from '@/hooks/usePermissions';
@@ -112,7 +113,7 @@ export default function ProjectDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex h-full items-center justify-center bg-background">
+            <div className="flex h-full items-center justify-center bg-zinc-950">
                 <Loader2 size={28} className="animate-spin text-primary" />
             </div>
         );
@@ -120,37 +121,37 @@ export default function ProjectDetailPage() {
 
     if (!project) {
         return (
-            <div className="flex h-full flex-col items-center justify-center gap-4 bg-background">
-                <AlertCircle size={40} className="text-destructive" />
-                <h2 className="text-lg font-bold">Projekt nenalezen</h2>
-                <button onClick={() => router.push('/projekty')} className="px-4 py-2 bg-muted rounded-md text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                    <ArrowLeft size={14} /> Zpět
+            <div className="flex h-full flex-col items-center justify-center gap-4 bg-zinc-950">
+                <AlertCircle size={40} className="text-rose-500" />
+                <h2 className="text-lg font-black uppercase tracking-widest text-zinc-100">Zakázka nenalezena</h2>
+                <button onClick={() => router.push('/projekty')} className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-zinc-800 transition-all">
+                    <ArrowLeft size={14} /> Zpět na seznam
                 </button>
             </div>
         );
     }
 
-    const typeColor = project.project_type === 'military' ? '#a5d6a7' : project.project_type === 'service' ? '#ce93d8' : '#90caf9';
+    const typeColor = project.project_type === 'military' ? '#059669' : project.project_type === 'service' ? '#9333ea' : '#3b82f6';
     const p = isEditing ? editedProject! : project;
 
     const DateField = ({ label, value, field }: any) => (
-        <div className="space-y-1">
-            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</label>
+        <div className="space-y-1.5 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
+            <label className="text-[9px] font-black uppercase tracking-[0.1em] text-zinc-500">{label}</label>
             {isEditing ? (
                 <input
                     type="date"
                     value={value || ''}
                     onChange={(e) => handleChange(field, e.target.value)}
-                    className="w-full text-[10px] font-bold bg-background border border-border rounded px-1.5 py-1 outline-none"
+                    className="w-full text-xs font-bold bg-zinc-900 border border-zinc-700 rounded px-2 py-1 outline-none text-zinc-100"
                 />
             ) : (
-                <div className="text-[11px] font-bold">{value ? new Date(value).toLocaleDateString('cs-CZ') : '—'}</div>
+                <div className="text-[11px] font-black text-zinc-100">{value ? new Date(value).toLocaleDateString('cs-CZ') : '—'}</div>
             )}
         </div>
     );
 
     return (
-        <div className="h-full flex flex-col bg-background text-foreground overflow-hidden">
+        <div className="h-full flex flex-col bg-zinc-950 text-zinc-100 overflow-hidden">
             <ProjectDetailHeader
                 project={p}
                 typeColor={typeColor}
@@ -162,78 +163,91 @@ export default function ProjectDetailPage() {
                 onDelete={handleDeleteProject}
             />
 
-            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full">
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row w-full max-w-[1700px] mx-auto">
 
-                {/* ── LEVÁ STRANA (Detaily a Timeline) ── */}
-                <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+                {/* ── LEVÁ STRANA (Timeline a Detaily) ── */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 scroll-smooth custom-scrollbar">
 
-                    {/* HLAVNÍ INFO MODUL (Sloučené detaily) */}
-                    <section className="bg-muted/10 border border-border/50 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="p-4 border-b border-border/50 bg-background/50 flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                                <span className={cn(
-                                    "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border",
-                                    p.project_type === 'military'
-                                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                        : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                                )}>
-                                    {p.project_type === 'military' ? 'Vojenské' : p.project_type === 'service' ? 'Servis' : 'Civil'}
-                                </span>
-                                <h1 className="text-xl font-black tracking-tight">
-                                    {isEditing ? (
-                                        <input
-                                            value={p.name}
-                                            onChange={(e) => handleChange('name', e.target.value)}
-                                            className="bg-transparent border-b border-primary/20 outline-none w-full"
-                                        />
-                                    ) : project.name}
-                                </h1>
+                    {/* MINI TIMELINE - TEĎ UPLNĚ NAHOŘE */}
+                    <ProjectMiniTimeline project={p} />
+
+                    {/* HLAVNÍ INFO MODUL */}
+                    <section className="bg-zinc-900/40 border border-zinc-800 shadow-2xl rounded-[2rem] overflow-hidden">
+                        <div className="p-8 border-b border-zinc-800 bg-gradient-to-br from-zinc-900/80 to-zinc-950/80">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                                <div className="space-y-4">
+                                    <h1 className="text-3xl font-black tracking-tighter text-white">
+                                        {isEditing ? (
+                                            <input
+                                                value={p.name}
+                                                onChange={(e) => handleChange('name', e.target.value)}
+                                                className="bg-zinc-800 border-b-2 border-primary outline-none w-full px-2 py-1 rounded-t"
+                                            />
+                                        ) : project.name}
+                                    </h1>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full border border-zinc-700 shadow-sm">
+                                            {p.id}
+                                        </span>
+                                        <span className={cn(
+                                            "text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border shadow-sm",
+                                            p.project_type === 'military'
+                                                ? 'bg-emerald-900/20 text-emerald-500 border-emerald-500/30'
+                                                : p.project_type === 'service'
+                                                    ? 'bg-purple-900/20 text-purple-500 border-purple-500/30'
+                                                    : 'bg-blue-900/20 text-blue-500 border-blue-500/30'
+                                        )}>
+                                            {p.project_type === 'military' ? 'Vojenské' : p.project_type === 'service' ? 'Servis' : 'Civilní'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             <ProjectDetailStats project={p} isEditing={isEditing} onChange={handleChange} />
                         </div>
                     </section>
 
-                    {/* MINI TIMELINE */}
-                    <ProjectMiniTimeline project={p} />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         {/* HARMONOGRAM (Detailed) */}
-                        <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
-                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                                <CalendarDays size={14} /> Harmonogram
+                        <section className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl">
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 text-zinc-400">
+                                <CalendarDays size={14} className="text-primary" /> Harmonogram Realizace
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <DateField label="Příjem" value={p.deadline} field="deadline" />
-                                <DateField label="Podvozek" value={p.chassis_delivery} field="chassis_delivery" />
-                                <DateField label="Nástavba" value={p.body_delivery} field="body_delivery" />
-                                <DateField label="Předání" value={p.customer_handover} field="customer_handover" />
-                                <DateField label="Uzavření" value={p.closed_at} field="closed_at" />
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <DateField label="Příjem do výroby" value={p.deadline} field="deadline" />
+                                <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" />
+                                <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" />
+                                <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" />
+                                <DateField label="Uzavření / Archiv" value={p.closed_at} field="closed_at" />
                             </div>
                         </section>
 
                         {/* SPECIFIKACE */}
-                        <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
-                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                                <ClipboardList size={14} /> Specifikace
+                        <section className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl">
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 text-zinc-400">
+                                <ClipboardList size={14} className="text-primary" /> Technická Specifikace
                             </h3>
-                            <div className="space-y-3">
-                                <div className="space-y-1">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Typ nástavby</label>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2 opacity-60">
+                                        <div className="w-1 h-1 bg-primary rounded-full" /> Typ nástavby
+                                    </label>
                                     <input
                                         readOnly={!isEditing}
                                         value={p.body_type || ''}
                                         onChange={(e) => handleChange('body_type', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border/50 rounded px-2 py-1 outline-none"
+                                        className="w-full text-sm font-black bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-zinc-100"
                                         placeholder="Např. CTS 20-66"
                                     />
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Výrobní číslo</label>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2 opacity-60">
+                                        <div className="w-1 h-1 bg-primary rounded-full" /> Výrobní číslo (S/N)
+                                    </label>
                                     <input
                                         readOnly={!isEditing}
                                         value={p.serial_number || ''}
                                         onChange={(e) => handleChange('serial_number', e.target.value)}
-                                        className="w-full text-xs font-bold bg-background/50 border border-border/50 rounded px-2 py-1 outline-none"
+                                        className="w-full text-sm font-black bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-zinc-100"
                                         placeholder="S/N"
                                     />
                                 </div>
@@ -241,22 +255,22 @@ export default function ProjectDetailPage() {
                         </section>
                     </div>
 
-                    <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-2 shadow-sm">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
-                            <Info size={12} /> Poznámka
+                    <section className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                            <StickyNote size={14} className="text-zinc-500" /> Interní Poznámka
                         </label>
                         <textarea
                             readOnly={!isEditing}
                             value={p.note || ''}
                             onChange={(e) => handleChange('note', e.target.value)}
-                            className="w-full text-xs font-medium bg-background/50 border border-border/50 rounded px-2 py-1.5 outline-none min-h-[100px]"
-                            placeholder="Interní poznámka k zakázce..."
+                            className="w-full text-sm font-medium bg-zinc-900/80 border border-zinc-800 rounded-2xl px-4 py-4 outline-none min-h-[160px] focus:ring-2 focus:ring-primary/20 transition-all resize-none text-zinc-300 leading-relaxed shadow-inner"
+                            placeholder="Zde můžete uvést doplňující informace k projektu..."
                         />
                     </section>
                 </div>
 
                 {/* ── PRAVÁ STRANA (Objednávky) ── */}
-                <div className="lg:w-[400px] xl:w-[450px] p-4 lg:p-6 lg:border-l border-border/50 bg-background/50">
+                <div className="lg:w-[420px] xl:w-[480px] px-6 py-6 lg:border-l border-zinc-800 bg-zinc-950/50 backdrop-blur-sm">
                     <ProjectDetailOrdering projectId={project.id} isEditing={isEditing} />
                 </div>
 
