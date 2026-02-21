@@ -1281,7 +1281,10 @@ const Timeline: React.FC = () => {
                                                         {/* Priority: OP# and Customer */}
                                                         <div className="flex items-center gap-1.5 min-w-0">
                                                             <span className="text-[9px] font-black bg-black/10 px-1 rounded-[2px] shrink-0 text-foreground/80">
-                                                                OP-{project.parent_id || project.id}
+                                                                {(() => {
+                                                                    const id = project.parent_id || project.id;
+                                                                    return id.startsWith('OP-') ? id : `OP-${id}`;
+                                                                })()}
                                                             </span>
                                                             {project.customer && (
                                                                 <span className="text-[10px] font-bold text-muted-foreground truncate" title={project.customer}>{project.customer}</span>
