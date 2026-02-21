@@ -61,3 +61,4 @@
 - [ ] Přidání potvrzovacích dialogů před změnou role.
 - [ ] Export auditu změn do CSV/Excel.
 - [ ] Vizuální odlišení adminů v seznamu uživatelů (volitelné).
+- **[x] Optimalizace animací a odezvy popupů v Timeline.**

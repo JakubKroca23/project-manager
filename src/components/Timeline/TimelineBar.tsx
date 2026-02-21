@@ -157,17 +157,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
     };
 
     const handleMouseLeave = () => {
-        hoverTimeoutRef.current = setTimeout(() => {
-            // Only close if we are not in the middle of an edit interaction that requires persistence
-            // But since this is a hover popover, generally we close it. 
-            // If user clicked "Delete", we might want to keep it? 
-            // For now, let's assume if they are interacting, they are INSIDE the popup, 
-            // so this onMouseLeave (from icon) is valid. 
-            // The popup ITSELF needs to cancel this timeout on enter.
-            if (!isEditingDate && !isDeleteConfirm && !isIconPickerOpen) {
-                setEditPopup(null);
-            }
-        }, 300); // 300ms grace period
+        // Remove delay for a snappier feel as requested
+        if (!isEditingDate && !isDeleteConfirm && !isIconPickerOpen) {
+            setEditPopup(null);
+        }
     };
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -912,7 +905,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-3 transition-opacity duration-200"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200"
                         style={{
                             left: Math.min(editPopup.x - 100, window.innerWidth - 300),
                             top: topPos,

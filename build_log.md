@@ -189,3 +189,7 @@
 - **Detail**:
     - Milníky již nemají pevné kruhové pozadí. Místo toho využívají techniku `drop-shadow` k vytvoření tlustého ohraničení (1.8px) kopírujícího tvar ikony.
     - **Stavová logika**: Ohraničení je bílé pro plánované, zelené pro doručené a červené pro zpožděné milníky. To zajišťuje okamžitý přehled o stavu bez nutnosti otevírat detail.
+- **Změna**: Optimalizace interakce s popupy milníků.
+- **Detail**:
+    - **Plynulejší animace**: Přidány Tailwind animace `animate-in fade-in zoom-in-95` pro hladší otevírání detailu milníku.
+    - **Okamžité zavírání**: Odstraněna umělá prodleva 300ms při odjezdu myší z ikony. UI nyní reaguje okamžitě, což zvyšuje pocit svižnosti celé aplikace.
