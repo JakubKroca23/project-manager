@@ -888,6 +888,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                 const bottomPos = isNearBottom ? Math.max(10, (window.innerHeight - editPopup.y) + 35) : 'auto';
 
                 const type = project.project_type || 'civil';
+                const SECTOR_COLORS: Record<string, string> = {
+                    civil: '#90caf9',
+                    military: '#1b5e20',
+                    service: '#a855f7',
+                    industrial: '#90caf9',
+                    business: '#90caf9'
+                };
                 const sectorLabels: Record<string, string> = {
                     civil: 'Civilní',
                     military: 'Vojenské',
