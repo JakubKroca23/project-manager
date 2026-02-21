@@ -91,7 +91,7 @@ export function Navbar() {
 
     return (
         <nav
-            className="sticky top-0 z-50 w-full backdrop-blur-md border-b shadow-xl transition-all duration-500"
+            className="sticky top-0 z-[20000] w-full backdrop-blur-md border-b shadow-xl transition-all duration-500"
             style={{
                 backgroundColor: activeColor ? `${activeColor}10` : 'hsl(var(--background) / 0.95)',
                 borderColor: activeColor ? `${activeColor}20` : 'hsl(var(--border))'
@@ -154,7 +154,7 @@ export function Navbar() {
 
                                         <div
                                             className={cn(
-                                                "absolute top-full left-0 pt-2 z-50 transition-all duration-300 ease-out",
+                                                "absolute top-full left-0 pt-2 z-[20100] transition-all duration-300 ease-out",
                                                 openSubmenu === item.name
                                                     ? "opacity-100 translate-y-0 pointer-events-auto"
                                                     : "opacity-0 -translate-y-2 pointer-events-none"
@@ -288,9 +288,6 @@ export function Navbar() {
                                 >
                                     <ZoomOut size={14} />
                                 </button>
-                                <span className="text-[9px] font-mono text-muted-foreground min-w-[32px] text-center select-none uppercase">
-                                    {Math.round((dayWidth / 25) * 100)}%
-                                </span>
                                 <button
                                     onClick={onZoomIn}
                                     className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
@@ -312,25 +309,23 @@ export function Navbar() {
                             </button>
                         )}
 
-                        {/* Import Button */}
-                        {canImport && (
-                            <button
-                                onClick={() => setIsImportWizardOpen(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground text-[10px] font-bold uppercase tracking-wider hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
-                                title="Importní Průvodce (Excel)"
-                            >
-                                <FileUp size={14} className="group-hover:scale-110 transition-transform" />
-                                <span className="hidden sm:inline">Import</span>
-                            </button>
-                        )}
-
-                        <div className="flex flex-col items-center justify-center">
-                            <span className="text-[10px] font-black text-emerald-500 tracking-tighter leading-none">{systemVersion}</span>
-                        </div>
-
                         <ThemeToggle className="hover:bg-primary/10 border-border/40" />
 
                         <div className="flex items-center gap-1.5">
+                            {/* Import Button - Moved next to Settings and styled for Admin */}
+                            {canImport && (
+                                <button
+                                    onClick={() => setIsImportWizardOpen(true)}
+                                    className={cn(
+                                        "p-2 rounded-md transition-all active:scale-95",
+                                        isAdmin ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20" : "bg-muted/40 text-muted-foreground hover:bg-muted border border-border/40"
+                                    )}
+                                    title="Importní Průvodce (Excel)"
+                                >
+                                    <FileUp size={16} />
+                                </button>
+                            )}
+
                             {onToggleDesign && (
                                 <button
                                     onClick={onToggleDesign}

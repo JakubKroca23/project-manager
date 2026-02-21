@@ -30,7 +30,7 @@ export default function RootLayout({
               <AuthGuard>
                 <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
                   <NavbarWrapper />
-                  <main className="flex-1 overflow-hidden p-6">
+                  <main className="flex-1 overflow-hidden">
                     {children}
                   </main>
                   <ImportWizard />

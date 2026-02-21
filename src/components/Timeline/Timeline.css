@@ -30,15 +30,16 @@
 
 .timeline-container {
   width: 100%;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 48px);
+  /* Navbar is h-12 (48px) */
   padding: 0;
   background: var(--background);
   color: var(--foreground);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: none;
+  border-radius: 0;
 }
 
 /* KOMPAKTNÍ REŽIM (při malém zoomu) */
