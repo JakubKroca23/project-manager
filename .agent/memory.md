@@ -139,3 +139,13 @@
     - Completely removed the circular background from milestones.
     - Implemented a "shape-outline" effect using multiple `drop-shadow` CSS filters. The outline follows the exact SVG path of the icon.
     - **Semantic Bordering**: The outline color dynamically reflects the milestone status: White (Default/Planned), Green (Delivered/Completed), and Red (Overdue). This allows for rapid project health assessment directly from the chart.
+
+## 2026-02-21: Final UI Reorganization & Density Indicators
+- **Navbar Layout (Final)**: 
+    - **Navigation Left**: "HARMONOGRAM" and "ZAKÁZKY" are now fixed on the left side of the Navbar for consistent navigation.
+    - **Controls Center**: Page-specific tools (Toolbar injection and "Today" button) are centered, making them the focal point for interactive actions.
+    - **Search/System Right**: Search and system-wide settings remain on the right.
+- **Timeline UX Polish**:
+    - **Milestone Popups**: Added premium slide-in animations (sliding from the icon). Implemented a 150ms "grace period" on mouse-leave to prevent accidental closing, making the interface more robust and accessible.
+    - **Stacking Density Indicator**: In high-density areas (where 3+ projects overlap in a summary row), a drastically darker background (`rgba(0,0,0,0.4)`) is applied. This "heatmaps" capacity bottlenecks directly in the collapsed view.
+- **Maintenance**: Fixed a code-integrity issue in `TimelineBar.tsx` by adding the missing `cn` utility import.
