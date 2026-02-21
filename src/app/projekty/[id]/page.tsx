@@ -14,7 +14,8 @@ import {
     ArrowLeft,
     Info,
     LayoutGrid,
-    StickyNote
+    StickyNote,
+    Hash
 } from 'lucide-react';
 
 import { usePermissions } from '@/hooks/usePermissions';
