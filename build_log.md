@@ -199,3 +199,9 @@
     - **Režim Zakázky**: Pokud je uživatel v sekci Projekty, tlačítko "ZAKÁZKY" (včetně submenu) se přesune do **středu** Navbaru spolu s nástrojovou lištou. Tlačítko "HARMONOGRAM" se posune **doleva**.
     - **Režim Harmonogram**: V ostatních případech zůstává rozvržení standardní (Harmonogram ve středu, Zakázky vlevo).
     - Tato změna zlepšuje ergonomii a soustředění na aktivní modul aplikace.
+
+- **Změna**: Finální reorganizace rozvržení Navbaru.
+- **Detail**:
+    - **Levá strana**: Přesunuty veškeré ovládací prvky specifické pro stránku (customToolbar) a tlačítko "Dnes". Tím je uvolněn prostor pro navigaci.
+    - **Střed**: Zde se nyní nachází pouze hlavní navigace (Zakázky a Harmonogram).
+    - **Dynamické centrování**: Aktivní položka se vždy posouvá blíže ke středu (prohazují se pozice). Pokud jsi v Zakázkách, jsou vpravo od Harmonogramu (blíže centru), pokud v Harmonogramu, jsou vpravo od Zakázek.
