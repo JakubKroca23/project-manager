@@ -77,7 +77,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'mounting_company', label: 'Montážní společnost', defaultAliases: ['montážní společnost', 'montáž', 'zhotovitel'] },
     { key: 'body_setup', label: 'Nástavba nastavení', defaultAliases: ['nástavba nastavení', 'konfigurace'] },
     { key: 'body_type', label: 'Typ nástavby', defaultAliases: ['typ nástavby', 'body type', 'nastavba typ'] },
-    { key: 'closed_at', label: 'Uzavřeno', defaultAliases: ['uzavřeno', 'closed', 'datum uzavření', 'datum ukončení'] },
+    { key: 'closed_at', label: 'Zahájení (Uzavření obchodu)', defaultAliases: ['uzavřeno', 'closed', 'datum uzavření', 'datum ukončení', 'zahájení'] },
     { key: 'serial_number', label: 'Výrobní číslo / VIN', defaultAliases: ['výrobní číslo', 'vč', 'vin', 'výr. č.'] },
 ];
 
@@ -301,7 +301,7 @@ export default function ImportWizard() {
                     manager: item[mapping['manager']] || "-",
                     status: "Aktivní",
                     deadline: "-",
-                    closed_at: getSafeDate(item[mapping['closed_at']], "Uzavřeno"),
+                    closed_at: getSafeDate(item[mapping['closed_at']], "Zahájení (Uzavření obchodu)"),
                     category: cleanNaN(item[mapping['category']]),
                     abra_order: cleanNaN(item[mapping['abra_order']]),
                     abra_project: cleanNaN(item[mapping['abra_project']]),

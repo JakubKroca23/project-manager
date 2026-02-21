@@ -23,7 +23,7 @@ export function ProjectMiniTimeline({ project }: ProjectMiniTimelineProps) {
         { label: 'Podvozek', date: project.chassis_delivery, icon: <Truck size={10} />, color: 'bg-amber-500', shadow: 'shadow-amber-500/20' },
         { label: 'Nástavba', date: project.body_delivery, icon: <Box size={10} />, color: 'bg-purple-500', shadow: 'shadow-purple-500/20' },
         { label: 'Předání', date: project.customer_handover, icon: <Handshake size={10} />, color: 'bg-emerald-500', shadow: 'shadow-emerald-500/20' },
-        { label: 'Uzavření', date: project.closed_at, icon: <CheckCircle2 size={10} />, color: 'bg-rose-500', shadow: 'shadow-rose-500/20' },
+        { label: 'Zahájení', date: project.closed_at, icon: <Zap size={10} />, color: 'bg-indigo-500', shadow: 'shadow-indigo-500/20' },
     ].filter(d => d.date);
 
     if (dates.length < 2) {

@@ -13,7 +13,7 @@ export interface Project {
     deadline?: string;      // Otevřeno od
 
     // CRM Rozšířená pole
-    closed_at?: string;             // Uzavřeno
+    closed_at?: string;             // Zahájení (Uzavření obchodu)
     category?: string;              // Kategorie
     abra_order?: string;            // Abra Objednávka
     abra_project?: string;          // Abra Zakázka

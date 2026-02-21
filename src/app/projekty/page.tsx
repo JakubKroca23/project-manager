@@ -118,7 +118,7 @@ const columns: ColumnDef<Project>[] = [
     },
     {
         accessorKey: 'closed_at',
-        header: 'Uzavřeno',
+        header: 'Zahájení',
         minSize: 30,
         cell: ({ row }) => <SafeCellValue value={row.getValue('closed_at')} />,
     },

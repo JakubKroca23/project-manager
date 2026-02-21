@@ -215,7 +215,7 @@ export default function ProjectDetailPage() {
                                 <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" />
                                 <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" />
                                 <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" />
-                                <DateField label="Uzavření / Archiv" value={p.closed_at} field="closed_at" />
+                                <DateField label="Zahájení (Uzavření obchodu)" value={p.closed_at} field="closed_at" />
                             </div>
                         </section>
 
