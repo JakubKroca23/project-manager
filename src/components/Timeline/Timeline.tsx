@@ -1303,7 +1303,7 @@ const Timeline: React.FC = () => {
                                                 className="project-info-sticky transition-colors group"
                                                 style={{
                                                     borderLeft: `10px solid ${sectorColor}`,
-                                                    backgroundColor: activePhaseColor ? `${activePhaseColor}15` : undefined
+                                                    backgroundColor: activePhaseColor ? `${activePhaseColor}30` : undefined
                                                 }}
                                             >
                                                 <div className="project-info-content pr-2 min-w-0 pl-1">

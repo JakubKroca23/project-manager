@@ -461,7 +461,7 @@
   z-index: 2000;
   width: 250px;
   flex-shrink: 0;
-  background: color-mix(in srgb, var(--timeline-today-bg), var(--background) 92%);
+  background: var(--background);
   border-right: 1px solid var(--border);
   display: flex;
   align-items: center;

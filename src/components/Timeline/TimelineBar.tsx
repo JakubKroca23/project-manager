@@ -889,14 +889,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
 
                 return (
                     <div
-                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-2 transition-opacity duration-200 overflow-y-auto"
+                        className="fixed bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-3 z-[99999] timeline-popup-content flex flex-col gap-2 transition-opacity duration-200"
                         style={{
-                            left: Math.min(editPopup.x - 100, window.innerWidth - 300), // Prevent overflow right
+                            left: Math.min(editPopup.x - 100, window.innerWidth - 300),
                             top: topPos,
                             bottom: bottomPos,
-                            width: 280, // Compact width
-                            maxWidth: '90vw',
-                            maxHeight: '85vh'
+                            width: 240,
+                            maxWidth: '90vw'
                         }}
                         onMouseEnter={() => {
                             if (hoverTimeoutRef.current) {
@@ -907,8 +906,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         onMouseLeave={handleMouseLeave}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Redesigned Header: Requested Row 1 */}
-                        <div className="flex flex-col gap-2 relative border-b border-border/50 pb-3">
+                        <div className="flex flex-col gap-3 relative pb-1">
                             <button
                                 onClick={() => setEditPopup(null)}
                                 className="absolute -top-1 -right-1 text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-full transition-colors outline-none z-10"
@@ -916,53 +914,23 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 <X size={14} />
                             </button>
 
-                            {/* Row 1: DATUM | IKONA | TYP MILNIKU | (dodatečné info o nástavbě/podvozku) */}
-                            <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded font-bold shrink-0">
-                                    {formatLocalDate(m.date)}
+                            {/* DATUM | IKONA | NAZEV */}
+                            <div className="flex flex-col items-center gap-2 pt-1">
+                                <span className="text-xs font-black text-black bg-muted/50 px-3 py-1 rounded-full border border-border/50">
+                                    {new Date(m.date).toLocaleDateString('cs-CZ')}
                                 </span>
-                                <div className="flex items-center gap-2 min-w-0">
+                                <div className="flex flex-col items-center gap-1 text-center mt-1">
                                     <Icon
-                                        size={16}
-                                        className="shrink-0"
-                                        color="#000000" // Always black
+                                        size={28}
+                                        className="mb-1"
+                                        color="#000000"
                                     />
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="font-black text-xs uppercase tracking-tight truncate" style={{ color: "#000000" }}>
-                                            {m.label}
-                                        </span>
-                                        {(m.class === 'body' || m.class === 'chassis') && project.body_type && (
-                                            <span className="text-[9px] font-bold text-muted-foreground/80 truncate">
-                                                {project.body_type}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Row 2: CISLO OP | NAZEV PROJEKTU | ZAKAZNIK | MANAGER */}
-                            <div className="flex flex-col gap-1.5 mt-1 bg-muted/30 p-2 rounded-lg border border-border/40">
-                                <div className="flex items-center justify-between gap-2">
-                                    <span className="font-black text-[10px] text-foreground bg-background px-1.5 py-0.5 rounded border border-border shadow-sm shrink-0">
-                                        #{project.id}
+                                    <span className="font-black text-[13px] uppercase tracking-tighter text-black leading-none">
+                                        {m.label}
                                     </span>
-                                    {project.manager && (
-                                        <span className="text-[9px] font-bold text-primary/70 uppercase tracking-wider truncate">
-                                            {project.manager}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <Link
-                                        href={`/projekty/${project.id}`}
-                                        className="text-[11px] font-bold leading-tight hover:text-primary transition-colors line-clamp-2"
-                                        title={name}
-                                    >
-                                        {name}
-                                    </Link>
-                                    {project.customer && (
-                                        <span className="text-[10px] text-muted-foreground font-medium truncate italic" title={project.customer}>
-                                            {project.customer}
+                                    {(m.class === 'body' || m.class === 'chassis') && project.body_type && (
+                                        <span className="text-[10px] font-bold text-muted-foreground/80 mt-1 italic">
+                                            {project.body_type}
                                         </span>
                                     )}
                                 </div>
@@ -970,11 +938,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                         </div>
 
                         {!isDeleteConfirm && !isEditingDate && !isIconPickerOpen && (
-                            <div className="flex flex-col gap-2 pt-1">
-                                {/* Row 3: UPRAVIT / POTVRDIT */}
+                            <div className="flex flex-col gap-2 mt-1">
                                 <div className="flex gap-2">
                                     <button
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-muted/50 hover:bg-muted text-foreground transition-all border border-border/50 group"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-muted/60 hover:bg-muted text-foreground transition-all border border-border group"
                                         onClick={() => setIsEditingDate(true)}
                                         disabled={isUpdating}
                                     >
@@ -983,26 +950,17 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                     </button>
 
                                     <button
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all border group ${isCompleted ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border-emerald-500/20'}`}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all border group ${isCompleted ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border-emerald-500/20'}`}
                                         onClick={() => toggleMilestoneCompletion(m.key)}
                                         disabled={isUpdating}
                                     >
                                         <ShieldCheck size={14} className={isCompleted ? 'text-emerald-600' : 'text-emerald-500 group-hover:scale-110 transition-transform'} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{isCompleted ? 'Splněno' : 'Potvrdit'}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{isCompleted ? 'Hotovo' : 'Potvrdit'}</span>
                                     </button>
                                 </div>
 
-                                {/* Quick Actions Grid (Existing functionality preserved but hidden/reorganized if needed) */}
-                                <div className="grid grid-cols-2 gap-2 mt-1">
-                                    <button
-                                        className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-muted/30 hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors border border-transparent hover:border-border"
-                                        onClick={() => setIsIconPickerOpen(true)}
-                                        disabled={isUpdating}
-                                    >
-                                        <Milestone size={12} />
-                                        <span className="text-[9px] font-bold uppercase">Ikona</span>
-                                    </button>
-
+                                {/* Smazat button - Conditionally shown for non-standard milestones */}
+                                {!['chassis', 'body'].includes(m.class) && (
                                     <button
                                         className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-destructive/5 hover:bg-destructive/10 text-destructive/60 hover:text-destructive transition-colors border border-transparent hover:border-destructive/10"
                                         onClick={() => setIsDeleteConfirm(true)}
@@ -1011,7 +969,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         <Trash2 size={12} />
                                         <span className="text-[9px] font-bold uppercase">Smazat</span>
                                     </button>
-                                </div>
+                                )}
                             </div>
                         )}
 
