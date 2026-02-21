@@ -21,7 +21,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { ProjectDetailHeader } from '@/components/ProjectDetail/ProjectDetailHeader';
 import { ProjectDetailStats } from '@/components/ProjectDetail/ProjectDetailStats';
 import { ProjectDetailOrdering } from '@/components/ProjectDetail/ProjectDetailOrdering';
-import { ProjectMiniTimeline } from '@/components/ProjectDetail/ProjectMiniTimeline';
+import { ProjectDetailTimeline } from '@/components/ProjectDetail/ProjectDetailTimeline';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -168,8 +168,8 @@ export default function ProjectDetailPage() {
                 {/* ── LEVÁ STRANA (Timeline a Detaily) ── */}
                 <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10 scroll-smooth custom-scrollbar">
 
-                    {/* MINI TIMELINE - GLASS SECTION */}
-                    <ProjectMiniTimeline project={p} />
+                    {/* DETAIL TIMELINE - GANTT SECTION */}
+                    <ProjectDetailTimeline project={p} milestones={milestones} />
 
                     {/* HLAVNÍ INFO MODUL */}
                     <section className="bg-white/80 backdrop-blur-2xl border border-white/60 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden">

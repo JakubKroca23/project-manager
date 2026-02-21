@@ -249,3 +249,4 @@
     - **UI**: Použity nové ikony (`Bookmark`, `Smartphone`) a sytější barevné akcenty pro indikaci aktivních prémiových doplňků.
     - **Admin UX**: Přidáno tlačítko "Nastavení katalogu (Admin)" přímo do Procurement modulu v detailu zakázky pro okamžitou změnu globálních předvoleb.
 - **Lokalizace**: Sjednocena terminologie – pole v CRM identifikované jako "Datum uzavření" je nyní v celém systému (Gantt, tabulky, detaily) označováno jako **"Zahájení"**, protože reprezentuje start realizace zakázky.
+- **Redesign detailu zakázky**: Původní zjednodušená časová osa (tečky na lince) byla nahrazena plnohodnotným **Mini-Gantt diagramem**, který vizuálně odpovídá hlavní časové ose (barevné bloky fází, ikony milníků, mřížka s víkendy a indikátor "Dnes").
