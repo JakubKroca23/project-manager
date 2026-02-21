@@ -36,6 +36,18 @@ export interface Project {
     created_at: string;
 }
 
+export interface ProjectItem {
+    id: string;
+    project_id: string;
+    name: string;
+    category: 'Podvozek' | 'Nástavba' | 'Příslušenství' | 'Smart' | string;
+    status: 'K objednání' | 'Objednáno' | 'Dodáno' | string;
+    source: 'Samostatně' | 'S podvozkem' | 'S nástavbou' | string;
+    note?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Milestone {
     id: string;
     project_id: string;

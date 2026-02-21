@@ -6,67 +6,18 @@ import { supabase } from '@/lib/supabase/client';
 import { Project, Milestone } from '@/types/project';
 import { cn } from '@/lib/utils';
 import {
-    ArrowLeft,
-    User,
-    Building2,
-    Tag,
-    ClipboardList,
-    Truck,
-    Shield,
-    Globe,
-    Hash,
-    Edit2,
-    Save,
-    X,
     Loader2,
-    PlusCircle,
-    Trash2,
-    AlertCircle,
-    Factory,
     CalendarDays,
-    Wrench,
-    FileText,
-    Package,
-    ArrowRightCircle
-} from 'lucide-react';
-import { VehicleGenerator } from '@/components/Military/VehicleGenerator';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useAdmin } from '@/hooks/useAdmin';
-import { CategoryChip } from '@/components/CategoryChip';
-import {
-    Calendar,
-    CheckCircle2,
-    Circle,
-    Clock,
-    Flag,
-    Hammer,
-    ThumbsUp,
-    AlertTriangle,
-    Check,
-    Zap,
-    Factory as FactoryIcon,
-    ShieldCheck,
-    Box,
-    Play,
-    Settings
+    Truck,
+    ClipboardList,
+    AlertCircle,
+    ArrowLeft
 } from 'lucide-react';
 
-const ICON_OPTIONS = {
-    Truck: Truck,
-    Hammer: Hammer,
-    ThumbsUp: ThumbsUp,
-    AlertTriangle: AlertTriangle,
-    Check: Check,
-    Wrench: Wrench,
-    Zap: Zap,
-    Package: Package,
-    Factory: Factory,
-    ShieldCheck: ShieldCheck,
-    Box: Box,
-    Settings: Settings,
-    Play: Play,
-    Milestone: Flag
-};
+import { usePermissions } from '@/hooks/usePermissions';
+import { ProjectDetailHeader } from '@/components/ProjectDetail/ProjectDetailHeader';
+import { ProjectDetailStats } from '@/components/ProjectDetail/ProjectDetailStats';
+import { ProjectDetailOrdering } from '@/components/ProjectDetail/ProjectDetailOrdering';
 
 export default function ProjectDetailPage() {
     const { id } = useParams();
@@ -77,23 +28,8 @@ export default function ProjectDetailPage() {
     const [editedProject, setEditedProject] = useState<Project | null>(null);
     const [saving, setSaving] = useState(false);
     const [milestones, setMilestones] = useState<Milestone[]>([]);
-    const [subProjects, setSubProjects] = useState<Project[]>([]); // New state for sub-projects
     const [loadingMilestones, setLoadingMilestones] = useState(true);
-    const [isAddingMilestone, setIsAddingMilestone] = useState(false);
-    const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
     const { canEdit } = usePermissions();
-
-    const fetchSubProjects = React.useCallback(async () => {
-        const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('parent_id', id)
-            .order('name', { ascending: true });
-
-        if (!error) {
-            setSubProjects(data || []);
-        }
-    }, [id]);
 
     useEffect(() => {
         async function fetchProject() {
@@ -132,143 +68,15 @@ export default function ProjectDetailPage() {
         if (id) {
             fetchProject();
             fetchMilestones();
-            fetchSubProjects();
         }
-    }, [id, fetchSubProjects]);
-
-    const handleDeleteProject = async () => {
-        if (!project) return;
-        if (!confirm('VAROVÁNÍ: Opravdu smazat tuto zakázku? Tato akce je nevratná.')) return;
-
-        try {
-            const { error } = await supabase
-                .from('projects')
-                .delete()
-                .eq('id', project.id);
-
-            if (error) throw error;
-            router.push('/projekty');
-        } catch (err: any) {
-            console.error('Error deleting project:', err);
-            alert('Chyba při mazání zakázky: ' + err.message);
-        }
-    };
-
-    const handleDeleteSubProject = async (subId: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!confirm('Opravdu odstranit toto vozidlo?')) return;
-
-        try {
-            const { error } = await supabase
-                .from('projects')
-                .delete()
-                .eq('id', subId);
-
-            if (error) throw error;
-            fetchSubProjects();
-        } catch (err: any) {
-            console.error('Error deleting sub-project:', err);
-            alert('Chyba při mazání vozidla: ' + err.message);
-        }
-    };
-
-    const handleAddMilestone = async () => {
-        if (!newMilestone.name || !newMilestone.date) {
-            alert('Vyplňte název a datum milníku.');
-            return;
-        }
-
-        try {
-            const { data, error } = await supabase
-                .from('project_milestones')
-                .insert({
-                    project_id: id,
-                    name: newMilestone.name,
-                    date: newMilestone.date,
-                    status: newMilestone.status,
-                    icon: newMilestone.icon
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            setMilestones([...milestones, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-            setNewMilestone({ name: '', date: '', status: 'pending', icon: 'Milestone' });
-            setIsAddingMilestone(false);
-        } catch (err) {
-            console.error('Error adding milestone:', err);
-            alert('Chyba při přidávání milníku.');
-        }
-    };
-
-    const handleToggleMilestoneStatus = async (milestone: Milestone) => {
-        const newStatus = milestone.status === 'completed' ? 'pending' : 'completed';
-        try {
-            const { error } = await supabase
-                .from('project_milestones')
-                .update({ status: newStatus })
-                .eq('id', milestone.id);
-
-            if (error) throw error;
-
-            setMilestones(milestones.map(m => m.id === milestone.id ? { ...m, status: newStatus } : m));
-        } catch (err) {
-            console.error('Error updating milestone status:', err);
-            alert('Chyba při aktualizaci stavu milníku.');
-        }
-    };
-
-    const handleDeleteMilestone = async (milestoneId: string) => {
-        if (!confirm('Opravdu smazat tento milník?')) return;
-        try {
-            const { error } = await supabase
-                .from('project_milestones')
-                .delete()
-                .eq('id', milestoneId);
-
-            if (error) throw error;
-
-            setMilestones(milestones.filter(m => m.id !== milestoneId));
-        } catch (err) {
-            console.error('Error deleting milestone:', err);
-            alert('Chyba při mazání milníku.');
-        }
-    };
-
-    const validateProject = (proj: Project): { isValid: boolean, missing: string[] } => {
-        const missing = [];
-        if (!proj.name) missing.push('Název zakázky');
-        if (!proj.customer) missing.push('Zákazník');
-        if (!proj.manager) missing.push('Vedoucí projektu');
-        if (!proj.priority) missing.push('Priorita');
-        if (!proj.category) missing.push('Kategorie');
-        if (!proj.abra_project) missing.push('Abra Zakázka');
-        // if (!proj.abra_order) missing.push('Abra Objednávka'); // Optional?
-
-        return { isValid: missing.length === 0, missing };
-    };
+    }, [id]);
 
     const handleSave = async () => {
         if (!editedProject) return;
-
-        // Validation only when activating
-        if (editedProject.status === 'Aktivní' && project?.status !== 'Aktivní') {
-            const { isValid, missing } = validateProject(editedProject);
-            if (!isValid) {
-                alert(`Nelze aktivovat zakázku. Chybí tato pole:\n- ${missing.join('\n- ')}`);
-                return;
-            }
-        }
-
         setSaving(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            const userName = user?.email?.split('@')[0] || 'Neznámý';
-
             const updates = {
                 ...editedProject,
-                last_modified_by: userName,
                 updated_at: new Date().toISOString()
             };
 
@@ -278,7 +86,6 @@ export default function ProjectDetailPage() {
                 .eq('id', project?.id);
 
             if (error) throw error;
-
             setProject(updates);
             setIsEditing(false);
         } catch (err) {
@@ -289,9 +96,10 @@ export default function ProjectDetailPage() {
         }
     };
 
-    const handleCancel = () => {
-        setEditedProject(project);
-        setIsEditing(false);
+    const handleDeleteProject = async () => {
+        if (!confirm('Opravdu smazat tuto zakázku?')) return;
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+        if (!error) router.push('/projekty');
     };
 
     const handleChange = (field: keyof Project, value: any) => {
@@ -299,943 +107,142 @@ export default function ProjectDetailPage() {
         setEditedProject({ ...editedProject, [field]: value });
     };
 
-    const handleCustomFieldChange = (key: string, value: any) => {
-        if (!editedProject) return;
-        setEditedProject({
-            ...editedProject,
-            custom_fields: {
-                ...editedProject.custom_fields,
-                [key]: value
-            }
-        });
-    };
-
-    const addCustomField = () => {
-        const name = prompt("Název nového pole:");
-        if (name && editedProject) {
-            handleCustomFieldChange(name, "-");
-        }
-    };
-
-    const removeCustomField = (key: string) => {
-        if (!editedProject || !confirm(`Opravdu smazat pole "${key}"?`)) return;
-        const newFields = { ...editedProject.custom_fields };
-        delete newFields[key];
-        setEditedProject({ ...editedProject, custom_fields: newFields });
-    };
-
-    // --- Loading State ---
     if (loading) {
         return (
             <div className="flex h-full items-center justify-center bg-background">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 size={28} className="animate-spin text-primary" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Načítám detail projektu...</p>
-                </div>
+                <Loader2 size={28} className="animate-spin text-primary" />
             </div>
         );
     }
 
-    // --- Not Found State ---
     if (!project) {
         return (
-            <div className="flex h-full flex-col items-center justify-center gap-6 p-6 bg-background">
-                <div className="p-6 bg-destructive/5 rounded-xl border border-destructive/10 text-destructive flex flex-col items-center gap-3">
-                    <AlertCircle size={40} strokeWidth={1.5} />
-                    <h2 className="text-lg font-bold">Projekt nenalezen</h2>
-                    <p className="text-xs text-destructive/80">ID <span className="font-mono bg-destructive/10 px-1.5 py-0.5 rounded">{id}</span> neexistuje.</p>
-                </div>
-                <button onClick={() => router.push('/projekty')} className="px-5 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition-all">
+            <div className="flex h-full flex-col items-center justify-center gap-4 bg-background">
+                <AlertCircle size={40} className="text-destructive" />
+                <h2 className="text-lg font-bold">Projekt nenalezen</h2>
+                <button onClick={() => router.push('/projekty')} className="px-4 py-2 bg-muted rounded-md text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                     <ArrowLeft size={14} /> Zpět
                 </button>
             </div>
         );
     }
 
-    const isMilitary = project.project_type === 'military';
-    const isCivil = project.project_type === 'civil';
-    const typeColor = isMilitary ? '#a5d6a7' : isCivil ? '#90caf9' : '#94a3b8';
-
+    const typeColor = project.project_type === 'military' ? '#a5d6a7' : project.project_type === 'service' ? '#ce93d8' : '#90caf9';
     const p = isEditing ? editedProject! : project;
 
-    const formatDate = (date: string | null | undefined) => {
-        if (!date) return '—';
-        return new Date(date).toLocaleDateString('cs-CZ');
-    };
+    const DateField = ({ label, value, field }: any) => (
+        <div className="space-y-1">
+            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</label>
+            {isEditing ? (
+                <input
+                    type="date"
+                    value={value || ''}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                    className="w-full text-[10px] font-bold bg-background border border-border rounded px-1.5 py-1 outline-none"
+                />
+            ) : (
+                <div className="text-[11px] font-bold">{value ? new Date(value).toLocaleDateString('cs-CZ') : '—'}</div>
+            )}
+        </div>
+    );
 
     return (
         <div className="h-full overflow-y-auto bg-background text-foreground">
-            {/* ── Sticky Top Bar ── */}
-            <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50">
-                <div
-                    className="absolute top-0 left-0 right-0 h-[2px] transition-colors duration-500"
-                    style={{ backgroundColor: typeColor, boxShadow: `0 0 8px ${typeColor}33` }}
-                />
-                <div className="max-w-[1400px] mx-auto px-4 h-10 flex items-center justify-between">
-                    <button
-                        onClick={() => router.push('/projekty')}
-                        className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-muted/50 hover:bg-muted transition-all border border-transparent hover:border-border/50 text-muted-foreground hover:text-foreground"
-                    >
-                        <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                        Zpět
-                    </button>
+            <ProjectDetailHeader
+                project={p}
+                typeColor={typeColor}
+                isEditing={isEditing}
+                saving={saving}
+                onEdit={() => setIsEditing(true)}
+                onCancel={() => { setIsEditing(false); setEditedProject(project); }}
+                onSave={handleSave}
+                onDelete={handleDeleteProject}
+            />
 
-                    <div className="flex items-center gap-2">
-                        {isEditing && (
-                            <button
-                                onClick={handleDeleteProject}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-all"
-                            >
-                                <Trash2 size={12} /> Smazat
-                            </button>
-                        )}
-                        {isEditing ? (
-                            <>
-                                <button onClick={handleCancel} disabled={saving} className="px-3 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
-                                    <X size={12} /> Zrušit
-                                </button>
-                                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-90 shadow-sm">
-                                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-                                    Uložit
-                                </button>
-                            </>
-                        ) : (
-                            canEdit && (
-                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary/10 hover:bg-primary/20 text-primary border border-primary/10 text-[10px] font-bold uppercase tracking-wider transition-all">
-                                    <Edit2 size={12} /> Upravit
-                                </button>
-                            )
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Main Content ── */}
-            <div className="max-w-[1400px] mx-auto px-4 py-4 pb-16 space-y-4">
-
+            <div className="max-w-[1400px] mx-auto px-4 py-6 space-y-6">
                 {/* ── HEADER ── */}
-                <div className="bg-muted/30 border border-border/50 rounded-xl p-4 mb-4 shadow-sm">
-                    <div className="space-y-3">
-                        {/* Row 1: Badges & Status */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${p.project_type === 'military'
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                                }`}>
-                                {p.project_type === 'military' ? 'Vojenské' : 'Civil'}
-                            </span>
-                            {isEditing && (
-                                <select
-                                    value={p.project_type}
-                                    onChange={(e) => handleChange('project_type', e.target.value)}
-                                    className="text-[9px] bg-background border border-border rounded px-1.5 py-0.5 outline-none font-bold"
-                                >
-                                    <option value="civil">Civil</option>
-                                    <option value="military">Vojenské</option>
-                                </select>
-                            )}
-                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-background border border-border rounded text-[9px] font-mono text-muted-foreground shadow-sm">
-                                <Hash size={9} />
-                                {project.id}
-                            </div>
-                            <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-600 ml-1.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${project.status === 'Aktivní' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/40'}`} />
-                                {project.status}
-                            </span>
-                        </div>
-
-                        {/* Row 2: Title */}
-                        <div className="max-w-4xl -mt-0.5">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-black tracking-tight">
                             {isEditing ? (
                                 <input
-                                    type="text"
                                     value={p.name}
                                     onChange={(e) => handleChange('name', e.target.value)}
-                                    className="text-xl font-black w-full bg-background/50 border border-primary/20 rounded-md px-2 py-1 focus:ring-2 focus:ring-primary/10 transition-all outline-none"
-                                    placeholder="Název zakázky"
+                                    className="bg-transparent border-b border-primary/20 outline-none w-full"
                                 />
-                            ) : (
-                                <h1 className="text-xl font-black text-foreground leading-normal tracking-tight">{project.name}</h1>
-                            )}
-                        </div>
-
-                        {/* Row 3: Metadata Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-3 pt-3 border-t border-border/40">
-                            {/* Abra Project */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Zakázka</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={p.abra_project || ''}
-                                        onChange={(e) => handleChange('abra_project', e.target.value)}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    />
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
-                                        <Hash size={11} className="text-primary/50" />
-                                        {p.abra_project || '—'}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Abra Order */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Abra Objednávka</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={p.abra_order || ''}
-                                        onChange={(e) => handleChange('abra_order', e.target.value)}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    />
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
-                                        <Hash size={11} className="text-primary/50" />
-                                        {p.abra_order || '—'}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Customer */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Zákazník</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={p.customer || ''}
-                                        onChange={(e) => handleChange('customer', e.target.value)}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    />
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground truncate">
-                                        <Building2 size={11} className="text-primary/50 shrink-0" />
-                                        <span className="truncate">{p.customer || '—'}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Manager */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Vedoucí projektu</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={p.manager || ''}
-                                        onChange={(e) => handleChange('manager', e.target.value)}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    />
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground truncate">
-                                        <User size={11} className="text-primary/50 shrink-0" />
-                                        <span className="truncate">{p.manager || '—'}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Category */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Kategorie</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={p.category || ''}
-                                        onChange={(e) => handleChange('category', e.target.value)}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    />
-                                ) : (
-                                    <CategoryChip value={p.category} className="text-[9px] px-2 py-0.5" />
-                                )}
-                            </div>
-
-                            {/* Priority */}
-                            <div className="space-y-0.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 block">Priorita</label>
-                                {isEditing ? (
-                                    <select
-                                        value={p.priority || 2}
-                                        onChange={(e) => handleChange('priority', parseInt(e.target.value))}
-                                        className="w-full text-[10px] font-bold bg-background/50 border border-border rounded px-1.5 py-1 outline-none"
-                                    >
-                                        <option value={1}>Urgentní</option>
-                                        <option value={2}>Normální</option>
-                                        <option value={3}>Nízká</option>
-                                    </select>
-                                ) : (
-                                    <div className="flex items-center gap-1.5">
-                                        <div className={cn(
-                                            "w-1.5 h-1.5 rounded-full",
-                                            p.priority === 1 ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.4)]" : p.priority === 3 ? "bg-slate-400" : "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.4)]"
-                                        )} />
-                                        <span className="text-[10px] font-bold">
-                                            {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                            ) : project.name}
+                        </h1>
                     </div>
+                    <ProjectDetailStats project={p} isEditing={isEditing} onChange={handleChange} />
                 </div>
 
                 {/* ── SECTIONS GRID ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                    {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
+                    {/* LEVÝ SLOUPEC (Harmonogram & Specifikace) - 7 sloupců */}
+                    <div className="lg:col-span-7 space-y-6">
 
-                    {/* ═══ 2. HARMONOGRAM ═══ */}
-                    <Section icon={<CalendarDays size={15} />} title="Harmonogram" color="amber">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                            <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
-                            <CustomDateField
-                                label="Konec montáže"
-                                value={p.custom_fields?.mounting_end_date}
-                                field="mounting_end_date"
-                                isEditing={isEditing}
-                                onChange={handleCustomFieldChange}
-                            />
-                            <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
-                            <CustomDateField
-                                label="Konec revize"
-                                value={p.custom_fields?.revision_end_date}
-                                field="revision_end_date"
-                                isEditing={isEditing}
-                                onChange={handleCustomFieldChange}
-                            />
-                            <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                            <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
-                        </div>
-                    </Section>
-
-                    {/* ═══ 3. VÝROBA / NÁSTAVBA ═══ */}
-                    <Section icon={<Truck size={15} />} title="Výroba a nástavba" color="emerald">
-                        <FieldGrid>
-                            <Field
-                                label="Stav výroby"
-                                icon={<Factory size={13} />}
-                                value={p.production_status}
-                                field="production_status"
-                                isEditing={isEditing}
-                                onChange={handleChange}
-                                highlight
-                                options={['V procesu', 'Dokončeno']}
-                            />
-                            <Field label="Montážní společnost" icon={<Wrench size={13} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
-                            <Field label="Konfigurace nástavby" icon={<Shield size={13} />} value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={handleChange} />
-                        </FieldGrid>
-                    </Section>
-
-                    {/* ═══ 4. ABRA PROPOJENÍ (Empty now) ═══ */}
-                </div>
-
-                {/* ═══ 3.5 TECHNICKÁ SPECIFIKACE ═══ */}
-                <Section icon={<ClipboardList size={15} />} title="Technická specifikace" color="blue" fullWidth>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
-                        {/* Column 1: Config */}
-                        <div className="space-y-4">
-                            <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/50 pb-1">Dokumentace</h4>
-
-                            {/* Trailerwin */}
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50">
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-bold flex items-center gap-2">
-                                        <Truck size={14} className="text-primary" /> Trailerwin
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground">Výpočet zatížení a rozložení</span>
-                                </div>
-                                {isEditing ? (
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleCustomFieldChange('trailerwin_done', !p.custom_fields?.trailerwin_done)}
-                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors ${p.custom_fields?.trailerwin_done ? 'bg-primary' : 'bg-muted-foreground/30'}`}
-                                        >
-                                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${p.custom_fields?.trailerwin_done ? 'translate-x-4' : 'translate-x-0'}`} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${p.custom_fields?.trailerwin_done ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
-                                        {p.custom_fields?.trailerwin_done ? 'Hotovo' : 'Ne'}
-                                    </div>
-                                )}
+                        {/* HARMONOGRAM */}
+                        <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
+                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
+                                <CalendarDays size={14} /> Harmonogram a termíny
+                            </h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <DateField label="Příjem" value={p.deadline} field="deadline" />
+                                <DateField label="Podvozek" value={p.chassis_delivery} field="chassis_delivery" />
+                                <DateField label="Nástavba" value={p.body_delivery} field="body_delivery" />
+                                <DateField label="Předání" value={p.customer_handover} field="customer_handover" />
+                                <DateField label="Uzavření" value={p.closed_at} field="closed_at" />
                             </div>
+                        </section>
 
-                            {/* Výkresová dokumentace */}
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50">
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-bold flex items-center gap-2">
-                                        <FileText size={14} className="text-primary" /> Výkresová dokumentace
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground">Schválený výkres od zákazníka</span>
-                                </div>
-                                {isEditing ? (
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleCustomFieldChange('drawings_done', !p.custom_fields?.drawings_done)}
-                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors ${p.custom_fields?.drawings_done ? 'bg-primary' : 'bg-muted-foreground/30'}`}
-                                        >
-                                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${p.custom_fields?.drawings_done ? 'translate-x-4' : 'translate-x-0'}`} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${p.custom_fields?.drawings_done ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
-                                        {p.custom_fields?.drawings_done ? 'Hotovo' : 'Ne'}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Column 2: Accessories */}
-                        <div className="space-y-4">
-                            <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/50 pb-1">Příslušenství</h4>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground/70">Příslušenství k nástavbě</label>
-                                {isEditing ? (
-                                    <textarea
-                                        value={p.custom_fields?.body_accessories || ''}
-                                        onChange={(e) => handleCustomFieldChange('body_accessories', e.target.value)}
-                                        className="w-full text-xs font-medium bg-background border border-border rounded-lg p-2 h-20 outline-none focus:ring-1 focus:ring-primary/20 resize-none"
-                                        placeholder="- Majáky&#10;- Pracovní světla&#10;- Box na nářadí..."
+                        {/* SPECIFIKACE */}
+                        <section className="bg-muted/10 border border-border/50 rounded-xl p-4 space-y-4 shadow-sm">
+                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
+                                <ClipboardList size={14} /> Technická specifikace
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Typ nástavby</label>
+                                    <input
+                                        readOnly={!isEditing}
+                                        value={p.body_type || ''}
+                                        onChange={(e) => handleChange('body_type', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border/50 rounded px-2 py-1 outline-none"
+                                        placeholder="Např. CTS 20-66"
                                     />
-                                ) : (
-                                    <div className="text-xs whitespace-pre-line text-foreground/80 min-h-[1.5rem] p-2 bg-muted/10 rounded-lg border border-border/30">
-                                        {p.custom_fields?.body_accessories || '—'}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase text-muted-foreground/70">Příslušenství na podvozek</label>
-                                {isEditing ? (
-                                    <textarea
-                                        value={p.custom_fields?.chassis_accessories || ''}
-                                        onChange={(e) => handleCustomFieldChange('chassis_accessories', e.target.value)}
-                                        className="w-full text-xs font-medium bg-background border border-border rounded-lg p-2 h-20 outline-none focus:ring-1 focus:ring-primary/20 resize-none"
-                                        placeholder="- Tažné zařízení&#10;- Zakládací klíny..."
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Výrobní číslo</label>
+                                    <input
+                                        readOnly={!isEditing}
+                                        value={p.serial_number || ''}
+                                        onChange={(e) => handleChange('serial_number', e.target.value)}
+                                        className="w-full text-xs font-bold bg-background/50 border border-border/50 rounded px-2 py-1 outline-none"
+                                        placeholder="S/N"
                                     />
-                                ) : (
-                                    <div className="text-xs whitespace-pre-line text-foreground/80 min-h-[1.5rem] p-2 bg-muted/10 rounded-lg border border-border/30">
-                                        {p.custom_fields?.chassis_accessories || '—'}
-                                    </div>
-                                )}
+                                </div>
+                                <div className="md:col-span-2 space-y-1">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Poznámka</label>
+                                    <textarea
+                                        readOnly={!isEditing}
+                                        value={p.note || ''}
+                                        onChange={(e) => handleChange('note', e.target.value)}
+                                        className="w-full text-xs font-medium bg-background/50 border border-border/50 rounded px-2 py-1.5 outline-none min-h-[80px]"
+                                        placeholder="Interní poznámka k zakázce..."
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
-                </Section>
 
-
-                {/* ═══ 4.2 VOZIDLA V ZAKÁZCE (Military Parent) ═══ */}
-                {isMilitary && !project.parent_id && (
-                    <Section icon={<Truck size={15} />} title="Vozidla v zakázce" color="emerald" fullWidth>
-                        <div className="space-y-3">
-                            {subProjects.length > 0 && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {subProjects.map(sub => (
-                                        <div
-                                            key={sub.id}
-                                            onClick={() => router.push(`/projekty/${sub.id}`)}
-                                            className="cursor-pointer group relative p-3 rounded-xl border border-border/50 bg-muted/10 hover:bg-muted/30 transition-all flex items-center justify-between"
-                                        >
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{sub.name}</span>
-                                                <span className="text-[10px] text-muted-foreground font-mono">{sub.id}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                {canEdit && (
-                                                    <button
-                                                        onClick={(e) => handleDeleteSubProject(sub.id, e)}
-                                                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                                        title="Smazat vozidlo"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
-                                                <ArrowRightCircle size={16} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {subProjects.length > 0 && (
-                                <div className="text-[10px] text-muted-foreground text-center pt-2 border-t border-border/30">
-                                    Celkem {subProjects.length} vozidel {project.quantity ? `/ ${project.quantity}` : ''}
-                                </div>
-                            )}
-
-                            {/* Generátor - zobrazit pokud nemáme plný počet */}
-                            {(!project.quantity || subProjects.length < project.quantity) && canEdit && !isEditing && (
-                                <VehicleGenerator
-                                    project={project}
-                                    existingCount={subProjects.length}
-                                    onSuccess={() => {
-                                        fetchSubProjects();
-                                    }}
-                                />
-                            )}
-
-                            {subProjects.length === 0 && !canEdit && (
-                                <div className="text-center py-4 text-xs text-muted-foreground">Žádná vozidla zatím nebyla přidána.</div>
-                            )}
-                        </div>
-                    </Section>
-                )}
-
-                {/* ═══ 4.3 RODIČOVSKÁ ZAKÁZKA (Military Child) ═══ */}
-                {isMilitary && project.parent_id && (
-                    <Section icon={<Truck size={15} />} title="Součást zakázky" color="blue" fullWidth>
-                        <div className="flex items-center gap-4 p-2">
-                            <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
-                                <Truck size={20} />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Patří pod hlavní zakázku</h4>
-                                <button
-                                    onClick={() => router.push(`/projekty/${project.parent_id}`)}
-                                    className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1 mt-0.5"
-                                >
-                                    Přejít na hlavní zakázku <ArrowRightCircle size={14} />
-                                </button>
-                            </div>
-                        </div>
-                    </Section>
-                )}
-
-                {/* ═══ 4.5 MILNÍKY ═══ */}
-                <Section
-                    icon={<Flag size={15} />}
-                    title="Milníky zakázky"
-                    color="emerald"
-                    fullWidth
-                    action={
-                        <button
-                            onClick={() => setIsAddingMilestone(!isAddingMilestone)}
-                            className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1"
-                        >
-                            {isAddingMilestone ? <X size={11} /> : <PlusCircle size={11} />}
-                            {isAddingMilestone ? 'Zrušit' : 'Nový milník'}
-                        </button>
-                    }
-                >
-                    <div className="space-y-3">
-                        {isAddingMilestone && (
-                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 flex flex-col gap-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Název milníku</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Např. Kontrola kvality"
-                                            value={newMilestone.name}
-                                            onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
-                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Datum</label>
-                                        <input
-                                            type="date"
-                                            value={newMilestone.date}
-                                            onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
-                                            className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">Vyberte ikonku</label>
-                                    <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 border border-border/40 p-2 rounded-xl bg-background/50">
-                                        {Object.entries(ICON_OPTIONS).map(([key, IconComponent]) => (
-                                            <button
-                                                key={key}
-                                                type="button"
-                                                onClick={() => setNewMilestone({ ...newMilestone, icon: key })}
-                                                className={`p-2 rounded-lg transition-all flex items-center justify-center ${newMilestone.icon === key ? 'bg-primary text-primary-foreground shadow-lg scale-110' : 'hover:bg-muted text-muted-foreground/60'}`}
-                                                title={key}
-                                            >
-                                                <IconComponent size={16} />
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end gap-2">
-                                    <button
-                                        onClick={() => setIsAddingMilestone(false)}
-                                        className="px-4 py-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                        Zrušit
-                                    </button>
-                                    <button
-                                        onClick={handleAddMilestone}
-                                        className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-[10px] font-bold uppercase hover:opacity-90 transition-all shadow-md shadow-primary/20"
-                                    >
-                                        Přidat milník
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {loadingMilestones ? (
-                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground animate-pulse">Načítám milníky...</div>
-                            ) : milestones.length === 0 ? (
-                                <div className="col-span-full py-4 text-center text-xs text-muted-foreground italic bg-muted/10 rounded-xl border border-dashed border-border/50">Žádné vlastní milníky nebyly přidány.</div>
-                            ) : (
-                                milestones.map((m) => (
-                                    <div key={m.id} className={`group relative p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${m.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="flex flex-col items-center gap-1 shrink-0">
-                                                <button
-                                                    onClick={() => handleToggleMilestoneStatus(m)}
-                                                    className={`p-1 rounded-full transition-colors ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}
-                                                >
-                                                    {m.status === 'completed' ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                                                </button>
-                                                {(() => {
-                                                    const MIcon = ICON_OPTIONS[m.icon as keyof typeof ICON_OPTIONS] || ICON_OPTIONS['Milestone'];
-                                                    return <MIcon size={12} className="text-muted-foreground/50" />;
-                                                })()}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <input
-                                                    type="text"
-                                                    value={m.name}
-                                                    onChange={async (e) => {
-                                                        const newName = e.target.value;
-                                                        const updatedMilestones = milestones.map(ms => ms.id === m.id ? { ...ms, name: newName } : ms);
-                                                        setMilestones(updatedMilestones);
-                                                    }}
-                                                    onBlur={async (e) => {
-                                                        const newName = e.target.value;
-                                                        if (!newName) return;
-                                                        try {
-                                                            await supabase
-                                                                .from('project_milestones')
-                                                                .update({ name: newName })
-                                                                .eq('id', m.id);
-                                                        } catch (err) {
-                                                            console.error('Error updating milestone name:', err);
-                                                        }
-                                                    }}
-                                                    className={`w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0 outline-none ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}
-                                                />
-                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 font-medium cursor-default">
-                                                    <Calendar size={10} />
-                                                    {new Date(m.date).toLocaleDateString('cs-CZ')}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeleteMilestone(m.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all shrink-0"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                    {/* PRAVÝ SLOUPEC (Objednávky) - 5 sloupců */}
+                    <div className="lg:col-span-5">
+                        <ProjectDetailOrdering projectId={project.id} isEditing={isEditing} />
                     </div>
-                </Section>
 
-                {/* ═══ 5. POPIS ZAKÁZKY / POZNÁMKY ═══ */}
-                <Section icon={<ClipboardList size={15} />} title="Popis zakázky" color="slate" fullWidth>
-                    {isEditing ? (
-                        <textarea
-                            value={p.note || ''}
-                            onChange={(e) => handleChange('note', e.target.value)}
-                            className="w-full h-28 bg-muted/20 border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed resize-none"
-                            placeholder="Zde můžete připsat popis zakázky nebo poznámky..."
-                        />
-                    ) : (
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap min-h-[2rem]">
-                            {project.note || 'Žádný popis nebyl přidán.'}
-                        </p>
-                    )}
-                </Section>
-
-                {/* ═══ 6. OSTATNÍ DATA (Custom Fields) ═══ */}
-                {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
-                    <Section
-                        icon={<Globe size={15} />}
-                        title="Ostatní data"
-                        color="slate"
-                        fullWidth
-                        action={isEditing ? (
-                            <button onClick={addCustomField} className="text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1">
-                                <PlusCircle size={11} /> Přidat
-                            </button>
-                        ) : undefined}
-                    >
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                            {(isEditing
-                                ? Object.entries(p.custom_fields || {})
-                                : Object.entries(project.custom_fields || {})
-                            ).map(([key, val]) => (
-                                <div key={key} className="group relative bg-muted/20 hover:bg-muted/30 p-2.5 rounded-lg border border-transparent hover:border-border/50 transition-all">
-                                    <div className="flex justify-between items-start mb-0.5">
-                                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">{key}</p>
-                                        {isEditing && (
-                                            <button onClick={() => removeCustomField(key)} className="text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive/10 p-0.5 rounded transition-all">
-                                                <Trash2 size={10} />
-                                            </button>
-                                        )}
-                                    </div>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={val as string}
-                                            onChange={(e) => handleCustomFieldChange(key, e.target.value)}
-                                            className="w-full bg-transparent border-none text-xs font-medium text-foreground focus:ring-0 p-0"
-                                        />
-                                    ) : (
-                                        <p className="text-xs font-medium text-foreground">{val?.toString() || '-'}</p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </Section>
-                )}
-
-                {/* ═══ 7. HISTORIE ZMĚN ═══ */}
-                <Section icon={<ClipboardList size={15} />} title="Historie změn" color="slate" fullWidth>
-                    <ProjectHistory projectId={project.id} />
-                </Section>
-            </div>
-        </div >
-    );
-}
-
-// ─── SUBCOMPONENTS ───────────────────────────────────────────────
-
-// Color accent maps
-const colorMap: Record<string, { border: string; bg: string; icon: string; text: string }> = {
-    blue: { border: 'border-blue-500/20', bg: 'bg-blue-500/5', icon: 'text-blue-500', text: 'text-blue-600' },
-    amber: { border: 'border-amber-500/20', bg: 'bg-amber-500/5', icon: 'text-amber-500', text: 'text-amber-600' },
-    emerald: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/5', icon: 'text-emerald-500', text: 'text-emerald-600' },
-    purple: { border: 'border-purple-500/20', bg: 'bg-purple-500/5', icon: 'text-purple-500', text: 'text-purple-600' },
-    slate: { border: 'border-border/60', bg: 'bg-muted/5', icon: 'text-muted-foreground', text: 'text-muted-foreground' },
-};
-
-interface SectionProps {
-    icon: React.ReactNode;
-    title: string;
-    color: string;
-    children: React.ReactNode;
-    fullWidth?: boolean;
-    action?: React.ReactNode;
-}
-
-function Section({ icon, title, color, children, fullWidth, action }: SectionProps) {
-    const c = colorMap[color] || colorMap.slate;
-    return (
-        <div className={`rounded-xl border ${c.border} ${c.bg} p-4 ${fullWidth ? '' : ''}`}>
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <div className={`${c.icon}`}>{icon}</div>
-                    <h3 className={`text-[11px] font-bold uppercase tracking-widest ${c.text}`}>{title}</h3>
                 </div>
-                {action}
             </div>
-            {children}
-        </div>
-    );
-}
-
-function FieldGrid({ children }: { children: React.ReactNode }) {
-    return <div className="grid grid-cols-2 gap-x-4 gap-y-2">{children}</div>;
-}
-
-interface FieldProps {
-    label: string;
-    icon: React.ReactNode;
-    value: any;
-    field: keyof Project;
-    isEditing: boolean;
-    onChange: (field: keyof Project, value: any) => void;
-    highlight?: boolean;
-    options?: (string | { label: string; value: any })[];
-}
-
-function Field({ label, icon, value, field, isEditing, onChange, highlight, options }: FieldProps) {
-    return (
-        <div className="flex items-start gap-2">
-            <div className="text-muted-foreground/50 mt-0.5 shrink-0">{icon}</div>
-            <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
-                {isEditing ? (
-                    options ? (
-                        <select
-                            value={String(value || '')}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                // Convert back to number if it's a numeric value (for priority)
-                                const numericVal = parseInt(val);
-                                onChange(field, isNaN(numericVal) ? val : numericVal);
-                            }}
-                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
-                        >
-                            <option value="">Vyberte...</option>
-                            {options.map(opt => {
-                                const label = typeof opt === 'string' ? opt : opt.label;
-                                const val = typeof opt === 'string' ? opt : opt.value;
-                                return <option key={String(val)} value={String(val)}>{label}</option>;
-                            })}
-                        </select>
-                    ) : (
-                        <input
-                            type="text"
-                            value={String(value || '')}
-                            onChange={(e) => onChange(field, e.target.value)}
-                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
-                        />
-                    )
-                ) : (
-                    <p className={`text-xs font-semibold truncate ${highlight ? 'text-primary' : 'text-foreground'}`} title={String(value || '')}>
-                        {value || '—'}
-                    </p>
-                )}
-            </div>
-        </div>
-    );
-}
-
-interface DateFieldProps {
-    label: string;
-    value: any;
-    field: keyof Project;
-    isEditing: boolean;
-    onChange: (field: keyof Project, value: any) => void;
-    highlight?: boolean;
-}
-
-function DateField({ label, value, field, isEditing, onChange, highlight }: DateFieldProps) {
-    const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
-    return (
-        <div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
-            {isEditing ? (
-                <input
-                    type="date"
-                    value={value || ''}
-                    onChange={(e) => onChange(field, e.target.value)}
-                    className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
-                />
-            ) : (
-                <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>
-                    {formatted}
-                </p>
-            )}
-        </div>
-    );
-}
-
-interface CustomDateFieldProps {
-    label: string;
-    value: any;
-    field: string;
-    isEditing: boolean;
-    onChange: (field: string, value: any) => void;
-    highlight?: boolean;
-}
-
-function CustomDateField({ label, value, field, isEditing, onChange, highlight }: CustomDateFieldProps) {
-    const formatted = value ? new Date(value).toLocaleDateString('cs-CZ') : '—';
-    return (
-        <div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
-            {isEditing ? (
-                <input
-                    type="date"
-                    value={value || ''}
-                    onChange={(e) => onChange(field, e.target.value)}
-                    className="bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 w-full"
-                />
-            ) : (
-                <p className={`text-sm font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>
-                    {formatted}
-                </p>
-            )}
-        </div>
-    );
-}
-
-function ProjectHistory({ projectId }: { projectId: string }) {
-    const [logs, setLogs] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { profiles } = useAdmin();
-
-    useEffect(() => {
-        async function fetchLogs() {
-            const { data, error } = await supabase
-                .from('project_action_logs')
-                .select('*')
-                .eq('project_id', projectId)
-                .order('performed_at', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching logs:', error);
-            } else {
-                setLogs(data || []);
-            }
-            setLoading(false);
-        }
-        fetchLogs();
-    }, [projectId]);
-
-    const resolveUser = (id: string) => {
-        if (!id) return 'Systém';
-        const profile = profiles.find((p: any) => p.id === id);
-        return profile?.email || id;
-    };
-
-    if (loading) return <div className="text-[10px] text-muted-foreground animate-pulse px-4 py-2">Načítám historii...</div>;
-    if (logs.length === 0) return <div className="text-[10px] text-muted-foreground px-4 py-2">Žádné záznamy o změnách.</div>;
-
-    return (
-        <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
-            {logs.map((log) => (
-                <div key={log.id} className="p-2.5 bg-background/40 rounded-lg border border-border/40 text-[10px] hover:bg-background/60 transition-colors">
-                    <div className="flex justify-between items-center mb-1.5">
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${log.action_type === 'create' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                            log.action_type === 'delete' ? 'bg-destructive/10 text-destructive border border-destructive/20' :
-                                'bg-blue-500/10 text-blue-600 border border-blue-500/20'
-                            }`}>
-                            {log.action_type === 'create' ? 'Vytvořeno' : log.action_type === 'delete' ? 'Smazáno' : 'Změna'}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground font-mono opacity-60">
-                            {new Date(log.performed_at).toLocaleString('cs-CZ')}
-                        </span>
-                    </div>
-                    <div className="text-foreground/70 mb-2 flex items-center gap-1.5 italic">
-                        <span className="opacity-50">Provedl:</span>
-                        <span className="font-bold underline decoration-primary/30 underline-offset-2">
-                            {resolveUser(log.performed_by)}
-                        </span>
-                    </div>
-                    {log.action_type === 'update' && log.old_value && log.new_value && (
-                        <div className="mt-2 space-y-1.5 border-t border-border/30 pt-1.5">
-                            {Object.keys(log.new_value).map(key => {
-                                const oldVal = log.old_value[key];
-                                const newVal = log.new_value[key];
-                                if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
-                                    if (['updated_at', 'last_modified_by', 'id', 'created_at'].includes(key)) return null;
-                                    return (
-                                        <div key={key} className="flex gap-2 items-baseline border-b border-border/10 pb-1 last:border-0 hover:bg-primary/5 px-1 rounded transition-colors group">
-                                            <span className="font-black text-muted-foreground/80 uppercase text-[8px] min-w-[60px]">{key}:</span>
-                                            <div className="flex flex-col gap-0.5 flex-1">
-                                                <span className="text-destructive line-through opacity-40 italic">{String(oldVal === null || oldVal === undefined ? '—' : (typeof oldVal === 'object' ? JSON.stringify(oldVal) : oldVal))}</span>
-                                                <span className="text-emerald-600 font-bold bg-emerald-500/5 px-1 rounded">{String(newVal === null || newVal === undefined ? '—' : (typeof newVal === 'object' ? JSON.stringify(newVal) : newVal))}</span>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </div>
-                    )}
-                </div>
-            ))}
         </div>
     );
 }
