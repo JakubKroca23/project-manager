@@ -814,10 +814,14 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            width: isSmallMilestone ? iconSize : iconSize + 4,
-                                            height: isSmallMilestone ? iconSize : iconSize + 4,
+                                            width: isSmallMilestone ? iconSize : iconSize + 8, // Slightly larger for border
+                                            height: isSmallMilestone ? iconSize : iconSize + 8,
                                             pointerEvents: 'auto',
-                                            transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                            transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '50%',
+                                            border: `2.5px solid ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}`,
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                         }}
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();

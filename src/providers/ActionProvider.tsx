@@ -17,6 +17,8 @@ interface ActionContextType {
     setDayWidth: (w: number) => void;
     isImportWizardOpen: boolean;
     setIsImportWizardOpen: (open: boolean) => void;
+    customToolbar: ReactNode | null;
+    setCustomToolbar: (content: ReactNode | null) => void;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export function ActionProvider({ children }: { children: ReactNode }) {
     const [onToggleDesign, setOnToggleDesign] = useState<(() => void) | null>(null);
     const [dayWidth, setDayWidth] = useState(25);
     const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
+    const [customToolbar, setCustomToolbar] = useState<ReactNode | null>(null);
 
     return (
         <ActionContext.Provider value={{
@@ -38,7 +41,8 @@ export function ActionProvider({ children }: { children: ReactNode }) {
             onZoomOut, setOnZoomOut,
             onToggleDesign, setOnToggleDesign,
             dayWidth, setDayWidth,
-            isImportWizardOpen, setIsImportWizardOpen
+            isImportWizardOpen, setIsImportWizardOpen,
+            customToolbar, setCustomToolbar
         }}>
             {children}
         </ActionContext.Provider>

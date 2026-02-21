@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import CreateProjectModal from '@/components/CreateProjectModal';
 import { CategoryChip } from '@/components/CategoryChip';
+import { useActions } from '@/providers/ActionProvider';
 
 
 
@@ -141,13 +142,15 @@ export default function ProjektyPage() {
     const typeParam = searchParams.get('type');
     const activeTab = (typeParam === 'service' ? 'service' : typeParam === 'military' ? 'military' : 'civil') as 'civil' | 'military' | 'service';
 
+    const tableSettings = useTableSettings(`projects-${activeTab}`);
+    const router = useRouter();
     const { searchTerm } = useSearch();
+    const { setCustomToolbar } = useActions();
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [isBulkMode, setIsBulkMode] = useState(false);
-    const tableSettings = useTableSettings(`projects-${activeTab}`);
-    const router = useRouter();
+    const [tableTools, setTableTools] = useState<React.ReactNode>(null);
 
     const fetchProjects = useCallback(async () => {
         setIsLoading(true);
@@ -173,6 +176,7 @@ export default function ProjektyPage() {
         window.addEventListener('projects-updated', handleGlobalRefresh);
         return () => window.removeEventListener('projects-updated', handleGlobalRefresh);
     }, [fetchProjects]);
+
 
     // All projects for this tab (no search filtering)
     const tabProjects = projects.filter(p => p.project_type === activeTab);
@@ -219,6 +223,96 @@ export default function ProjektyPage() {
         });
     }, [tabProjects, searchTerm]);
 
+    // Update global navbar toolbar
+    useEffect(() => {
+        setCustomToolbar(
+            <div className="flex items-center gap-2">
+                {/* Column Toggle (From Table) */}
+                {tableTools}
+
+                {/* Compact Count */}
+                <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-muted-foreground/60 border border-transparent">
+                    <Database size={12} />
+                    <span>{filteredProjects.length} / {tabProjects.length}</span>
+                </div>
+
+                {/* Create New Button */}
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-white transition-all hover:scale-105 active:scale-95 shadow-sm",
+                        activeTab === 'service' ? "bg-purple-600 shadow-purple-500/20" : activeTab === 'military' ? "bg-emerald-600 shadow-emerald-500/20" : "bg-blue-600 shadow-blue-500/20"
+                    )}
+                >
+                    <Plus size={12} strokeWidth={3} />
+                    <span>{activeTab === 'service' ? 'Nový servis' : 'Nová zakázka'}</span>
+                </button>
+
+                {/* Bulk Mode Toggle */}
+                <button
+                    onClick={() => {
+                        if (isBulkMode) setRowSelection({});
+                        setIsBulkMode(!isBulkMode);
+                    }}
+                    className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all",
+                        isBulkMode ? "bg-rose-500 text-white border-rose-600" : "bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted"
+                    )}
+                >
+                    <CheckCircle2 size={12} strokeWidth={3} />
+                    <span>{isBulkMode ? 'Zrušit' : 'Hromadné akce'}</span>
+                </button>
+
+                {/* Bulk Actions (Delete/Complete) */}
+                {isBulkMode && Object.keys(rowSelection).length > 0 && (
+                    <div className="flex items-center gap-1.5 pl-1 border-l border-border/50 animate-in slide-in-from-left-2 transition-all">
+                        <button
+                            onClick={async () => {
+                                const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
+                                const count = selectedProjects.length;
+                                if (confirm(`Opravdu smazat ${count} zakázek?`)) {
+                                    const { error } = await supabase.from('projects').delete().in('id', selectedProjects.map(p => p.id));
+                                    if (error) toast.error(error.message);
+                                    else {
+                                        toast.success('Smazáno');
+                                        setRowSelection({});
+                                        setIsBulkMode(false);
+                                        fetchProjects();
+                                    }
+                                }
+                            }}
+                            className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                            title="Smazat vybrané"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                        <button
+                            onClick={async () => {
+                                const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
+                                if (confirm(`Změnit stav na Dokončeno u ${selectedProjects.length} položek?`)) {
+                                    const { error } = await supabase.from('projects').update({ production_status: 'Dokončeno' }).in('id', selectedProjects.map(p => p.id));
+                                    if (error) toast.error(error.message);
+                                    else {
+                                        toast.success('Hotovo');
+                                        setRowSelection({});
+                                        setIsBulkMode(false);
+                                        fetchProjects();
+                                    }
+                                }
+                            }}
+                            className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                            title="Označit jako hotové"
+                        >
+                            <PackageCheck size={14} />
+                        </button>
+                    </div>
+                )}
+            </div>
+        );
+
+        return () => setCustomToolbar(null);
+    }, [activeTab, filteredProjects.length, tabProjects.length, isBulkMode, rowSelection, tableTools, setCustomToolbar, fetchProjects]);
+
 
 
     // Memoize columns to include dynamic custom fields
@@ -261,125 +355,8 @@ export default function ProjektyPage() {
                     <DataTable
                         columns={tableColumns}
                         data={filteredProjects}
-                        leftToolbar={
-                            <div className="flex items-center gap-3 w-full">
-                                {/* Compact Count - Styled like Navbar Active Pill */}
-                                <div className="hidden md:flex items-center gap-1" title="Zobrazeno / Celkem projektů">
-                                    <span
-                                        className="flex items-center gap-1.5 px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80 transition-all"
-                                    >
-                                        <Database size={10} className="opacity-80" />
-                                        <span>
-                                            {filteredProjects.length}
-                                            <span className="opacity-50 mx-0.5">/</span>
-                                            {tabProjects.length}
-                                        </span>
-                                    </span>
-                                </div>
-
-                                {/* Create New Button */}
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm transition-all hover:scale-105 active:scale-95",
-                                        activeTab === 'service'
-                                            ? "bg-purple-600 text-white border-purple-500/20 shadow-purple-500/10"
-                                            : activeTab === 'military'
-                                                ? "bg-emerald-600 text-white border-emerald-500/20 shadow-emerald-500/10"
-                                                : "bg-blue-600 text-white border-blue-500/20 shadow-blue-500/10"
-                                    )}
-                                >
-                                    <Plus size={10} />
-                                    <span>{activeTab === 'service' ? 'Nový servis' : 'Nová zakázka'}</span>
-                                </button>
-
-                                {isBulkMode ? (
-                                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all">
-                                        <button
-                                            onClick={() => {
-                                                setIsBulkMode(false);
-                                                setRowSelection({});
-                                            }}
-                                            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-border bg-muted/50 text-muted-foreground hover:bg-muted transition-all"
-                                        >
-                                            <X size={10} />
-                                            <span>Zrušit</span>
-                                        </button>
-
-                                        {Object.keys(rowSelection).length > 0 && (
-                                            <button
-                                                onClick={async () => {
-                                                    const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
-                                                    const count = selectedProjects.length;
-
-                                                    if (confirm(`Opravdu chcete nenávratně smazat ${count} vybraných zakázek?`)) {
-                                                        const ids = selectedProjects.map(p => p.id);
-                                                        const { error } = await supabase
-                                                            .from('projects')
-                                                            .delete()
-                                                            .in('id', ids);
-
-                                                        if (error) {
-                                                            toast.error('Chyba při mazání: ' + error.message);
-                                                        } else {
-                                                            toast.success(`Smazáno ${count} zakázek.`);
-                                                            setRowSelection({});
-                                                            setIsBulkMode(false);
-                                                            fetchProjects();
-                                                        }
-                                                    }
-                                                }}
-                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-600 text-white border border-rose-500/20 shadow-lg shadow-rose-500/20 hover:bg-rose-700 transition-all animate-in zoom-in-95"
-                                            >
-                                                <Trash2 size={10} />
-                                                <span>Smazat ({Object.keys(rowSelection).length})</span>
-                                            </button>
-                                        )}
-
-                                        {Object.keys(rowSelection).length > 0 && (
-                                            <button
-                                                onClick={async () => {
-                                                    const selectedProjects = filteredProjects.filter((_, idx) => rowSelection[idx]);
-                                                    const count = selectedProjects.length;
-
-                                                    if (confirm(`Opravdu změnit stav výroby na "Dokončeno" u ${count} položek?`)) {
-                                                        const ids = selectedProjects.map(p => p.id);
-                                                        const { error } = await supabase
-                                                            .from('projects')
-                                                            .update({ production_status: 'Dokončeno' })
-                                                            .in('id', ids);
-
-                                                        if (error) {
-                                                            toast.error('Chyba: ' + error.message);
-                                                        } else {
-                                                            toast.success('Hromadná úprava dokončena');
-                                                            setRowSelection({});
-                                                            setIsBulkMode(false);
-                                                            fetchProjects();
-                                                        }
-                                                    }
-                                                }}
-                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all animate-in fade-in"
-                                            >
-                                                <PackageCheck size={10} />
-                                                <span>Dokončit ({Object.keys(rowSelection).length})</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() => setIsBulkMode(true)}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-border bg-background text-muted-foreground hover:bg-muted transition-all"
-                                        title="Zapne režim pro hromadné označování a mazání"
-                                    >
-                                        <CheckCircle2 size={10} />
-                                        <span>Hromadné akce</span>
-                                    </button>
-                                )}
-
-
-                            </div>
-                        }
+                        renderToolbar={setTableTools}
+                        leftToolbar={null}
                         toolbar={null}
                         toolbarSubtext={null}
                         onRowClick={(row) => {

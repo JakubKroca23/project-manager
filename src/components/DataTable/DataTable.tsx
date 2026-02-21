@@ -93,6 +93,7 @@ interface DataTableProps<TData, TValue> {
     onRowSelectionChange?: (selection: any) => void;
     rowSelection?: any;
     enableMultiSelect?: boolean;
+    renderToolbar?: (tools: React.ReactNode) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -117,6 +118,7 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange,
     rowSelection: externalRowSelection,
     enableMultiSelect = false,
+    renderToolbar,
 }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -261,6 +263,13 @@ export function DataTable<TData, TValue>({
         return () => setOnFit(null);
     }, [handleAutoFit, setOnFit]);
 
+    // Expose toolbar tools to parent if needed
+    React.useEffect(() => {
+        if (renderToolbar) {
+            renderToolbar(<ColumnToggle table={table} />);
+        }
+    }, [table, renderToolbar]);
+
     // Reset column sizing to defaults
     const handleResetSizing = useCallback(() => {
         table.resetColumnSizing();
@@ -277,7 +286,6 @@ export function DataTable<TData, TValue>({
 
                     {/* Left-Aligned Actions */}
                     <div className="flex items-center gap-1.5 ml-0">
-                        <ColumnToggle table={table} />
                         {toolbar}
                         {toolbarSubtext && (
                             <div className="ml-2 flex items-center">

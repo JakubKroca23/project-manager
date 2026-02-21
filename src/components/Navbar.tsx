@@ -38,7 +38,7 @@ export function Navbar() {
     const { checkPerm, canImport } = usePermissions();
     const { isAdmin } = useAdmin();
     const { searchTerm, setSearchTerm } = useSearch();
-    const { onFit, onJumpToToday, onZoomIn, onZoomOut, onToggleDesign, dayWidth, setIsImportWizardOpen } = useActions();
+    const { onFit, onJumpToToday, onZoomIn, onZoomOut, onToggleDesign, dayWidth, setIsImportWizardOpen, customToolbar } = useActions();
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -134,22 +134,19 @@ export function Navbar() {
                                             <div className="flex items-center gap-2">
                                                 <item.icon size={19} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} className="group-hover:opacity-100" />
                                                 <span className="text-[13px] font-black tracking-tight hidden sm:inline">{item.name}</span>
-                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.7)' }} />
-                                            </div>
-                                            {activeCategory && isActive && (
-                                                <div className="absolute top-[110%] left-1/2 -translate-x-1/2 z-10 flex justify-center pointer-events-none">
+                                                {activeCategory && isActive && (
                                                     <span
-                                                        className="text-[9px] font-black tracking-widest uppercase animate-in fade-in slide-in-from-top-1 px-3 py-1 rounded-lg bg-background border shadow-xl shadow-black/10 whitespace-nowrap"
+                                                        className="ml-1 text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-md border shadow-sm whitespace-nowrap bg-background"
                                                         style={{
                                                             color: activeColor,
-                                                            borderColor: activeColor,
-                                                            backgroundColor: 'white' // Force white background for maximum opacity
+                                                            borderColor: `${activeColor}44`,
                                                         }}
                                                     >
                                                         {activeCategory}
                                                     </span>
-                                                </div>
-                                            )}
+                                                )}
+                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.7)' }} />
+                                            </div>
                                         </button>
 
                                         <div
@@ -221,6 +218,11 @@ export function Navbar() {
 
                     {/* Center: Harmonogram & Today */}
                     <div className="flex-none flex items-center justify-center gap-1">
+                        {customToolbar && (
+                            <div className="flex items-center gap-2 px-3 border-r border-border/50 mr-2">
+                                {customToolbar}
+                            </div>
+                        )}
                         {onJumpToToday && (
                             <button
                                 onClick={onJumpToToday}
