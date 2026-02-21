@@ -9,7 +9,8 @@ import { useAdmin, ADMIN_EMAIL, type UserRequest, type UserProfile } from '@/hoo
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
 import { ActivityLogSection } from '@/components/profile/ActivityLogSection';
-import { Gamepad2 } from 'lucide-react';
+import { AccessoryCatalogSection } from '@/components/profile/AccessoryCatalogSection';
+import { Gamepad2, Smartphone } from 'lucide-react';
 
 const MaintenanceGameToggle = ({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) => {
     const [enabled, setEnabled] = useState(false);
@@ -817,6 +818,17 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
                                         <ActivityLogSection isAdmin={isAdmin} profiles={profiles} />
+                                    </div>
+                                </div>
+
+                                {/* --- ACCESSORY CATALOG --- */}
+                                <div className="space-y-3 pt-4 border-t border-border mt-6">
+                                    <div className="flex items-center gap-2 text-[11px] font-bold text-indigo-500 uppercase tracking-widest px-1">
+                                        <Smartphone size={14} />
+                                        <span>Katalog příslušenství</span>
+                                    </div>
+                                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                        <AccessoryCatalogSection />
                                     </div>
                                 </div>
                             </div>

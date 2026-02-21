@@ -59,3 +59,13 @@ export interface Milestone {
     created_at: string;
     updated_at: string;
 }
+
+export interface AccessoryCatalogItem {
+    id: string;
+    name: string;
+    category: string;
+    description?: string;
+    is_smart: boolean;
+    created_at: string;
+    updated_at: string;
+}

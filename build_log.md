@@ -239,3 +239,11 @@
     - **UI**: Interaktivní panel na pravé straně s rychlým přepínáním stavů (K objednání -> Objednáno -> Dodáno) a vazeb (Samostatně, S podvozkem, S nástavbou).
     - **Flexibilita**: Modul zabírá celou pravou stranu pro snadnou správu i při delším seznamu položek.
 - **Oprava**: Vyřešen chybějící import ikony `Hash` v detailu projektu, který způsoboval pád buildu.
+
+## [2026-02-21] - Katalog příslušenství a Správa předvoleb
+- **Změna**: Implementace globálního katalogu příslušenství.
+- **Detail**:
+    - **Databáze**: Zavedena tabulka `accessory_catalog` pro uložení standardních i chytrých (Smart) doplňků.
+    - **Admin Panel**: Přidána sekce "Katalog příslušenství" do administrace, umožňující plné CRUD operace nad globálními položkami.
+    - **Procurement (v2)**: Modul v detailu projektu nyní obsahuje sekci "Katalog příslušenství (Předvolby)", kde lze jedním kliknutím (Yes/No) přidávat nebo odebírat standardní položky k zakázce.
+    - **UI**: Použity nové ikony (`Bookmark`, `Smartphone`) a sytější barevné akcenty pro indikaci aktivních prémiových doplňků.

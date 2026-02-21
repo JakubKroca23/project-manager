@@ -6,6 +6,10 @@
 - [ ] Ověření funkčnosti `user_action_logs` v Supabase dashboardu.
 
 ## Hotové úkoly (Done)
+- [x] Implementace katalogu příslušenství (Accessory Catalog).
+- [x] Správa katalogu v Admin Panelu (vytváření, editace a mazání položek).
+- [x] Integrace katalogu do Procurement modulu (Checklist výběr pro projekty).
+- [x] Podpora pro "Smart" příslušenství v katalogu i projektu.
 - [x] Redesign detailu projektu (Glassmorphism, High-contrast).
 - [x] Implementace Mini Timeline v detailu zakázky.
 - [x] Nový modul "Položky k objednání" (Procurement) s integrací do Supabase.
