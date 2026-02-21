@@ -57,6 +57,8 @@ export function Navbar() {
     // Active Category Label
     const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : activeType === 'service' ? 'SERVIS' : null;
 
+    const isProjectsActive = pathname === '/projekty' || pathname?.startsWith('/projekty/');
+
     useEffect(() => {
         // User email logic
         const getUser = async () => {
@@ -102,18 +104,33 @@ export function Navbar() {
                     className="flex h-12 items-center justify-between gap-1"
                 >
                     {/* Navigation Items - Left Aligned Menu */}
-                    {/* Left: Zakázky */}
+                    {/* Left: Zakázky nebo Harmonogram (pokud jsme v zakázkách) */}
                     <div className="flex-1 flex items-center justify-start gap-1">
-                        {filteredNavItems.filter(i => i.name === 'ZAKÁZKY').map((item) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
-                            const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
-                            const isService = item.name === 'ZAKÁZKY' && activeType === 'service';
+                        {isProjectsActive ? (
+                            // Render HARMONOGRAM on the left when projects are active
+                            filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border border-transparent text-foreground hover:bg-primary/5 hover:border-primary/20",
+                                    )}
+                                >
+                                    <item.icon size={18} />
+                                    <span className="hidden sm:inline">{item.name}</span>
+                                </Link>
+                            ))
+                        ) : (
+                            // Render ZAKÁZKY on the left normally
+                            filteredNavItems.filter(i => i.name === 'ZAKÁZKY').map((item) => {
+                                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
+                                const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
+                                const isService = item.name === 'ZAKÁZKY' && activeType === 'service';
 
-                            let activeColor = item.color;
-                            if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
-                            if (isService && item.serviceColor) activeColor = item.serviceColor;
+                                let activeColor = item.color;
+                                if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
+                                if (isService && item.serviceColor) activeColor = item.serviceColor;
 
-                            if (item.submenu) {
                                 return (
                                     <div
                                         key={item.name}
@@ -160,7 +177,7 @@ export function Navbar() {
                                             <div
                                                 className="bg-background rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-1.5 flex flex-row items-center gap-1.5 whitespace-nowrap min-w-max border border-border/60 backdrop-blur-md"
                                             >
-                                                {item.submenu.map((sub) => {
+                                                {item.submenu!.map((sub) => {
                                                     const isSubMilitary = sub.name === 'VOJENSKÉ';
                                                     const isSubService = sub.name === 'SERVIS';
                                                     let subActiveColor = item.color;
@@ -211,49 +228,163 @@ export function Navbar() {
                                         </div>
                                     </div>
                                 );
-                            }
-                            return null;
-                        })}
+                            })
+                        )}
                     </div>
 
-                    {/* Center: Harmonogram & Today */}
+                    {/* Center: Harmonogram & Today (or Zakázky if active) */}
                     <div className="flex-none flex items-center justify-center gap-1">
                         {customToolbar && (
                             <div className="flex items-center gap-2 px-3 border-r border-border/50 mr-2">
                                 {customToolbar}
                             </div>
                         )}
-                        {onJumpToToday && (
-                            <button
-                                onClick={onJumpToToday}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
-                                title="Skočit na dnešek"
-                            >
-                                <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
-                                <span className="hidden lg:inline">Dnes</span>
-                            </button>
-                        )}
-                        {filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
-                            let activeColor = item.color;
 
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border",
-                                        isActive ? "bg-primary/10 border-primary/30" : "border-transparent text-foreground hover:bg-primary/5 hover:border-primary/20"
-                                    )}
-                                    style={{
-                                        color: isActive ? activeColor : undefined,
-                                    }}
-                                >
-                                    <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} />
-                                    <span className="hidden sm:inline">{item.name}</span>
-                                </Link>
-                            );
-                        })}
+                        {isProjectsActive ? (
+                            // Render ZAKÁZKY in center when active
+                            filteredNavItems.filter(i => i.name === 'ZAKÁZKY').map((item) => {
+                                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)) || (item.name === 'ZAKÁZKY' && pathname?.startsWith('/projekty/'));
+                                const isMilitary = item.name === 'ZAKÁZKY' && activeType === 'military';
+                                const isService = item.name === 'ZAKÁZKY' && activeType === 'service';
+
+                                let activeColor = item.color;
+                                if (isMilitary && item.militaryColor) activeColor = item.militaryColor;
+                                if (isService && item.serviceColor) activeColor = item.serviceColor;
+
+                                return (
+                                    <div
+                                        key={item.name}
+                                        className="relative group h-full flex items-center"
+                                        onMouseEnter={() => setOpenSubmenu(item.name)}
+                                        onMouseLeave={() => setOpenSubmenu(null)}
+                                    >
+                                        <button
+                                            className={cn(
+                                                "relative flex flex-col items-center justify-center px-4 py-1.5 rounded-lg transition-all duration-200 uppercase whitespace-nowrap border-2",
+                                                isActive ? "bg-primary/[0.08] shadow-sm" : "hover:bg-primary/5 border-transparent"
+                                            )}
+                                            style={{
+                                                color: isActive ? activeColor : 'hsl(var(--foreground))',
+                                                borderColor: isActive ? `${activeColor}44` : 'transparent',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <item.icon size={19} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} className="group-hover:opacity-100" />
+                                                <span className="text-[13px] font-black tracking-tight hidden sm:inline">{item.name}</span>
+                                                {activeCategory && isActive && (
+                                                    <span
+                                                        className="ml-1 text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-md border shadow-sm whitespace-nowrap bg-background"
+                                                        style={{
+                                                            color: activeColor,
+                                                            borderColor: `${activeColor}44`,
+                                                        }}
+                                                    >
+                                                        {activeCategory}
+                                                    </span>
+                                                )}
+                                                <ChevronDown size={12} className={cn("transition-transform duration-200", openSubmenu === item.name && "rotate-180")} style={{ color: isActive ? activeColor : 'hsl(var(--foreground) / 0.7)' }} />
+                                            </div>
+                                        </button>
+
+                                        <div
+                                            className={cn(
+                                                "absolute top-full left-1/2 -translate-x-1/2 pt-2 z-[20100] transition-all duration-300 ease-out",
+                                                openSubmenu === item.name
+                                                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                                                    : "opacity-0 -translate-y-2 pointer-events-none"
+                                            )}
+                                        >
+                                            <div
+                                                className="bg-background rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-1.5 flex flex-row items-center gap-1.5 whitespace-nowrap min-w-max border border-border/60 backdrop-blur-md"
+                                            >
+                                                {item.submenu!.map((sub) => {
+                                                    const isSubMilitary = sub.name === 'VOJENSKÉ';
+                                                    const isSubService = sub.name === 'SERVIS';
+                                                    let subActiveColor = item.color;
+                                                    if (isSubMilitary && item.militaryColor) subActiveColor = item.militaryColor;
+                                                    if (isSubService && item.serviceColor) subActiveColor = item.serviceColor;
+
+                                                    const isSubActive =
+                                                        (sub.href.includes('type=military') && activeType === 'military') ||
+                                                        (sub.href.includes('type=civil') && activeType === 'civil') ||
+                                                        (sub.href.includes('type=service') && activeType === 'service');
+
+                                                    return (
+                                                        <Link
+                                                            key={sub.name}
+                                                            href={sub.href}
+                                                            className={cn(
+                                                                "text-[10px] font-black tracking-[0.2em] transition-all uppercase px-4 py-2 rounded-md flex items-center justify-center border",
+                                                                isSubActive
+                                                                    ? "shadow-sm border-current bg-background"
+                                                                    : "text-foreground border-transparent hover:bg-foreground/[0.08]"
+                                                            )}
+                                                            style={{
+                                                                backgroundColor: isSubActive ? `${subActiveColor}20` : undefined,
+                                                                color: isSubActive ? subActiveColor : undefined,
+                                                                borderColor: isSubActive ? `${subActiveColor}40` : undefined,
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                if (!isSubActive) {
+                                                                    e.currentTarget.style.color = subActiveColor!;
+                                                                    e.currentTarget.style.backgroundColor = `${subActiveColor}15`;
+                                                                    e.currentTarget.style.borderColor = `${subActiveColor}40`;
+                                                                }
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!isSubActive) {
+                                                                    e.currentTarget.style.color = 'hsl(var(--foreground))';
+                                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                                    e.currentTarget.style.borderColor = 'transparent';
+                                                                }
+                                                            }}
+                                                            onClick={() => setOpenSubmenu(null)}
+                                                        >
+                                                            {sub.name}
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            // Render HARMONOGRAM and Today normally
+                            <>
+                                {onJumpToToday && (
+                                    <button
+                                        onClick={onJumpToToday}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
+                                        title="Skočit na dnešek"
+                                    >
+                                        <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
+                                        <span className="hidden lg:inline">Dnes</span>
+                                    </button>
+                                )}
+                                {filteredNavItems.filter(i => i.name === 'HARMONOGRAM').map((item) => {
+                                    const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                                    let activeColor = item.color;
+
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={cn(
+                                                "flex items-center gap-1.5 px-6 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all duration-200 uppercase whitespace-nowrap border",
+                                                isActive ? "bg-primary/10 border-primary/30" : "border-transparent text-foreground hover:bg-primary/5 hover:border-primary/20"
+                                            )}
+                                            style={{
+                                                color: isActive ? activeColor : undefined,
+                                            }}
+                                        >
+                                            <item.icon size={18} style={{ color: isActive ? activeColor : 'hsl(var(--foreground))' }} />
+                                            <span className="hidden sm:inline">{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </>
+                        )}
                     </div>
 
                     {/* Right: Search & Tools */}

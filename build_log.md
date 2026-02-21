@@ -193,3 +193,9 @@
 - **Detail**:
     - **Plynulejší animace**: Přidány Tailwind animace `animate-in fade-in zoom-in-95` pro hladší otevírání detailu milníku.
     - **Okamžité zavírání**: Odstraněna umělá prodleva 300ms při odjezdu myší z ikony. UI nyní reaguje okamžitě, což zvyšuje pocit svižnosti celé aplikace.
+
+- **Změna**: Dynamické uspořádání Navbaru dle aktivní sekce.
+- **Detail**:
+    - **Režim Zakázky**: Pokud je uživatel v sekci Projekty, tlačítko "ZAKÁZKY" (včetně submenu) se přesune do **středu** Navbaru spolu s nástrojovou lištou. Tlačítko "HARMONOGRAM" se posune **doleva**.
+    - **Režim Harmonogram**: V ostatních případech zůstává rozvržení standardní (Harmonogram ve středu, Zakázky vlevo).
+    - Tato změna zlepšuje ergonomii a soustředění na aktivní modul aplikace.
