@@ -461,13 +461,13 @@
   z-index: 2000;
   width: 250px;
   flex-shrink: 0;
-  background: var(--background);
+  background: color-mix(in srgb, var(--timeline-today-bg), var(--background) 92%);
   border-right: 1px solid var(--border);
   display: flex;
   align-items: center;
   padding: 0 0.5rem;
   text-decoration: none;
-  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .project-info-content {

@@ -606,6 +606,65 @@ const Timeline: React.FC = () => {
         return () => window.removeEventListener('projects-updated', handleGlobalRefresh);
     }, [fetchProjects, fetchMilestones]);
 
+    const getActivePhaseColor = (project: Project) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (project.project_type === 'service') {
+            return '#6366f1';
+        }
+
+        const t_start = parseDate(project.created_at);
+        const t_chassis = parseDate(project.chassis_delivery || project.custom_fields?.chassis_delivery);
+        const t_body = parseDate(project.body_delivery || project.custom_fields?.body_delivery);
+        const t_handover = parseDate(project.customer_handover || project.custom_fields?.customer_handover);
+        const t_deadline = parseDate(project.deadline || project.custom_fields?.deadline);
+        const customMountingEnd = parseDate(project.custom_fields?.mounting_end_date);
+
+        const mDates = [t_chassis, t_body, t_handover, t_deadline].filter((d): d is Date => d !== null);
+
+        // 1. Initial Phase
+        if (t_start && mDates.length > 0) {
+            const firstM = new Date(Math.min(...mDates.map(d => d.getTime())));
+            if (today >= t_start && today < firstM) {
+                return colors.phaseInitial?.color || '#bae6fd';
+            }
+        }
+
+        // 2. Mounting Phase
+        if (t_chassis && t_body) {
+            const start = new Date(Math.min(t_chassis.getTime(), t_body.getTime()));
+            const end = new Date(Math.max(t_chassis.getTime(), t_body.getTime()));
+            if (today >= start && today < end) {
+                return colors.phaseMounting?.color || '#4ade80';
+            }
+        }
+
+        // 3. Buffer Yellow
+        const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
+        if (lastMainM.length > 0) {
+            const mountingStart = new Date(Math.max(...lastMainM.map(d => d.getTime())));
+            let mountingEnd;
+            if (customMountingEnd) {
+                mountingEnd = customMountingEnd;
+            } else {
+                mountingEnd = new Date(mountingStart);
+                mountingEnd.setDate(mountingEnd.getDate() + 14);
+            }
+            if (today >= mountingStart && today < mountingEnd) {
+                // Priority logic check
+                if (design.usePriorityColors && project.priority) {
+                    const priorityKey = `priority${project.priority}` as keyof typeof colors;
+                    const priorityConfig = colors[priorityKey] as any;
+                    if (priorityConfig) return priorityConfig.color;
+                }
+                return colors.phaseBufferYellow?.color || '#facc15';
+            }
+        }
+
+        return null;
+    };
+
     const handleProjectUpdate = useCallback((updatedProject: Project) => {
         setProjects((prev: Project[]) => prev.map((p: Project) => p.id === updatedProject.id ? updatedProject : p));
         fetchMilestones(); // Refresh milestones too
@@ -1230,17 +1289,22 @@ const Timeline: React.FC = () => {
                                     const sectorColor = SECTOR_COLORS[type] || SECTOR_COLORS.civil;
 
                                     // Check visibility based on activeTypes -> REMOVED per user request
-                                    /* 
+                                    /*
                                     const type = project.project_type || 'civil';
                                     if (!activeTypes[type]) return null;
                                     */
+
+                                    const activePhaseColor = getActivePhaseColor(project);
 
                                     return (
                                         <div key={project.id} className="timeline-row is-project">
                                             <Link
                                                 href={`/projekty/${project.id}?type=${project.project_type || 'civil'}`}
                                                 className="project-info-sticky transition-colors group"
-                                                style={{ borderLeft: `10px solid ${sectorColor}` }}
+                                                style={{
+                                                    borderLeft: `10px solid ${sectorColor}`,
+                                                    backgroundColor: activePhaseColor ? `${activePhaseColor}15` : undefined
+                                                }}
                                             >
                                                 <div className="project-info-content pr-2 min-w-0 pl-1">
                                                     <div className="flex flex-col h-full justify-center overflow-hidden py-0.5">
