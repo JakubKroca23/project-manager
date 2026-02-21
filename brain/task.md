@@ -49,7 +49,13 @@
 - [x] Integrace čísel dnů do sumárního řádku CELKEM (Header consolidation).
 - [x] Dynamický redesign levého sloupce zakázek (OP#, Zákazník, Název, Vedoucí).
 - [x] Vylepšení indikátoru "Dnes" (4px rameček, z-index fix svislé linky).
-- [x] Úprava výšek sumárních řádků (29px CELKEM, 40px SERVIS).
+- **[x] Redesign Navbaru (přesun štítků kategorie vedle tlačítka).**
+- **[x] Implementace Global Toolbar systému (vstřikování tlačítek zespodu do Navbaru).**
+- **[x] Integrace ovládání tabulky Projekty (Nová zakázka, Hromadné akce, Sloupce) do Navbaru.**
+- **[x] Redesign milníků na "Extrahovaný" styl (outline bez kruhu).**
+- **[x] Dynamické barvy ohraničení milníků dle stavu (Bílá/Zelená/Červená).**
+- **[x] Implementace permanentních pravidel komunikace do `.agent/rules.md`.**
+- **[x] Provedení aktualizace paměti a logů dle workflow `/logging`.**
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

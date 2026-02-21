@@ -175,3 +175,17 @@
 - **Detail**: Dnešní den je zvýrazněn 4px červeným rámečkem. Svislá červená linka nyní začíná až pod hlavičkou dnů a schovává se pod sticky sloupec zakázek (z-index fix).
 - **Změna**: Úprava výšek sumárních řádků.
 - **Detail**: Výška řádku CELKEM zvýšena na 29px a řádku SERVIS na 40px pro lepší přehlednost stacked barů.
+
+## [2026-02-21] - Navbar Redesign & Global Toolbar Integration
+- **Změna**: Redesign Navbaru a integrace dynamické lišty (Global Toolbar).
+- **Detail**:
+    - **Aktivní sekce**: Štítek aktivní podkategorie (CIVIL/SERVIS/VOJENSKÉ) přesunut zespodu přímo vedle názvu "ZAKÁZKY" pro úsporu místa a lepší vizuální vazbu.
+    - **Injectable Toolbar**: Rozšířen `ActionProvider` o `customToolbar`, který umožňuje jednotlivým stránkám (např. Projekty) vkládat své specifické akce přímo do globálního Navbaru.
+- **Změna**: Modernizace stránky Projekty.
+- **Detail**:
+    - Tlačítka "Nová zakázka", "Hromadné akce", "Sloupce" a počítadlo záznamů přesunuta do globálního Navbaru.
+    - Odstraněn vnitřní toolbar z `DataTable`, což maximalizuje prostor pro samotná data.
+- **Změna**: "Extrahovaný" styl milníků v Timeline.
+- **Detail**:
+    - Milníky již nemají pevné kruhové pozadí. Místo toho využívají techniku `drop-shadow` k vytvoření tlustého ohraničení (1.8px) kopírujícího tvar ikony.
+    - **Stavová logika**: Ohraničení je bílé pro plánované, zelené pro doručené a červené pro zpožděné milníky. To zajišťuje okamžitý přehled o stavu bez nutnosti otevírat detail.

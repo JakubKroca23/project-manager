@@ -131,3 +131,11 @@
 - **Layout Adjustments**: 
     - Increased 'CELKEM' row height to 29px and 'SERVIS' to 40px to better accommodate content and stacked objects.
     - Updated `handleFitVertical` to include these new fixed heights in available space calculations.
+
+## 2026-02-21: Navbar Redesign & Global Toolbar Injection
+- **Architecture (Injectable UI)**: Implemented a 'Global Toolbar' pattern. Pages can now inject their context-specific actions (e.g., table controls, creation buttons) directly into the main Navbar using the `ActionProvider`'s `customToolbar` state. This centralizes global actions and declutters the main content area.
+- **Navbar UX**: Moved the active category label (e.g., CIVIL, SERVICE) to the right side of the main "ZAKÁZKY" button. This layout change provides a more streamlined header and clearer visual hierarchy.
+- **Milestone Design (v3 - "Extraction")**: 
+    - Completely removed the circular background from milestones.
+    - Implemented a "shape-outline" effect using multiple `drop-shadow` CSS filters. The outline follows the exact SVG path of the icon.
+    - **Semantic Bordering**: The outline color dynamically reflects the milestone status: White (Default/Planned), Green (Delivered/Completed), and Red (Overdue). This allows for rapid project health assessment directly from the chart.

@@ -21,3 +21,8 @@
 - Při výskytu chyby nejdříve vytvoř test, který chybu reprodukuje.
 - Oprav chybu a ověř, že testy procházejí.
 - Zdokumentuj příčinu a řešení v logu.
+## Komunikace
+- **Styl**: Komunikuj profesionálně, věcně a stručně.
+- **Struktura**: Každá odpověď by měla obsahovat jasné shrnutí provedených změn v češtině (pomocí odrážek nebo strukturovaného seznamu).
+- **Jazyk**: Veškerý text pro uživatele (včetně vysvětlení a shrnutí) piš v češtině, pokud není výslovně požadováno jinak.
+- **Konzistence**: Udržuj tento styl komunikace trvale ve všech budoucích interakcích.
