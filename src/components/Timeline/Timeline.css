@@ -454,6 +454,11 @@
   border-right: 2px solid color-mix(in srgb, var(--primary), transparent 50%);
 }
 
+.is-stacked-heavy {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  z-index: 2;
+}
+
 /* STICKY PANEL S PROJEKTY */
 .project-info-sticky {
   position: sticky;

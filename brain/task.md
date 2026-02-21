@@ -66,3 +66,4 @@
 - **[x] Reorganizace Navbaru (ovládání vlevo, navigace uprostřed).**
 - **[x] Oprava popupu milníků (animace "výjezdu" z ikony + přístupnost myší).**
 - **[x] Kompletní reorganizace Navbaru (Harmonogram/Zakázky vlevo, Ovládání uprostřed).**
+- **[x] Zvýraznění hustoty projektů (ztmavení při souběhu 3+ projektů v summary řádku).**

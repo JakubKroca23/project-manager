@@ -1225,18 +1225,39 @@ const Timeline: React.FC = () => {
 
                                                         {/* Grid lines inside summary for parity */}
                                                         <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
-                                                            {days.map((day: Date, idx: number) => (
-                                                                <div
-                                                                    key={idx}
-                                                                    className={cn(
-                                                                        `timeline-grid-column`,
-                                                                        isWeekend(day) && 'is-weekend',
-                                                                        isToday(day) && 'is-today',
-                                                                        isWeekStart(day) && 'is-week-start'
-                                                                    )}
-                                                                    style={{ width: dayWidth }}
-                                                                />
-                                                            ))}
+                                                            {(() => {
+                                                                // Calculate overlap counts for this sector
+                                                                const zoneCounts = new Array(days.length).fill(0);
+                                                                sector.projects.forEach(p => {
+                                                                    const start = parseDate(p.created_at);
+                                                                    const end = parseDate(p.deadline) || parseDate(p.customer_handover);
+                                                                    if (!start || !end) return;
+
+                                                                    const sIdx = Math.max(0, Math.floor((start.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
+                                                                    const eIdx = Math.min(days.length - 1, Math.floor((end.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
+
+                                                                    for (let i = sIdx; i <= eIdx; i++) {
+                                                                        zoneCounts[i]++;
+                                                                    }
+                                                                });
+
+                                                                return days.map((day: Date, idx: number) => {
+                                                                    const count = zoneCounts[idx];
+                                                                    return (
+                                                                        <div
+                                                                            key={idx}
+                                                                            className={cn(
+                                                                                `timeline-grid-column`,
+                                                                                isWeekend(day) && 'is-weekend',
+                                                                                isToday(day) && 'is-today',
+                                                                                isWeekStart(day) && 'is-week-start',
+                                                                                count >= 3 && 'is-stacked-heavy'
+                                                                            )}
+                                                                            style={{ width: dayWidth }}
+                                                                        />
+                                                                    );
+                                                                });
+                                                            })()}
                                                         </div>
 
                                                         {sector.projects.map((p: Project) => (

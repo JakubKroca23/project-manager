@@ -218,3 +218,9 @@
     - **Střed**: Přesunuty ovládací prvky specifické pro stránku (Toolbar, tlačítko Dnes).
     - **Pravá strana**: Zůstává vyhledávání a systémové nástroje.
 - **Oprava**: Doplněn chybějící import cn v TimelineBar.tsx.
+
+- **Změna**: Vizuální zvýraznění kritického nahromadění projektů (Stacking).
+- **Detail**:
+    - **Detekce překryvu**: V sumárních řádcích (Celkem, Servis) se nyní automaticky vypočítává počet souběžných projektů pro každý den.
+    - **Vizuální efekt**: Pokud se v jednom čase překrývají **3 a více projektů**, daná oblast v řádku se razantně ztmaví (gba(0,0,0,0.45)).
+    - **Účel**: Okamžitá identifikace kapacitně vytížených období přímo na časové ose bez nutnosti rozbalovat detaily.
