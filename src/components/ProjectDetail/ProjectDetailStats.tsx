@@ -10,7 +10,6 @@ import {
     AlertTriangle,
     Info,
     LayoutGrid,
-    Tag,
     Fingerprint
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,13 +25,12 @@ export function ProjectDetailStats({ project, isEditing, onChange }: ProjectDeta
     const p = project;
 
     const StatBox = ({ label, icon, value, isEditable, field, options, children }: any) => (
-        <div className="flex flex-col gap-1 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 shadow-lg group hover:border-zinc-700 transition-all">
+        <div className="flex flex-col gap-1.5 px-5 py-4 rounded-2xl bg-white border-2 border-slate-950 shadow-[4px_4px_0px_rgba(0,0,0,1)] group hover:translate-y-[-2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all">
             <div className="flex items-center justify-between">
-                <label className="text-[9px] font-black uppercase tracking-[0.1em] text-zinc-500 flex items-center gap-1.5">
-                    <span className="text-primary/70">{icon}</span>
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 flex items-center gap-2">
+                    <span className="text-slate-950">{icon}</span>
                     {label}
                 </label>
-                {isEditing && isEditable && <Tag size={8} className="text-primary/40" />}
             </div>
             <div className="min-h-[1.5rem] flex items-center">
                 {isEditing && isEditable ? (
@@ -40,10 +38,10 @@ export function ProjectDetailStats({ project, isEditing, onChange }: ProjectDeta
                         <select
                             value={value || ''}
                             onChange={(e) => onChange(field, e.target.value)}
-                            className="w-full text-xs font-bold bg-zinc-800 border-zinc-700 text-zinc-100 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary/50"
+                            className="w-full text-xs font-black bg-slate-50 border-2 border-slate-950 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary/20"
                         >
                             {options.map((opt: any) => (
-                                <option key={opt.value} value={opt.value} className="bg-zinc-900">{opt.label}</option>
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
                         </select>
                     ) : (
@@ -51,28 +49,28 @@ export function ProjectDetailStats({ project, isEditing, onChange }: ProjectDeta
                             type="text"
                             value={value || ''}
                             onChange={(e) => onChange(field, e.target.value)}
-                            className="w-full text-xs font-bold bg-zinc-800 border-zinc-700 text-zinc-100 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary/50"
+                            className="w-full text-xs font-black bg-slate-50 border-2 border-slate-950 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     )
                 ) : (
-                    children || <span className="text-[12px] font-black text-zinc-100 truncate tracking-tight">{value || '—'}</span>
+                    children || <span className="text-[13px] font-black text-slate-950 truncate tracking-tight">{value || '—'}</span>
                 )}
             </div>
         </div>
     );
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            <StatBox label="Zákazník" icon={<Building2 size={11} />} value={p.customer} field="customer" isEditable />
-            <StatBox label="Vedoucí projektu" icon={<User size={11} />} value={p.manager} field="manager" isEditable />
-            <StatBox label="Abra Project" icon={<Hash size={11} />} value={p.abra_project} field="abra_project" isEditable />
-            <StatBox label="Kategorie" icon={<LayoutGrid size={11} />} field="category" isEditable>
-                <CategoryChip value={p.category} className="text-[9px] px-2.5 py-1 font-black bg-zinc-800 border-zinc-700 text-zinc-300" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <StatBox label="Zákazník" icon={<Building2 size={12} strokeWidth={3} />} value={p.customer} field="customer" isEditable />
+            <StatBox label="Vedoucí projektu" icon={<User size={12} strokeWidth={3} />} value={p.manager} field="manager" isEditable />
+            <StatBox label="Abra Project" icon={<Hash size={12} strokeWidth={3} />} value={p.abra_project} field="abra_project" isEditable />
+            <StatBox label="Kategorie" icon={<LayoutGrid size={12} strokeWidth={3} />} field="category" isEditable>
+                <CategoryChip value={p.category} className="text-[10px] px-3 py-1 font-black bg-slate-100 border-2 border-slate-950 text-slate-950 rounded-lg" />
             </StatBox>
 
             <StatBox
                 label="Priorita"
-                icon={<AlertTriangle size={11} />}
+                icon={<AlertTriangle size={12} strokeWidth={3} />}
                 field="priority"
                 isEditable
                 options={[
@@ -82,45 +80,43 @@ export function ProjectDetailStats({ project, isEditing, onChange }: ProjectDeta
                 ]}
             >
                 <div className={cn(
-                    "flex items-center gap-2 px-2 py-0.5 rounded-md border",
-                    p.priority === 1 ? "bg-rose-500/10 border-rose-500/30 text-rose-500" :
-                        p.priority === 3 ? "bg-zinc-800 border-zinc-700 text-zinc-400" :
-                            "bg-blue-500/10 border-blue-500/30 text-blue-500"
+                    "flex items-center gap-2 px-3 py-1 rounded-lg border-2 border-slate-950 font-black text-[10px] uppercase tracking-wider",
+                    p.priority === 1 ? "bg-rose-100 text-rose-600 shadow-[2px_2px_0px_#e11d48]" :
+                        p.priority === 3 ? "bg-slate-100 text-slate-600 shadow-[2px_2px_0px_#475569]" :
+                            "bg-blue-100 text-blue-600 shadow-[2px_2px_0px_#2563eb]"
                 )}>
                     <div className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        p.priority === 1 ? "bg-rose-500" : p.priority === 3 ? "bg-zinc-500" : "bg-blue-500"
+                        "w-2 h-2 rounded-full",
+                        p.priority === 1 ? "bg-rose-600" : p.priority === 3 ? "bg-slate-600" : "bg-blue-600"
                     )} />
-                    <span className="text-[10px] font-black uppercase tracking-wider">
-                        {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
-                    </span>
+                    {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
                 </div>
             </StatBox>
 
-            <StatBox label="Typ" icon={<Shield size={11} />} field="project_type" isEditable options={[
+            <StatBox label="Typ" icon={<Shield size={12} strokeWidth={3} />} field="project_type" isEditable options={[
                 { label: 'Civil', value: 'civil' },
                 { label: 'Vojenské', value: 'military' },
                 { label: 'Servis', value: 'service' }
             ]}>
                 <span className={cn(
-                    "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border",
+                    "px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border-2 border-slate-950 shadow-[2px_2px_0px_black]",
                     p.project_type === 'military'
-                        ? 'bg-emerald-600/20 text-emerald-500 border-emerald-500/30'
+                        ? 'bg-emerald-100 text-emerald-700'
                         : p.project_type === 'service'
-                            ? 'bg-purple-600/20 text-purple-500 border-purple-500/30'
-                            : 'bg-blue-600/20 text-blue-500 border-blue-500/30'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-blue-100 text-blue-700'
                 )}>
                     {p.project_type === 'military' ? 'Vojenské' : p.project_type === 'service' ? 'Servis' : 'Civil'}
                 </span>
             </StatBox>
 
-            <StatBox label="Status" icon={<Info size={11} />} field="status" isEditable>
-                <span className="text-[10px] font-black uppercase text-zinc-400 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
+            <StatBox label="Status" icon={<Info size={12} strokeWidth={3} />} field="status" isEditable>
+                <span className="text-[10px] font-black uppercase text-slate-950 bg-slate-100 px-3 py-1 rounded-lg border-2 border-slate-950 shadow-[2px_2px_0px_black]">
                     {p.status || 'Aktivní'}
                 </span>
             </StatBox>
 
-            <StatBox label="ID Zakázky" icon={<Fingerprint size={11} />} value={p.id} />
+            <StatBox label="ID Zakázky" icon={<Fingerprint size={12} strokeWidth={3} />} value={p.id} />
         </div>
     );
 }

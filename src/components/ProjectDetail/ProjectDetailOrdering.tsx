@@ -8,12 +8,10 @@ import {
     Plus,
     Truck,
     Box,
-    Zap,
     Trash2,
     CheckCircle2,
     Clock,
-    AlertCircle,
-    ShoppingCart
+    ShoppingCart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -91,85 +89,83 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
         }
     }
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Dodáno': return 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30';
-            case 'Objednáno': return 'bg-blue-600/20 text-blue-400 border-blue-500/30';
-            default: return 'bg-amber-600/20 text-amber-400 border-amber-500/30';
-        }
-    };
-
     const getSourceIcon = (source: string) => {
         switch (source) {
-            case 'S podvozkem': return <Truck size={10} />;
-            case 'S nástavbou': return <Box size={10} />;
-            default: return <ShoppingCart size={10} />;
+            case 'S podvozkem': return <Truck size={12} strokeWidth={3} />;
+            case 'S nástavbou': return <Box size={12} strokeWidth={3} />;
+            default: return <ShoppingCart size={12} strokeWidth={3} />;
         }
     };
 
     return (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl">
-            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 text-primary rounded-xl border border-primary/20">
-                        <ShoppingCart size={18} />
+        <div className="bg-white border-2 border-slate-950 rounded-2xl overflow-hidden flex flex-col h-full shadow-[8px_8px_0px_rgba(0,0,0,1)] font-sans">
+            <div className="px-6 py-5 border-b-2 border-slate-950 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-slate-950 text-white rounded-xl">
+                        <ShoppingCart size={20} strokeWidth={3} />
                     </div>
                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-widest text-zinc-100">Procurement / Položky</h3>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">Správa komponentů</p>
+                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-950">Procurement / Položky</h3>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Technická kontrola objednávek</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-zinc-400 bg-zinc-800 px-2.5 py-1 rounded-full border border-zinc-700">
+                <div>
+                    <span className="text-xs font-black text-slate-950 bg-white border-2 border-slate-950 px-3 py-1 rounded-full shadow-[2px_2px_0px_black]">
                         {items.filter(i => i.status === 'Dodáno').length} / {items.length}
                     </span>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-[400px]">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-[400px]">
                 {loading ? (
-                    <div className="flex items-center justify-center h-20 text-zinc-600 animate-pulse text-[10px] uppercase font-black tracking-widest">
+                    <div className="flex items-center justify-center h-20 text-slate-950 animate-pulse text-[11px] uppercase font-black tracking-[0.2em]">
                         Načítám seznam...
                     </div>
                 ) : items.length === 0 && !isAdding ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-30">
-                        <Package size={32} className="text-zinc-500" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Žádné položky k objednání</p>
+                    <div className="flex flex-col items-center justify-center py-24 text-center space-y-6">
+                        <div className="w-16 h-16 bg-slate-50 border-2 border-slate-200 border-dashed rounded-full flex items-center justify-center">
+                            <Package size={32} className="text-slate-300" />
+                        </div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Žádné položky k objednání</p>
                     </div>
                 ) : (
                     <>
                         {items.map(item => (
                             <div
                                 key={item.id}
-                                className="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all shadow-md"
+                                className="group flex items-center justify-between p-4 rounded-2xl bg-white border-2 border-slate-950 hover:bg-slate-50 transition-all shadow-[4px_4px_0px_black] active:translate-y-1 active:shadow-none"
                             >
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-5">
                                     <button
                                         onClick={() => {
                                             const nextStatus = item.status === 'K objednání' ? 'Objednáno' : item.status === 'Objednáno' ? 'Dodáno' : 'K objednání';
                                             updateItem(item.id, { status: nextStatus });
                                         }}
                                         className={cn(
-                                            "w-7 h-7 rounded-lg flex items-center justify-center transition-all border",
+                                            "w-8 h-8 rounded-xl flex items-center justify-center transition-all border-2",
                                             item.status === 'Dodáno'
-                                                ? "bg-emerald-600/30 text-emerald-400 border-emerald-500/40"
-                                                : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700"
+                                                ? "bg-emerald-500 text-white border-slate-950"
+                                                : item.status === 'Objednáno'
+                                                    ? "bg-blue-500 text-white border-slate-950"
+                                                    : "bg-white border-slate-950 text-slate-950 hover:bg-slate-100"
                                         )}
                                     >
-                                        {item.status === 'Dodáno' ? <CheckCircle2 size={16} /> : <div className="w-2.5 h-2.5 rounded-full border-2 border-current opacity-30" />}
+                                        {item.status === 'Dodáno' ? <CheckCircle2 size={18} strokeWidth={3} /> : <div className="w-3 h-3 rounded-full border-[3px] border-current" />}
                                     </button>
 
                                     <div className="flex flex-col">
                                         <span className={cn(
-                                            "text-[13px] font-black tracking-tight",
-                                            item.status === 'Dodáno' ? "text-zinc-500 line-through" : "text-zinc-100"
+                                            "text-sm font-black tracking-tight",
+                                            item.status === 'Dodáno' ? "text-slate-400 line-through" : "text-slate-950"
                                         )}>
                                             {item.name}
                                         </span>
-                                        <div className="flex items-center gap-2 mt-1.5">
+                                        <div className="flex items-center gap-2 mt-2">
                                             <span className={cn(
-                                                "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border",
-                                                getStatusColor(item.status)
+                                                "text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded border-2 border-slate-950 shadow-[2px_2px_0px_black]",
+                                                item.status === 'Dodáno' ? "bg-emerald-100 text-emerald-700" :
+                                                    item.status === 'Objednáno' ? "bg-blue-100 text-blue-700" :
+                                                        "bg-amber-100 text-amber-700"
                                             )}>
                                                 {item.status}
                                             </span>
@@ -178,7 +174,7 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                                                     const nextSource = item.source === 'Samostatně' ? 'S podvozkem' : item.source === 'S podvozkem' ? 'S nástavbou' : 'Samostatně';
                                                     updateItem(item.id, { source: nextSource });
                                                 }}
-                                                className="text-[8px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 hover:text-zinc-300 transition-colors bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700"
+                                                className="text-[9px] font-black uppercase tracking-widest text-slate-950 flex items-center gap-2 hover:bg-white transition-colors bg-slate-100 px-2.5 py-0.5 rounded border-2 border-slate-950 shadow-[2px_2px_0px_black]"
                                             >
                                                 {getSourceIcon(item.source)}
                                                 {item.source}
@@ -187,12 +183,12 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => deleteItem(item.id)}
-                                        className="p-2 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
+                                        className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                                     >
-                                        <Trash2 size={15} />
+                                        <Trash2 size={18} strokeWidth={3} />
                                     </button>
                                 </div>
                             </div>
@@ -201,7 +197,7 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                 )}
 
                 {isAdding ? (
-                    <div className="flex flex-col gap-3 p-4 bg-zinc-900 border border-primary/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+                    <div className="flex flex-col gap-4 p-5 bg-slate-50 border-2 border-slate-950 rounded-2xl animate-in fade-in slide-in-from-top-2 shadow-[6px_6px_0px_rgba(0,0,0,0.1)]">
                         <input
                             autoFocus
                             type="text"
@@ -209,37 +205,37 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                             onChange={(e) => setNewItemName(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addItem()}
                             onBlur={() => !newItemName && setIsAdding(false)}
-                            placeholder="Název položky..."
-                            className="text-xs font-bold bg-zinc-950 border border-zinc-800 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                            placeholder="Zadejte název součástky..."
+                            className="text-sm font-black bg-white border-2 border-slate-950 text-slate-950 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                         />
-                        <div className="flex items-center justify-between">
-                            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Enter pro potvrzení</span>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => setIsAdding(false)} className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors">Zrušit</button>
-                                <button onClick={addItem} className="px-3 py-1.5 bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg hover:opacity-90 transition-all">Přidat</button>
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Enter pro uložení</span>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setIsAdding(false)} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-950 transition-colors">Zrušit</button>
+                                <button onClick={addItem} className="px-5 py-2.5 bg-slate-950 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 active:translate-y-0.5 transition-all shadow-[4px_4px_0px_black]">Přidat položku</button>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <button
                         onClick={() => setIsAdding(true)}
-                        className="w-full py-4 border border-dashed border-zinc-800 hover:border-primary/50 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-2.5 text-zinc-500 hover:text-primary transition-all group"
+                        className="w-full py-5 border-4 border-dashed border-slate-200 hover:border-slate-950 hover:bg-slate-50 rounded-3xl flex items-center justify-center gap-3 text-slate-300 hover:text-slate-950 transition-all group"
                     >
-                        <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Nová položka</span>
+                        <Plus size={24} strokeWidth={4} className="group-hover:rotate-90 transition-transform duration-300" />
+                        <span className="text-xs font-black uppercase tracking-[0.2em]">Nová položka k objednání</span>
                     </button>
                 )}
             </div>
 
-            <div className="p-4 bg-zinc-900 border-t border-zinc-800 flex items-center justify-center gap-6">
-                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" /> K objednání
+            <div className="p-6 bg-slate-50 border-t-2 border-slate-950 flex items-center justify-center gap-8">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-950">
+                    <div className="w-3 h-3 rounded-md bg-amber-400 border-2 border-slate-950" /> K objednání
                 </div>
-                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" /> Objednáno
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-950">
+                    <div className="w-3 h-3 rounded-md bg-blue-500 border-2 border-slate-950" /> Objednáno
                 </div>
-                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" /> Dodáno
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-950">
+                    <div className="w-3 h-3 rounded-md bg-emerald-500 border-2 border-slate-950" /> Dodáno
                 </div>
             </div>
         </div>
