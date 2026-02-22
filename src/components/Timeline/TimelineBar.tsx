@@ -803,23 +803,21 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 return (
                                     <div
                                         key={m.key}
-                                        className={`milestone-icon cursor-pointer transition-all ${isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125'}`}
+                                        className={cn(
+                                            "milestone-icon cursor-pointer transition-all flex items-center justify-center shadow-lg",
+                                            isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125 hover:z-50',
+                                            isCompleted ? "bg-emerald-500 text-white shadow-emerald-500/20" :
+                                                isOverdue ? "bg-rose-500 text-white shadow-rose-500/20" :
+                                                    "bg-white border-2 border-slate-200 text-slate-800"
+                                        )}
                                         style={{
                                             transform: `scale(${isHovered ? 1.5 : 1.05})`,
                                             zIndex: idx,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: isSmallMilestone ? iconSize : iconSize + 4,
-                                            height: isSmallMilestone ? iconSize : iconSize + 4,
+                                            width: isSmallMilestone ? iconSize : iconSize + 6,
+                                            height: isSmallMilestone ? iconSize : iconSize + 6,
+                                            borderRadius: isSmallMilestone ? '50%' : '6px',
                                             pointerEvents: 'auto',
-                                            transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                            filter: `
-                                                drop-shadow(1.8px 1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-1.8px -1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(1.8px -1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-1.8px 1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
-                                            `
+                                            transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                         }}
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();
@@ -839,13 +837,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             <div className="flex items-center justify-center w-full h-full">
                                                 <div
                                                     className={`${isStartVal ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full`}
-                                                    style={{ backgroundColor: '#000000', border: '1px solid #000000' }}
+                                                    style={{ backgroundColor: isCompleted ? '#fff' : '#000' }}
                                                 />
                                             </div>
                                         ) : Icon ? (
                                             <Icon
                                                 size={iconSize}
-                                                color="#000000"
+                                                color={(isCompleted || isOverdue) ? "#ffffff" : "#000000"}
                                             />
                                         ) : null}
                                     </div>
