@@ -22,6 +22,7 @@ export function AccessoryCatalogSection() {
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
+        name: '',
         category: 'Příslušenství',
         description: '',
         variants_raw: '',
