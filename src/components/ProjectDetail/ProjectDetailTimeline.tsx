@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone as MilestoneIcon,
     Wrench, Package, Box, Factory, ShieldCheck, Drill, Settings,
-    Zap, Clock, ChevronLeft, ChevronRight
+    Zap, Clock, ChevronLeft, ChevronRight, Shield, Layers, Flame, Hand, Scissors, Cpu,
+    Waves, Fan, CloudRain, Binary, Cog, Ruler, ClipboardCheck
 } from 'lucide-react';
 
 // --- CUSTOM ICONS (reused from main timeline) ---
@@ -41,7 +42,20 @@ const ICON_OPTIONS: Record<string, React.FC<any>> = {
     Drill: wrapLucide(Drill),
     Settings: wrapLucide(Settings),
     Hiab: Hiab,
-    Zap: wrapLucide(Zap)
+    Zap: wrapLucide(Zap),
+    Shield: wrapLucide(Shield),
+    Layers: wrapLucide(Layers),
+    Flame: wrapLucide(Flame),
+    Hand: wrapLucide(Hand),
+    Scissors: wrapLucide(Scissors),
+    Cpu: wrapLucide(Cpu),
+    Waves: wrapLucide(Waves),
+    Fan: wrapLucide(Fan),
+    CloudRain: wrapLucide(CloudRain),
+    Binary: wrapLucide(Binary),
+    Cog: wrapLucide(Cog),
+    Ruler: wrapLucide(Ruler),
+    ClipboardCheck: wrapLucide(ClipboardCheck)
 };
 
 interface ProjectDetailTimelineProps {

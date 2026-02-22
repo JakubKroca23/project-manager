@@ -18,7 +18,8 @@ import {
     Check, Milestone, Wrench, Package, Factory, ShieldCheck,
     Box, Drill, Settings, Briefcase, Building2, Globe, TrendingUp,
     Euro, Warehouse, Landmark, Users, Laptop, Phone, Mail,
-    Zap, Star, Rocket, Coffee
+    Zap, Star, Rocket, Coffee, Shield, Layers, Flame, Hand, Scissors, Cpu,
+    Waves, Fan, CloudRain, Binary, Cog, Ruler, ClipboardCheck
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -70,7 +71,20 @@ const ICON_OPTIONS = {
     Zap: wrapLucide(Zap),
     Star: wrapLucide(Star),
     Rocket: wrapLucide(Rocket),
-    Coffee: wrapLucide(Coffee)
+    Coffee: wrapLucide(Coffee),
+    Shield: wrapLucide(Shield),
+    Layers: wrapLucide(Layers),
+    Flame: wrapLucide(Flame),
+    Hand: wrapLucide(Hand),
+    Scissors: wrapLucide(Scissors),
+    Cpu: wrapLucide(Cpu),
+    Waves: wrapLucide(Waves),
+    Fan: wrapLucide(Fan),
+    CloudRain: wrapLucide(CloudRain),
+    Binary: wrapLucide(Binary),
+    Cog: wrapLucide(Cog),
+    Ruler: wrapLucide(Ruler),
+    ClipboardCheck: wrapLucide(ClipboardCheck)
 };
 
 // Seznam ikon pro výběr v editoru
@@ -194,7 +208,8 @@ const Timeline: React.FC = () => {
         barHeight: 70, // in %
         opacity: 1,
         usePriorityColors: true,
-        stackedOpacity: 0.15
+        stackedOpacity: 0.15,
+        milestoneBoxScale: 1.2 // New: size of square background relative to icon
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -954,6 +969,21 @@ const Timeline: React.FC = () => {
                                         V % vůči výšce řádku ({Math.round(rowHeight * (milestoneSize / 100))}px)
                                     </div>
                                 </div>
+                                <div className="mt-4">
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Velikost boxu milníku</span>
+                                        <span className="text-primary">{Math.round((design.milestoneBoxScale || 1.2) * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="1" max="2" step="0.05"
+                                        value={design.milestoneBoxScale || 1.2}
+                                        onChange={(e) => setDesign({ ...design, milestoneBoxScale: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="text-[8px] text-muted-foreground/60 mt-1 italic">
+                                        Poměr velikosti čtverce vůči ikoně
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -975,10 +1005,27 @@ const Timeline: React.FC = () => {
                                         />
                                     </div>
                                 ))}
-                                {/* Priorities */}
                                 {Object.entries(colors).filter(([k]) => k.startsWith('priority')).map(([key, config]) => (
                                     <div key={key} className="flex items-center justify-between p-1.5 bg-muted/20 rounded border border-border/20">
                                         <span className="text-[9px] font-bold truncate max-w-[80px] text-muted-foreground">{config.label}</span>
+                                        <input
+                                            type="color"
+                                            value={config.color}
+                                            onChange={(e) => setColors({ ...colors, [key]: { ...config, color: e.target.value } })}
+                                            className="w-4 h-4 rounded cursor-pointer bg-transparent border-none p-0 overflow-hidden"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <h4 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider mb-2 mt-4">Barvy Stavů (Milníky)</h4>
+                            <div className="grid grid-cols-1 gap-2">
+                                {Object.entries(colors).filter(([k]) => k.startsWith('state')).map(([key, config]) => (
+                                    <div key={key} className="flex items-center justify-between p-1.5 bg-muted/20 rounded border border-border/20">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded shadow-sm" style={{ backgroundColor: config.color }} />
+                                            <span className="text-[9px] font-bold text-muted-foreground">{config.label}</span>
+                                        </div>
                                         <input
                                             type="color"
                                             value={config.color}

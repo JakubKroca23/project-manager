@@ -9,7 +9,9 @@ import {
     Truck, Hammer, ThumbsUp, AlertTriangle, Play, Check, Milestone,
     Wrench, Package, Box, Factory, ShieldCheck, Drill, Settings,
     X, Trash2, Plus, Briefcase, Building2, Globe, TrendingUp,
-    Euro, Warehouse, Landmark, Users, Laptop, Phone, Mail, Clock
+    Euro, Warehouse, Landmark, Users, Laptop, Phone, Mail, Clock,
+    Zap, Star, Rocket, Coffee, Shield, Layers, Flame, Hand, Scissors, Cpu,
+    Waves, Fan, CloudRain, Binary, Cog, Ruler, ClipboardCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -67,7 +69,24 @@ const ICON_OPTIONS = {
     Users: wrapLucide(Users),
     Laptop: wrapLucide(Laptop),
     Phone: wrapLucide(Phone),
-    Mail: wrapLucide(Mail)
+    Mail: wrapLucide(Mail),
+    Zap: wrapLucide(Zap),
+    Star: wrapLucide(Star),
+    Rocket: wrapLucide(Rocket),
+    Coffee: wrapLucide(Coffee),
+    Shield: wrapLucide(Shield),
+    Layers: wrapLucide(Layers),
+    Flame: wrapLucide(Flame),
+    Hand: wrapLucide(Hand),
+    Scissors: wrapLucide(Scissors),
+    Cpu: wrapLucide(Cpu),
+    Waves: wrapLucide(Waves),
+    Fan: wrapLucide(Fan),
+    CloudRain: wrapLucide(CloudRain),
+    Binary: wrapLucide(Binary),
+    Cog: wrapLucide(Cog),
+    Ruler: wrapLucide(Ruler),
+    ClipboardCheck: wrapLucide(ClipboardCheck)
 };
 
 interface IPhase {
@@ -805,17 +824,22 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                         key={m.key}
                                         className={cn(
                                             "milestone-icon cursor-pointer transition-all flex items-center justify-center shadow-lg",
-                                            isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125 hover:z-50',
-                                            isCompleted ? "bg-emerald-500 text-white shadow-emerald-500/20" :
-                                                isOverdue ? "bg-rose-500 text-white shadow-rose-500/20" :
-                                                    "bg-white border-2 border-slate-200 text-slate-800"
+                                            isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125 hover:z-50'
                                         )}
                                         style={{
                                             transform: `scale(${isHovered ? 1.5 : 1.05})`,
                                             zIndex: idx,
-                                            width: isSmallMilestone ? iconSize : iconSize + 6,
-                                            height: isSmallMilestone ? iconSize : iconSize + 6,
+                                            width: isSmallMilestone ? iconSize : iconSize * (config?.design?.milestoneBoxScale || 1.2),
+                                            height: isSmallMilestone ? iconSize : iconSize * (config?.design?.milestoneBoxScale || 1.2),
                                             borderRadius: isSmallMilestone ? '50%' : '6px',
+                                            backgroundColor: isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e') :
+                                                isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444') :
+                                                    (config?.colors?.statePending?.color || '#ffffff'),
+                                            border: isCompleted || isOverdue ? 'none' : '2px solid #e2e8f0',
+                                            color: '#000000',
+                                            boxShadow: isCompleted ? `0 4px 12px ${(config?.colors?.stateCompleted?.color || '#22c55e')}40` :
+                                                isOverdue ? `0 4px 12px ${(config?.colors?.stateOverdue?.color || '#ef4444')}40` :
+                                                    '0 4px 12px rgba(0,0,0,0.1)',
                                             pointerEvents: 'auto',
                                             transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                         }}
