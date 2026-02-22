@@ -59,7 +59,7 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
         setLoading(false);
     }
 
-    async function addItem(name: string, category: string = 'Příslušenství') {
+    async function addItem(name: string, category: string = 'Příslušenství', variant?: string) {
         const finalName = name || newItemName.trim();
         if (!finalName) return;
 
@@ -70,7 +70,8 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                 name: finalName,
                 status: 'K objednání',
                 category: category,
-                source: 'Samostatně'
+                source: 'Samostatně',
+                variant: variant
             })
             .select()
             .single();
@@ -110,7 +111,10 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
         if (existing) {
             await deleteItem(existing.id, true);
         } else {
-            await addItem(catalogItem.name, catalogItem.category);
+            const firstVariant = catalogItem.variants && catalogItem.variants.length > 0
+                ? catalogItem.variants[0]
+                : undefined;
+            await addItem(catalogItem.name, catalogItem.category, firstVariant);
         }
     };
 
@@ -255,6 +259,27 @@ export function ProjectDetailOrdering({ projectId, isEditing }: ProjectDetailOrd
                                             )}>
                                                 {item.status}
                                             </span>
+
+                                            {/* Variant Selector */}
+                                            {(() => {
+                                                const catalogItem = catalogItems.find(c => c.name === item.name);
+                                                if (catalogItem && catalogItem.variants && catalogItem.variants.length > 0) {
+                                                    return (
+                                                        <select
+                                                            value={item.variant || ''}
+                                                            onChange={(e) => updateItem(item.id, { variant: e.target.value })}
+                                                            className="text-[9px] font-bold uppercase tracking-widest text-primary bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg outline-none cursor-pointer hover:bg-primary/10 transition-colors"
+                                                        >
+                                                            <option value="">Vyberte typ...</option>
+                                                            {catalogItem.variants.map(v => (
+                                                                <option key={v} value={v}>{v}</option>
+                                                            ))}
+                                                        </select>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
                                             <button
                                                 onClick={() => {
                                                     const nextSource = item.source === 'Samostatně' ? 'S podvozkem' : item.source === 'S podvozkem' ? 'S nástavbou' : 'Samostatně';

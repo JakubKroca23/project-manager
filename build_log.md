@@ -260,4 +260,10 @@
     - Implementováno progresivní **červené ztmavování** při překryvu více projektů, které se nyní reviduje **pouze pro dny montáže** (žlutá fáze).
     - Červené zvýraznění má nyní prioritu (**vyšší z-index**), takže se zobrazuje jako "překryv" nad pruhy zakázek.
     - **Čísla dnů v záhlaví**: Text čísel dnů je nyní čistě bílý s černým obrysem (outline) a je umístěn na **nejvyšší vrstvě** nad červeným zvýrazněním. To zajišťuje perfektní čitelnost i při vysoké intenzitě varovných překryvů.
-    - **Oprava skoku na dnešek**: Funkce "Dnes" byla opravena tak, aby správně centrovala aktuální den ve viditelné části mřížky (bere v úvahu 250px široký postranní panel).
+    - **Oprava skoku na dnešek**: Funkce "Dnes" byla opravena tak, aby správně centrovala aktuální den přesně uprostřed viditelné mřížky. Byla odstraněna chyba ve výpočtu, která způsobovala nepřesné odsouvání mřížky při započítání postranního panelu.
+    - **Pinch-to-zoom**: Přidána podpora pro dotyková gesta. Harmonogram lze nyní plynule přibližovat a oddalovat roztažením nebo stažením prstů (pinch gesture) na mobilních zařízeních a tabletech.
+    - **Interaktivní Příslušenství (Procurement)**:
+        - Rozšířen globální katalog o podporu **variant/typů** (např. pro Čerpadla lze nyní definovat seznam konkrétních modelů).
+        - Přidána možnost výběru varianty přímo v detailu projektu u položek příslušenství.
+        - Zjednodušeno přepínání stavu (K objednání -> Objednáno -> Dodáno) a zdroje (Samostatně -> S podvozkem -> S nástavbou) pouhým kliknutím.
+        - Administrátoři mohou spravovat katalog (přidávat položky a jejich varianty) přímo z rozhraní detailu projektu.

@@ -43,6 +43,7 @@ export interface ProjectItem {
     category: 'Podvozek' | 'Nástavba' | 'Příslušenství' | 'Smart' | string;
     status: 'K objednání' | 'Objednáno' | 'Dodáno' | string;
     source: 'Samostatně' | 'S podvozkem' | 'S nástavbou' | string;
+    variant?: string;
     note?: string;
     created_at: string;
     updated_at: string;
@@ -65,6 +66,7 @@ export interface AccessoryCatalogItem {
     name: string;
     category: string;
     description?: string;
+    variants?: string[];
     is_smart: boolean;
     created_at: string;
     updated_at: string;

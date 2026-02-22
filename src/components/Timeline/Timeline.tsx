@@ -227,6 +227,8 @@ const Timeline: React.FC = () => {
         stackOpacityRed: 0.6 // New: multiplier for red overlap intensity
     });
     const timelineRef = useRef<HTMLDivElement>(null);
+    const initialTouchDistance = useRef<number | null>(null);
+    const initialTouchDayWidth = useRef<number | null>(null);
 
     // Ref for accessing current dayWidth in event listeners
     const dayWidthRef = useRef(dayWidth);
@@ -595,6 +597,60 @@ const Timeline: React.FC = () => {
         return () => window.removeEventListener('wheel', handleWindowWheel, { capture: true });
     }, []);
 
+    // Touch Pinch Zoom Handler
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialTouchDistance.current = dist;
+                initialTouchDayWidth.current = dayWidthRef.current;
+
+                const midpointX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const rect = container.getBoundingClientRect();
+                const focalX = midpointX - rect.left;
+                const pointDays = (container.scrollLeft + focalX) / dayWidthRef.current;
+                zoomFocus.current = { pointDays, pixelOffset: focalX };
+            }
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 2 && initialTouchDistance.current && initialTouchDayWidth.current) {
+                // Stay on timeline grid to prevent standard pinch-zoom
+                if ((e.target as HTMLElement).closest('.timeline-grid-container')) {
+                    e.preventDefault();
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const scale = dist / initialTouchDistance.current;
+                    const nextWidth = Math.min(MAX_DAY_WIDTH, Math.max(MIN_DAY_WIDTH, initialTouchDayWidth.current * scale));
+                    setDayWidth(nextWidth);
+                }
+            }
+        };
+
+        const handleTouchEnd = () => {
+            initialTouchDistance.current = null;
+            initialTouchDayWidth.current = null;
+        };
+
+        container.addEventListener('touchstart', handleTouchStart, { passive: true });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+        container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        return () => {
+            container.removeEventListener('touchstart', handleTouchStart);
+            container.removeEventListener('touchmove', handleTouchMove);
+            container.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, []);
+
     const fetchProjects = useCallback(async () => {
         try {
             const { data, error } = await supabase
@@ -813,8 +869,14 @@ const Timeline: React.FC = () => {
             const sidebarWidth = 250;
             const visibleGridWidth = containerWidth - sidebarWidth;
 
-            // Chceme, aby dnešek byl uprostřed VIDITELNÉ části mřížky (napravo od sidebaru)
-            const targetScroll = dayPos - sidebarWidth - (visibleGridWidth / 2) + (dayWidth / 2);
+            // Dnešek chceme uprostřed viditelné části mřížky (napravo od 250px sidebaru)
+            // dayPos je offset od začátku mřížky (která reálně začíná za sidebar díky flexu)
+            // Takže absolutní pozice dne je (250 + dayPos).
+            // Viditelný střed je (250 + visibleGridWidth / 2).
+            // (250 + dayPos) - scrollLeft = 250 + visibleGridWidth / 2
+            // scrollLeft = dayPos - (visibleGridWidth / 2)
+
+            const targetScroll = dayPos - (visibleGridWidth / 2) + (dayWidth / 2);
 
             container.scrollTo({
                 left: Math.max(0, targetScroll),
