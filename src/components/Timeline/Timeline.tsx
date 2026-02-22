@@ -869,13 +869,13 @@ const Timeline: React.FC = () => {
             const container = scrollContainerRef.current;
             const containerWidth = container.clientWidth;
 
-            // Dynamicky zjistíme šířku sidebaru (na mobilu je 110px, na pc 250px)
+            // Dynamicky zjistíme šířku sidebaru (250px na PC, 110px na mobilu)
             const sidebarEl = container.querySelector('.project-info-sticky');
             const sidebarWidth = sidebarEl ? (sidebarEl as HTMLElement).offsetWidth : 250;
             const visibleGridWidth = containerWidth - sidebarWidth;
 
-            // Výpočet: scrollLeft nastavíme tak, aby dayPos (začátek dne) byl uprostřed volné plochy (za sidebarWidth)
-            const targetScroll = dayPos - (visibleGridWidth / 2) + (dayWidth / 2);
+            // Výpočet: scrollLeft nastavíme tak, aby dnešní den byl uprostřed VOLNÉ plochy (té napravo od sidebaru)
+            const targetScroll = dayPos + (dayWidth / 2) - (visibleGridWidth / 2);
 
             container.scrollTo({
                 left: Math.max(0, targetScroll),
@@ -1280,6 +1280,7 @@ const Timeline: React.FC = () => {
                             endDate={timelineRange.end}
                             dayWidth={dayWidth}
                             showDays={false}
+                            sidebarWidth={typeof document !== 'undefined' ? (document.querySelector('.project-info-sticky') as HTMLElement)?.offsetWidth || 250 : 250}
                         >
                             <div className="timeline-rows">
                                 {/* 1. CATEGORY SUMMARIES (Stacked) */}

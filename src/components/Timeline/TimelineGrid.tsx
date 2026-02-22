@@ -8,6 +8,7 @@ interface TimelineGridProps {
     dayWidth: number;
     children?: React.ReactNode;
     showDays?: boolean;
+    sidebarWidth?: number;
 }
 
 const getWeekNumber = (d: Date) => {
@@ -18,7 +19,7 @@ const getWeekNumber = (d: Date) => {
     return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 };
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children, showDays = true }) => {
+const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidth, children, showDays = true, sidebarWidth = 0 }) => {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonthVal = today.getMonth();
@@ -94,59 +95,69 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
     return (
         <div className="timeline-grid">
             <div className="timeline-grid-header-multi">
-                {/* Úroveň 1: Měsíce */}
-                <div className="timeline-header-row months">
-                    {months.map((m, i) => (
-                        <div
-                            key={`m-${i}`}
-                            className={`header-cell month ${m.year === currentYear && m.monthIndex === currentMonthVal ? 'is-current' : ''}`}
-                            style={{ width: m.width }}
-                        >
-                            {m.month} {m.year}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Úroveň 2: Týdny */}
-                <div className="timeline-header-row weeks">
-                    {weeks.map((w, i) => (
-                        <div
-                            key={`w-${i}`}
-                            className={`header-cell week ${w.year === currentYear && w.weekNum === currentWeekVal ? 'is-current' : ''}`}
-                            style={{ width: w.width }}
-                        >
-                            {dayWidth > 15 ? `Týden ${w.weekNum}` : w.weekNum}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Úroveň 3: Dny - Skrýt při velmi malém zoomu nebo pokud je zakázáno */}
-                {dayWidth > 12 && showDays && (
-                    <div className="timeline-header-row days">
-                        {days.map((day, idx) => {
-                            const showDayName = dayWidth > 35;
-                            const showNumber = dayWidth > 10;
-
-                            return (
-                                <div
-                                    key={`d-${idx}`}
-                                    className={`header-cell day ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''}`}
-                                    style={{
-                                        width: dayWidth,
-                                        fontSize: dayWidth < 20 ? '0.55rem' : '0.65rem'
-                                    }}
-                                >
-                                    {showDayName && <span className="day-name">{day.toLocaleDateString('cs-CZ', { weekday: 'short' })}</span>}
-                                    {showNumber && <span className="day-number">{day.getDate()}</span>}
-                                </div>
-                            );
-                        })}
-                    </div>
+                {/* Dynamický placeholder pro sidebar hlavičku */}
+                {sidebarWidth > 0 && (
+                    <div
+                        className="timeline-header-sidebar-placeholder sticky left-0 z-[5000] bg-background border-r border-border"
+                        style={{ width: sidebarWidth, height: '100%', position: 'absolute', top: 0, left: 0 }}
+                    />
                 )}
+
+                <div style={{ marginLeft: sidebarWidth }}>
+                    {/* Úroveň 1: Měsíce */}
+                    <div className="timeline-header-row months">
+                        {months.map((m, i) => (
+                            <div
+                                key={`m-${i}`}
+                                className={`header-cell month ${m.year === currentYear && m.monthIndex === currentMonthVal ? 'is-current' : ''}`}
+                                style={{ width: m.width }}
+                            >
+                                {m.month} {m.year}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Úroveň 2: Týdny */}
+                    <div className="timeline-header-row weeks">
+                        {weeks.map((w, i) => (
+                            <div
+                                key={`w-${i}`}
+                                className={`header-cell week ${w.year === currentYear && w.weekNum === currentWeekVal ? 'is-current' : ''}`}
+                                style={{ width: w.width }}
+                            >
+                                {dayWidth > 15 ? `Týden ${w.weekNum}` : w.weekNum}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Úroveň 3: Dny - Skrýt při velmi malém zoomu nebo pokud je zakázáno */}
+                    {dayWidth > 12 && showDays && (
+                        <div className="timeline-header-row days">
+                            {days.map((day, idx) => {
+                                const showDayName = dayWidth > 35;
+                                const showNumber = dayWidth > 10;
+
+                                return (
+                                    <div
+                                        key={`d-${idx}`}
+                                        className={`header-cell day ${isToday(day) ? 'is-today' : ''} ${isWeekend(day) ? 'is-weekend' : ''} ${day.getDate() === 1 ? 'is-month-start' : ''}`}
+                                        style={{
+                                            width: dayWidth,
+                                            fontSize: dayWidth < 20 ? '0.55rem' : '0.65rem'
+                                        }}
+                                    >
+                                        {showDayName && <span className="day-name">{day.toLocaleDateString('cs-CZ', { weekday: 'short' })}</span>}
+                                        {showNumber && <span className="day-number">{day.getDate()}</span>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="timeline-grid-content">
-                <div className="timeline-grid-body">
+                <div className="timeline-grid-body" style={{ marginLeft: sidebarWidth }}>
                     {days.map((day, idx) => (
                         <div
                             key={idx}
@@ -159,15 +170,20 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
 
                 {/* Indikátor dnešního dne nad objekty */}
                 {(() => {
-                    const todayDate = new Date();
-                    todayDate.setHours(0, 0, 0, 0);
-                    if (todayDate >= startDate && todayDate <= endDate) {
-                        const diffDays = Math.floor((todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                    const d1 = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                    const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+                    const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+
+                    if (utc2 >= utc1) {
+                        const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+                        const leftPos = sidebarWidth + (diffDays * dayWidth) + (dayWidth / 2);
+
                         return (
                             <div
                                 className="timeline-today-indicator"
                                 style={{
-                                    left: diffDays * dayWidth + (dayWidth / 2),
+                                    left: leftPos,
                                     top: '29px',
                                     bottom: 0
                                 }}
