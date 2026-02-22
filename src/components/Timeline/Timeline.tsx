@@ -584,9 +584,9 @@ const Timeline: React.FC = () => {
             // mouseX relative to viewport start of scroll container
             const mouseX = e.clientX - rect.left;
 
-            // Capture exact state BEFORE state changes
-            const pointDays = (container.scrollLeft + mouseX) / currentWidth;
-            zoomFocus.current = { pointDays, pixelOffset: mouseX };
+            // Započítáme sidebar, protože data začínají až za ním
+            const pointDays = (container.scrollLeft + mouseX - sidebarWidth) / currentWidth;
+            zoomFocus.current = { pointDays, pixelOffset: mouseX - sidebarWidth };
 
             // Změna šířky dne (zoom)
             if (delta > 0) {
@@ -618,8 +618,9 @@ const Timeline: React.FC = () => {
                 const midpointX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
                 const rect = container.getBoundingClientRect();
                 const focalX = midpointX - rect.left;
-                const pointDays = (container.scrollLeft + focalX) / dayWidthRef.current;
-                zoomFocus.current = { pointDays, pixelOffset: focalX };
+                // Započítáme sidebar do pointDays, aby pinch-zoom neulétával
+                const pointDays = (container.scrollLeft + focalX - sidebarWidth) / dayWidthRef.current;
+                zoomFocus.current = { pointDays, pixelOffset: focalX - sidebarWidth };
             }
         };
 
@@ -870,9 +871,11 @@ const Timeline: React.FC = () => {
 
             const container = scrollContainerRef.current;
             const containerWidth = container.clientWidth;
+
+            // Viditelná plocha pro data (pravá část)
             const visibleGridWidth = containerWidth - sidebarWidth;
 
-            // Výpočet: scrollLeft nastavíme tak, aby dnešní den byl uprostřed VOLNÉ plochy
+            // Výpočet: scrollLeft nastavíme tak, aby middle dne byl uprostřed viditelné grid plochy
             const targetScroll = dayPos + (dayWidth / 2) - (visibleGridWidth / 2);
 
             container.scrollTo({
@@ -1342,11 +1345,16 @@ const Timeline: React.FC = () => {
                                                                         <div
                                                                             key={idx}
                                                                             className={cn(
-                                                                                "flex flex-col items-center justify-center border-r border-border/10",
-                                                                                today ? "border-[4px] border-red-500 rounded-md shadow-[0_0_15px_rgba(239,68,68,0.6)] bg-red-500 mx-[1px]" : "",
-                                                                                isWeekend(day) && "bg-muted/10"
+                                                                                "flex flex-col items-center justify-center border-r border-border/10 transition-colors",
+                                                                                today ? "relative z-10" : "",
+                                                                                isWeekend(day) && "bg-muted/5"
                                                                             )}
-                                                                            style={{ width: dayWidth }}
+                                                                            style={{
+                                                                                width: dayWidth,
+                                                                                // Použijeme shadow místo border/margin, aby se nepohnula mřížka!
+                                                                                boxShadow: today ? 'inset 0 0 0 2px #ef4444, 0 0 10px rgba(239,68,68,0.4)' : 'none',
+                                                                                backgroundColor: today ? 'rgba(239,68,68,0.1)' : undefined
+                                                                            }}
                                                                         >
                                                                             <div className="flex flex-col items-center gap-0 translate-y-[1px]">
                                                                                 {showDayName && (
@@ -1576,6 +1584,38 @@ const Timeline: React.FC = () => {
                                 })}
                             </div>
                         </TimelineGrid>
+
+                        {/* GLOBÁLNÍ INDIKÁTOR DNES - NAD VŠEMI VRSTVAMI (včetně summary) */}
+                        {(() => {
+                            const today = new Date();
+                            const d1 = new Date(timelineRange.start.getFullYear(), timelineRange.start.getMonth(), timelineRange.start.getDate());
+                            const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                            const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+                            const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+
+                            if (utc2 >= utc1) {
+                                const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+                                // Absolutní pozice: sidebar + (počet dní * šířka dne) + polovina dne pro střed
+                                const leftPos = sidebarWidth + (diffDays * dayWidth) + (dayWidth / 2);
+
+                                return (
+                                    <div
+                                        className="timeline-today-indicator shadow-[0_0_15px_rgba(239,68,68,0.6)]"
+                                        style={{
+                                            left: leftPos,
+                                            top: '38px', // Pod hlavním kalendářem (Months/Weeks)
+                                            bottom: 0,
+                                            width: '2px',
+                                            backgroundColor: '#ef4444',
+                                            position: 'absolute',
+                                            zIndex: 9999,
+                                            pointerEvents: 'none'
+                                        }}
+                                    />
+                                );
+                            }
+                            return null;
+                        })()}
                     </div >
                 </div >
             </div>

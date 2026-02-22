@@ -168,30 +168,6 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ startDate, endDate, dayWidt
                 </div>
                 {children}
 
-                {/* Indikátor dnešního dne nad objekty */}
-                {(() => {
-                    const d1 = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-                    const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-                    const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-
-                    if (utc2 >= utc1) {
-                        const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-                        const leftPos = sidebarWidth + (diffDays * dayWidth) + (dayWidth / 2);
-
-                        return (
-                            <div
-                                className="timeline-today-indicator"
-                                style={{
-                                    left: leftPos,
-                                    top: '29px',
-                                    bottom: 0
-                                }}
-                            />
-                        );
-                    }
-                    return null;
-                })()}
             </div>
         </div>
     );
