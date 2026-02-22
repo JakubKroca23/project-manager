@@ -258,4 +258,5 @@
 - **Vizuální ladění**: 
     - V řádku **"Celkem"** zachováno ztmavování víkendů pro konzistenci s mřížkou.
     - Implementováno progresivní **červené ztmavování** při překryvu více projektů, které se nyní reviduje **pouze pro dny montáže** (žlutá fáze).
-    - Přidán ovladač do nastavení: Posuvník **"Intenzita překryvů (Důraz)"** umožňuje uživatelsky nastavit, jak moc mají tyto kritické dny montáže vizuálně "křičet".
+    - Červené zvýraznění má nyní prioritu (**vyšší z-index**), takže se zobrazuje jako "překryv" nad čísly dnů i nad samotnými pruhy zakázek, což zvyšuje jeho varovný efekt.
+    - Přidán ovladač do nastavení: Posuvník **"Intenzita překryvů (Důraz)"** umožňuje uživatelsky nastavit sytost tohoto horního varovného vrstvy.

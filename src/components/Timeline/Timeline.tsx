@@ -1287,8 +1287,8 @@ const Timeline: React.FC = () => {
                                                             </div>
                                                         </div>
 
-                                                        {/* Grid lines inside summary for parity */}
-                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 1 }}>
+                                                        {/* Grid lines inside summary for parity - Higher Z-index to overlay projects/numbers */}
+                                                        <div className="absolute inset-x-0 inset-y-0 flex pointer-events-none" style={{ zIndex: 60 }}>
                                                             {(() => {
                                                                 // Calculate overlap counts for this sector
                                                                 const zoneCounts = new Array(days.length).fill(0);
