@@ -785,14 +785,25 @@ const Timeline: React.FC = () => {
     const jumpToToday = () => {
         if (scrollContainerRef.current) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffDays = Math.floor((today.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+            const d1 = new Date(timelineRange.start.getFullYear(), timelineRange.start.getMonth(), timelineRange.start.getDate());
+            const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-            const containerWidth = scrollContainerRef.current.clientWidth;
-            const offset = containerWidth / 2; // Center the view
+            const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+            const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
 
-            scrollContainerRef.current.scrollTo({
-                left: diffDays * dayWidth - offset,
+            const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+            const dayPos = diffDays * dayWidth;
+
+            const container = scrollContainerRef.current;
+            const containerWidth = container.clientWidth;
+            const sidebarWidth = 250;
+            const visibleGridWidth = containerWidth - sidebarWidth;
+
+            // Chceme, aby dnešek byl uprostřed VIDITELNÉ části mřížky (napravo od sidebaru)
+            const targetScroll = dayPos - sidebarWidth - (visibleGridWidth / 2) + (dayWidth / 2);
+
+            container.scrollTo({
+                left: Math.max(0, targetScroll),
                 behavior: 'smooth'
             });
         }
@@ -1211,9 +1222,9 @@ const Timeline: React.FC = () => {
                                                             borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
                                                         }}
                                                     >
-                                                        {/* Day Numbers for Total Row - High Z-index to pop over everything */}
+                                                        {/* Day Numbers for Total Row - Highest Z-index to pop over red warning and projects */}
                                                         {isTotal && dayWidth > 12 && (
-                                                            <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 50 }}>
+                                                            <div className="absolute inset-0 flex pointer-events-none" style={{ zIndex: 75 }}>
                                                                 {days.map((day, idx) => {
                                                                     const showDayName = dayWidth > 35;
                                                                     const today = isToday(day);
@@ -1230,26 +1241,18 @@ const Timeline: React.FC = () => {
                                                                         >
                                                                             <div className="flex flex-col items-center gap-0 translate-y-[1px]">
                                                                                 {showDayName && (
-                                                                                    <span className={cn(
-                                                                                        "text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm",
-                                                                                        today ? "text-white bg-black/20" : "text-white"
-                                                                                    )}
+                                                                                    <span className="text-[7px] leading-tight font-black uppercase mb-[-1px] px-1 rounded-sm text-white"
                                                                                         style={{
-                                                                                            textShadow: '1px 1px 1px #000, -1px 1px 1px #000, 1px -1px 1px #000, -1px -1px 1px #000'
+                                                                                            textShadow: '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000, 0 0 2px #000'
                                                                                         }}>
                                                                                         {day.toLocaleDateString('cs-CZ', { weekday: 'short' })}
                                                                                     </span>
                                                                                 )}
                                                                                 <span
-                                                                                    className={cn(
-                                                                                        "flex items-center justify-center shrink-0",
-                                                                                        today ? "text-white font-black" : "text-foreground font-black"
-                                                                                    )}
+                                                                                    className="flex items-center justify-center shrink-0 text-white font-black"
                                                                                     style={{
                                                                                         fontSize: dayWidth < 20 ? '9px' : '12px',
-                                                                                        textShadow: today
-                                                                                            ? '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000, 0px 1px 0 #000, 0px -1px 0 #000, 1px 0px 0 #000, -1px 0px 0 #000'
-                                                                                            : '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff'
+                                                                                        textShadow: '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000, 0 0 3px #000'
                                                                                     }}
                                                                                 >
                                                                                     {day.getDate()}

@@ -258,5 +258,6 @@
 - **Vizuální ladění**: 
     - V řádku **"Celkem"** zachováno ztmavování víkendů pro konzistenci s mřížkou.
     - Implementováno progresivní **červené ztmavování** při překryvu více projektů, které se nyní reviduje **pouze pro dny montáže** (žlutá fáze).
-    - Červené zvýraznění má nyní prioritu (**vyšší z-index**), takže se zobrazuje jako "překryv" nad čísly dnů i nad samotnými pruhy zakázek, což zvyšuje jeho varovný efekt.
-    - Přidán ovladač do nastavení: Posuvník **"Intenzita překryvů (Důraz)"** umožňuje uživatelsky nastavit sytost tohoto horního varovného vrstvy.
+    - Červené zvýraznění má nyní prioritu (**vyšší z-index**), takže se zobrazuje jako "překryv" nad pruhy zakázek.
+    - **Čísla dnů v záhlaví**: Text čísel dnů je nyní čistě bílý s černým obrysem (outline) a je umístěn na **nejvyšší vrstvě** nad červeným zvýrazněním. To zajišťuje perfektní čitelnost i při vysoké intenzitě varovných překryvů.
+    - **Oprava skoku na dnešek**: Funkce "Dnes" byla opravena tak, aby správně centrovala aktuální den ve viditelné části mřížky (bere v úvahu 250px široký postranní panel).
