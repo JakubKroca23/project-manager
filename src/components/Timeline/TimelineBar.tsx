@@ -20,7 +20,14 @@ import { cn } from '@/lib/utils';
 
 const Hiab = ({ size = 24 }: any) => {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: size,
+            height: size,
+            filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))'
+        }}>
             <svg version="1.1" viewBox="0 0 756 719" width={size} height={size} xmlSpace="preserve">
                 {/* Hiab Icon (Transparent) */}
 
@@ -38,7 +45,14 @@ const Hiab = ({ size = 24 }: any) => {
 };
 
 const wrapLucide = (Icon: any) => ({ size = 24, color, ...props }: any) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
+    <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: size,
+        height: size,
+        filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))'
+    }}>
         <Icon size={size - 6} color={color || "#000000"} strokeWidth={3} {...props} />
     </div>
 );
@@ -837,9 +851,9 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                     (config?.colors?.statePending?.color || '#ffffff'),
                                             border: isCompleted || isOverdue ? 'none' : '2px solid #e2e8f0',
                                             color: '#000000',
-                                            boxShadow: isCompleted ? `0 4px 12px ${(config?.colors?.stateCompleted?.color || '#22c55e')}40` :
-                                                isOverdue ? `0 4px 12px ${(config?.colors?.stateOverdue?.color || '#ef4444')}40` :
-                                                    '0 4px 12px rgba(0,0,0,0.1)',
+                                            boxShadow: isCompleted ? `0 6px 15px ${(config?.colors?.stateCompleted?.color || '#22c55e')}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
+                                                isOverdue ? `0 6px 15px ${(config?.colors?.stateOverdue?.color || '#ef4444')}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
+                                                    '0 6px 15px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.05)',
                                             pointerEvents: 'auto',
                                             transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                         }}
