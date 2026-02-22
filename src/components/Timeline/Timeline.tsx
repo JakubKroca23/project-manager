@@ -209,7 +209,8 @@ const Timeline: React.FC = () => {
         opacity: 1,
         usePriorityColors: true,
         stackedOpacity: 0.15,
-        milestoneBoxScale: 1.2 // New: size of square background relative to icon
+        milestoneBoxScale: 1.2,
+        stackOpacityRed: 0.6 // New: multiplier for red overlap intensity
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -385,10 +386,11 @@ const Timeline: React.FC = () => {
         '--bar-radius': `${design.borderRadius}px`,
         '--bar-height': `${design.barHeight}%`,
         '--bar-opacity': design.opacity,
+        '--stack-opacity-red': design.stackOpacityRed || 0.6,
         '--priority-1-color': colors.priority1.color,
         '--priority-2-color': colors.priority2.color,
         '--priority-3-color': colors.priority3.color,
-    } as React.CSSProperties;
+    } as any;
 
 
 
@@ -933,6 +935,21 @@ const Timeline: React.FC = () => {
                                         onChange={(e) => setDesign({ ...design, stackedOpacity: parseFloat(e.target.value) })}
                                         className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                                     />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Intenzita překryvů (Důraz)</span>
+                                        <span className="text-primary">{Math.round((design.stackOpacityRed || 0.6) * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0.1" max="1.5" step="0.1"
+                                        value={design.stackOpacityRed || 0.6}
+                                        onChange={(e) => setDesign({ ...design, stackOpacityRed: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="text-[8px] text-muted-foreground/60 mt-1 italic">
+                                        Nastavení sytosti červeného varování při kumulaci zakázek
+                                    </div>
                                 </div>
 
 
