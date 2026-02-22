@@ -296,11 +296,11 @@ export function ProjectDetailTimeline({ project, milestones }: ProjectDetailTime
                                     <div className="h-14 flex items-center justify-center">
                                         <div className={cn(
                                             "w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-125 group-hover:z-50 shadow-lg",
-                                            isCompleted ? "bg-emerald-500 text-white shadow-emerald-500/20" :
-                                                isPast ? "bg-rose-500 text-white shadow-rose-500/20" :
-                                                    "bg-white border-2 border-slate-200 text-slate-800"
+                                            isCompleted ? "bg-emerald-500 shadow-emerald-500/20" :
+                                                isPast ? "bg-rose-500 shadow-rose-500/20" :
+                                                    "bg-white border-2 border-slate-200"
                                         )}>
-                                            <Icon size={20} />
+                                            <Icon size={20} color="#000000" />
                                         </div>
                                     </div>
                                     {/* Tooltip on hover */}

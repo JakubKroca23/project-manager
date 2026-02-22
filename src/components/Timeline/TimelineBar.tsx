@@ -837,13 +837,13 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             <div className="flex items-center justify-center w-full h-full">
                                                 <div
                                                     className={`${isStartVal ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full`}
-                                                    style={{ backgroundColor: isCompleted ? '#fff' : '#000' }}
+                                                    style={{ backgroundColor: '#000000' }}
                                                 />
                                             </div>
                                         ) : Icon ? (
                                             <Icon
                                                 size={iconSize}
-                                                color={(isCompleted || isOverdue) ? "#ffffff" : "#000000"}
+                                                color="#000000"
                                             />
                                         ) : null}
                                     </div>
