@@ -833,27 +833,43 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                 // Milestone icon rendering
                                 const IconComponent = m.icon ? ICON_OPTIONS[m.icon as keyof typeof ICON_OPTIONS] : null;
 
+                                const isHovered = editPopup?.m?.key === m.key;
+                                const design = config?.design || {};
+                                const useExtraction = design.useExtractedMilestones;
+                                const outlineWidth = design.milestoneOutlineWidth || 2;
+                                const statusColor = isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e') :
+                                    isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444') :
+                                        (config?.colors?.statePending?.color || '#ffffff');
+
                                 return (
                                     <div
                                         key={m.key}
                                         className={cn(
-                                            "milestone-icon cursor-pointer transition-all flex items-center justify-center shadow-lg",
-                                            isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125 hover:z-50'
+                                            "milestone-icon cursor-pointer transition-all flex items-center justify-center",
+                                            isSmallMilestone ? 'hover:scale-110' : 'hover:scale-125 hover:z-50',
+                                            !useExtraction && "shadow-lg"
                                         )}
                                         style={{
                                             transform: `scale(${isHovered ? 1.5 : 1.05})`,
                                             zIndex: idx,
-                                            width: isSmallMilestone ? iconSize : iconSize * (config?.design?.milestoneBoxScale || 1.2),
-                                            height: isSmallMilestone ? iconSize : iconSize * (config?.design?.milestoneBoxScale || 1.2),
+                                            width: isSmallMilestone ? iconSize : iconSize * (design.milestoneBoxScale || 1.2),
+                                            height: isSmallMilestone ? iconSize : iconSize * (design.milestoneBoxScale || 1.2),
                                             borderRadius: isSmallMilestone ? '50%' : '6px',
-                                            backgroundColor: isCompleted ? (config?.colors?.stateCompleted?.color || '#22c55e') :
-                                                isOverdue ? (config?.colors?.stateOverdue?.color || '#ef4444') :
-                                                    (config?.colors?.statePending?.color || '#ffffff'),
-                                            border: isCompleted || isOverdue ? 'none' : '2px solid #e2e8f0',
+                                            backgroundColor: useExtraction ? 'transparent' : statusColor,
+                                            border: useExtraction ? 'none' : (isCompleted || isOverdue ? 'none' : '2px solid #e2e8f0'),
                                             color: '#000000',
-                                            boxShadow: isCompleted ? `0 6px 15px ${(config?.colors?.stateCompleted?.color || '#22c55e')}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
-                                                isOverdue ? `0 6px 15px ${(config?.colors?.stateOverdue?.color || '#ef4444')}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
-                                                    '0 6px 15px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.05)',
+                                            boxShadow: useExtraction ? 'none' : (
+                                                isCompleted ? `0 6px 15px ${statusColor}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
+                                                    isOverdue ? `0 6px 15px ${statusColor}60, inset 0 0 0 1px rgba(0,0,0,0.1)` :
+                                                        '0 6px 15px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.05)'
+                                            ),
+                                            filter: useExtraction ? `
+                                                drop-shadow(${outlineWidth}px 0 0 ${statusColor}) 
+                                                drop-shadow(-${outlineWidth}px 0 0 ${statusColor}) 
+                                                drop-shadow(0 ${outlineWidth}px 0 ${statusColor}) 
+                                                drop-shadow(0 -${outlineWidth}px 0 ${statusColor})
+                                                drop-shadow(0 0 ${Math.max(1, outlineWidth / 2)}px rgba(0,0,0,0.3))
+                                            ` : 'none',
                                             pointerEvents: 'auto',
                                             transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                         }}

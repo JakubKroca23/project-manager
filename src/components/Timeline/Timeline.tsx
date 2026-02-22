@@ -224,7 +224,9 @@ const Timeline: React.FC = () => {
         usePriorityColors: true,
         stackedOpacity: 0.15,
         milestoneBoxScale: 1.2,
-        stackOpacityRed: 0.6 // New: multiplier for red overlap intensity
+        stackOpacityRed: 0.6, // New: multiplier for red overlap intensity
+        useExtractedMilestones: true, // New: only icon outline, no box
+        milestoneOutlineWidth: 2 // New: outline width in px
     });
     const timelineRef = useRef<HTMLDivElement>(null);
     const initialTouchDistance = useRef<number | null>(null);
@@ -1088,6 +1090,39 @@ const Timeline: React.FC = () => {
                                         Poměr velikosti čtverce vůči ikoně
                                     </div>
                                 </div>
+
+                                <div className="h-px bg-border/40 my-2" />
+
+                                <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border/30">
+                                    <span className="text-[10px] font-bold text-muted-foreground">Použít extrakci ikon</span>
+                                    <button
+                                        onClick={() => setDesign({ ...design, useExtractedMilestones: !design.useExtractedMilestones })}
+                                        className={cn(
+                                            "w-7 h-3.5 rounded-full transition-colors relative",
+                                            design.useExtractedMilestones ? "bg-primary" : "bg-muted-foreground/30"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "absolute top-0.5 left-0.5 w-2.5 h-2.5 rounded-full bg-white transition-transform shadow-sm",
+                                            design.useExtractedMilestones ? "translate-x-3.5" : "translate-x-0"
+                                        )} />
+                                    </button>
+                                </div>
+
+                                {design.useExtractedMilestones && (
+                                    <div className="mt-3">
+                                        <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                            <span className="text-muted-foreground">Tloušťka vytažení (px)</span>
+                                            <span className="text-primary">{design.milestoneOutlineWidth}px</span>
+                                        </div>
+                                        <input
+                                            type="range" min="1" max="8" step="1"
+                                            value={design.milestoneOutlineWidth}
+                                            onChange={(e) => setDesign({ ...design, milestoneOutlineWidth: parseInt(e.target.value) })}
+                                            className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
