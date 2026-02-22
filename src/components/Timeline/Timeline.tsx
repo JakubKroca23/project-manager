@@ -623,8 +623,8 @@ const Timeline: React.FC = () => {
 
         const handleTouchMove = (e: TouchEvent) => {
             if (e.touches.length === 2 && initialTouchDistance.current && initialTouchDayWidth.current) {
-                // Stay on timeline grid to prevent standard pinch-zoom
-                if ((e.target as HTMLElement).closest('.timeline-grid-container')) {
+                // Stay on timeline container to allow custom pinch-zoom
+                if ((e.target as HTMLElement).closest('.timeline-container')) {
                     e.preventDefault();
                     const dist = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
@@ -868,16 +868,13 @@ const Timeline: React.FC = () => {
 
             const container = scrollContainerRef.current;
             const containerWidth = container.clientWidth;
-            const sidebarWidth = 250;
+
+            // Dynamicky zjistíme šířku sidebaru (na mobilu je 110px, na pc 250px)
+            const sidebarEl = container.querySelector('.project-info-sticky');
+            const sidebarWidth = sidebarEl ? (sidebarEl as HTMLElement).offsetWidth : 250;
             const visibleGridWidth = containerWidth - sidebarWidth;
 
-            // Dnešek chceme uprostřed viditelné části mřížky (napravo od 250px sidebaru)
-            // dayPos je offset od začátku mřížky (která reálně začíná za sidebar díky flexu)
-            // Takže absolutní pozice dne je (250 + dayPos).
-            // Viditelný střed je (250 + visibleGridWidth / 2).
-            // (250 + dayPos) - scrollLeft = 250 + visibleGridWidth / 2
-            // scrollLeft = dayPos - (visibleGridWidth / 2)
-
+            // Výpočet: scrollLeft nastavíme tak, aby dayPos (začátek dne) byl uprostřed volné plochy (za sidebarWidth)
             const targetScroll = dayPos - (visibleGridWidth / 2) + (dayWidth / 2);
 
             container.scrollTo({
