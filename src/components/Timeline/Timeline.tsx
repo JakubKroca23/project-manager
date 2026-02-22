@@ -231,6 +231,8 @@ const Timeline: React.FC = () => {
     const timelineRef = useRef<HTMLDivElement>(null);
     const initialTouchDistance = useRef<number | null>(null);
     const initialTouchDayWidth = useRef<number | null>(null);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const sidebarWidth = isMobile ? 110 : 250;
 
     // Ref for accessing current dayWidth in event listeners
     const dayWidthRef = useRef(dayWidth);
@@ -868,13 +870,9 @@ const Timeline: React.FC = () => {
 
             const container = scrollContainerRef.current;
             const containerWidth = container.clientWidth;
-
-            // Dynamicky zjistíme šířku sidebaru (250px na PC, 110px na mobilu)
-            const sidebarEl = container.querySelector('.project-info-sticky');
-            const sidebarWidth = sidebarEl ? (sidebarEl as HTMLElement).offsetWidth : 250;
             const visibleGridWidth = containerWidth - sidebarWidth;
 
-            // Výpočet: scrollLeft nastavíme tak, aby dnešní den byl uprostřed VOLNÉ plochy (té napravo od sidebaru)
+            // Výpočet: scrollLeft nastavíme tak, aby dnešní den byl uprostřed VOLNÉ plochy
             const targetScroll = dayPos + (dayWidth / 2) - (visibleGridWidth / 2);
 
             container.scrollTo({
@@ -1280,7 +1278,7 @@ const Timeline: React.FC = () => {
                             endDate={timelineRange.end}
                             dayWidth={dayWidth}
                             showDays={false}
-                            sidebarWidth={typeof document !== 'undefined' ? (document.querySelector('.project-info-sticky') as HTMLElement)?.offsetWidth || 250 : 250}
+                            sidebarWidth={sidebarWidth}
                         >
                             <div className="timeline-rows">
                                 {/* 1. CATEGORY SUMMARIES (Stacked) */}
@@ -1328,7 +1326,9 @@ const Timeline: React.FC = () => {
                                                             width: 'max-content',
                                                             minWidth: '100%',
                                                             backgroundColor: isTotal ? '#ffffff' : undefined,
-                                                            borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
+                                                            borderBottom: isTotal ? '2px solid #cbd5e1' : undefined,
+                                                            marginLeft: 0,
+                                                            paddingLeft: sidebarWidth // Align content with the grid
                                                         }}
                                                     >
                                                         {/* Day Numbers for Total Row - Highest Z-index to pop over red warning and projects */}
