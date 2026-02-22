@@ -160,3 +160,15 @@
     - **Data Layer**: Introduced the `project_items` table in Supabase to track orderable components (Chassis, Bodies, Accessories).
     - **Real-time Interaction**: Implemented a dedicated sidebar for managing project items with quick-toggle statuses and source linking.
 - **Hotfix**: Resolved a Vercel build failure caused by a missing `Hash` icon import in the redesigned page.
+
+## 2026-02-22: Touch Zoom & Advanced Procurement
+- **Touch Interactivity**:
+    - **Pinch-to-zoom**: Implemented native multi-touch zoom support for the Timeline grid. Calculating focal points between fingers to maintain zoom center.
+    - **Scroll Logic Fix**: Corrected the "Jump to Today" calculation. Removed redundant sidebar width subtraction that caused misalignment.
+- **Accessory Variants Architecture**:
+    - **Schema Expansion**: Added `variants` (JSONB) to `accessory_catalog` and `variant` (TEXT) to `project_items` for granular procurement tracking.
+    - **Dynamic UI**: Items in the procurement list now feature context-aware variant selectors when catalog templates provide multiple options (e.g., Pump Types).
+    - **Admin Management**: Enhanced the catalog manager to support comma-separated variant entry with real-time UI updates.
+- **UI Polish**:
+    - **Visibility**: Increased z-index of day numbers (75) to stay above red overlap indicators (60).
+    - **Layering**: Restricted red overlap logic specifically to the "Mounting" phase (buffer-yellow) to prevent visual noise in other phases.

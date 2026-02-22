@@ -17,6 +17,11 @@
 - [x] Sjednocení terminologie (Uzavření -> Zahájení) napříč aplikací.
 - [x] Integrace správy globálního katalogu příslušenství do detailu zakázky pro Adminy.
 - [x] Fix buildu na Vercelu (chybějící importy).
+20: - [x] Implementace Pinch-to-zoom pro dotyková zařízení v Timeline.
+21: - [x] Oprava centrování mřížky funkcí "Dnes".
+22: - [x] Rozšíření katalogu příslušenství o podporu variant a typů.
+23: - [x] Implementace výběru varianty u položek v detailu projektu.
+24: - [x] Úprava z-indexů pro lepší viditelnost čísel dnů nad překryvy.
 
 ## Hotové úkoly (Done)
 - [x] Detekce `isAdmin` na základě role v DB (`profiles`).
