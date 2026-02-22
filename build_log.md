@@ -257,5 +257,5 @@
     - Knihovna ikon milníků rozšířena o technické symboly: **Blatníky** (Shield), **Plech** (Layers), **Elektro** (Cpu), **Hydraulika** (Waves), **Pily/Stříhání** (Scissors) a další.
 - **Vizuální ladění**: 
     - V řádku **"Celkem"** zachováno ztmavování víkendů pro konzistenci s mřížkou.
-    - Implementováno progresivní **červené ztmavování** při překryvu více projektů: 2 projekty (světle červená), 3 projekty (střední), 4 a více projektů (tmavě červená).
-    - Přidán ovladač do nastavení: Posuvník **"Intenzita překryvů (Důraz)"** umožňuje uživatelsky nastavit, jak moc mají tyto kritické dny vizuálně "křičet" (mění sytost červeného zbarvení).
+    - Implementováno progresivní **červené ztmavování** při překryvu více projektů, které se nyní reviduje **pouze pro dny montáže** (žlutá fáze).
+    - Přidán ovladač do nastavení: Posuvník **"Intenzita překryvů (Důraz)"** umožňuje uživatelsky nastavit, jak moc mají tyto kritické dny montáže vizuálně "křičet".

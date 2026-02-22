@@ -1293,12 +1293,25 @@ const Timeline: React.FC = () => {
                                                                 // Calculate overlap counts for this sector
                                                                 const zoneCounts = new Array(days.length).fill(0);
                                                                 sector.projects.forEach(p => {
-                                                                    const start = parseDate(p.created_at);
-                                                                    const end = parseDate(p.deadline) || parseDate(p.customer_handover);
-                                                                    if (!start || !end) return;
+                                                                    // We only count overlaps for the "Mounting" phase (Buffer Yellow)
+                                                                    const t_chassis = parseDate(p.chassis_delivery);
+                                                                    const t_body = parseDate(p.body_delivery);
+                                                                    const customMountingEnd = parseDate(p.custom_fields?.mounting_end_date);
 
-                                                                    const sIdx = Math.max(0, Math.floor((start.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
-                                                                    const eIdx = Math.min(days.length - 1, Math.floor((end.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
+                                                                    const lastMainM = [t_chassis, t_body].filter((d): d is Date => d !== null);
+                                                                    if (lastMainM.length === 0) return;
+
+                                                                    const mountingStart = new Date(Math.max(...lastMainM.map(d => d.getTime())));
+                                                                    let mountingEnd;
+                                                                    if (customMountingEnd) {
+                                                                        mountingEnd = customMountingEnd;
+                                                                    } else {
+                                                                        mountingEnd = new Date(mountingStart);
+                                                                        mountingEnd.setDate(mountingEnd.getDate() + 14);
+                                                                    }
+
+                                                                    const sIdx = Math.max(0, Math.floor((mountingStart.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
+                                                                    const eIdx = Math.min(days.length - 1, Math.floor((mountingEnd.getTime() - timelineRange.start.getTime()) / (1000 * 3600 * 24)));
 
                                                                     for (let i = sIdx; i <= eIdx; i++) {
                                                                         zoneCounts[i]++;
