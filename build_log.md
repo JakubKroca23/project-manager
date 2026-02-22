@@ -255,3 +255,6 @@
     - Do nastavení vzhledu přidán posuvník pro **měřítko čtvercového boxu** milníků (100-200% velikosti ikony).
     - Přidána možnost uživatelsky **měnit barvy stavů** milníků (Hotovo, Zpožděno, Čeká).
     - Knihovna ikon milníků rozšířena o technické symboly: **Blatníky** (Shield), **Plech** (Layers), **Elektro** (Cpu), **Hydraulika** (Waves), **Pily/Stříhání** (Scissors) a další.
+- **Vizuální ladění**: 
+    - V řádku **"Celkem"** zachováno ztmavování víkendů pro konzistenci s mřížkou.
+    - Implementováno progresivní **červené ztmavování** při překryvu více projektů: 2 projekty (světle červená), 3 projekty (střední), 4 a více projektů (tmavě červená). To umožňuje okamžitou vizuální identifikaci kritických dnů s vysokou kumulací zakázek.

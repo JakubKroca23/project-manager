@@ -1190,7 +1190,7 @@ const Timeline: React.FC = () => {
                                                             zIndex: isTotal ? 3600 : 3500 - vIdx,
                                                             width: 'max-content',
                                                             minWidth: '100%',
-                                                            backgroundColor: isTotal ? 'var(--background)' : undefined,
+                                                            backgroundColor: isTotal ? '#ffffff' : undefined,
                                                             borderBottom: isTotal ? '2px solid #cbd5e1' : undefined // Lighter 2px divider
                                                         }}
                                                     >
@@ -1244,7 +1244,7 @@ const Timeline: React.FC = () => {
                                                             </div>
                                                         )}
                                                         {/* Block scrolling projects */}
-                                                        <div className="absolute inset-0 bg-background pointer-events-none" style={{ zIndex: 0 }} />
+                                                        <div className="absolute inset-0 bg-white pointer-events-none" style={{ zIndex: 0 }} />
 
                                                         <div
                                                             className="project-info-sticky"
@@ -1298,7 +1298,9 @@ const Timeline: React.FC = () => {
                                                                                 isWeekend(day) && 'is-weekend',
                                                                                 isToday(day) && 'is-today',
                                                                                 isWeekStart(day) && 'is-week-start',
-                                                                                count >= 3 && 'is-stacked-heavy'
+                                                                                count === 2 && 'stack-2',
+                                                                                count === 3 && 'stack-3',
+                                                                                count >= 4 && 'stack-4plus'
                                                                             )}
                                                                             style={{ width: dayWidth }}
                                                                         />

@@ -454,8 +454,18 @@
   border-right: 2px solid color-mix(in srgb, var(--primary), transparent 50%);
 }
 
-.is-stacked-heavy {
-  background-color: rgba(0, 0, 0, 0.4) !important;
+.stack-2 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  z-index: 2;
+}
+
+.stack-3 {
+  background-color: rgba(239, 68, 68, 0.3) !important;
+  z-index: 2;
+}
+
+.stack-4plus {
+  background-color: rgba(185, 28, 28, 0.5) !important;
   z-index: 2;
 }
 
