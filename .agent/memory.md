@@ -151,4 +151,6 @@
 - **Maintenance**: Fixed a code-integrity issue in `TimelineBar.tsx` by adding the missing `cn` utility import.
 - **Timeline UI (v4)**:
     - **Dynamic Icon Outlines**: Added a user setting in the Design sidebar to control the thickness of the milestone icon outlines (`milestoneOutlineWidth`).
-    - **Implementation**: The outline uses a four-way `drop-shadow` technique to create a status-colored border (white/green/red) around the black icon paths, with the thickness now being adjustable from 0px to 5px.
+    - **Implementation**: The outline uses an eight-way `drop-shadow` technique (including diagonals) to create a smooth, status-colored border (white/green/red) around the black icon paths. The thickness is adjustable from 0px to 5px.
+- **Timeline UI Polish (v4.1)**:
+    - **UI Simplification**: Removed the "DNES" (Today) button from the Navbar to reduce visual noise. The "Jump to Today" functionality is still executed automatically on initial load to ensure the user starts at the current date.

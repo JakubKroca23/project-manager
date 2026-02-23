@@ -228,3 +228,7 @@
 - **Změna**: Přidáno nastavení tloušťky obrysu ikon milníků.
 - **Detail**: v `Timeline.tsx` přidán posuvník pro `milestoneOutlineWidth` a v `TimelineBar.tsx` upravena logika vykreslování `drop-shadow` tak, aby využívala tuto dynamickou hodnotu (0-5px).
 - **Cíl**: Umožnit uživatelům přizpůsobit vizuální výraznost milníků na časové ose.
+
+- **Úprava**: Odstranění tlačítka "DNES" z uživatelského rozhraní časové osy. Automatické skočení na aktuální den při načtení zůstává zachováno.
+- **Vizuální vylepšení**: Zvýšení hladkosti obrysu ikon milníků.
+- **Detail**: Původní 4-směrný `drop-shadow` byl nahrazen 8-směrným (včetně diagonál), což eliminuje "duchování" a artefakty při větších tloušťkách obrysu.

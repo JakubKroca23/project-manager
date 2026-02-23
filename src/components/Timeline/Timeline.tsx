@@ -802,7 +802,7 @@ const Timeline: React.FC = () => {
 
     useEffect(() => {
         setOnFit(() => handleFitVertical);
-        setOnJumpToToday(() => jumpToToday);
+        // setOnJumpToToday(() => jumpToToday); // Removed Today button from UI
         setOnZoomIn(() => handleZoomIn);
         setOnZoomOut(() => handleZoomOut);
         setOnToggleDesign(() => () => setShowDesignSettings(prev => !prev));

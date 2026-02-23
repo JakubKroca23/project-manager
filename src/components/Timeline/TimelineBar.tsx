@@ -815,11 +815,15 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             pointerEvents: 'auto',
                                             transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                             filter: `
-                                                drop-shadow(${config?.design?.milestoneOutlineWidth ?? 1.8}px ${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-${config?.design?.milestoneOutlineWidth ?? 1.8}px -${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(${config?.design?.milestoneOutlineWidth ?? 1.8}px -${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-${config?.design?.milestoneOutlineWidth ?? 1.8}px ${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
-                                            `
+                                                drop-shadow(${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(-${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(0 ${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(0 -${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                                drop-shadow(${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px ${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                                drop-shadow(-${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px ${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                                drop-shadow(${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px -${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                                drop-shadow(-${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px -${(config?.design?.milestoneOutlineWidth ?? 1.8) * 0.707}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                             `
                                         }}
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();

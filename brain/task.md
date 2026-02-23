@@ -68,3 +68,5 @@
 - **[x] Kompletní reorganizace Navbaru (Harmonogram/Zakázky vlevo, Ovládání uprostřed).**
 - **[x] Zvýraznění hustoty projektů (ztmavení při souběhu 3+ projektů v summary řádku).**
 - **[x] Implementace nastavení tloušťky obrysu ikon milníků (0-5px) v sekci Vzhled.**
+- **[x] Odstranění tlačítka "DNES" z Navbaru časové osy.**
+- **[x] Vyhlazení obrysu milníků pomocí 8-směrného stínu (oprava artefaktů).**
