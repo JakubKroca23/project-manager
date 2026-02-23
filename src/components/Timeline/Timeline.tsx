@@ -194,7 +194,8 @@ const Timeline: React.FC = () => {
         barHeight: 70, // in %
         opacity: 1,
         usePriorityColors: true,
-        stackedOpacity: 0.15
+        stackedOpacity: 0.15,
+        milestoneOutlineWidth: 1.8
     });
     const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -953,6 +954,19 @@ const Timeline: React.FC = () => {
                                     <div className="text-[8px] text-muted-foreground/60 mt-1 italic">
                                         V % vůči výšce řádku ({Math.round(rowHeight * (milestoneSize / 100))}px)
                                     </div>
+                                </div>
+
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold mb-1.5">
+                                        <span className="text-muted-foreground">Obrys ikon milníků</span>
+                                        <span className="text-primary">{design.milestoneOutlineWidth}px</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="5" step="0.1"
+                                        value={design.milestoneOutlineWidth || 1.8}
+                                        onChange={(e) => setDesign({ ...design, milestoneOutlineWidth: parseFloat(e.target.value) })}
+                                        className="w-full accent-primary h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+                                    />
                                 </div>
                             </div>
                         </div>

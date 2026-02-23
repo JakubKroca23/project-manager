@@ -67,3 +67,4 @@
 - **[x] Oprava popupu milníků (animace "výjezdu" z ikony + přístupnost myší).**
 - **[x] Kompletní reorganizace Navbaru (Harmonogram/Zakázky vlevo, Ovládání uprostřed).**
 - **[x] Zvýraznění hustoty projektů (ztmavení při souběhu 3+ projektů v summary řádku).**
+- **[x] Implementace nastavení tloušťky obrysu ikon milníků (0-5px) v sekci Vzhled.**

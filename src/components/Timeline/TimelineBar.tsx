@@ -815,10 +815,10 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                             pointerEvents: 'auto',
                                             transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                             filter: `
-                                                drop-shadow(1.8px 1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-1.8px -1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(1.8px -1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
-                                                drop-shadow(-1.8px 1.8px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
+                                                drop-shadow(${config?.design?.milestoneOutlineWidth ?? 1.8}px ${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(-${config?.design?.milestoneOutlineWidth ?? 1.8}px -${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(${config?.design?.milestoneOutlineWidth ?? 1.8}px -${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')}) 
+                                                drop-shadow(-${config?.design?.milestoneOutlineWidth ?? 1.8}px ${config?.design?.milestoneOutlineWidth ?? 1.8}px 0 ${isCompleted ? '#22c55e' : (isOverdue ? '#ef4444' : '#ffffff')})
                                             `
                                         }}
                                         onMouseEnter={(e) => {

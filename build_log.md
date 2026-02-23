@@ -222,5 +222,9 @@
 - **Změna**: Vizuální zvýraznění kritického nahromadění projektů (Stacking).
 - **Detail**:
     - **Detekce překryvu**: V sumárních řádcích (Celkem, Servis) se nyní automaticky vypočítává počet souběžných projektů pro každý den.
-    - **Vizuální efekt**: Pokud se v jednom čase překrývají **3 a více projektů**, daná oblast v řádku se razantně ztmaví (gba(0,0,0,0.45)).
+    - **Vizuální efekt**: Pokud se v jednom čase překrývají **3 a více projektů**, daná oblast v řádku se razantně ztmaví (gba(0,0,0,0.45)).
     - **Účel**: Okamžitá identifikace kapacitně vytížených období přímo na časové ose bez nutnosti rozbalovat detaily.
+
+- **Změna**: Přidáno nastavení tloušťky obrysu ikon milníků.
+- **Detail**: v `Timeline.tsx` přidán posuvník pro `milestoneOutlineWidth` a v `TimelineBar.tsx` upravena logika vykreslování `drop-shadow` tak, aby využívala tuto dynamickou hodnotu (0-5px).
+- **Cíl**: Umožnit uživatelům přizpůsobit vizuální výraznost milníků na časové ose.

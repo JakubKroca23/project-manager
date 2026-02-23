@@ -149,3 +149,6 @@
     - **Milestone Popups**: Added premium slide-in animations (sliding from the icon). Implemented a 150ms "grace period" on mouse-leave to prevent accidental closing, making the interface more robust and accessible.
     - **Stacking Density Indicator**: In high-density areas (where 3+ projects overlap in a summary row), a drastically darker background (`rgba(0,0,0,0.4)`) is applied. This "heatmaps" capacity bottlenecks directly in the collapsed view.
 - **Maintenance**: Fixed a code-integrity issue in `TimelineBar.tsx` by adding the missing `cn` utility import.
+- **Timeline UI (v4)**:
+    - **Dynamic Icon Outlines**: Added a user setting in the Design sidebar to control the thickness of the milestone icon outlines (`milestoneOutlineWidth`).
+    - **Implementation**: The outline uses a four-way `drop-shadow` technique to create a status-colored border (white/green/red) around the black icon paths, with the thickness now being adjustable from 0px to 5px.
