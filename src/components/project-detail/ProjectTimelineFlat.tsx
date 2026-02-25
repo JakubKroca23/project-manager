@@ -1,47 +1,87 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Project, Milestone } from '@/types/project';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase/client';
 import {
     Truck, Factory, Wrench, Shield, Check, Flag,
-    Calendar, Play, Info
+    Calendar, Play, Info, Zap, ThumbsUp, Package, AlertTriangle,
+    LucideIcon
 } from 'lucide-react';
 
 interface ProjectTimelineFlatProps {
     project: Project;
     milestones: Milestone[];
+    isEditing?: boolean;
+    onCustomFieldChange?: (field: string, value: any) => void;
 }
 
-const ICON_MAP: Record<string, React.ReactNode> = {
-    start: <Play size={10} />,
-    chassis: <Truck size={10} />,
-    body: <Factory size={10} />,
-    mounting_end: <Wrench size={10} />,
-    revision_end: <Shield size={10} />,
-    handover: <Check size={10} />,
+// ─── CUSTOM ICONS ────────────────────────────────────────────────
+
+const Hiab = ({ size = 24 }: { size?: number }) => (
+    <svg version="1.1" viewBox="0 0 756 719" width={size} height={size} style={{ display: 'block' }}>
+        <path fill="currentColor" fillRule="evenodd" d="M239.325577,244.186447 C203.676422,260.819580 181.076263,297.162354 182.767044,334.754974 C184.659683,376.835571 214.633133,412.044403 255.930511,420.166931 C290.925354,427.049896 321.923950,419.072845 348.072388,394.205811 C348.646942,393.659393 349.350281,393.248383 350.698639,392.254486 C350.876465,394.253387 351.104340,395.619995 351.103790,396.986572 C351.103790,420.319366 350.979187,443.652557 351.102631,466.984528 C351.123352,470.902740 349.982635,472.827637 346.087982,474.136627 C314.852814,484.634644 282.792542,488.090546 250.473999,482.307434 C176.538651,469.077393 127.043213,426.617065 103.475761,355.035187 C90.394173,315.302216 90.995651,275.095520 104.500275,235.729980 C124.083107,178.646637 162.374619,139.218216 219.688461,118.965439 C265.006805,102.951469 309.664490,106.366371 353.827484,123.622246 C379.737000,133.745926 403.279755,147.750900 425.192444,164.987671 C442.542694,178.635559 460.278503,192.182083 479.337524,203.185028 C515.062378,223.809326 554.102417,231.555420 595.280273,226.561981 C615.185608,224.148117 633.773682,217.584396 650.923706,207.098816 C652.627502,206.057114 654.341736,205.031387 656.075623,204.041153 C656.311707,203.906326 656.691223,204.022583 657.474792,204.022583 C657.474792,343.750275 657.474792,483.451508 657.474792,623.471130 C592.401489,623.471130 527.332031,623.471130 461.703094,623.471130 C465.198578,598.751526 472.556335,575.556274 481.364807,553.438538 C470.681000,543.735840 459.901154,534.822144 450.133575,524.910889 C420.921997,495.269623 402.146088,459.562714 389.878693,420.032654 C380.711121,390.491394 375.579071,360.200592 371.022034,329.723511 C367.572266,306.651764 359.240570,285.458252 344.542786,267.071228 C332.136230,251.550446 315.365082,243.249496 296.460724,238.938934 C277.059540,234.515060 258.087372,236.593246 239.325577,244.186447 z M405.066071,356.463867 C410.432312,383.842468 418.457458,410.395691 430.494324,435.600952 C445.061768,466.105164 463.614624,493.674988 490.639832,514.752502 C492.789459,516.429016 495.057343,517.953857 496.417114,518.934143 C513.274902,494.606476 529.752014,470.828064 546.346313,446.880646 C544.305969,446.365356 542.040405,445.919800 539.855347,445.221893 C516.372620,437.721619 498.028503,423.066315 483.016296,403.948822 C457.174347,371.040009 444.689209,332.920502 439.677368,291.924713 C438.283508,280.522980 437.043335,269.093719 435.263367,257.750763 C433.873779,248.895523 427.581482,243.368057 419.133240,242.589844 C411.363129,241.874100 404.838959,245.662964 401.942169,253.419128 C400.451782,257.409546 399.397797,266.087616 399.397797,266.087616 C397.282166,296.164215 399.298950,326.010345 405.066071,356.463867 z M526.730957,299.152283 C524.841736,300.771179 522.798889,302.243286 521.088745,304.033264 C511.238831,314.342743 509.870361,330.107635 517.726929,341.649139 C526.089478,353.933990 540.631409,358.646790 554.090332,352.992706 C565.409607,348.237457 572.231384,339.693481 573.135559,327.223969 C574.031616,314.867828 568.991577,305.131012 558.450073,298.728607 C548.244873,292.530487 537.709229,292.676788 526.730957,299.152283 z" />
+    </svg>
+);
+
+const ICON_MAP: Record<string, LucideIcon | any> = {
+    Truck: Truck,
+    Hammer: Factory, // Use Factory for Hammer if needed
+    ThumbsUp: ThumbsUp,
+    AlertTriangle: AlertTriangle,
+    Play: Play,
+    Check: Check,
+    Wrench: Wrench,
+    Package: Package,
+    Factory: Factory,
+    Zap: Zap,
+    Hiab: Hiab
 };
 
-const LABEL_MAP: Record<string, string> = {
-    start: 'Zahájení',
-    chassis: 'Podvozek',
-    body: 'Nástavba',
-    mounting_end: 'Montáž',
-    revision_end: 'Revize',
-    handover: 'Předání',
-};
+export function ProjectTimelineFlat({ project, milestones, isEditing, onCustomFieldChange }: ProjectTimelineFlatProps) {
+    const [config, setConfig] = useState<any>(null);
 
-export function ProjectTimelineFlat({ project, milestones }: ProjectTimelineFlatProps) {
+    // Fetch global timeline configuration
+    useEffect(() => {
+        async function fetchConfig() {
+            const { data } = await supabase
+                .from('app_settings')
+                .select('settings')
+                .eq('id', 'timeline_config')
+                .maybeSingle();
+
+            if (data?.settings) {
+                setConfig(data.settings);
+            }
+        }
+        fetchConfig();
+    }, []);
+
     const timelineData = useMemo(() => {
-        // Sesbírat standardní data
+        const completedMilestones = project.custom_fields?.completed_milestones || [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Map settings keys to our internal IDs (database fields)
+        const settingsMap: Record<string, string> = {
+            start_at: 'milestoneStart',
+            chassis_delivery: 'milestoneChassis',
+            body_delivery: 'milestoneBody',
+            mounting_end_date: 'milestoneMountingEnd',
+            revision_end_date: 'milestoneRevisionEnd',
+            customer_handover: 'milestoneHandover'
+        };
+
+        // Sesbírat standardní data (ID musí odpovídat názvům polí v Project)
         const standardDates = [
-            { id: 'start', date: project.start_at || project.created_at, color: 'bg-slate-400', label: 'Zahájení' },
-            { id: 'chassis', date: project.chassis_delivery, color: 'bg-blue-400', label: 'Podvozek' },
-            { id: 'body', date: project.body_delivery, color: 'bg-indigo-400', label: 'Nástavba' },
-            { id: 'mounting_end', date: project.custom_fields?.mounting_end_date, color: 'bg-emerald-400', label: 'Montáž' },
-            { id: 'revision_end', date: project.custom_fields?.revision_end_date, color: 'bg-teal-400', label: 'Revize' },
-            { id: 'handover', date: project.customer_handover || project.deadline, color: 'bg-amber-500', label: 'Předání' },
+            { id: 'start_at', date: project.start_at || project.created_at, label: 'Zahájení', defaultColor: '#94a3b8' },
+            { id: 'chassis_delivery', date: project.chassis_delivery, label: 'Podvozek', defaultColor: '#3b82f6' },
+            { id: 'body_delivery', date: project.body_delivery, label: 'Nástavba', defaultColor: '#6366f1' },
+            { id: 'mounting_end_date', date: project.custom_fields?.mounting_end_date, label: 'Montáž', defaultColor: '#10b981' },
+            { id: 'revision_end_date', date: project.custom_fields?.revision_end_date, label: 'Revize', defaultColor: '#14b8a6' },
+            { id: 'customer_handover', date: project.customer_handover || project.deadline, label: 'Předání', defaultColor: '#f59e0b' },
         ];
 
         // Přidat milníky z projektu, které mají datum
@@ -50,18 +90,54 @@ export function ProjectTimelineFlat({ project, milestones }: ProjectTimelineFlat
             .map(m => ({
                 id: m.id,
                 date: m.date,
-                color: m.status === 'completed' ? 'bg-emerald-500' : 'bg-slate-300',
                 label: m.name,
                 isCustom: true,
-                iconKey: m.icon
+                iconKey: m.icon,
+                status: m.status,
+                defaultColor: '#94a3b8'
             }));
 
         const allDates = [...standardDates, ...projectMilestones]
             .filter(d => Boolean(d.date))
-            .map(d => ({
-                ...d,
-                dateObj: new Date(d.date!)
-            }))
+            .map(d => {
+                const dateObj = new Date(d.date!);
+                dateObj.setHours(0, 0, 0, 0);
+
+                // Determine confirmation from custom_fields
+                const confirmedDate = config?.settingsMap?.[d.id]
+                    ? project.custom_fields?.[`${d.id}_confirmed`]
+                    : (d.id.length < 20 ? project.custom_fields?.[`${d.id}_confirmed`] : null);
+
+                const isCompleted = d.id.length > 20
+                    ? (d as any).status === 'completed'
+                    : (completedMilestones.includes(d.id) || !!confirmedDate);
+
+                // Determine if overdue
+                const isOverdue = !isCompleted && dateObj < today;
+
+                // Apply dynamic settings if available
+                const settingKey = settingsMap[d.id];
+                const setting = config?.colors?.[settingKey];
+
+                // Final color logic: Completed/Confirmed > Overdue > Dynamic > Default
+                let finalColor = (d as any).defaultColor;
+                if (isCompleted) {
+                    finalColor = '#22c55e'; // Green
+                } else if (isOverdue) {
+                    finalColor = '#ef4444'; // Red
+                } else if (setting?.color && setting.color !== '#000000') {
+                    finalColor = setting.color;
+                }
+
+                return {
+                    ...d,
+                    dateObj,
+                    confirmedDate,
+                    isCompleted,
+                    finalColor,
+                    dynamicIcon: setting?.icon ? setting.icon : null
+                };
+            })
             .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
         if (allDates.length < 2) return null;
@@ -93,16 +169,45 @@ export function ProjectTimelineFlat({ project, milestones }: ProjectTimelineFlat
             }));
         }
 
+        const todayPercent = ((today.getTime() - startTime) / duration) * 100;
+
         return {
             dates: finalDates,
-            durationDays: Math.ceil(duration / (1000 * 60 * 60 * 24))
+            durationDays: Math.ceil(duration / (1000 * 60 * 60 * 24)),
+            todayPercent
         };
-    }, [project, milestones]);
+    }, [project, milestones, config]);
+
+    const handleIconClick = (item: any) => {
+        if (!isEditing || !onCustomFieldChange) return;
+
+        const fieldName = `${item.id}_confirmed`;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Toggle: if already confirmed today, clear it, otherwise set to today
+        const currentVal = project.custom_fields?.[fieldName];
+        onCustomFieldChange(fieldName, currentVal ? null : todayStr);
+    };
 
     if (!timelineData) return null;
 
+    // Helper for icon rendering
+    const renderIcon = (item: any) => {
+        // Prioritize dynamic icon from settings
+        const iconKey = item.dynamicIcon || (item.id === 'start_at' ? 'Zap' :
+            item.id === 'chassis_delivery' ? 'Truck' :
+                item.id === 'body_delivery' ? 'Hiab' :
+                    item.id === 'mounting_end_date' ? 'Package' :
+                        item.id === 'revision_end_date' ? 'Factory' :
+                            item.id === 'customer_handover' ? 'ThumbsUp' :
+                                item.iconKey);
+
+        const IconComp = ICON_MAP[iconKey] || Flag;
+        return <IconComp size={iconKey === 'Hiab' ? 14 : 10} />;
+    };
+
     return (
-        <div className="w-full py-12 selective-none px-8">
+        <div className="w-full py-12 select-none px-8">
             <div className="relative h-1 bg-slate-200 rounded-full w-full">
                 {/* Spojovací čáry mezi body */}
                 <div className="absolute inset-0 flex items-center">
@@ -111,6 +216,27 @@ export function ProjectTimelineFlat({ project, milestones }: ProjectTimelineFlat
                         style={{ width: '100%' }}
                     />
                 </div>
+
+                {/* Linka "Dnes" */}
+                {timelineData.todayPercent >= 0 && timelineData.todayPercent <= 100 && (
+                    <div
+                        className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center z-20 pointer-events-none"
+                        style={{ left: `${timelineData.todayPercent}%` }}
+                    >
+                        {/* Vertikální čárka přes osu */}
+                        <div className="w-[2px] h-6 bg-primary/40 rounded-full" />
+
+                        {/* Pulzující kroužek */}
+                        <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]">
+                            <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-40" />
+                        </div>
+
+                        {/* Štítek "Dnes" */}
+                        <span className="absolute -top-6 text-[9px] font-black uppercase tracking-widest text-primary/80 bg-white/80 px-1.5 py-0.5 rounded-md backdrop-blur-sm border border-primary/10">
+                            Dnes
+                        </span>
+                    </div>
+                )}
 
                 {/* Body v čase */}
                 {timelineData.dates.map((item, idx) => {
@@ -122,31 +248,31 @@ export function ProjectTimelineFlat({ project, milestones }: ProjectTimelineFlat
                             style={{ left: `${item.percent}%` }}
                         >
                             {/* Tečka s ikonou */}
-                            <div className={cn(
-                                "w-7 h-7 rounded-full border-4 border-white shadow-md flex items-center justify-center text-white transition-all duration-300 hover:scale-125 z-10",
-                                item.color
-                            )}>
-                                {ICON_MAP[item.id] || <Flag size={10} />}
+                            <div
+                                onClick={() => handleIconClick(item)}
+                                className={cn(
+                                    "w-7 h-7 rounded-full border-4 border-white shadow-md flex items-center justify-center text-white transition-all duration-300 z-10",
+                                    isEditing ? "cursor-pointer hover:scale-125 hover:shadow-lg active:scale-95" : "hover:scale-110",
+                                    item.isCompleted && isEditing ? "ring-2 ring-emerald-500/20 ring-offset-2" : ""
+                                )}
+                                style={{ backgroundColor: item.finalColor }}
+                            >
+                                {renderIcon(item)}
                             </div>
 
-                            {/* Label - střídání nahoru/dolů */}
-                            <div className={cn(
-                                "absolute flex flex-col items-center whitespace-nowrap",
-                                isEven ? "bottom-8" : "top-8"
-                            )}>
+                            {/* Label - vše pod ikonami */}
+                            <div className="absolute flex flex-col items-center whitespace-nowrap top-8">
+                                <div className="w-px h-1.5 bg-slate-200 mb-1 order-first" />
                                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-900">
                                     {item.label}
                                 </span>
-                                <span className="text-[9px] font-bold text-black font-mono">
-                                    {formatDate(item.date)}
+                                <span className={cn(
+                                    "text-[9px] font-bold font-mono",
+                                    item.isCompleted ? "text-emerald-600" : "text-black"
+                                )}>
+                                    {item.confirmedDate ? formatDate(item.confirmedDate) : formatDate(item.date)}
+                                    {item.confirmedDate && <Check size={8} className="inline ml-0.5 mb-0.5" strokeWidth={4} />}
                                 </span>
-                                {isEven && <div className="w-px h-1.5 bg-slate-200 mt-1" />}
-                                {!isEven && <div className="w-px h-1.5 bg-slate-200 mb-1 order-first" />}
-                            </div>
-
-                            {/* Tooltip při hoveru */}
-                            <div className="absolute opacity-0 group-hover:opacity-100 transition-all bg-slate-900 text-white text-[9px] px-2 py-1 rounded bottom-14 pointer-events-none z-50 shadow-xl font-bold">
-                                {formatDate(item.date)}: {item.label}
                             </div>
                         </div>
                     );

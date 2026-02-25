@@ -155,10 +155,10 @@ export function useAdmin() {
             if (!error) {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, can_import: canImport, access_requested: false } : p));
             } else {
-
+                console.error('Chyba při aktualizaci oprávnění k importu:', error);
             }
         } catch (err) {
-
+            console.error('Neočekávaná chyba v updatePermission:', err);
         }
     };
 
@@ -184,11 +184,11 @@ export function useAdmin() {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, permissions: newPermissions } : p));
                 return true;
             } else {
-
+                console.error('Chyba při aktualizaci granulárních oprávnění:', error);
                 return false;
             }
         } catch (err) {
-
+            console.error('Neočekávaná chyba v updateUserPermissions:', err);
             return false;
         }
     };
@@ -212,10 +212,10 @@ export function useAdmin() {
             if (!error) {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, password_reset_requested: false } : p));
             } else {
-
+                console.error('Chyba při resetu žádosti o heslo:', error);
             }
         } catch (err) {
-
+            console.error('Neočekávaná chyba v resetPasswordRequest:', err);
         }
     };
 
@@ -238,9 +238,11 @@ export function useAdmin() {
 
             if (!error) {
                 setUserRequests((prev: UserRequest[]) => prev.filter((r: UserRequest) => r.id !== requestId));
+            } else {
+                console.error('Chyba při zpracování požadavku uživatele:', error);
             }
         } catch (err) {
-
+            console.error('Neočekávaná chyba v processUserRequest:', err);
         }
     };
 
@@ -266,11 +268,11 @@ export function useAdmin() {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, role: newRole } : p));
                 return true;
             } else {
-
+                console.error('Chyba při aktualizaci role uživatele:', error);
                 return false;
             }
         } catch (err) {
-
+            console.error('Neočekávaná chyba v updateRole:', err);
             return false;
         }
     };

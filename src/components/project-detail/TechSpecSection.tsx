@@ -1,4 +1,4 @@
-import { ClipboardList, Truck, FileText, Tag, Hash, Sparkles, Plus, Trash2, ChevronDown, Upload, Download, Loader2, Eye, X } from 'lucide-react';
+import { ClipboardList, Truck, FileText, Tag, Hash, Sparkles, Plus, Trash2, ChevronDown, Upload, Download, Loader2, Eye, X, AlertTriangle, Check } from 'lucide-react';
 import { Project } from '@/types/project';
 import { Section } from './DetailComponents';
 import { extractModelDesignation, formatDate, cn } from '@/lib/utils';
@@ -572,23 +572,52 @@ export function TechSpecSection({
 
                     const toggleItem = (key: string) => {
                         const next = { ...accData };
-                        if (isSelected(key)) { delete next[key]; }
-                        else { next[key] = {}; }
+                        if (isSelected(key)) {
+                            delete next[key];
+                        } else {
+                            // Pre-fill with manager by default
+                            next[key] = {
+                                responsible: p.manager || '',
+                                pocet: 1
+                            };
+                        }
                         handleCustomFieldChange('accessories', next);
                     };
 
                     const updateField = (key: string, field: string, value: any) => {
-                        handleCustomFieldChange('accessories', {
-                            ...accData,
-                            [key]: { ...(accData[key] || {}), [field]: value }
-                        });
+                        const nextData = { ...accData };
+                        const itemData = { ...(nextData[key] || {}), [field]: value };
+
+                        // If switching to 'objednat', ensure responsible is filled
+                        if (field === 'source' && value === 'objednat' && !itemData.responsible) {
+                            itemData.responsible = p.manager || '';
+                        }
+
+                        nextData[key] = itemData;
+                        handleCustomFieldChange('accessories', nextData);
                     };
 
                     const selectedItems = ACCESSORIES.filter(a => isSelected(a.key));
 
+                    // Alerts logic
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const overdueItems = selectedItems.filter(item => {
+                        const data = accData[item.key] || {};
+                        return data.source === 'objednat' && !data.arrived && data.delivery_date && new Date(data.delivery_date) < today;
+                    });
+
                     return (
-                        <div className="space-y-2">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b border-border/40 pb-1.5">Příslušenství a výbava</h4>
+                        <div className="space-y-4 pt-4 border-t border-border/20">
+                            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Příslušenství a výbava</h4>
+                                {overdueItems.length > 0 && !isEditing && (
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-black uppercase animate-pulse border border-rose-500/20">
+                                        <AlertTriangle size={10} />
+                                        <span>Zpožděné dodávky ({overdueItems.length})</span>
+                                    </div>
+                                )}
+                            </div>
 
                             {isEditing ? (
                                 <div className="flex flex-col gap-1">
@@ -613,6 +642,7 @@ export function TechSpecSection({
                                                     {/* Kompaktní preview aktivních hodnot */}
                                                     {active && (
                                                         <div className="flex items-center gap-1.5 shrink-0">
+                                                            {data.arrived && <span className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Dorazilo</span>}
                                                             {srcOption && <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase border ${srcOption.color}`}>{srcOption.label}</span>}
                                                             {data.vyrobce && <span className="text-[9px] text-muted-foreground font-semibold truncate max-w-[80px]">{data.vyrobce}</span>}
                                                             {(data.pocet && data.pocet > 1) && <span className="text-[9px] font-black text-muted-foreground">{data.pocet}×</span>}
@@ -670,6 +700,64 @@ export function TechSpecSection({
                                                             >+</button>
                                                             <span className="text-[9px] text-muted-foreground/60 font-bold ml-0.5">ks</span>
                                                         </div>
+
+                                                        {/* 5. Rozšířená data pro objednávku */}
+                                                        {data.source === 'objednat' && (
+                                                            <div className="w-full grid grid-cols-1 sm:grid-cols-4 gap-3 mt-1 pt-2.5 border-t border-border/15">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <label className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">
+                                                                        Zodpovědná osoba <span className="text-rose-500">*</span>
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={data.responsible || ''}
+                                                                        onChange={(e) => updateField(item.key, 'responsible', e.target.value)}
+                                                                        placeholder="Kdo objednává..."
+                                                                        className={cn(
+                                                                            "text-[10px] font-semibold bg-background border rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-muted-foreground/30",
+                                                                            !data.responsible ? "border-rose-500/50 bg-rose-500/[0.02]" : "border-border/40"
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <label className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">Datum objednání</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={data.order_date || ''}
+                                                                        onChange={(e) => updateField(item.key, 'order_date', e.target.value)}
+                                                                        className="text-[10px] font-semibold bg-background border border-border/40 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all cursor-pointer"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <label className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">Datum doručení</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={data.delivery_date || ''}
+                                                                        onChange={(e) => updateField(item.key, 'delivery_date', e.target.value)}
+                                                                        className={cn(
+                                                                            "text-[10px] font-semibold bg-background border rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all cursor-pointer",
+                                                                            data.delivery_date && new Date(data.delivery_date) < today && !data.arrived ? "text-rose-500 border-rose-500/30" : "border-border/40"
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-col gap-1 justify-center">
+                                                                    <label className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mb-0.5">Stav</label>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => updateField(item.key, 'arrived', !data.arrived)}
+                                                                        className={cn(
+                                                                            "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border",
+                                                                            data.arrived
+                                                                                ? "bg-emerald-500 text-white border-emerald-600 shadow-sm"
+                                                                                : "bg-background border-border/40 text-muted-foreground hover:border-border/70 hover:bg-muted/30"
+                                                                        )}
+                                                                    >
+                                                                        <Check size={12} strokeWidth={3} />
+                                                                        <span>{data.arrived ? 'Dorazilo' : 'Nedorazilo'}</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -682,13 +770,54 @@ export function TechSpecSection({
                                         {selectedItems.map(item => {
                                             const data = accData[item.key] || {};
                                             const srcOption = SOURCE_OPTIONS.find(s => s.key === data.source);
+                                            const isOverdue = data.source === 'objednat' && !data.arrived && data.delivery_date && new Date(data.delivery_date) < today;
+                                            const hasExtraData = data.responsible || data.order_date || data.delivery_date || data.arrived;
+
                                             return (
-                                                <div key={item.key} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/15 border border-border/30">
-                                                    <span className="text-[11px] font-black text-foreground/80 min-w-0 flex-1">{item.label}</span>
-                                                    {srcOption && <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border shrink-0 ${srcOption.color}`}>{srcOption.label}</span>}
-                                                    {data.vyrobce && <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-[120px]">{data.vyrobce}</span>}
-                                                    {data.oznaceni && <span className="text-[10px] font-semibold text-muted-foreground/70 truncate max-w-[120px]">{data.oznaceni}</span>}
-                                                    {(data.pocet && data.pocet > 1) && <span className="text-[10px] font-black text-muted-foreground shrink-0">{data.pocet} ks</span>}
+                                                <div key={item.key} className={cn(
+                                                    "flex flex-col gap-1 px-3 py-2.5 rounded-xl border transition-all",
+                                                    isOverdue ? "bg-rose-500/[0.03] border-rose-500/20" : "bg-muted/15 border-border/30"
+                                                )}>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[11px] font-black text-foreground/80 min-w-0 flex-1 flex items-center gap-2">
+                                                            {isOverdue && <AlertTriangle size={12} className="text-rose-500 animate-pulse shrink-0" />}
+                                                            {item.label}
+                                                        </span>
+                                                        {data.arrived && <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shrink-0">Skladem</span>}
+                                                        {srcOption && <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border shrink-0 ${srcOption.color}`}>{srcOption.label}</span>}
+                                                        {data.vyrobce && <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-[120px]">{data.vyrobce}</span>}
+                                                        {data.oznaceni && <span className="text-[10px] font-semibold text-muted-foreground/70 truncate max-w-[120px]">{data.oznaceni}</span>}
+                                                        {(data.pocet && data.pocet > 1) && <span className="text-[10px] font-black text-muted-foreground shrink-0">{data.pocet} ks</span>}
+                                                    </div>
+
+                                                    {hasExtraData && (
+                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 pt-1.5 border-t border-border/10">
+                                                            {data.responsible && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-[8px] font-black uppercase text-muted-foreground/30">Zodp.:</span>
+                                                                    <span className="text-[10px] font-bold text-muted-foreground/70 tracking-tight">{data.responsible}</span>
+                                                                </div>
+                                                            )}
+                                                            {data.order_date && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-[8px] font-black uppercase text-muted-foreground/30">Objednáno:</span>
+                                                                    <span className="text-[10px] font-bold text-muted-foreground/70 tracking-tight">{formatDate(data.order_date)}</span>
+                                                                </div>
+                                                            )}
+                                                            {data.delivery_date && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-[8px] font-black uppercase text-muted-foreground/30">Příjezd:</span>
+                                                                    <span className={cn(
+                                                                        "text-[10px] font-bold tracking-tight",
+                                                                        isOverdue ? "text-rose-500 font-extrabold" : (data.arrived ? "text-emerald-600" : "text-primary/70")
+                                                                    )}>
+                                                                        {formatDate(data.delivery_date)}
+                                                                        {isOverdue && " (ZPOŽDĚNÍ!)"}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         })}

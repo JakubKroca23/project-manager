@@ -1,7 +1,7 @@
 # Aktuální stav úkolů
 
 ## Rozpracované úkoly (In Progress)
-- [ ] Odstranění TypeScript a JSX lint chyb v `src/app/profile/page.tsx` a `src/hooks/useAdmin.ts`.
+- [x] Odstranění TypeScript a JSX lint chyb v `src/app/profile/page.tsx` a `src/hooks/useAdmin.ts`.
 - [ ] Testování reálného zobrazení Admin Panelu pod jiným adminským účtem.
 - [ ] Ověření funkčnosti `user_action_logs` v Supabase dashboardu.
 

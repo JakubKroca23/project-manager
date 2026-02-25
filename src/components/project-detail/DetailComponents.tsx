@@ -105,30 +105,52 @@ export function Field({ label, icon, value, field, isEditing, onChange, highligh
 interface DateFieldProps {
     label: string;
     value: any;
+    confirmedValue?: any;
     field: keyof Project;
     isEditing: boolean;
     onChange: (field: keyof Project, value: any) => void;
+    onConfirmedChange?: (field: string, value: any) => void;
     highlight?: boolean;
 }
 
-export function DateField({ label, value, field, isEditing, onChange, highlight }: DateFieldProps) {
+export function DateField({ label, value, confirmedValue, field, isEditing, onChange, onConfirmedChange, highlight }: DateFieldProps) {
+    const confirmationField = `${String(field)}_confirmed`;
     return (
         <div className="flex flex-col gap-1 group">
             <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">{label}</p>
             {isEditing ? (
-                <input
-                    type="date"
-                    value={value ? new Date(value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => onChange(field, e.target.value)}
-                    className="w-full bg-background/50 border border-border/60 rounded px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-primary/20 outline-none transition-all"
-                />
+                <div className="space-y-2">
+                    <input
+                        type="date"
+                        value={value ? new Date(value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => onChange(field, e.target.value)}
+                        className="w-full bg-background/50 border border-border/60 rounded px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                    />
+                    <div className="flex flex-col gap-1 pt-1 border-t border-border/10">
+                        <label className="text-[8px] font-black uppercase tracking-tight text-emerald-600/70">Potvrdit splnění (skutečnost)</label>
+                        <input
+                            type="date"
+                            value={confirmedValue ? new Date(confirmedValue).toISOString().split('T')[0] : ''}
+                            onChange={(e) => onConfirmedChange?.(confirmationField, e.target.value)}
+                            className="w-full bg-emerald-500/5 border border-emerald-500/20 rounded px-2 py-1 text-[10px] font-bold text-emerald-700 outline-none transition-all"
+                        />
+                    </div>
+                </div>
             ) : (
-                <p className={cn(
-                    "text-xs font-black transition-colors",
-                    highlight ? 'text-amber-800' : 'text-slate-900'
-                )}>
-                    {formatDate(value)}
-                </p>
+                <div className="space-y-0.5">
+                    <p className={cn(
+                        "text-xs font-black transition-colors",
+                        highlight ? 'text-amber-800' : 'text-slate-900'
+                    )}>
+                        {formatDate(value)}
+                    </p>
+                    {confirmedValue && confirmedValue !== '-' && (
+                        <p className="text-[9px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-tighter">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            Splněno: {formatDate(confirmedValue)}
+                        </p>
+                    )}
+                </div>
             )}
         </div>
     );
@@ -137,30 +159,52 @@ export function DateField({ label, value, field, isEditing, onChange, highlight 
 interface CustomDateFieldProps {
     label: string;
     value: any;
+    confirmedValue?: any;
     field: string;
     isEditing: boolean;
     onChange: (field: string, value: any) => void;
     highlight?: boolean;
+    onConfirmedChange?: (field: string, value: any) => void;
 }
 
-export function CustomDateField({ label, value, field, isEditing, onChange, highlight }: CustomDateFieldProps) {
+export function CustomDateField({ label, value, confirmedValue, field, isEditing, onChange, onConfirmedChange, highlight }: CustomDateFieldProps) {
+    const confirmationField = `${field}_confirmed`;
     return (
         <div className="flex flex-col gap-1 group">
             <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">{label}</p>
             {isEditing ? (
-                <input
-                    type="date"
-                    value={value && value !== '-' ? new Date(value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => onChange(field, e.target.value)}
-                    className="w-full bg-background/50 border border-border/60 rounded px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-primary/20 outline-none transition-all"
-                />
+                <div className="space-y-2">
+                    <input
+                        type="date"
+                        value={value && value !== '-' ? new Date(value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => onChange(field, e.target.value)}
+                        className="w-full bg-background/50 border border-border/60 rounded px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                    />
+                    <div className="flex flex-col gap-1 pt-1 border-t border-border/10">
+                        <label className="text-[8px] font-black uppercase tracking-tight text-emerald-600/70">Potvrdit splnění (skutečnost)</label>
+                        <input
+                            type="date"
+                            value={confirmedValue ? new Date(confirmedValue).toISOString().split('T')[0] : ''}
+                            onChange={(e) => onConfirmedChange?.(confirmationField, e.target.value)}
+                            className="w-full bg-emerald-500/5 border border-emerald-500/20 rounded px-2 py-1 text-[10px] font-bold text-emerald-700 outline-none transition-all"
+                        />
+                    </div>
+                </div>
             ) : (
-                <p className={cn(
-                    "text-xs font-black transition-colors",
-                    highlight ? 'text-amber-800' : 'text-slate-900'
-                )}>
-                    {formatDate(value)}
-                </p>
+                <div className="space-y-0.5">
+                    <p className={cn(
+                        "text-xs font-black transition-colors",
+                        highlight ? 'text-amber-800' : 'text-slate-900'
+                    )}>
+                        {formatDate(value)}
+                    </p>
+                    {confirmedValue && confirmedValue !== '-' && (
+                        <p className="text-[9px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-tighter">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            Splněno: {formatDate(confirmedValue)}
+                        </p>
+                    )}
+                </div>
             )}
         </div>
     );

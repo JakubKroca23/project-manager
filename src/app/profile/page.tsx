@@ -105,12 +105,18 @@ export default function ProfilePage() {
 
     useEffect(() => {
         const fetchMaintenance = async () => {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('app_settings')
                 .select('settings')
                 .eq('id', 'maintenance_mode')
                 .maybeSingle();
-            const settings = data?.settings as any;
+
+            if (error) {
+                console.error('Chyba při načítání režimu údržby:', error);
+                return;
+            }
+
+            const settings = data?.settings as { value?: boolean; estimated_end?: string } | null;
             if (settings?.value === true) {
                 setMaintenanceMode(true);
                 if (settings?.estimated_end) {
@@ -121,12 +127,18 @@ export default function ProfilePage() {
         };
 
         const fetchSystemInfo = async () => {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('app_settings')
                 .select('settings')
                 .eq('id', 'system_info')
                 .maybeSingle();
-            const settings = data?.settings as any;
+
+            if (error) {
+                console.error('Chyba při načítání systémových informací:', error);
+                return;
+            }
+
+            const settings = data?.settings as { version?: string } | null;
             if (settings?.version) {
                 setSystemVersion(settings.version);
             }
@@ -295,13 +307,14 @@ export default function ProfilePage() {
     const openPermissionsModal = (user: UserProfile) => {
         setSelectedUserForPermissions(user);
         // Initialize with existing permissions or defaults (true if undefined)
+        const perms = user.permissions || {};
         setEditedPermissions({
-            timeline: user.permissions?.timeline !== false,
-            projects_civil: (user.permissions as any)?.projects_civil !== false,
-            projects_military: (user.permissions as any)?.projects_military !== false,
-            service: user.permissions?.service !== false,
-            can_bulk_delete: (user.permissions as any)?.can_bulk_delete === true,
-            is_manager: (user.permissions as any)?.is_manager === true,
+            timeline: perms.timeline !== false,
+            projects_civil: perms.projects_civil !== false,
+            projects_military: perms.projects_military !== false,
+            service: perms.service !== false,
+            can_bulk_delete: perms.can_bulk_delete === true,
+            is_manager: perms.is_manager === true,
         });
         setPermissionsModalOpen(true);
     };

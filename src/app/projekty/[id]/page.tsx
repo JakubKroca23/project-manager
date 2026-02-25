@@ -177,32 +177,72 @@ export default function ProjectDetailPage() {
                             <div className="md:col-span-2">
                                 <Section icon={<CalendarDays size={18} />} title="Harmonogram Realizace" color="amber">
                                     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-6 pt-2">
-                                        <DateField label="Zahájení" value={p.start_at || p.created_at} field="start_at" isEditing={isEditing} onChange={handleChange} />
-                                        <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
-                                        <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField
+                                            label="Zahájení"
+                                            value={p.start_at || p.created_at}
+                                            confirmedValue={p.custom_fields?.start_at_confirmed}
+                                            field="start_at"
+                                            isEditing={isEditing}
+                                            onChange={handleChange}
+                                            onConfirmedChange={handleCustomFieldChange}
+                                        />
+                                        <DateField
+                                            label="Dodání podvozku"
+                                            value={p.chassis_delivery}
+                                            confirmedValue={p.custom_fields?.chassis_delivery_confirmed}
+                                            field="chassis_delivery"
+                                            isEditing={isEditing}
+                                            onChange={handleChange}
+                                            onConfirmedChange={handleCustomFieldChange}
+                                        />
+                                        <DateField
+                                            label="Dodání nástavby"
+                                            value={p.body_delivery}
+                                            confirmedValue={p.custom_fields?.body_delivery_confirmed}
+                                            field="body_delivery"
+                                            isEditing={isEditing}
+                                            onChange={handleChange}
+                                            onConfirmedChange={handleCustomFieldChange}
+                                        />
                                         <CustomDateField
                                             label="Konec montáže"
                                             value={p.custom_fields?.mounting_end_date}
+                                            confirmedValue={p.custom_fields?.mounting_end_date_confirmed}
                                             field="mounting_end_date"
                                             isEditing={isEditing}
                                             onChange={handleCustomFieldChange}
+                                            onConfirmedChange={handleCustomFieldChange}
                                         />
                                         <CustomDateField
                                             label="Konec revize"
                                             value={p.custom_fields?.revision_end_date}
+                                            confirmedValue={p.custom_fields?.revision_end_date_confirmed}
                                             field="revision_end_date"
                                             isEditing={isEditing}
                                             onChange={handleCustomFieldChange}
+                                            onConfirmedChange={handleCustomFieldChange}
                                         />
-                                        <DateField label="Předání zákazníkovi" value={p.customer_handover || p.deadline} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                                        <DateField
+                                            label="Předání zákazníkovi"
+                                            value={p.customer_handover || p.deadline}
+                                            confirmedValue={p.custom_fields?.customer_handover_confirmed}
+                                            field="customer_handover"
+                                            isEditing={isEditing}
+                                            onChange={handleChange}
+                                            onConfirmedChange={handleCustomFieldChange}
+                                            highlight
+                                        />
                                     </div>
 
                                     {/* Vizualizace časové osy */}
-                                    {!isEditing && (
-                                        <div className="mt-8 pt-6 border-t border-amber-500/10 min-h-24 relative">
-                                            <ProjectTimelineFlat project={project} milestones={milestones} />
-                                        </div>
-                                    )}
+                                    <div className="mt-8 pt-6 border-t border-amber-500/10 min-h-24 relative">
+                                        <ProjectTimelineFlat
+                                            project={p}
+                                            milestones={milestones}
+                                            isEditing={isEditing}
+                                            onCustomFieldChange={handleCustomFieldChange}
+                                        />
+                                    </div>
                                 </Section>
                             </div>
 
