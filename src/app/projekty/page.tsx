@@ -11,25 +11,22 @@ import { useTableSettings } from '@/hooks/useTableSettings';
 
 import { Project } from '@/types/project';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { cn, formatManager } from '@/lib/utils';
+import { cn, formatManager, formatDate } from '@/lib/utils';
 import CreateProjectModal from '@/components/CreateProjectModal';
 import { CategoryChip } from '@/components/CategoryChip';
 import { useActions } from '@/providers/ActionProvider';
 import { usePermissions } from '@/hooks/usePermissions';
+import Image from 'next/image';
+import logo from '@/assets/contsystem-logo.png';
 
 
 
 
-const parseDate = (dateStr: string | undefined | null): Date | null => {
-    if (!dateStr || typeof dateStr !== 'string') return null;
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? null : d;
-};
 
-const SafeCellValue: React.FC<{ value: any }> = ({ value }) => {
-    if (value === null || value === undefined) return <span>-</span>;
+const SafeCellValue: React.FC<{ value: any; isDate?: boolean }> = ({ value, isDate }) => {
+    if (value === null || value === undefined || value === '' || value === '-' || value === '—') return <span>—</span>;
+    if (isDate) return <span>{formatDate(value)}</span>;
     if (typeof value === 'object') {
-        // Safe stringify for objects to prevent React crash
         return <span className="text-muted-foreground text-[10px] break-all">{JSON.stringify(value)}</span>;
     }
     return <span>{String(value)}</span>;
@@ -61,19 +58,6 @@ const columns: ColumnDef<Project>[] = [
         cell: ({ row }) => <span>{formatManager(row.getValue('manager'))}</span>,
     },
     {
-        accessorKey: 'status',
-        header: 'Status',
-        minSize: 30,
-        cell: ({ row }) => {
-            const val = row.getValue('status');
-            return (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                    {typeof val === 'string' ? val : '-'}
-                </span>
-            );
-        },
-    },
-    {
         accessorKey: 'production_status',
         header: 'Status Výroby',
         minSize: 30,
@@ -82,19 +66,19 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'chassis_delivery',
         header: 'Dodání Podvozku',
         minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('chassis_delivery')} />,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('chassis_delivery')} isDate />,
     },
     {
         accessorKey: 'body_delivery',
         header: 'Dodání Nástavby',
         minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('body_delivery')} />,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('body_delivery')} isDate />,
     },
     {
         accessorKey: 'customer_handover',
         header: 'Předání',
         minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('customer_handover')} />,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('customer_handover')} isDate />,
     },
     {
         accessorKey: 'abra_project',
@@ -122,7 +106,7 @@ const columns: ColumnDef<Project>[] = [
         accessorKey: 'start_at',
         header: 'Zahájení',
         minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('start_at')} />,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('start_at')} isDate />,
     },
     {
         accessorKey: 'serial_number',
@@ -348,10 +332,23 @@ export default function ProjektyPage() {
         <div className="h-full flex flex-col bg-background">
             <div className="flex-1 overflow-hidden flex flex-col px-4">
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="animate-spin text-primary" size={24} />
-                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Načítám prostředí...</span>
+                    <div className="flex items-center justify-center h-[60vh]">
+                        <div className="flex flex-col items-center gap-8">
+                            <div className="relative w-48 h-auto animate-gradual-light">
+                                <Image
+                                    src={logo}
+                                    alt="ContSystem Logo"
+                                    className="w-full h-auto drop-shadow-[0_0_15px_rgba(37,99,235,0.2)]"
+                                    priority
+                                    unoptimized
+                                />
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5 relative z-10">
+                                <div className="flex items-center gap-2">
+                                    <Loader2 size={12} className="animate-spin text-primary/60" strokeWidth={3} />
+                                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/60 mt-1">Příprava prostředí...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ) : (

@@ -30,6 +30,8 @@ import {
     Settings,
     Flag
 } from 'lucide-react';
+import Image from 'next/image';
+import logo from '@/assets/contsystem-logo.png';
 
 import { useProjectDetail } from '@/hooks/useProjectDetail';
 import { PageHeader } from '@/components/project-detail/PageHeader';
@@ -89,21 +91,29 @@ export default function ProjectDetailPage() {
         fetchSubProjects,
         setMilestones
     } = useProjectDetail();
+
     const { profiles } = useAdmin();
 
     const router = useRouter();
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <div className="flex flex-col items-center gap-6">
-                    <div className="relative">
-                        <Loader2 size={48} className="animate-spin text-primary opacity-20" />
-                        <Loader2 size={48} className="animate-spin text-primary absolute top-0 left-0 clip-path-half" />
+            <div className="flex h-screen items-center justify-center bg-[#111111]">
+                <div className="flex flex-col items-center gap-8">
+                    <div className="relative w-64 h-auto animate-gradual-light">
+                        <Image
+                            src={logo}
+                            alt="ContSystem Logo"
+                            className="w-full h-auto drop-shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                            priority
+                            unoptimized
+                        />
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary animate-pulse">Načítám Data</p>
-                        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">System Nexus 2.0</p>
+                    <div className="flex flex-col items-center gap-2 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <Loader2 size={14} className="animate-spin text-primary/60" strokeWidth={3} />
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60 mt-1">Načítám Data</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,6 +170,7 @@ export default function ProjectDetailPage() {
                             managers={profiles}
                         />
 
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Harmonogram */}
                             <Section icon={<CalendarDays size={18} />} title="Harmonogram Realizace" color="amber">
@@ -185,12 +196,6 @@ export default function ProjectDetailPage() {
                                 </div>
                             </Section>
 
-                            {/* Výroba */}
-                            <Section icon={<Truck size={18} />} title="Výroba a Nástavba" color="emerald">
-                                <FieldGrid>
-                                    <Field label="Stav výroby" icon={<FactoryIcon size={14} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
-                                </FieldGrid>
-                            </Section>
 
                             {/* Milníky */}
                             <div className="md:col-span-2">
@@ -301,7 +306,24 @@ export default function ProjectDetailPage() {
                                                 ? Object.entries(p.custom_fields || {})
                                                 : Object.entries(project.custom_fields || {})
                                             ).map(([key, val]) => {
-                                                if (['mounting_end_date', 'revision_end_date', 'trailerwin_done', 'drawings_done', 'body_accessories', 'chassis_accessories'].includes(key)) return null;
+                                                const hiddenKeys = [
+                                                    'mounting_end_date',
+                                                    'revision_end_date',
+                                                    'trailerwin_done',
+                                                    'drawings_done',
+                                                    'body_accessories',
+                                                    'chassis_accessories',
+                                                    'drawing_url',
+                                                    'drawing_path',
+                                                    'drawing_name',
+                                                    'chassis_brand',
+                                                    'chassis_model',
+                                                    'vin',
+                                                    'license_plate',
+                                                    'bodies',
+                                                    'body_type'
+                                                ];
+                                                if (hiddenKeys.includes(key)) return null;
                                                 return (
                                                     <div key={key} className="group relative bg-background/40 hover:bg-background/80 p-3 rounded-xl border border-border/40 hover:border-border transition-all duration-200">
                                                         <div className="flex justify-between items-start mb-1">
@@ -333,14 +355,15 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* ════ PRAVÁ ČÁST - SIDEBAR (Tech Spec) ════ */}
-                    <aside className="w-full lg:w-[450px] xl:w-[550px] shrink-0 lg:sticky lg:top-8 self-stretch">
-                        <div className="flex flex-col h-full">
+                    <aside className="w-full lg:w-[450px] xl:w-[550px] shrink-0 lg:sticky lg:top-8 self-start">
+                        <div className="flex flex-col">
                             <TechSpecSection
                                 project={project}
                                 editedProject={editedProject!}
                                 isEditing={isEditing}
+                                onChange={handleChange}
                                 handleCustomFieldChange={handleCustomFieldChange}
-                                className="h-full bg-card/40 backdrop-blur-sm border-primary/10 shadow-2xl shadow-primary/5"
+                                className="bg-card/40 backdrop-blur-sm border-primary/10 shadow-2xl shadow-primary/5 max-h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar"
                             />
                         </div>
                     </aside>

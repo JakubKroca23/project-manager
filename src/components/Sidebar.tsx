@@ -42,10 +42,10 @@ export function Sidebar() {
         <aside className="w-64 h-screen bg-card border-r border-border flex flex-col shrink-0 transition-all duration-300">
             {/* Logo Area */}
             <div className="p-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg shadow-primary/20">
-                    N
+                <div className="flex flex-col">
+                    <span className="font-black text-xl tracking-[0.1em] text-foreground uppercase italic leading-none">CONT<span className="text-primary">SYSTEM</span></span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-muted-foreground/60 mt-1">Project Manager</span>
                 </div>
-                <span className="font-bold text-xl tracking-tight text-foreground">Nexus.</span>
             </div>
 
             {/* Navigation */}

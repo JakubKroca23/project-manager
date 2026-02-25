@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeft, Hash, Edit2, Save, X, Trash2, Loader2, Building2, User, Flag, Tag, Factory, Wrench, Shield } from 'lucide-react';
+import { ArrowLeft, Hash, Edit2, Save, X, Trash2, Loader2, Building2, User, Flag, Tag, Factory, Wrench, Shield, Calendar } from 'lucide-react';
 import { Project } from '@/types/project';
 import { CategoryChip } from '@/components/CategoryChip';
 import { cn, formatManager } from '@/lib/utils';
@@ -44,7 +44,10 @@ export function PageHeader({
         setDetailInfo(
             <div className="flex items-center gap-4">
                 <button
-                    onClick={() => router.push('/projekty')}
+                    onClick={() => {
+                        const type = project.project_type || 'civil';
+                        router.push(`/projekty?type=${type}`);
+                    }}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-all text-xs font-black uppercase tracking-widest active:scale-95 text-foreground/80 border border-transparent hover:border-border/40"
                 >
                     <ArrowLeft size={16} />
@@ -177,7 +180,7 @@ export function PageHeader({
                                         >
                                             <option value="" disabled>Vyberte...</option>
                                             {managers.map(m => (
-                                                <option key={m.id} value={m.email}>{m.email}</option>
+                                                <option key={m.id} value={m.email}>{formatManager(m.email)}</option>
                                             ))}
                                         </select>
                                     ) : (
@@ -270,7 +273,7 @@ export function PageHeader({
                         </div>
 
                         <MetaItem label="Montážní firma" value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={onChange} icon={<Wrench size={11} />} />
-                        <MetaItem label="Typové označení" value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={onChange} icon={<Shield size={11} />} />
+                        <MetaItem label="Nastavení nástavby" value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={onChange} icon={<Shield size={11} />} />
                         <MetaItem label="Abra Zakázka" value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
                         <MetaItem label="Abra Objednávka" value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { X, Loader2, Plus, Check, ChevronDown } from 'lucide-react';
 import { Project } from '@/types/project';
-import { cn } from '@/lib/utils';
+import { cn, formatManager } from '@/lib/utils';
 
 interface CreateProjectModalProps {
     isOpen: boolean;
@@ -244,7 +244,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                                     <option value="" disabled>Vyberte vedoucího...</option>
                                     {managers.map(manager => (
                                         <option key={manager.id} value={manager.email}>
-                                            {manager.email}
+                                            {formatManager(manager.email)}
                                         </option>
                                     ))}
                                 </select>

@@ -36,7 +36,7 @@ export function Navbar() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const activeTypeFromParams = searchParams.get('type');
-    const activeType = activeTypeFromParams || (pathname?.startsWith('/servis') ? 'service' : null);
+    const activeType = activeTypeFromParams || (pathname === '/projekty' ? 'civil' : pathname?.startsWith('/servis') ? 'service' : null);
     const { checkPerm, canImport } = usePermissions();
     const { isAdmin } = useAdmin();
     const { searchTerm, setSearchTerm } = useSearch();

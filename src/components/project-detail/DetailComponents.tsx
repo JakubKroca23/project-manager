@@ -1,6 +1,6 @@
 import React from 'react';
 import { Project } from '@/types/project';
-import { cn } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 
 export const colorMap: Record<string, { border: string; bg: string; icon: string; text: string }> = {
     blue: { border: 'border-blue-500/20', bg: 'bg-blue-500/5', icon: 'text-blue-500', text: 'text-blue-600' },
@@ -127,7 +127,7 @@ export function DateField({ label, value, field, isEditing, onChange, highlight 
                     "text-xs font-black transition-colors",
                     highlight ? 'text-amber-600' : 'text-foreground/80'
                 )}>
-                    {value ? new Date(value).toLocaleDateString('cs-CZ') : '—'}
+                    {formatDate(value)}
                 </p>
             )}
         </div>
@@ -159,7 +159,7 @@ export function CustomDateField({ label, value, field, isEditing, onChange, high
                     "text-xs font-black transition-colors",
                     highlight ? 'text-amber-600' : 'text-foreground/80'
                 )}>
-                    {value && value !== '-' ? new Date(value).toLocaleDateString('cs-CZ') : '—'}
+                    {formatDate(value)}
                 </p>
             )}
         </div>

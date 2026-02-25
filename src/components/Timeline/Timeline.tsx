@@ -21,6 +21,8 @@ import {
     Zap, Star, Rocket, Coffee
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import logo from '@/assets/contsystem-logo.png';
 
 // ─── CUSTOM ICONS ────────────────────────────────────────────────
 
@@ -820,8 +822,24 @@ const Timeline: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="timeline-container">
-                <div className="timeline-loading-spinner">Načítám časovou osu...</div>
+            <div className="flex flex-col items-center justify-center w-full h-full bg-background min-h-[400px]">
+                <div className="flex flex-col items-center gap-8">
+                    <div className="relative w-64 h-auto animate-gradual-light">
+                        <Image
+                            src={logo}
+                            alt="ContSystem Logo"
+                            className="w-full h-auto drop-shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                            priority
+                            unoptimized
+                        />
+                    </div>
+                    <div className="flex flex-col items-center gap-1.5 relative z-10">
+                        <div className="flex items-center gap-2">
+                            <Loader2 size={12} className="animate-spin text-primary/60" strokeWidth={3} />
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60 mt-1">Načítám Časovou Osu...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

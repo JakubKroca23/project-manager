@@ -75,7 +75,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'chassis_delivery', label: 'Dodání podvozku', defaultAliases: ['dodání podvozku', 'termín podvozek'] },
     { key: 'production_status', label: 'Status Výroby', defaultAliases: ['status výroby', 'stav výroby'] },
     { key: 'mounting_company', label: 'Montážní společnost', defaultAliases: ['montážní společnost', 'montáž', 'zhotovitel'] },
-    { key: 'body_setup', label: 'Nástavba nastavení', defaultAliases: ['nástavba nastavení', 'konfigurace'] },
+    { key: 'body_setup', label: 'Nastavení nástavby', defaultAliases: ['nastavení nástavby', 'nastaveni nastavby', 'konfigurace'] },
     { key: 'start_at', label: 'Zahájení', defaultAliases: ['zahájení', 'zahajeni', 'datum zahájení', 'uzavřeno', 'closed', 'datum uzavření'] },
     { key: 'serial_number', label: 'Výrobní číslo / VIN', defaultAliases: ['výrobní číslo', 'vč', 'vin', 'výr. č.'] },
 ];

@@ -1,36 +1,30 @@
-# Implementation Plan - Re-introducing Body Type
+# Implementační plán - Oprava Kategorie a Smart TechSpec v detailu zakázky
 
-This plan covers the re-introduction of the `body_type` (Typ nástavby) field into the project management system, following the database migration prepared on 2026-02-17.
+Tento plán řeší nefunkční výběr kategorie a nefunkční inteligentní extrakci modelu v pravém bočním panelu detailu zakázky.
 
-## 1. Database & Types (Foundational)
-- **Migration**: Verify `supabase_migrations/20260217_add_body_type.sql` is applied.
-- **TypeScript**: `Project` interface already contains `body_type?: string` in `src/types/project.ts`. No changes needed.
+## Problém
+1. **Špatné handlery v `TechSpecSection`**: Pole `category`, `body_setup` a `serial_number` jsou v komponentě `TechSpecSection` aktualizována pomocí `handleCustomFieldChange`. Tato pole jsou však v db/interfaci `Project` na nejvyšší úrovni (top-level), nikoliv v `custom_fields`. To způsobuje, že se změny neprojeví v hlavním objektu projektu a `useEffect` pro extrakci modelu pracuje se starými daty.
+2. **Priorita kategorií v `extractModelDesignation`**: Pokud má zakázka kombinovanou kategorii (např. "HIAB + MULTILIFT"), systém zkusí pouze jednu a pokud selže, vrátí `null` bez kontroly druhé možnosti.
+3. **Chybějící `onChange` prop**: `TechSpecSection` postrádá přístup k hlavnímu handleru `handleChange` pro top-level pole.
 
-## 2. Project Creation
-- **Component**: `src/components/CreateProjectModal.tsx`
-- **Change**: Add a new input field for `body_type` (labeled "Typ nástavby").
-- **Logic**: Ensure `body_type` is included in the `insert` payload in `handleSubmit`.
+## Navržené řešení
 
-## 3. Project List (Tables)
-- **Component**: `src/app/projekty/page.tsx`
-- **Change**: 
-    - Add a new column definition for `body_type` in the `columns` array.
-    - Set header to "Typ nástavby".
-    - Update the universal filter (`searchableFields`) to include `body_type`.
+### 1. Úprava `src/lib/utils.ts`
+- Upravit `extractModelDesignation` tak, aby nekončil s `null` okamžitě po selhání první nalezené kategorie v řetězci, ale zkusil všechny relevantní regexy.
 
-## 4. Timeline Visualization
-- **Component**: `src/components/Timeline/TimelineBar.tsx`
-- **Change**: 
-    - Include `body_type` in the project information section of the edit/delete popup (Portal).
-    - Display it as a small badge or label next to the project name/ID.
+### 2. Úprava `src/components/project-detail/TechSpecSection.tsx`
+- Rozšířit props o `onChange` (odpovídající `handleChange` z hooku).
+- Zaměnit `handleCustomFieldChange` za `onChange` u polí: `category`, `body_setup`, `serial_number`.
+- Ponechat `handleCustomFieldChange` u polí, která jsou skutečně v `custom_fields` (`trailerwin_done`, `drawings_done`, `body_accessories`, `chassis_accessories`).
 
-## 5. Verification (TDD)
-- **Test**: Create or update a test to verify that manual project creation with `body_type` works and persistence is maintained.
-- **Manual**: Create a project, check the database, and verify display in Timeline and Project List.
+### 3. Úprava `src/app/projekty/[id]/page.tsx`
+- Předat `handleChange` do `TechSpecSection` jako prop `onChange`.
 
----
+### 4. (Volitelné) Synchronizace s PageHeader
+- Doplnit "Sparkles" logiku (návrhy) i do `PageHeader.tsx` pro pole "Typové označení", aby byl zážitek konzistentní napříč stránkou.
 
-### Questions for the User:
-1. Přejete si, aby pole "Typ nástavby" bylo povinné při vytváření nové zakázky?
-2. Má být toto pole zobrazeno v tabulce projektů jako samostatný sloupec, nebo raději sloučeno s jinou informací (např. v závorce u názvu)?
-3. Má se informace o typu nástavby zobrazovat i v kompaktním zobrazení "stacked" řádků v Timeline, nebo stačí pouze v detailním popupu?
+## Kontrola (TDD)
+- Vytvořit/aktualizovat test pro `TechSpecSection`, který ověří, že změna kategorie vyvolá správný handler a spustí novou extrakci modelu.
+
+## Build Log & Memory
+- Zapsat změny do `build_log.md` a `.agent/memory.md`.

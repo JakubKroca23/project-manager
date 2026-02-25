@@ -238,13 +238,15 @@ export function useProjectDetail() {
     };
 
     const handleCustomFieldChange = (key: string, value: any) => {
-        if (!editedProject) return;
-        setEditedProject({
-            ...editedProject,
-            custom_fields: {
-                ...editedProject.custom_fields,
-                [key]: value
-            }
+        setEditedProject(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                custom_fields: {
+                    ...prev.custom_fields,
+                    [key]: value
+                }
+            };
         });
     };
 

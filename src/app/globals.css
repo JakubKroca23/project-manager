@@ -93,7 +93,7 @@
 }
 
 .dark {
-  /* DARK MODE (Nexus Dark) */
+  /* DARK MODE (ContSystem Dark) */
   --background: #0f172a;
   /* Slate 900 / Deep Blue */
   --foreground: #f8fafc;
@@ -246,4 +246,40 @@
 
 .animate-construction-progress {
   animation: construction-progress 3s ease-in-out infinite;
+}
+
+@keyframes gradual-light {
+  0% {
+    filter: brightness(0.3) opacity(0.5);
+  }
+
+  50% {
+    filter: brightness(1.2) opacity(1);
+  }
+
+  100% {
+    filter: brightness(0.3) opacity(0.5);
+  }
+}
+
+.animate-gradual-light {
+  animation: gradual-light 2.5s ease-in-out infinite;
+}
+
+@keyframes progress-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress-loading {
+  animation: progress-loading 2s ease-in-out infinite;
 }

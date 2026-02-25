@@ -248,3 +248,19 @@
 - **TechSpec Sekce**: Reorganizace polí do gridu (3 sloupce). Implementována inteligentní extrakce modelů (HIAB, MULTILIFT, LOGLIFT, atd.) z názvu projektu. Přidáno automatické předvyplňování a vizuální návrhy ("Sparkles" systém).
 - **Core Utils**: Rozšíření `src/lib/utils.ts` o utilitu `extractModelDesignation` s podporou pro širokou škálu formátů strojů.
 - **Sjednocení terminologie**: Přejmenování "Nastavení nástavby" na "Typové označení" napříč celým detailem zakázky.
+
+## [2026-02-25] - Fix TechSpec Handlers
+- **Změna**: Oprava ukládání polí Kategorie, Typové označení a Sériové číslo v detailu zakázky.
+- **Detail**: Původní implementace využívala `handleCustomFieldChange` pro pole, která jsou ve skutečnosti na nejvyšší úrovni objektu `Project`. Do `TechSpecSection` byl přidán prop `onChange` (propojený na `handleChange`), který tyto top-level pole nyní správně aktualizuje. Také opravena logika tlačítka pro inteligentní návrh modelu.
+- **Změna**: Vylepšení `extractModelDesignation`.
+- **Detail**: Opravena chyba u kombinovaných kategorií (např. HIAB + MULTILIFT), kdy se při nenalezení prvního typu přerušilo hledání. Nyní systém zkusí všechny relevantní regexy.
+- **Změna**: Finální rozmístění polí nástavby.
+- **Detail**: "Nastavení nástavby" je nyní zobrazeno výhradně v hlavní hlavičce projektu. "Typové označení" je zobrazeno výhradně v pravém panelu technické specifikace, kde je k němu k dispozici i inteligentní našeptávač. Obě pole jsou v databázi oddělena.
+- **Změna**: Vylepšení importu dat.
+- **Detail**: Do `ImportWizard.tsx` přidána podpora pro automatické párování obou polí. Přidány aliasy pro "Nastavení nástavby" a "Typové označení".
+- **UI Zakázky**: Odstraněn sloupec "Status" ze seznamu zakázek pro zvýšení přehlednosti.
+- **UI Editace**: Výběr vedoucího zakázky (v detailu i v modálu vytvoření) nyní zobrazuje pouze čitelná jména bez emailových adres, čímž se sjednotil vzhled s náhledovým režimem.
+- **UI Nástavba**: Přidáno pole "Datum dodání" do sekce nástavby v pravém panelu. Pole bylo prohozeno se sériovým číslem pro lepší logickou posloupnost. Z hlavičky bylo toto pole na žádost uživatele odstraněno pro zachování čistoty.
+- **UI Úpravy**: Odstraněna celá sekce "Výroba a Nástavba" z hlavní plochy detailu projektu, protože stav výroby je přehledně zobrazen v horní hlavičce.
+- **Formátování**: Všechna data v aplikaci (seznam zakázek, detail, technická specifikace) byla sjednocena na formát `DD.MM.YYYY` pro lepší čitelnost.
+- **UX Vylepšení**: "Datum dodání" má nyní v režimu úprav plnohodnotný kalendář. Tlačítko pro inteligentní návrh modelu (hvězdičky) je nyní v režimu úprav trvale viditelné, pokud systém rozpozná typ podle názvu zakázky.

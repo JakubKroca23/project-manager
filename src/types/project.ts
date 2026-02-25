@@ -22,9 +22,8 @@ export interface Project {
     chassis_delivery?: string;      // Dodání podvozku
     production_status?: string;     // Status Výroby
     mounting_company?: string;      // Montážní společnost
-    body_setup?: string;            // Nástavba nastavení
+    body_setup?: string;            // Nastavení nástavby
     serial_number?: string;         // Výrobní číslo
-    // service_duration removed
 
     // Interní pole systému
     quantity: number;

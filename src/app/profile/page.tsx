@@ -2,12 +2,13 @@
 
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus, Activity, Briefcase, Gamepad2, Save } from 'lucide-react';
+import { User, LogOut, Loader2, Shield, Moon, Sun, Monitor, Bell, Palette, Settings, Users, Key, AlertTriangle, Clock, KeyRound, CheckCircle, X, UserPlus, Activity, Briefcase, Gamepad2, Save, HardDrive } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import { useAdmin, ADMIN_EMAIL, type UserRequest, type UserProfile } from '@/hooks/useAdmin';
 import { approveAccessRequest } from '@/actions/admin';
 import { cn } from '@/lib/utils';
+import { FileManager } from '@/components/admin/FileManager';
 
 const MaintenanceGameToggle = ({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) => {
     const [enabled, setEnabled] = useState(false);
@@ -81,6 +82,7 @@ export default function ProfilePage() {
     const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showFileManager, setShowFileManager] = useState(false);
 
     // Approval Modal State
     const [approveModalOpen, setApproveModalOpen] = useState(false);
@@ -491,6 +493,22 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="p-1.5 bg-indigo-600 text-white rounded-lg">
                                                     <Activity size={14} />
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setShowSettingsModal(false);
+                                                    setShowFileManager(true);
+                                                }}
+                                                className="w-full flex items-center justify-between bg-white dark:bg-muted/30 px-4 py-3 rounded-xl border border-indigo-500/10 hover:bg-indigo-500/5 transition-colors"
+                                            >
+                                                <div className="text-left space-y-0.5">
+                                                    <p className="text-[11px] font-bold text-foreground">Správce souborů</p>
+                                                    <p className="text-[10px] text-muted-foreground">Správa nahraných výkresů v cloudu</p>
+                                                </div>
+                                                <div className="p-1.5 bg-indigo-600 text-white rounded-lg">
+                                                    <HardDrive size={14} />
                                                 </div>
                                             </button>
 
@@ -920,7 +938,7 @@ export default function ProfilePage() {
             {/* Password Change Modal */}
             {showPasswordModal && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-card w-full max-w-sm border border-border rounded-2xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200">
+                    <div className="bg-card w-full max-sm:w-full border border-border rounded-2xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between border-b border-border pb-4">
                             <div>
                                 <h3 className="text-lg font-bold">Změna hesla</h3>
@@ -1002,6 +1020,51 @@ export default function ProfilePage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* File Manager Modal */}
+            {showFileManager && isAdmin && (
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 overflow-hidden">
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowFileManager(false)}
+                    />
+                    <div className="relative w-full h-[100dvh] sm:h-auto max-w-4xl bg-card border-t sm:border border-border rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl flex flex-col sm:max-h-[90vh] animate-in slide-in-from-bottom duration-500 sm:duration-300 sm:slide-in-from-none sm:zoom-in-95 fade-in">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-border bg-indigo-500/[0.03]">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-indigo-500/10 rounded-2xl text-indigo-600">
+                                    <HardDrive size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-foreground">Správce cloudových souborů</h3>
+                                    <p className="text-xs text-muted-foreground">Centrální správa všech nahraných příloh</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowFileManager(false)}
+                                className="p-2 hover:bg-muted rounded-full transition-colors group"
+                            >
+                                <X size={20} className="text-muted-foreground group-hover:text-foreground" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <FileManager />
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-border bg-muted/5 flex justify-end">
+                            <button
+                                onClick={() => setShowFileManager(false)}
+                                className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.98] transition-all text-sm uppercase tracking-widest"
+                            >
+                                Zavřít
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
