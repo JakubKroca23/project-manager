@@ -302,31 +302,10 @@ export default function ProjektyPage() {
 
 
 
-    // Memoize columns to include dynamic custom fields
+    // Memoize columns to include fixed fields only (removed dynamic custom columns)
     const tableColumns = useMemo(() => {
-        const dynamicColumns: ColumnDef<Project>[] = [];
-        const customKeys = new Set<string>();
-
-        // Collect all custom keys from current project list
-        projects.forEach(p => {
-            if (p.custom_fields) {
-                Object.keys(p.custom_fields).forEach(key => customKeys.add(key));
-            }
-        });
-
-        // Create column definitions for each custom key
-        customKeys.forEach(key => {
-            dynamicColumns.push({
-                accessorFn: (row) => row.custom_fields?.[key] || '-',
-                id: `custom_${key}`,
-                header: key,
-                minSize: 30,
-                cell: ({ getValue }) => <SafeCellValue value={getValue()} />
-            });
-        });
-
-        return [...columns, ...dynamicColumns];
-    }, [projects]);
+        return [...columns];
+    }, []);
 
     return (
         <div className="h-full flex flex-col bg-background">
