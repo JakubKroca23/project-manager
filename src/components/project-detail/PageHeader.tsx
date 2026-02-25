@@ -108,91 +108,93 @@ export function PageHeader({
 
     return (
         <div className="w-full mb-8 print:mb-0">
-            <div className="bg-white border-[3px] border-black overflow-hidden shadow-2xl transition-all duration-300">
+            <div className="bg-white border-[3px] border-slate-900 overflow-hidden shadow-2xl transition-all duration-300">
                 <div className="grid grid-cols-12">
                     {/* Levý sloupec s názvem dokumentu */}
-                    <div className="col-span-12 md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-black p-4 flex items-center justify-center bg-white">
-                        <h2 className="text-sm font-black text-black uppercase tracking-[0.2em] text-center leading-tight">
-                            Popis<br />zakázky
-                        </h2>
+                    <div className="col-span-12 md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-slate-900 p-6 flex flex-col items-center justify-center bg-slate-900 text-white">
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 opacity-60">Dokumentace</h2>
+                        <h1 className="text-xl font-black uppercase tracking-[0.1em] text-center leading-[1.1]">
+                            Popis<br /><span className="text-indigo-400">zakázky</span>
+                        </h1>
                     </div>
 
                     {/* Hlavní mřížka s detaily */}
                     <div className="col-span-12 md:col-span-10">
                         {/* Horní řada: ID a Termíny dodání komponent */}
-                        <div className="grid grid-cols-1 md:grid-cols-7 border-b-[3px] border-black">
-                            <div className="md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-black flex">
-                                <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0">Číslo zakázky :</span>
-                                <span className="px-3 py-2 text-sm font-black flex items-center">{project.id}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-7 border-b-[3px] border-slate-900">
+                            <div className="md:col-span-2 border-r-0 md:border-r-[3px] border-b-[3px] md:border-b-0 border-slate-900 flex group hover:bg-slate-50 transition-colors">
+                                <span className="bg-slate-100/80 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-slate-500">Číslo zakázky</span>
+                                <span className="px-4 py-3 text-base font-black flex items-center text-slate-900">{project.id}</span>
                             </div>
-                            <div className="md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-black flex min-w-0">
-                                <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0">Termín dodání<br />podvozku</span>
-                                <span className="px-3 py-2 text-[13px] font-black flex items-center">{formatDate(project.chassis_delivery)}</span>
+                            <div className="md:col-span-2 border-r-0 md:border-r-[3px] border-b-[3px] md:border-b-0 border-slate-900 flex min-w-0 group hover:bg-slate-50 transition-colors">
+                                <span className="bg-slate-100/80 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-slate-500">Dodání<br />podvozku</span>
+                                <span className="px-4 py-3 text-[14px] font-black flex items-center text-slate-800">{formatDate(project.chassis_delivery)}</span>
                             </div>
-                            <div className="md:col-span-3 flex min-w-0">
-                                <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0">Termín dodání<br />nástavby</span>
-                                <span className="px-3 py-2 text-[13px] font-black flex items-center">{formatDate(project.body_delivery)}</span>
+                            <div className="md:col-span-3 flex min-w-0 group hover:bg-slate-50 transition-colors">
+                                <span className="bg-slate-100/80 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-slate-500">Dodání<br />nástavby</span>
+                                <span className="px-4 py-3 text-[14px] font-black flex items-center text-slate-800">{formatDate(project.body_delivery)}</span>
                             </div>
                         </div>
 
                         {/* Druhá řada: Počet kusů, Zákazník a Požadovaný termín (Žlutý) */}
-                        <div className="grid grid-cols-1 md:grid-cols-7 border-b-[3px] border-black">
-                            <div className="md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-black flex">
-                                <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0 text-blue-800">Počet kusů</span>
-                                <span className="px-3 py-2 text-[11px] font-black flex items-center text-blue-800">{project.quantity || 1}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-7 border-b-[3px] border-slate-900">
+                            <div className="md:col-span-2 border-r-0 md:border-r-[3px] border-b-[3px] md:border-b-0 border-slate-900 flex group hover:bg-indigo-50/30 transition-colors">
+                                <span className="bg-slate-100/80 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-indigo-700">Počet kusů</span>
+                                <span className="px-4 py-3 text-[13px] font-black flex items-center text-indigo-800">{project.quantity || 1} ks</span>
                             </div>
-                            <div className="md:col-span-2 border-b-[3px] md:border-b-0 md:border-r-[3px] border-black flex min-w-0">
-                                <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0">Zákazník :</span>
-                                <span className="px-3 py-2 text-[13px] font-black flex items-center truncate" title={p.customer || ''}>{p.customer || '—'}</span>
+                            <div className="md:col-span-2 border-r-0 md:border-r-[3px] border-b-[3px] md:border-b-0 border-slate-900 flex min-w-0 group hover:bg-slate-50 transition-colors">
+                                <span className="bg-slate-100/80 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-slate-500">Zákazník</span>
+                                <span className="px-4 py-3 text-[14px] font-black flex items-center truncate text-slate-900" title={p.customer || ''}>{p.customer || '—'}</span>
                             </div>
-                            <div className="md:col-span-3 flex min-w-0 bg-yellow-200">
-                                <span className="bg-yellow-400 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-32 flex items-center shrink-0 text-rose-800">Požadovaný termín dokončení</span>
-                                <span className="px-3 py-2 text-[13px] font-black flex items-center text-rose-600">{formatDate(project.customer_handover || project.deadline)}</span>
+                            <div className="md:col-span-3 flex min-w-0 bg-yellow-50 hover:bg-yellow-100 transition-colors">
+                                <span className="bg-yellow-400 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-36 flex items-center shrink-0 text-rose-900">Požadovaný<br />termín</span>
+                                <span className="px-4 py-3 text-lg font-black flex items-center text-rose-600 tracking-tight">{formatDate(project.customer_handover || project.deadline)}</span>
                             </div>
                         </div>
 
                         {/* Třetí řada: Název projektu */}
-                        <div className="flex border-b-[3px] border-black bg-white">
-                            <span className="bg-slate-100/80 px-2 py-2 text-[9px] font-black uppercase border-r-[3px] border-black w-40 flex items-center shrink-0 text-blue-800">Název projektu</span>
-                            <div className="px-3 py-2 flex-1 flex items-center">
+                        <div className="flex border-b-[3px] border-slate-900 bg-white group hover:bg-slate-50 transition-colors">
+                            <span className="bg-slate-100/80 px-3 py-4 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-44 flex items-center shrink-0 text-indigo-700">Název projektu</span>
+                            <div className="px-5 py-4 flex-1 flex items-center">
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         value={p.name}
                                         onChange={(e) => onChange('name', e.target.value)}
-                                        className="w-full text-base font-black uppercase text-blue-800 bg-transparent outline-none focus:bg-blue-50/50"
+                                        className="w-full text-lg font-black uppercase text-indigo-700 bg-transparent outline-none focus:bg-white p-1 border-b-2 border-indigo-200"
                                     />
                                 ) : (
-                                    <h1 className="text-[15px] font-black uppercase text-blue-800 leading-tight">{project.name}</h1>
+                                    <h1 className="text-xl font-black uppercase text-indigo-900 leading-tight tracking-tight">{project.name}</h1>
                                 )}
                             </div>
                         </div>
 
                         {/* Čtvrtá řada: Podvozek */}
-                        <div className="flex border-b-[3px] border-black bg-white">
-                            <span className="bg-slate-100/40 px-2 py-1.5 text-[9px] font-black uppercase border-r-[3px] border-black w-40 flex items-center shrink-0">Podvozek</span>
-                            <div className="px-3 py-1.5 flex-1 flex items-center">
-                                <span className="text-sm font-black uppercase text-slate-800">
-                                    {project.custom_fields?.chassis || 'MERCEDES 6x4'}
+                        <div className="flex border-b-[3px] border-slate-900 bg-white group hover:bg-slate-50 transition-colors">
+                            <span className="bg-slate-100/40 px-3 py-3 text-[10px] font-black uppercase border-r-[3px] border-slate-900 w-44 flex items-center shrink-0 text-slate-500">Podvozek</span>
+                            <div className="px-5 py-3 flex-1 flex items-center">
+                                <span className="text-base font-black uppercase text-slate-800 tracking-wide">
+                                    {project.custom_fields?.chassis || 'Specifikace v příloze'}
                                 </span>
                             </div>
                         </div>
 
                         {/* Pátá řada: Typ nástavby */}
-                        <div className="flex bg-slate-50">
-                            <div className="flex flex-col w-full text-center">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 py-1 border-b border-slate-200">Typ nástavby</span>
-                                <div className="py-2 px-3">
+                        <div className="flex bg-slate-50 border-slate-900 group">
+                            <div className="flex flex-col w-full text-center group-hover:bg-white transition-colors">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 py-2 border-b-2 border-slate-100">Typ nástavby / zařízení</span>
+                                <div className="py-4 px-6">
                                     {isEditing ? (
                                         <input
                                             type="text"
                                             value={p.body_setup || ''}
                                             onChange={(e) => onChange('body_setup', e.target.value)}
-                                            className="w-full text-base font-black uppercase text-center bg-transparent outline-none italic"
+                                            className="w-full text-2xl font-black uppercase text-center bg-transparent outline-none italic text-slate-900 border-b-2 border-slate-200"
+                                            placeholder="Specifikujte nástavbu..."
                                         />
                                     ) : (
-                                        <h3 className="text-[17px] font-black uppercase italic text-black leading-tight">
-                                            {project.body_setup || 'MULTILIFT ULTIMA 21Z59'}
+                                        <h3 className="text-3xl font-black uppercase italic text-slate-900 leading-tight tracking-tighter">
+                                            {project.body_setup || 'MULTILIFT ULTIMA'}
                                         </h3>
                                     )}
                                 </div>
@@ -203,13 +205,17 @@ export function PageHeader({
             </div>
 
             {/* Systémové info v patičce hlavičky (velmi diskrétní) */}
-            <div className="flex justify-between items-center px-4 py-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Dokument ID: CS-{project.id}-{new Date().getFullYear()}
+            <div className="flex justify-between items-center px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-100">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Aktivní dokument
+                    </div>
+                    <span>ID: CS-{project.id}-{new Date().getFullYear()}</span>
                 </div>
-                <div>
-                    Strana 1 / 1
+                <div className="flex items-center gap-4">
+                    <span>Vytvořeno: {formatDate(project.created_at)}</span>
+                    <span className="bg-slate-900 text-white px-3 py-1 rounded">Strana 1 / 1</span>
                 </div>
             </div>
         </div>

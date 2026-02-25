@@ -177,3 +177,20 @@
     - **Smart Spacing Logic**: Implementován algoritmus pro hlídání minimálního rozestupu (12 %) mezi milníky, který zabraňuje jejich vizuálnímu překrývání.
     - **Zig-Zag Labeling**: Popisky se střídají nad a pod osou, což umožňuje zobrazení velkého množství milníků (včetně uživatelských) při zachování přehlednosti.
     - **Délka realizace**: Automatický výpočet a zobrazení celkové délky zakázky ve dnech.
+## 2026-02-25: Redesign "Popis zakázky" - Technický list
+- **Vizuální koncept dokumentu**: Kompletní přerod detailu projektu do stylu technického listu/dokumentace. Použit "scanned document" efekt s výraznými černými bordery (`slate-900`), vysokým kontrastem a specifickým rozvržením prvků.
+- **Hlavička "Executive"**:
+    - Implementován boční štítek "POPIS ZAKÁZKY" s tmavým pozadím.
+    - Žlutě zvýrazněný termín dokončení pro okamžitou prioritu.
+    - Rigidní grid pro ID zakázky, termíny dodání podvozku/nástavby a údaje o zákazníkovi.
+- **Interaktivní Tabulka Příslušenství**:
+    - Nová komponenta `AccessoriesTable` umožňující dynamickou správu položek (label, popis, dodavatel, montáž, poznámka).
+    - V editačním módu integrovaná tlačítka pro přidání a mazání řádků přímo v tabulce.
+- **Integrován dokumentní "Viewer"**:
+    - Přidána horní ovládací lišta pro tisk dokumentu.
+    - Implementována funkce `window.print()` s optimalizovaným CSS (skrytí navigace, zachování stínů dokumentu jen na obrazovce).
+- **Procesní a textové prvky**:
+    - **SimpleMemo**: Poznámky mají moderní jantarový "post-it" vzhled s výraznou kurzívou.
+    - **Vizuální osa**: `ProjectTimelineFlat` byla integrována přímo do těla dokumentu pod termíny, čímž poskytuje okamžitý vizuální kontext časového průběhu.
+- **Patička**: Stylizovaná patička s ID dokumentu, stránkováním a polem pro schválení (nastaveno na "Vedoucí zakázky").
+- **UX**: Celá stránka nyní působí jako fyzický papír položený na tmavším stole, což zlepšuje přehlednost při práci s technickými detaily.

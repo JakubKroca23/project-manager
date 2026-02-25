@@ -1,4 +1,5 @@
 import React from 'react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Project } from '@/types/project';
 import { cn, formatDate } from '@/lib/utils';
 
@@ -21,17 +22,15 @@ interface SectionProps {
 }
 
 export function Section({ icon, title, color, children, action, className }: SectionProps) {
-    const c = colorMap[color] || colorMap.slate;
     return (
         <section className={cn(
-            "mb-8 overflow-hidden bg-white border-[3px] border-black shadow-lg",
+            "mb-8 overflow-hidden bg-white border-[3px] border-slate-900 shadow-xl",
             className
         )}>
-            <header className={cn(
-                "px-4 py-2 border-b-[3px] border-black flex items-center justify-between bg-slate-100",
-            )}>
+            <header className="px-5 py-3 border-b-[3px] border-slate-900 flex items-center justify-between bg-slate-50">
                 <div className="flex items-center gap-3">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">{title}</h3>
+                    {icon && <span className="text-slate-500">{icon}</span>}
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.25em] text-slate-900">{title}</h3>
                 </div>
                 {action}
             </header>
@@ -42,43 +41,115 @@ export function Section({ icon, title, color, children, action, className }: Sec
     );
 }
 
-export function AccessoriesTable({ rows = [] }: { rows?: any[] }) {
-    const defaultRows = [
-        { label: 'BLATNÍKY', desc: '', provider: 'CONTSYSTEM', installer: 'CONTSYSTEM', note: '' },
-        { label: 'BOČNÍ PODJEZDOVÉ ZÁBRANY', desc: '', provider: 'CONTSYSTEM', installer: 'CONTSYSTEM', note: '' },
-        { label: 'ZADNÍ PODJEZDOVÁ ZÁBRANA', desc: 'HIAB URBH 810', provider: 'CONTSYSTEM', installer: 'CONTSYSTEM', note: '' },
-        { label: 'DRŽÁK REZERVY', desc: 'ALSAP', provider: 'CONT', installer: 'CONT', note: '' },
-        { label: 'ČERPADLO', desc: 'SAP 84I R', provider: 'Contsystem', installer: 'Contsystem', note: '' },
-        { label: 'SKŘÍNĚ NA NÁŘADÍ', desc: '', provider: 'CONTSYSTEM', installer: 'CONTSYSTEM', note: '' },
-        { label: 'NÁDOBA NA VODU', desc: '', provider: 'CONTSYSTEM', installer: 'CONTSYSTEM', note: '' },
-        { label: 'MEZIRÁM', desc: '-', provider: '-', installer: '-', note: '' },
-        { label: 'NÁDRŽ', desc: '150l BOČNÍ v rámu', provider: 'Contsystem', installer: 'Contsystem', note: 'PADOAN' },
-    ];
-
-    const dataRows = rows.length > 0 ? rows : defaultRows;
+export function AccessoriesTable({
+    rows = [],
+    isEditing,
+    onAddRow,
+    onRemoveRow,
+    onRowChange
+}: {
+    rows?: any[];
+    isEditing?: boolean;
+    onAddRow?: () => void;
+    onRemoveRow?: (index: number) => void;
+    onRowChange?: (index: number, field: string, value: string) => void;
+}) {
+    const dataRows = rows;
 
     return (
-        <div className="w-full border-t-[3px] border-black overflow-x-auto">
+        <div className="w-full border-t-[3px] border-slate-900 overflow-x-auto">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-slate-200 border-b-[3px] border-black">
-                        <th className="border-r-[3px] border-black px-2 py-1.5 text-[9px] font-black uppercase text-slate-600 text-left w-1/4">Příslušenství</th>
-                        <th className="border-r-[3px] border-black px-2 py-1.5 text-[9px] font-black uppercase text-slate-600 text-left w-1/4">Popis</th>
-                        <th className="border-r-[3px] border-black px-2 py-1.5 text-[9px] font-black uppercase text-slate-600 text-left">Kdo dodává</th>
-                        <th className="border-r-[3px] border-black px-2 py-1.5 text-[9px] font-black uppercase text-slate-600 text-left">Kdo montuje</th>
-                        <th className="px-2 py-1.5 text-[9px] font-black uppercase text-slate-600 text-left">Poznámka</th>
+                    <tr className="bg-slate-100 border-b-[3px] border-slate-900">
+                        <th className="border-r-[3px] border-slate-900 px-3 py-2 text-[10px] font-black uppercase text-slate-500 text-left w-1/4">Příslušenství</th>
+                        <th className="border-r-[3px] border-slate-900 px-3 py-2 text-[10px] font-black uppercase text-slate-500 text-left w-1/4">Popis / Specifikace</th>
+                        <th className="border-r-[3px] border-slate-900 px-3 py-2 text-[10px] font-black uppercase text-slate-500 text-left">Dodavatel</th>
+                        <th className="border-r-[3px] border-slate-900 px-3 py-2 text-[10px] font-black uppercase text-slate-500 text-left">Montáž</th>
+                        <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 text-left flex justify-between items-center">
+                            <span>Poznámka</span>
+                            {isEditing && (
+                                <button
+                                    onClick={onAddRow}
+                                    className="bg-slate-900 text-white p-1 rounded hover:bg-slate-700 transition-all"
+                                    title="Přidat řádek"
+                                >
+                                    <PlusCircle size={14} />
+                                </button>
+                            )}
+                        </th>
                     </tr>
                 </thead>
-                <tbody className="divide-y-[2px] divide-slate-300">
-                    {dataRows.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50">
-                            <td className="border-r-[3px] border-black px-2 py-1.5 text-[10px] font-black uppercase bg-slate-50/50">{row.label}</td>
-                            <td className="border-r-[3px] border-black px-2 py-1.5 text-[11px] font-bold italic text-blue-900">{row.desc}</td>
-                            <td className="border-r-[3px] border-black px-2 py-1.5 text-[10px] font-bold text-slate-700">{row.provider}</td>
-                            <td className="border-r-[3px] border-black px-2 py-1.5 text-[10px] font-bold text-slate-700">{row.installer}</td>
-                            <td className="px-2 py-1.5 text-[10px] font-bold text-slate-700">{row.note}</td>
+                <tbody className="divide-y-[2px] divide-slate-200">
+                    {dataRows.length > 0 ? dataRows.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-indigo-50/30 transition-colors group">
+                            <td className="border-r-[3px] border-slate-900 px-3 py-2.5 text-[11px] font-black uppercase bg-slate-50/50 text-slate-900">
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={row.label || ''}
+                                        onChange={(e) => onRowChange?.(idx, 'label', e.target.value)}
+                                        className="w-full bg-transparent border-b border-slate-300 focus:border-indigo-500 outline-none"
+                                        placeholder="Název..."
+                                    />
+                                ) : row.label}
+                            </td>
+                            <td className="border-r-[3px] border-slate-900 px-3 py-2.5 text-[12px] font-bold italic text-indigo-900">
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={row.desc || ''}
+                                        onChange={(e) => onRowChange?.(idx, 'desc', e.target.value)}
+                                        className="w-full bg-transparent border-b border-indigo-200 focus:border-indigo-500 outline-none"
+                                        placeholder="Specifikace..."
+                                    />
+                                ) : row.desc}
+                            </td>
+                            <td className="border-r-[3px] border-slate-900 px-3 py-2.5 text-[11px] font-black text-slate-700">
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={row.provider || ''}
+                                        onChange={(e) => onRowChange?.(idx, 'provider', e.target.value)}
+                                        className="w-full bg-transparent border-b border-slate-300 outline-none"
+                                    />
+                                ) : row.provider}
+                            </td>
+                            <td className="border-r-[3px] border-slate-900 px-3 py-2.5 text-[11px] font-black text-slate-700">
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={row.installer || ''}
+                                        onChange={(e) => onRowChange?.(idx, 'installer', e.target.value)}
+                                        className="w-full bg-transparent border-b border-slate-300 outline-none"
+                                    />
+                                ) : row.installer}
+                            </td>
+                            <td className="px-3 py-2.5 text-[11px] font-medium text-slate-600 relative">
+                                {isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={row.note || ''}
+                                            onChange={(e) => onRowChange?.(idx, 'note', e.target.value)}
+                                            className="w-full bg-transparent border-b border-slate-300 outline-none"
+                                        />
+                                        <button
+                                            onClick={() => onRemoveRow?.(idx)}
+                                            className="text-rose-500 hover:bg-rose-50 p-1 rounded"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ) : row.note}
+                            </td>
                         </tr>
-                    ))}
+                    )) : (
+                        <tr>
+                            <td colSpan={5} className="px-4 py-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest italic">
+                                Žádné příslušenství nebylo definováno
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>
@@ -87,19 +158,20 @@ export function AccessoriesTable({ rows = [] }: { rows?: any[] }) {
 
 export function SimpleMemo({ title, content, isEditing, onChange }: { title: string, content: string, isEditing?: boolean, onChange?: (val: string) => void }) {
     return (
-        <div className="mb-8 border-[3px] border-black overflow-hidden">
-            <div className="bg-yellow-400 border-b-[3px] border-black px-2 py-1">
-                <h4 className="text-[9px] font-black uppercase tracking-tight text-slate-800">{title}</h4>
+        <div className="mb-8 border-[3px] border-slate-900 overflow-hidden shadow-md group">
+            <div className="bg-amber-400 border-b-[3px] border-slate-900 px-3 py-1.5 flex justify-between items-center transition-colors group-hover:bg-amber-300">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900">{title}</h4>
             </div>
-            <div className="p-4 min-h-[100px] flex items-center justify-center text-center">
+            <div className="p-5 min-h-[120px] flex items-center bg-amber-50/30">
                 {isEditing ? (
                     <textarea
-                        className="w-full h-full min-h-[100px] outline-none text-base font-black p-2 bg-yellow-50"
+                        className="w-full h-full min-h-[120px] outline-none text-[15px] font-black p-3 bg-transparent border-2 border-amber-200 focus:border-amber-400 rounded-xl transition-all resize-none"
                         value={content}
                         onChange={(e) => onChange?.(e.target.value)}
+                        placeholder="Zadejte text..."
                     />
                 ) : (
-                    <p className="text-lg font-black italic text-slate-800">{content || '—'}</p>
+                    <p className="text-xl font-black italic text-slate-800 leading-relaxed indent-4 select-all">{content || '—'}</p>
                 )}
             </div>
         </div>
