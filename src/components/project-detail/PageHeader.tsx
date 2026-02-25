@@ -270,7 +270,7 @@ export function PageHeader({
                         </div>
 
                         <MetaItem label="Montážní firma" value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={onChange} icon={<Wrench size={11} />} />
-                        <MetaItem label="Nastavení nástavby" value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={onChange} icon={<Shield size={11} />} />
+                        <MetaItem label="Typové označení" value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={onChange} icon={<Shield size={11} />} />
                         <MetaItem label="Abra Zakázka" value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
                         <MetaItem label="Abra Objednávka" value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
 

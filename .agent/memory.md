@@ -162,3 +162,9 @@
     - **Responzivita**: Na zařízeních s menším rozlišením se grid automaticky skládá pod název pro zachování čitelnosti.
     - **TDD**: Změna byla podložena novou testovací sadou pro komponentu hlavičky.
     - **Environment**: Do vývojového prostředí byla přidána závislost `@testing-library/dom` pro zajištění stability testů.
+
+## 2026-02-25: Globální vyhledávání a Smart TechSpec
+- **Search Architecture**: Vyhledávání v Navbaru bylo transformováno z pasivního filtru na aktivní globální navigaci. Využívá `SearchProvider` pro synchronizaci stavu a asynchronní dotazy do Supabase s debouncem 300ms. Výsledky jsou prezentovány v "glassmorphic" dropdownu s bohatými metadaty (stav, typ, klient).
+- **Smart Data Extraction**: Implementován systém inteligentní analýzy názvů zakázek. Pomocí regulárních výrazů v `extractModelDesignation` systém identifikuje typy strojů (např. ULTIMA 21Z59, X-HiPro 188, F125S).
+- **UX TechSpec**: Tato extrakce je integrována přímo do `TechSpecSection`. Pokud je pole prázdné, systém jej v editačním módu automaticky předvyplní (Smart Pre-fill). V náhledovém módu jsou tyto hodnoty zobrazeny jako "navržené" (Suggested values) s ikonou `Sparkles`. Změna dramaticky snižuje manuální práci u rutinních typů zakázek.
+- **Header Integration**: Klíčová montážní a technická data byla vytažena do hlavní hlavičky projektu pro okamžitý náhled bez nutnosti scrollovat. Přejmenováno "Nastavení nástavby" na "Typové označení".

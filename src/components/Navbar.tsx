@@ -10,6 +10,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useSearch } from '@/providers/SearchProvider';
 import { useActions } from '@/providers/ActionProvider';
+import { Project } from '@/types/project';
 
 import { ThemeToggle } from './ThemeToggle';
 
@@ -55,6 +56,9 @@ export function Navbar() {
     const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string>('');
     const [systemVersion, setSystemVersion] = useState<string>('v1.0.0-alpha');
+    const [searchResults, setSearchResults] = useState<Project[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     // Active Category Label
     const activeCategory = activeType === 'military' ? 'VOJENSKÉ' : activeType === 'civil' ? 'CIVIL' : activeType === 'service' ? 'SERVIS' : null;
@@ -89,6 +93,35 @@ export function Navbar() {
         await supabase.auth.signOut();
         window.location.href = '/login';
     };
+
+    // Global Search Logic
+    useEffect(() => {
+        if (!searchTerm || searchTerm.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('id, name, customer, abra_project, serial_number, project_type, status, production_status')
+                    .or(`id.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%,customer.ilike.%${searchTerm}%,abra_project.ilike.%${searchTerm}%,serial_number.ilike.%${searchTerm}%`)
+                    .limit(8);
+
+                if (!error && data) {
+                    setSearchResults(data as Project[]);
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const activeColor = activeType === 'military' ? '#059669' : activeType === 'civil' ? '#2563eb' : activeType === 'service' ? '#9333ea' : null;
 
@@ -284,29 +317,91 @@ export function Navbar() {
                     {/* Right: Global Tools & Profile */}
                     <div className="flex-1 flex items-center justify-end gap-3">
 
-                        {/* Global Search (Shrinked & Right Aligned) */}
-                        {!detailInfo && (
-                            <div className="hidden md:block w-full max-w-[180px] animate-in fade-in slide-in-from-right-2 duration-300">
-                                <div className="relative group">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 group-focus-within:text-primary transition-all duration-300" size={13} />
-                                    <input
-                                        type="text"
-                                        placeholder="VYHLEDAT..."
-                                        className="w-full bg-foreground/[0.04] border border-foreground/10 rounded-xl py-1.5 pl-8 pr-8 text-[10px] font-black tracking-widest focus:outline-none focus:ring-4 focus:ring-primary/10 focus:bg-background focus:border-primary/40 transition-all duration-300 placeholder:text-foreground/20"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    {searchTerm && (
-                                        <button
-                                            onClick={() => setSearchTerm('')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors"
-                                        >
-                                            <X size={13} />
-                                        </button>
-                                    )}
-                                </div>
+                        {/* Global Search (Always Visible) */}
+                        <div className="hidden md:block w-full max-w-[200px] relative">
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 group-focus-within:text-primary transition-all duration-300" size={13} />
+                                <input
+                                    type="text"
+                                    placeholder="VYHLEDAT..."
+                                    className="w-full bg-foreground/[0.04] border border-foreground/10 rounded-xl py-1.5 pl-8 pr-8 text-[10px] font-black tracking-widest focus:outline-none focus:ring-4 focus:ring-primary/10 focus:bg-background focus:border-primary/40 transition-all duration-300 placeholder:text-foreground/20"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onFocus={() => setIsSearchFocused(true)}
+                                    onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors"
+                                    >
+                                        <X size={13} />
+                                    </button>
+                                )}
                             </div>
-                        )}
+
+                            {/* Dropdown Results */}
+                            {isSearchFocused && (searchTerm.length >= 2) && (
+                                <div className="absolute top-full right-0 mt-2 w-[300px] bg-background border border-border/60 rounded-2xl shadow-2xl overflow-hidden z-[21000] animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-xl">
+                                    <div className="p-2 border-b border-border/40 bg-muted/30">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Výsledky hledání</span>
+                                    </div>
+                                    <div className="max-h-[400px] overflow-y-auto p-1.5 space-y-1">
+                                        {isSearching ? (
+                                            <div className="flex items-center justify-center py-8">
+                                                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                            </div>
+                                        ) : searchResults.length > 0 ? (
+                                            searchResults.map(result => (
+                                                <button
+                                                    key={result.id}
+                                                    onClick={() => {
+                                                        const path = result.project_type === 'service' ? `/servis/${result.id}` : `/projekty/${result.id}?type=${result.project_type || 'civil'}`;
+                                                        router.push(path);
+                                                        setSearchTerm('');
+                                                        setIsSearchFocused(false);
+                                                    }}
+                                                    className="w-full flex flex-col gap-0.5 p-2.5 rounded-xl hover:bg-primary/5 transition-all text-left group border border-transparent hover:border-primary/10"
+                                                >
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <span className="text-xs font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">{result.name}</span>
+                                                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">{result.id}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-muted-foreground/60 line-clamp-1">{result.customer || 'Bez klienta'}</span>
+                                                        <div className="flex items-center gap-1.5 ml-auto">
+                                                            <span className={cn(
+                                                                "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.25 rounded",
+                                                                result.project_type === 'service' ? "bg-purple-500/10 text-purple-600" :
+                                                                    result.project_type === 'military' ? "bg-emerald-500/10 text-emerald-600" :
+                                                                        "bg-blue-500/10 text-blue-600"
+                                                            )}>
+                                                                {result.project_type || 'Civil'}
+                                                            </span>
+                                                            {(result.production_status || result.status) && (
+                                                                <span className={cn(
+                                                                    "text-[8px] font-bold uppercase tracking-tight px-1.5 py-0.25 rounded-full border",
+                                                                    result.production_status === 'Dokončeno' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                                                                        result.production_status === 'V procesu' ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
+                                                                            result.production_status === 'Čeká na díly' ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                                                                                "bg-muted text-muted-foreground border-border/40"
+                                                                )}>
+                                                                    {result.production_status || result.status}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="py-8 text-center">
+                                                <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">Nebylo nic nalezeno</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {customToolbar && (
                             <div className="flex items-center gap-2 pr-4 border-r border-border/30 animate-in fade-in slide-in-from-right-1 duration-300">

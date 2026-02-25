@@ -1,7 +1,9 @@
 import React from 'react';
-import { ClipboardList, Truck, FileText, Tag, Hash } from 'lucide-react';
+import { ClipboardList, Truck, FileText, Tag, Hash, Sparkles } from 'lucide-react';
 import { Project } from '@/types/project';
 import { Section } from './DetailComponents';
+import { extractModelDesignation } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface TechSpecSectionProps {
     project: Project;
@@ -20,6 +22,23 @@ export function TechSpecSection({
 }: TechSpecSectionProps) {
     const p = isEditing ? editedProject : project;
 
+    const [suggestedModel, setSuggestedModel] = useState<string | null>(null);
+
+    // Inteligentní extrakce modelu
+    useEffect(() => {
+        if (p.name && p.category) {
+            const extracted = extractModelDesignation(p.name, p.category);
+            setSuggestedModel(extracted);
+
+            // Automatické předvyplnění v režimu editace (pouze pokud je prázdné)
+            if (isEditing && extracted && !p.body_setup) {
+                handleCustomFieldChange('body_setup', extracted);
+            }
+        } else {
+            setSuggestedModel(null);
+        }
+    }, [p.name, p.category, isEditing]);
+
     return (
         <Section icon={<ClipboardList size={15} />} title="Technická specifikace" color="blue" fullWidth className={className}>
             <div className="flex flex-col gap-8 p-1">
@@ -27,7 +46,7 @@ export function TechSpecSection({
                 <div className="space-y-4">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b border-border/40 pb-2">Nástavba</h4>
 
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                         {/* Kategorie */}
                         <div className="flex flex-col gap-1.5 px-1">
                             <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Kategorie</label>
@@ -50,6 +69,49 @@ export function TechSpecSection({
                             )}
                         </div>
 
+                        {/* Typové označení */}
+                        <div className="flex flex-col gap-1.5 px-1 relative">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
+                                Typové označení
+                                {suggestedModel && !p.body_setup && (
+                                    <span className="flex items-center gap-1 text-[8px] text-primary animate-pulse font-black">
+                                        <Sparkles size={10} /> NÁVRH K DISPOZICI
+                                    </span>
+                                )}
+                            </label>
+                            {isEditing ? (
+                                <div className="relative group/input">
+                                    <input
+                                        type="text"
+                                        value={p.body_setup || ''}
+                                        onChange={(e) => handleCustomFieldChange('body_setup', e.target.value)}
+                                        className="w-full text-xs font-black bg-muted/20 border border-border/60 rounded-xl px-3 py-2 outline-none focus:ring-4 focus:ring-primary/5 transition-all"
+                                        placeholder={suggestedModel || "Typ..."}
+                                    />
+                                    {suggestedModel && p.body_setup !== suggestedModel && (
+                                        <button
+                                            onClick={() => handleCustomFieldChange('body_setup', suggestedModel)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-primary/10 text-primary opacity-0 group-hover/input:opacity-100 hover:bg-primary hover:text-white transition-all"
+                                            title={`Použít návrh: ${suggestedModel}`}
+                                        >
+                                            <Sparkles size={12} />
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-sm font-black text-foreground">
+                                    {p.body_setup ? p.body_setup : (
+                                        suggestedModel ? (
+                                            <span className="text-muted-foreground/40 italic flex items-center gap-2">
+                                                <Sparkles size={12} className="text-primary/30" />
+                                                {suggestedModel}
+                                            </span>
+                                        ) : '—'
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Sériové číslo */}
                         <div className="flex flex-col gap-1.5 px-1">
                             <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Sériové číslo</label>
@@ -58,7 +120,7 @@ export function TechSpecSection({
                                     type="text"
                                     value={p.serial_number || ''}
                                     onChange={(e) => handleCustomFieldChange('serial_number', e.target.value)}
-                                    className="w-full text-xs font-black bg-muted/20 border border-border/60 rounded-xl px-3 py-2 underline-none focus:ring-4 focus:ring-primary/5 transition-all font-mono"
+                                    className="w-full text-xs font-black bg-muted/20 border border-border/60 rounded-xl px-3 py-2 outline-none focus:ring-4 focus:ring-primary/5 transition-all font-mono"
                                     placeholder="S/N..."
                                 />
                             ) : (

@@ -56,6 +56,11 @@
 - **[x] Dynamické barvy ohraničení milníků dle stavu (Bílá/Zelená/Červená).**
 - **[x] Implementace permanentních pravidel komunikace do `.agent/rules.md`.**
 - **[x] Provedení aktualizace paměti a logů dle workflow `/logging`.**
+- **[x] Redesign vyhledávání v Navbaru (přesun doprava, fixní šířka).**
+- **[x] Implementace inteligentního globálního vyhledávání s našeptávačem.**
+- **[x] Reorganizace detailu zakázky (přesun technických polí do hlavičky).**
+- **[x] Implementace inteligentní extrakce modelových označení (HIAB/MULTILIFT/LOGLIFT/atd.).**
+- **[x] Reorganizace sekce Nástavba v TechSpec do gridu.**
 
 ## Budoucí úkoly (Backlog)
 - [ ] Přidání potvrzovacích dialogů před změnou role.

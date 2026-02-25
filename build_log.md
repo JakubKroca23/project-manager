@@ -242,3 +242,9 @@
     - Povoleno zalamování dlouhých názvů zakázek.
 - **TDD**: Vytvořen test `src/components/project-detail/__tests__/PageHeader.test.tsx`, ověřena struktura a layout.
 - **Oprava**: Instalována chybějící závislost `@testing-library/dom` pro běh testů.
+
+## [2026-02-25] - Inteligentní vyhledávání a automatizace TechSpec
+- **Globální vyhledávání**: Redesign vyhledávacího pole (přesun doprava, fixní šířka). Implementace inteligentního našeptávače s real-time výsledky (ID, název, klient, barevný typ a stav). Vyhledávání je nyní dostupné na všech stránkách včetně detailu.
+- **TechSpec Sekce**: Reorganizace polí do gridu (3 sloupce). Implementována inteligentní extrakce modelů (HIAB, MULTILIFT, LOGLIFT, atd.) z názvu projektu. Přidáno automatické předvyplňování a vizuální návrhy ("Sparkles" systém).
+- **Core Utils**: Rozšíření `src/lib/utils.ts` o utilitu `extractModelDesignation` s podporou pro širokou škálu formátů strojů.
+- **Sjednocení terminologie**: Přejmenování "Nastavení nástavby" na "Typové označení" napříč celým detailem zakázky.
