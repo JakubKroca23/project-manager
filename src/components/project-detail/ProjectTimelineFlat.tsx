@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
 import {
     Truck, Factory, Wrench, Shield, Check, Flag,
-    Calendar, Play, Info, Zap, ThumbsUp, Package, AlertTriangle,
+    Calendar, Play, Info, Zap, ThumbsUp, Package, AlertTriangle, X,
     LucideIcon
 } from 'lucide-react';
 
@@ -42,6 +42,7 @@ const ICON_MAP: Record<string, LucideIcon | any> = {
 
 export function ProjectTimelineFlat({ project, milestones, isEditing, onCustomFieldChange }: ProjectTimelineFlatProps) {
     const [config, setConfig] = useState<any>(null);
+    const [activePopover, setActivePopover] = useState<string | null>(null);
 
     // Fetch global timeline configuration
     useEffect(() => {
@@ -108,9 +109,11 @@ export function ProjectTimelineFlat({ project, milestones, isEditing, onCustomFi
                     ? project.custom_fields?.[`${d.id}_confirmed`]
                     : (d.id.length < 20 ? project.custom_fields?.[`${d.id}_confirmed`] : null);
 
-                const isCompleted = d.id.length > 20
-                    ? (d as any).status === 'completed'
-                    : (completedMilestones.includes(d.id) || !!confirmedDate);
+                const isCompleted = d.id === 'start_at'
+                    ? true
+                    : (d.id.length > 20
+                        ? (d as any).status === 'completed'
+                        : (completedMilestones.includes(d.id) || !!confirmedDate));
 
                 // Determine if overdue
                 const isOverdue = !isCompleted && dateObj < today;
@@ -179,14 +182,24 @@ export function ProjectTimelineFlat({ project, milestones, isEditing, onCustomFi
     }, [project, milestones, config]);
 
     const handleIconClick = (item: any) => {
-        if (!isEditing || !onCustomFieldChange) return;
+        if (!isEditing || !onCustomFieldChange || item.id === 'start_at') return;
+        setActivePopover(activePopover === item.id ? null : item.id);
+    };
+
+    const confirmMilestone = (item: any, type: 'original' | 'today' | 'clear') => {
+        if (!onCustomFieldChange) return;
 
         const fieldName = `${item.id}_confirmed`;
-        const todayStr = new Date().toISOString().split('T')[0];
+        let dateVal = null;
 
-        // Toggle: if already confirmed today, clear it, otherwise set to today
-        const currentVal = project.custom_fields?.[fieldName];
-        onCustomFieldChange(fieldName, currentVal ? null : todayStr);
+        if (type === 'original') {
+            dateVal = item.date ? new Date(item.date).toISOString().split('T')[0] : null;
+        } else if (type === 'today') {
+            dateVal = new Date().toISOString().split('T')[0];
+        }
+
+        onCustomFieldChange(fieldName, dateVal);
+        setActivePopover(null);
     };
 
     if (!timelineData) return null;
@@ -241,19 +254,86 @@ export function ProjectTimelineFlat({ project, milestones, isEditing, onCustomFi
                 {/* Body v čase */}
                 {timelineData.dates.map((item, idx) => {
                     const isEven = idx % 2 === 0;
+                    const isPopping = activePopover === item.id;
+
                     return (
                         <div
                             key={item.id}
                             className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center group"
-                            style={{ left: `${item.percent}%` }}
+                            style={{ left: `${item.percent}%`, zIndex: isPopping ? 50 : 10 }}
                         >
+                            {/* Kontexní menu pro potvrzení - SVĚTLÝ ALE VÝRAZNÝ STYL */}
+                            {isPopping && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40 bg-white/40 backdrop-blur-[2px]"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActivePopover(null);
+                                        }}
+                                    />
+                                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white border-2 border-amber-500 rounded-2xl shadow-[0_20px_40px_-5px_rgba(0,0,0,0.2)] p-2 z-50 flex flex-col gap-1.5 min-w-[210px] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200 origin-bottom">
+                                        <div className="flex items-center justify-between px-2 py-1.5 mb-1 border-b border-slate-100">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">Zadat skutečnost</span>
+                                            <button onClick={() => setActivePopover(null)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors group">
+                                                <X size={12} className="text-slate-400 group-hover:text-slate-900" />
+                                            </button>
+                                        </div>
+
+                                        <button
+                                            onClick={() => confirmMilestone(item, 'original')}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 bg-slate-50 hover:bg-amber-500 rounded-xl transition-all text-left group/btn border border-slate-200 hover:border-amber-600 shadow-sm hover:shadow-md"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover/btn:border-transparent transition-colors">
+                                                <Calendar size={14} className="text-amber-600 group-hover/btn:text-amber-900" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight group-hover/btn:text-white">Plánované datum</span>
+                                                <span className="text-[10px] font-bold text-amber-700 group-hover/btn:text-amber-100">{formatDate(item.date)}</span>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => confirmMilestone(item, 'today')}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 bg-slate-50 hover:bg-emerald-600 rounded-xl transition-all text-left group/btn border border-slate-200 hover:border-emerald-700 shadow-sm hover:shadow-md"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover/btn:border-transparent transition-colors">
+                                                <div className="relative">
+                                                    <Calendar size={14} className="text-emerald-600 group-hover/btn:text-emerald-900" />
+                                                    <div className="absolute -right-1 -bottom-1 w-2.5 h-2.5 bg-emerald-600 rounded-full border-2 border-white flex items-center justify-center group-hover/btn:bg-white">
+                                                        <Check size={6} className="text-white group-hover/btn:text-emerald-900" strokeWidth={5} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight group-hover/btn:text-white">Uděláno dnes</span>
+                                                <span className="text-[10px] font-bold text-emerald-700 group-hover/btn:text-emerald-100">{formatDate(new Date())}</span>
+                                            </div>
+                                        </button>
+
+                                        {item.confirmedDate && (
+                                            <button
+                                                onClick={() => confirmMilestone(item, 'clear')}
+                                                className="w-full flex items-center gap-3 px-3 py-2.5 bg-rose-50 hover:bg-rose-600 rounded-xl transition-all text-left mt-1 group/btn border border-rose-100 hover:border-rose-700"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-rose-200 flex items-center justify-center group-hover/btn:border-transparent transition-colors">
+                                                    <X size={14} className="text-rose-600 group-hover/btn:text-rose-900" />
+                                                </div>
+                                                <span className="text-[11px] font-black text-rose-700 group-hover/btn:text-white uppercase tracking-tight">Zrušit potvrzení</span>
+                                            </button>
+                                        )}
+
+                                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r-2 border-b-2 border-amber-500 rotate-45" />
+                                    </div>
+                                </>
+                            )}
                             {/* Tečka s ikonou */}
                             <div
                                 onClick={() => handleIconClick(item)}
                                 className={cn(
                                     "w-7 h-7 rounded-full border-4 border-white shadow-md flex items-center justify-center text-white transition-all duration-300 z-10",
-                                    isEditing ? "cursor-pointer hover:scale-125 hover:shadow-lg active:scale-95" : "hover:scale-110",
-                                    item.isCompleted && isEditing ? "ring-2 ring-emerald-500/20 ring-offset-2" : ""
+                                    isEditing && item.id !== 'start_at' ? "cursor-pointer hover:scale-125 hover:shadow-lg active:scale-95" : "hover:scale-110",
+                                    item.isCompleted && isEditing && item.id !== 'start_at' ? "ring-2 ring-emerald-500/20 ring-offset-2" : ""
                                 )}
                                 style={{ backgroundColor: item.finalColor }}
                             >

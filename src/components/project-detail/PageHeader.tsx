@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeft, Hash, Edit2, Save, X, Trash2, Loader2, Building2, User, Flag, Tag, Factory, Wrench, Shield, Calendar } from 'lucide-react';
+import { ArrowLeft, Hash, Edit2, Save, X, Trash2, Loader2, Building2, User, Flag, Tag, Factory, Wrench, Shield, Calendar, Globe } from 'lucide-react';
 import { Project } from '@/types/project';
 import { CategoryChip } from '@/components/CategoryChip';
 import { cn, formatManager } from '@/lib/utils';
@@ -107,202 +107,220 @@ export function PageHeader({
     }, [project, editedProject, isEditing, saving, canEdit, p.name, p.project_type, onChange, onEdit, onCancel, onSave, onDelete, setDetailInfo, setDetailActions, router]);
 
     return (
-        <div className="w-full mb-6 text-left">
-            <div className="flex flex-col items-start p-6 bg-card/30 backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm hover:border-border/80 transition-all duration-300 overflow-hidden group">
-                {/* Horní část: Nadpis a ID */}
-                <div className="w-full space-y-6">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex flex-wrap items-end gap-x-12 px-1">
+        <div className="w-full mb-6">
+            <div className="bg-white border-[3px] border-slate-300 rounded-2xl overflow-hidden shadow-xl transition-all duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-6 border-b-[3px] border-slate-300">
+                    {/* Řada 1: Klíčové identifikátory */}
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1 bg-slate-50/80">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                            <Hash size={10} /> OP
+                        </label>
+                        <span className="text-sm font-black text-slate-900 leading-none">{project.id}</span>
+                    </div>
 
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1 md:col-span-2">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                            <Building2 size={10} /> Název zakázky
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.name}
+                                onChange={(e) => onChange('name', e.target.value)}
+                                className="text-sm font-black bg-slate-50 border-b-2 border-primary/40 outline-none focus:border-primary transition-all w-full leading-none py-0.5"
+                                placeholder="Název..."
+                            />
+                        ) : (
+                            <h1 className="text-sm font-black text-slate-900 leading-none truncate" title={project.name}>{project.name}</h1>
+                        )}
+                    </div>
 
-                            <div className="flex flex-col gap-1.5 min-w-0">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                    <Hash size={11} className="text-muted-foreground/30" />
-                                    Číslo OP
-                                </label>
-                                <div className="h-10 flex items-center">
-                                    <span className="text-lg font-black text-foreground tracking-tight leading-none">{project.id}</span>
-                                </div>
-                            </div>
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                            <User size={10} /> Zákazník
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.customer || ''}
+                                onChange={(e) => onChange('customer', e.target.value)}
+                                className="text-xs font-black bg-slate-50 border-b border-primary/20 outline-none focus:border-primary transition-all w-full py-0.5"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-slate-800 leading-none truncate" title={project.customer || ''}>{project.customer || '—'}</span>
+                        )}
+                    </div>
 
-                            <div className="flex flex-col gap-1.5 min-w-0">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                    <Building2 size={11} className="text-muted-foreground/30" />
-                                    Název zakázky
-                                </label>
-                                <div className="h-10 flex items-center">
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={p.name}
-                                            onChange={(e) => onChange('name', e.target.value)}
-                                            className="text-lg font-black bg-transparent border-b-2 border-primary/30 outline-none focus:border-primary transition-colors min-w-[300px] leading-none py-1"
-                                            placeholder="Zadejte název zakázky..."
-                                            autoFocus
-                                        />
-                                    ) : (
-                                        <h1 className="text-lg font-black text-foreground tracking-tight leading-none">{project.name}</h1>
-                                    )}
-                                </div>
-                            </div>
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1 bg-slate-50/40">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                            <Globe size={10} /> Abra Proj
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.abra_project || ''}
+                                onChange={(e) => onChange('abra_project', e.target.value)}
+                                className="text-xs font-black bg-white border border-slate-300 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary/20"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-slate-700 leading-none">{project.abra_project || '—'}</span>
+                        )}
+                    </div>
 
-                            <div className="flex flex-col gap-1.5 min-w-0">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                    <Building2 size={11} className="text-muted-foreground/30" />
-                                    Zákazník
-                                </label>
-                                <div className="h-10 flex items-center">
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={p.customer || ''}
-                                            onChange={(e) => onChange('customer', e.target.value)}
-                                            className="text-lg font-black bg-transparent border-b-2 border-primary/30 outline-none focus:border-primary transition-colors min-w-[200px] leading-none py-1"
-                                            placeholder="Zadejte zákazníka..."
-                                        />
-                                    ) : (
-                                        <span className="text-lg font-black text-foreground tracking-tight leading-none">{project.customer || '—'}</span>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-1.5 min-w-0">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                    <User size={11} className="text-muted-foreground/30" />
-                                    Vedoucí zakázky
-                                </label>
-                                <div className="h-10 flex items-center">
-                                    {isEditing ? (
-                                        <select
-                                            value={p.manager || ''}
-                                            onChange={(e) => onChange('manager', e.target.value)}
-                                            className="text-lg font-black bg-transparent border-b-2 border-primary/30 outline-none focus:border-primary transition-colors min-w-[200px] leading-none py-1 appearance-none cursor-pointer"
-                                        >
-                                            <option value="" disabled>Vyberte...</option>
-                                            {managers.map(m => (
-                                                <option key={m.id} value={m.email}>{formatManager(m.email)}</option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        <span className="text-lg font-black text-foreground tracking-tight leading-none">
-                                            {formatManager(project.manager)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                    <div className="p-2.5 flex flex-col gap-1 bg-slate-50/40">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                            <Hash size={10} /> Abra Obj
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.abra_order || ''}
+                                onChange={(e) => onChange('abra_order', e.target.value)}
+                                className="text-xs font-black bg-white border border-slate-300 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary/20"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-slate-700 leading-none">{project.abra_order || '—'}</span>
+                        )}
                     </div>
                 </div>
 
-                {/* Spodní část: Metadata */}
-                <div className="w-full mt-5 pt-5 border-t border-border/40">
-                    <div className="flex flex-wrap items-center gap-x-10 gap-y-6 flex-1">
-                        {/* Priority Column */}
-                        <div className="flex flex-col gap-2 min-w-0">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                <Flag size={11} className="text-muted-foreground/30" />
-                                Priorita
-                            </label>
-                            {isEditing ? (
-                                <select
-                                    value={p.priority || 2}
-                                    onChange={(e) => onChange('priority', parseInt(e.target.value))}
-                                    className="text-sm font-black bg-background border border-border/50 rounded-xl px-3 h-10 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
-                                >
-                                    <option value={1}>Urgentní</option>
-                                    <option value={2}>Normální</option>
-                                    <option value={3}>Nízká</option>
-                                </select>
-                            ) : (
-                                <div className={cn(
-                                    "flex items-center gap-2.5 px-3 py-1.5 border rounded-xl shadow-sm h-10 transition-all duration-300",
-                                    p.priority === 1 ? 'bg-rose-500/5 border-rose-500/20 text-rose-600' :
-                                        p.priority === 3 ? 'bg-slate-500/5 border-slate-500/20 text-slate-500' :
-                                            'bg-blue-500/5 border-blue-500/20 text-blue-600'
-                                )}>
-                                    <span className={cn(
-                                        "w-2.5 h-2.5 rounded-full shadow-sm",
-                                        p.priority === 1 ? 'bg-rose-500 animate-pulse' :
-                                            p.priority === 3 ? 'bg-slate-400' :
-                                                'bg-blue-500'
-                                    )} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-                                        {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-6">
+                    {/* Řada 2: Detaily a statusy */}
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <User size={10} /> Vedoucí
+                        </label>
+                        {isEditing ? (
+                            <select
+                                value={p.manager || ''}
+                                onChange={(e) => onChange('manager', e.target.value)}
+                                className="text-xs font-black bg-slate-50 border-b border-primary/20 outline-none focus:border-primary transition-all w-full py-0.5 appearance-none cursor-pointer"
+                            >
+                                <option value="" disabled>Vyberte...</option>
+                                {managers.map(m => (
+                                    <option key={m.id} value={m.email}>{formatManager(m.email)}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <span className="text-xs font-black text-slate-800 leading-none">{formatManager(project.manager)}</span>
+                        )}
+                    </div>
 
-                        {/* Production Status Column */}
-                        <div className="flex flex-col gap-2 min-w-0">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                                <Factory size={11} className="text-muted-foreground/30" />
-                                Stav výroby
-                            </label>
-                            {isEditing ? (
-                                <select
-                                    value={p.production_status || 'V procesu'}
-                                    onChange={(e) => onChange('production_status', e.target.value)}
-                                    className="text-sm font-black bg-background border border-border/50 rounded-xl px-3 h-10 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm cursor-pointer"
-                                >
-                                    <option value="V procesu">V procesu</option>
-                                    <option value="Čeká na díly">Čeká na díly</option>
-                                    <option value="Dokončeno">Dokončeno</option>
-                                    <option value="-">-</option>
-                                </select>
-                            ) : (
-                                <div className={cn(
-                                    "flex items-center gap-2.5 px-3 py-1.5 border rounded-xl shadow-sm h-10 transition-all duration-300",
-                                    p.production_status === 'Dokončeno' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600' :
-                                        p.production_status === 'Čeká na díly' ? 'bg-amber-500/5 border-amber-500/20 text-amber-600' :
-                                            p.production_status === 'V procesu' ? 'bg-blue-500/5 border-blue-500/20 text-blue-600' :
-                                                'bg-muted/30 border-border/50 text-foreground/70'
-                                )}>
-                                    <span className={cn(
-                                        "w-2.5 h-2.5 rounded-full",
-                                        p.production_status === 'Dokončeno' ? 'bg-emerald-500' :
-                                            p.production_status === 'Čeká na díly' ? 'bg-amber-500 animate-pulse' :
-                                                p.production_status === 'V procesu' ? 'bg-blue-500 animate-pulse' :
-                                                    'bg-muted-foreground/40'
-                                    )} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-                                        {p.production_status || '—'}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <Wrench size={10} /> Montáž
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.mounting_company || ''}
+                                onChange={(e) => onChange('mounting_company', e.target.value)}
+                                className="text-xs font-black bg-slate-50 border-b border-primary/20 outline-none focus:border-primary transition-all w-full py-0.5"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-slate-700 leading-none truncate" title={project.mounting_company || ''}>{project.mounting_company || '—'}</span>
+                        )}
+                    </div>
 
-                        <MetaItem label="Montážní firma" value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={onChange} icon={<Wrench size={11} />} />
-                        <MetaItem label="Nastavení nástavby" value={p.body_setup} field="body_setup" isEditing={isEditing} onChange={onChange} icon={<Shield size={11} />} />
-                        <MetaItem label="Abra Zakázka" value={p.abra_project} field="abra_project" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
-                        <MetaItem label="Abra Objednávka" value={p.abra_order} field="abra_order" isEditing={isEditing} onChange={onChange} icon={<Hash size={11} />} />
+                    <div className="p-2.5 border-r-2 border-slate-200 md:col-span-2 flex flex-col gap-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <Shield size={10} /> Nastavení nástavby
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={p.body_setup || ''}
+                                onChange={(e) => onChange('body_setup', e.target.value)}
+                                className="text-xs font-black bg-slate-50 border-b border-primary/20 outline-none focus:border-primary transition-all w-full py-0.5"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-slate-700 leading-none truncate" title={project.body_setup || ''}>{project.body_setup || '—'}</span>
+                        )}
+                    </div>
 
+                    <div className="p-2.5 border-r-2 border-slate-200 flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <Flag size={10} /> Priorita
+                        </label>
+                        {isEditing ? (
+                            <select
+                                value={p.priority || 2}
+                                onChange={(e) => onChange('priority', parseInt(e.target.value))}
+                                className="text-[10px] font-black bg-white border border-slate-300 rounded px-1.5 h-6 outline-none"
+                            >
+                                <option value={1}>Urgentní</option>
+                                <option value={2}>Normální</option>
+                                <option value={3}>Nízká</option>
+                            </select>
+                        ) : (
+                            <div className={cn(
+                                "flex items-center gap-1.5 px-2 py-0.5 border-2 rounded-md w-fit h-6 shadow-sm",
+                                p.priority === 1 ? 'border-rose-500 bg-rose-50 text-rose-700' :
+                                    p.priority === 3 ? 'border-slate-300 bg-slate-50 text-slate-500' :
+                                        'border-blue-500 bg-blue-50 text-blue-700'
+                            )}>
+                                <span className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    p.priority === 1 ? 'bg-rose-500 animate-pulse' :
+                                        p.priority === 3 ? 'bg-slate-400' :
+                                            'bg-blue-500'
+                                )} />
+                                <span className="text-[9px] font-black uppercase tracking-tighter">
+                                    {p.priority === 1 ? 'Urgentní' : p.priority === 3 ? 'Nízká' : 'Normální'}
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
+                    <div className="p-2.5 flex flex-col gap-1.5 bg-slate-50/20">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <Factory size={10} /> Výroba
+                        </label>
+                        {isEditing ? (
+                            <select
+                                value={p.production_status || 'V procesu'}
+                                onChange={(e) => onChange('production_status', e.target.value)}
+                                className="text-[10px] font-black bg-white border border-slate-300 rounded px-1.5 h-6 outline-none"
+                            >
+                                <option value="V procesu">V procesu</option>
+                                <option value="Čeká na díly">Čeká na díly</option>
+                                <option value="Dokončeno">Dokončeno</option>
+                                <option value="-">-</option>
+                            </select>
+                        ) : (
+                            <div className={cn(
+                                "flex items-center gap-1.5 px-2 py-0.5 border-2 rounded-md w-fit h-6 shadow-sm",
+                                p.production_status === 'Dokončeno' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' :
+                                    p.production_status === 'Čeká na díly' ? 'border-amber-500 bg-amber-50 text-amber-700' :
+                                        p.production_status === 'V procesu' ? 'border-blue-500 bg-blue-50 text-blue-700' :
+                                            'border-slate-300 bg-slate-50 text-slate-600'
+                            )}>
+                                <span className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    p.production_status === 'Dokončeno' ? 'bg-emerald-500' :
+                                        p.production_status === 'Čeká na díly' ? 'bg-amber-500' :
+                                            p.production_status === 'V procesu' ? 'bg-blue-500 animate-pulse' :
+                                                'bg-slate-400'
+                                )} />
+                                <span className="text-[9px] font-black uppercase tracking-tighter">
+                                    {p.production_status || '—'}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
+                {/* Velmi diskrétní patička systému */}
+                <div className="bg-slate-50 border-t-2 border-slate-200 px-3 py-1 flex justify-between items-center text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                    <div className="flex items-center gap-2">
+                        <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                        System Ready
+                    </div>
+                    <div>
+                        Last Sync: {new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                 </div>
             </div>
-        </div>
-    );
-}
-
-function MetaItem({ label, value, field, isEditing, onChange, icon }: { label: string, value: any, field: keyof Project, isEditing: boolean, onChange: (field: keyof Project, value: any) => void, icon?: React.ReactNode }) {
-    return (
-        <div className="space-y-1.5 group/item">
-            <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 block group-hover/item:text-primary/60 transition-colors">{label}</label>
-            {isEditing ? (
-                <input
-                    type="text"
-                    value={String(value || '')}
-                    onChange={(e) => onChange(field, e.target.value)}
-                    className="w-full text-xs font-bold bg-background border border-border/50 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-primary/20"
-                />
-            ) : (
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground/90 truncate">
-                    {icon && <span className="text-muted-foreground/40">{icon}</span>}
-                    <span className="truncate" title={String(value || '')}>{value || '—'}</span>
-                </div>
-            )}
         </div>
     );
 }

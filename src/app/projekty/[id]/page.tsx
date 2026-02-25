@@ -180,11 +180,9 @@ export default function ProjectDetailPage() {
                                         <DateField
                                             label="Zahájení"
                                             value={p.start_at || p.created_at}
-                                            confirmedValue={p.custom_fields?.start_at_confirmed}
                                             field="start_at"
                                             isEditing={isEditing}
                                             onChange={handleChange}
-                                            onConfirmedChange={handleCustomFieldChange}
                                         />
                                         <DateField
                                             label="Dodání podvozku"
