@@ -40,7 +40,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                     setEstimatedEnd(settings?.estimated_end);
                 }
             } catch (err) {
-                console.warn('Failed to check maintenance mode', err);
+
             }
 
             // If it's a public route, we don't need to block rendering for the session check

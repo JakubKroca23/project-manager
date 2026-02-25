@@ -19,6 +19,12 @@ interface ActionContextType {
     setIsImportWizardOpen: (open: boolean) => void;
     customToolbar: ReactNode | null;
     setCustomToolbar: (content: ReactNode | null) => void;
+    customLeftContent: ReactNode | null;
+    setCustomLeftContent: (content: ReactNode | null) => void;
+    detailInfo: ReactNode | null;
+    setDetailInfo: (content: ReactNode | null) => void;
+    detailActions: ReactNode | null;
+    setDetailActions: (content: ReactNode | null) => void;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
@@ -32,6 +38,9 @@ export function ActionProvider({ children }: { children: ReactNode }) {
     const [dayWidth, setDayWidth] = useState(25);
     const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
     const [customToolbar, setCustomToolbar] = useState<ReactNode | null>(null);
+    const [customLeftContent, setCustomLeftContent] = useState<ReactNode | null>(null);
+    const [detailInfo, setDetailInfo] = useState<ReactNode | null>(null);
+    const [detailActions, setDetailActions] = useState<ReactNode | null>(null);
 
     return (
         <ActionContext.Provider value={{
@@ -42,7 +51,10 @@ export function ActionProvider({ children }: { children: ReactNode }) {
             onToggleDesign, setOnToggleDesign,
             dayWidth, setDayWidth,
             isImportWizardOpen, setIsImportWizardOpen,
-            customToolbar, setCustomToolbar
+            customToolbar, setCustomToolbar,
+            customLeftContent, setCustomLeftContent,
+            detailInfo, setDetailInfo,
+            detailActions, setDetailActions
         }}>
             {children}
         </ActionContext.Provider>

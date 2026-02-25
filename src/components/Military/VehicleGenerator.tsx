@@ -51,8 +51,8 @@ export function VehicleGenerator({ project, existingCount = 0, onSuccess }: Vehi
                     category: project.category,
                     production_status: 'Příprava',
                     mounting_company: project.mounting_company,
-                    body_type: project.body_type,
                     // Technical fields
+                    start_at: null,
                     quantity: 1, // Sub-project is always 1 unit
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(), // Use same time for creation
@@ -70,7 +70,7 @@ export function VehicleGenerator({ project, existingCount = 0, onSuccess }: Vehi
             onSuccess();
 
         } catch (err: any) {
-            console.error('Error generating vehicles:', err);
+
             setError(err.message || 'Nepodařilo se vygenerovat vozidla.');
         } finally {
             setIsGenerating(false);

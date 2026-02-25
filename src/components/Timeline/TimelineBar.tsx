@@ -192,7 +192,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
         };
     }, [addMilestoneDate, editPopup]);
     // Parsujeme všechna data
-    const t_closed = parseDate(project.closed_at) || parseDate(project.created_at);
+    const t_closed = parseDate(project.start_at) || parseDate(project.created_at);
     const t_chassis = parseDate(project.chassis_delivery);
     const t_body = parseDate(project.body_delivery);
     const t_handover = parseDate(project.customer_handover);
@@ -393,7 +393,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             }
             toast.success('Datum milníku aktualizováno');
         } catch (err) {
-            console.error('Error updating milestone date:', err);
+
             toast.error('Chyba při ukládání data.');
         } finally {
             setIsUpdating(false);
@@ -445,7 +445,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
             }
             toast.success('Stav milníku aktualizován');
         } catch (err) {
-            console.error('Error toggling milestone status:', err);
+
             toast.error('Chyba při aktualizaci stavu');
         } finally {
             setIsUpdating(false);
@@ -1057,7 +1057,7 @@ const TimelineBar: React.FC<ITimelineBarProps> = ({
                                                     toast.success('Ikona aktualizována');
                                                     setIsIconPickerOpen(false);
                                                 } catch (err) {
-                                                    console.error('Error updating icon:', err);
+
                                                     toast.error('Chyba při změně ikony');
                                                 } finally {
                                                     setIsUpdating(false);

@@ -11,10 +11,11 @@ import { useTableSettings } from '@/hooks/useTableSettings';
 
 import { Project } from '@/types/project';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { cn, formatManager } from '@/lib/utils';
 import CreateProjectModal from '@/components/CreateProjectModal';
 import { CategoryChip } from '@/components/CategoryChip';
 import { useActions } from '@/providers/ActionProvider';
+import { usePermissions } from '@/hooks/usePermissions';
 
 
 
@@ -55,8 +56,9 @@ const columns: ColumnDef<Project>[] = [
     },
     {
         accessorKey: 'manager',
-        header: 'Vedoucí projektu',
+        header: 'Vedoucí zakázky',
         minSize: 30,
+        cell: ({ row }) => <span>{formatManager(row.getValue('manager'))}</span>,
     },
     {
         accessorKey: 'status',
@@ -117,22 +119,16 @@ const columns: ColumnDef<Project>[] = [
         minSize: 30,
     },
     {
-        accessorKey: 'closed_at',
-        header: 'Uzavřeno',
+        accessorKey: 'start_at',
+        header: 'Zahájení',
         minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('closed_at')} />,
+        cell: ({ row }) => <SafeCellValue value={row.getValue('start_at')} />,
     },
     {
         accessorKey: 'serial_number',
         header: 'VIN / VČ',
         minSize: 30,
         cell: ({ row }) => <SafeCellValue value={row.getValue('serial_number')} />,
-    },
-    {
-        accessorKey: 'body_type',
-        header: 'Typ Nástavby',
-        minSize: 30,
-        cell: ({ row }) => <SafeCellValue value={row.getValue('body_type')} />,
     },
 ];
 
@@ -145,7 +141,8 @@ export default function ProjektyPage() {
     const tableSettings = useTableSettings(`projects-${activeTab}`);
     const router = useRouter();
     const { searchTerm } = useSearch();
-    const { setCustomToolbar } = useActions();
+    const { setCustomToolbar, setCustomLeftContent } = useActions();
+    const { canBulkDelete, canImport } = usePermissions();
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -160,7 +157,7 @@ export default function ProjektyPage() {
             .order('updated_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching projects:', error);
+
         } else {
             setProjects(data || []);
         }
@@ -206,8 +203,7 @@ export default function ProjektyPage() {
                 p.status,
                 p.category,
                 p.production_status,
-                p.mounting_company,
-                p.body_type
+                p.mounting_company
             ].map((val: string | undefined) => normalize(val || ''));
 
             // Check custom fields as well
@@ -225,43 +221,39 @@ export default function ProjektyPage() {
 
     // Update global navbar toolbar
     useEffect(() => {
-        setCustomToolbar(
+        // Left Content: Actions & Columns (Moved from Right)
+        setCustomLeftContent(
             <div className="flex items-center gap-2">
-                {/* Column Toggle (From Table) */}
-                {tableTools}
-
-                {/* Compact Count */}
-                <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-muted-foreground/60 border border-transparent">
-                    <Database size={12} />
-                    <span>{filteredProjects.length} / {tabProjects.length}</span>
-                </div>
-
                 {/* Create New Button */}
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-white transition-all hover:scale-105 active:scale-95 shadow-sm",
-                        activeTab === 'service' ? "bg-purple-600 shadow-purple-500/20" : activeTab === 'military' ? "bg-emerald-600 shadow-emerald-500/20" : "bg-blue-600 shadow-blue-500/20"
-                    )}
-                >
-                    <Plus size={12} strokeWidth={3} />
-                    <span>{activeTab === 'service' ? 'Nový servis' : 'Nová zakázka'}</span>
-                </button>
+                {canImport && (
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className={cn(
+                            "flex items-center gap-2 px-4 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 shadow-lg",
+                            activeTab === 'service' ? "bg-purple-600 shadow-purple-500/20" : activeTab === 'military' ? "bg-emerald-600 shadow-emerald-500/20" : "bg-blue-600 shadow-blue-500/20"
+                        )}
+                    >
+                        <Plus size={17} strokeWidth={3.5} />
+                        <span className="hidden md:inline">NOVÁ</span>
+                    </button>
+                )}
 
                 {/* Bulk Mode Toggle */}
-                <button
-                    onClick={() => {
-                        if (isBulkMode) setRowSelection({});
-                        setIsBulkMode(!isBulkMode);
-                    }}
-                    className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all",
-                        isBulkMode ? "bg-rose-500 text-white border-rose-600" : "bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted"
-                    )}
-                >
-                    <CheckCircle2 size={12} strokeWidth={3} />
-                    <span>{isBulkMode ? 'Zrušit' : 'Hromadné akce'}</span>
-                </button>
+                {canBulkDelete && (
+                    <button
+                        onClick={() => {
+                            if (isBulkMode) setRowSelection({});
+                            setIsBulkMode(!isBulkMode);
+                        }}
+                        className={cn(
+                            "flex items-center gap-2 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all shadow-sm",
+                            isBulkMode ? "bg-rose-500 text-white border-rose-600 shadow-rose-500/20" : "bg-background text-muted-foreground border-border hover:bg-muted"
+                        )}
+                    >
+                        <CheckCircle2 size={17} strokeWidth={3.5} />
+                        <span className="hidden md:inline">{isBulkMode ? 'ZRUŠIT' : 'OZNAČIT'}</span>
+                    </button>
+                )}
 
                 {/* Bulk Actions (Delete/Complete) */}
                 {isBulkMode && Object.keys(rowSelection).length > 0 && (
@@ -307,11 +299,22 @@ export default function ProjektyPage() {
                         </button>
                     </div>
                 )}
+
+                {/* Column Toggle (From Table) - Keep at the end of the group */}
+                <div className="ml-1 pl-1 border-l border-border/30">
+                    {tableTools}
+                </div>
             </div>
         );
 
-        return () => setCustomToolbar(null);
-    }, [activeTab, filteredProjects.length, tabProjects.length, isBulkMode, rowSelection, tableTools, setCustomToolbar, fetchProjects]);
+        // Right Content: Empty
+        setCustomToolbar(null);
+
+        return () => {
+            setCustomLeftContent(null);
+            setCustomToolbar(null);
+        };
+    }, [filteredProjects.length, tabProjects.length, isBulkMode, rowSelection, tableTools, activeTab, setCustomToolbar, setCustomLeftContent, fetchProjects]);
 
 
 

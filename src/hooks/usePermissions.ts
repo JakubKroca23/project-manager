@@ -11,12 +11,11 @@ export interface UserPermissions {
     role: string;
     permissions?: {
         timeline?: boolean;
-        projects?: boolean;
         projects_civil?: boolean;
         projects_military?: boolean;
         service?: boolean;
-        production?: boolean;
-        purchasing?: boolean;
+        can_bulk_delete?: boolean;
+        is_manager?: boolean;
     };
 }
 
@@ -54,7 +53,7 @@ export function usePermissions() {
                     filter: `id=eq.${user.id}`
                 },
                 (payload) => {
-                    console.log('Real-time permission update:', payload.new);
+
                     setPermissions(payload.new as UserPermissions);
                 }
             )
@@ -79,12 +78,33 @@ export function usePermissions() {
         return perms[key as keyof typeof perms] !== false;
     }, [permissions]);
 
+    const isOrderManager = permissions?.permissions?.is_manager === true;
+    const isAdmin = permissions?.role === 'admin' || permissions?.email === ADMIN_EMAIL;
+
+    const canEditProject = useCallback((project: any) => {
+        if (!permissions) return false;
+        if (isAdmin) return true;
+
+        if (isOrderManager) {
+            if (!project) return false;
+            const userName = permissions.email.split('@')[0].toLowerCase();
+            const projectManager = project.manager?.toLowerCase() || '';
+            // Allow if user is explicitly mentioned in manager field or has import rights
+            return projectManager.includes(userName) || permissions.can_import;
+        }
+
+        return permissions.can_import || false;
+    }, [permissions, isAdmin, isOrderManager]);
+
     return {
         permissions,
         isLoading,
         canImport: permissions?.can_import || false,
-        canEdit: permissions?.can_import || permissions?.role === 'admin' || permissions?.email === ADMIN_EMAIL,
-        isAdmin: permissions?.role === 'admin' || permissions?.email === ADMIN_EMAIL,
+        canEdit: isAdmin || isOrderManager || permissions?.can_import,
+        canBulkDelete: isAdmin,
+        isAdmin,
+        isOrderManager,
+        canEditProject,
         checkPerm
     };
 }

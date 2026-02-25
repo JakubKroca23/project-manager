@@ -13,10 +13,11 @@ export interface UserProfile {
     last_request_at?: string;
     permissions?: {
         timeline?: boolean;
-        projects?: boolean;
+        projects_civil?: boolean;
+        projects_military?: boolean;
         service?: boolean;
-        production?: boolean;
-        purchasing?: boolean;
+        can_bulk_delete?: boolean;
+        is_manager?: boolean;
     };
 }
 
@@ -154,10 +155,10 @@ export function useAdmin() {
             if (!error) {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, can_import: canImport, access_requested: false } : p));
             } else {
-                console.error('Failed to update permission:', error);
+
             }
         } catch (err) {
-            console.error('Error updating permission:', err);
+
         }
     };
 
@@ -183,11 +184,11 @@ export function useAdmin() {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, permissions: newPermissions } : p));
                 return true;
             } else {
-                console.error('Failed to update user permissions:', error);
+
                 return false;
             }
         } catch (err) {
-            console.error('Error updating user permissions:', err);
+
             return false;
         }
     };
@@ -211,10 +212,10 @@ export function useAdmin() {
             if (!error) {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, password_reset_requested: false } : p));
             } else {
-                console.error('Failed to reset password request:', error);
+
             }
         } catch (err) {
-            console.error('Error reset password request:', err);
+
         }
     };
 
@@ -239,7 +240,7 @@ export function useAdmin() {
                 setUserRequests((prev: UserRequest[]) => prev.filter((r: UserRequest) => r.id !== requestId));
             }
         } catch (err) {
-            console.error('Error processing user request:', err);
+
         }
     };
 
@@ -265,11 +266,11 @@ export function useAdmin() {
                 setProfiles((prev: UserProfile[]) => prev.map((p: UserProfile) => p.id === userId ? { ...p, role: newRole } : p));
                 return true;
             } else {
-                console.error('Failed to update role:', error);
+
                 return false;
             }
         } catch (err) {
-            console.error('Error updating role:', err);
+
             return false;
         }
     };

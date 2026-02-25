@@ -52,7 +52,7 @@ export function useTableSettings(tableId: string) {
                     settingsRef.current = loaded;
                 }
             } catch (err) {
-                console.error('Failed to load table settings:', err);
+
             } finally {
                 setIsLoaded(true);
             }
@@ -78,7 +78,7 @@ export function useTableSettings(tableId: string) {
                     updated_at: new Date().toISOString(),
                 }, { onConflict: 'user_id,table_id' });
         } catch (err) {
-            console.error('Failed to save table settings:', err);
+
         }
     }, [tableId]);
 

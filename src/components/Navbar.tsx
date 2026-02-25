@@ -29,16 +29,18 @@ const navItems = [
     },
     { name: 'HARMONOGRAM', icon: Calendar, href: '/', color: '#2563eb' },
 ];
+
 export function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const router = useRouter(); // Use this if router is needed, otherwise remove. Added for safety based on import.
+    const router = useRouter();
     const activeTypeFromParams = searchParams.get('type');
     const activeType = activeTypeFromParams || (pathname?.startsWith('/servis') ? 'service' : null);
     const { checkPerm, canImport } = usePermissions();
     const { isAdmin } = useAdmin();
     const { searchTerm, setSearchTerm } = useSearch();
-    const { onFit, onJumpToToday, onZoomIn, onZoomOut, onToggleDesign, dayWidth, setIsImportWizardOpen, customToolbar } = useActions();
+    const { onFit, onJumpToToday, onZoomIn, onZoomOut, onToggleDesign, dayWidth, setIsImportWizardOpen, customToolbar, customLeftContent, detailInfo, detailActions } = useActions();
+
     const filteredNavItems = navItems.filter(item => {
         switch (item.name) {
             case 'HARMONOGRAM': return checkPerm('timeline');
@@ -60,7 +62,6 @@ export function Navbar() {
     const isProjectsActive = pathname === '/projekty' || pathname?.startsWith('/projekty/');
 
     useEffect(() => {
-        // User email logic
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user?.email) setUserEmail(user.email);
@@ -100,11 +101,14 @@ export function Navbar() {
             }}
         >
             <div className="w-full px-4">
-                <div
-                    className="flex h-12 items-center justify-between gap-1"
-                >
-                    {/* Left: Navigace (Harmonogram, Zakázky) */}
+                <div className="flex h-12 items-center justify-between gap-1">
+
+                    {/* Left: Navigation + Page Tools */}
                     <div className="flex-1 flex items-center justify-start gap-1">
+                        <div className="flex items-center mr-4 shrink-0 select-none">
+                            <span className="text-[10px] font-black tracking-widest text-muted-foreground/80 uppercase italic">{systemVersion}</span>
+                        </div>
+
                         {(() => {
                             const zakazkyItem = filteredNavItems.find(i => i.name === 'ZAKÁZKY');
                             const harmonogramItem = filteredNavItems.find(i => i.name === 'HARMONOGRAM');
@@ -163,9 +167,7 @@ export function Navbar() {
                                                     : "opacity-0 -translate-y-2 pointer-events-none"
                                             )}
                                         >
-                                            <div
-                                                className="bg-background rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-1.5 flex flex-row items-center gap-1.5 whitespace-nowrap min-w-max border border-border/60 backdrop-blur-md"
-                                            >
+                                            <div className="bg-background rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.15)] p-1.5 flex flex-row items-center gap-1.5 whitespace-nowrap min-w-max border border-border/60 backdrop-blur-md">
                                                 {item.submenu!.map((sub) => {
                                                     const isSubMilitary = sub.name === 'VOJENSKÉ';
                                                     const isSubService = sub.name === 'SERVIS';
@@ -197,7 +199,7 @@ export function Navbar() {
                                                                 if (!isSubActive) {
                                                                     e.currentTarget.style.color = subActiveColor!;
                                                                     e.currentTarget.style.backgroundColor = `${subActiveColor}15`;
-                                                                    e.currentTarget.style.borderColor = `${subActiveColor}40`;
+                                                                    e.currentTarget.style.borderColor = `${subActiveColor}44`;
                                                                 }
                                                             }}
                                                             onMouseLeave={(e) => {
@@ -232,9 +234,7 @@ export function Navbar() {
                                             "flex items-center gap-1.5 px-6 py-1.5 rounded-lg text-xs font-black tracking-wider transition-all duration-200 uppercase whitespace-nowrap border-2",
                                             isActive ? "bg-primary/[0.08] shadow-sm border-primary/30" : "border-transparent text-foreground hover:bg-primary/5 hover:border-primary/20"
                                         )}
-                                        style={{
-                                            color: isActive ? item.color : undefined,
-                                        }}
+                                        style={{ color: isActive ? item.color : undefined }}
                                     >
                                         <item.icon size={19} style={{ color: isActive ? item.color : 'hsl(var(--foreground))' }} />
                                         <span className="hidden sm:inline">{item.name}</span>
@@ -244,92 +244,96 @@ export function Navbar() {
 
                             return [renderHarmonogram(), renderZakazky()];
                         })()}
-                    </div>
 
-                    {/* Center: Ovládací prvky (Toolbar, Dnes) */}
-                    <div className="flex-none flex items-center justify-center gap-1">
-                        {customToolbar && (
-                            <div className="flex items-center gap-2 px-3 border-r border-border/50 mr-2">
-                                {customToolbar}
-                            </div>
-                        )}
-                        {onJumpToToday && (
-                            <button
-                                onClick={onJumpToToday}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 group"
-                                title="Skočit na dnešek"
-                            >
-                                <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
-                                <span className="hidden lg:inline">Dnes</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Right: Search & Tools */}
-                    <div className="flex-1 flex items-center justify-end gap-3">
-                        {/* Search Field */}
-                        <div className="max-w-xs w-full px-2">
-                            <div className="relative group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 group-focus-within:text-blue-600 transition-all duration-300" size={14} />
-                                <input
-                                    type="text"
-                                    placeholder="Hledat..."
-                                    className="w-full bg-foreground/[0.03] border border-foreground/15 rounded-full py-1.5 pl-9 pr-9 text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-background focus:border-blue-500 transition-all duration-300 placeholder:text-foreground/40"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-blue-600 transition-colors"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Zoom Controls */}
-                        {onZoomIn && onZoomOut && (
-                            <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50">
-                                <button
-                                    onClick={onZoomOut}
-                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Oddálit"
-                                >
-                                    <ZoomOut size={14} />
-                                </button>
-                                <button
-                                    onClick={onZoomIn}
-                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Přiblížit"
-                                >
-                                    <ZoomIn size={14} />
-                                </button>
+                        {/* Detail Info (Back Button) */}
+                        {detailInfo && (
+                            <div className="flex items-center gap-3 ml-4 pl-4 border-l border-border/30 animate-in fade-in slide-in-from-left-2 duration-300">
+                                {detailInfo}
                             </div>
                         )}
 
-                        {/* Fit Button (Small/Icon only) */}
-                        {onFit && (
+                        {/* Page specific tools */}
+                        {!detailInfo && customLeftContent && (
+                            <div className="flex items-center gap-1.5 ml-4 pl-4 border-l border-border/30 animate-in fade-in slide-in-from-left-1 duration-300">
+                                {customLeftContent}
+                            </div>
+                        )}
+
+                        {/* Auto-Fit Button (Moved from Center) */}
+                        {onFit && !detailInfo && (
                             <button
                                 onClick={onFit}
-                                className="p-2 rounded-lg bg-muted/40 border border-border/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 group"
+                                className="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all active:scale-95 group shadow-sm flex-shrink-0 ml-4 animate-in fade-in"
                                 title="Přizpůsobit zobrazení"
                             >
                                 <Maximize2 size={14} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap hidden sm:inline">PŘIZPŮSOBIT</span>
                             </button>
+                        )}
+                    </div>
+
+                    {/* Center: Detail Actions Only */}
+                    <div className="flex-shrink-0 flex items-center justify-center gap-4 min-w-0 px-2">
+                        {detailActions && (
+                            <div className="animate-in fade-in zoom-in-95 duration-300">
+                                {detailActions}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right: Global Tools & Profile */}
+                    <div className="flex-1 flex items-center justify-end gap-3">
+
+                        {/* Global Search (Shrinked & Right Aligned) */}
+                        {!detailInfo && (
+                            <div className="hidden md:block w-full max-w-[180px] animate-in fade-in slide-in-from-right-2 duration-300">
+                                <div className="relative group">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 group-focus-within:text-primary transition-all duration-300" size={13} />
+                                    <input
+                                        type="text"
+                                        placeholder="VYHLEDAT..."
+                                        className="w-full bg-foreground/[0.04] border border-foreground/10 rounded-xl py-1.5 pl-8 pr-8 text-[10px] font-black tracking-widest focus:outline-none focus:ring-4 focus:ring-primary/10 focus:bg-background focus:border-primary/40 transition-all duration-300 placeholder:text-foreground/20"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors"
+                                        >
+                                            <X size={13} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {customToolbar && (
+                            <div className="flex items-center gap-2 pr-4 border-r border-border/30 animate-in fade-in slide-in-from-right-1 duration-300">
+                                {customToolbar}
+                            </div>
                         )}
 
                         <ThemeToggle className="hover:bg-primary/10 border-border/40" />
 
                         <div className="flex items-center gap-1.5">
-                            {/* Import Button - Moved next to Settings and styled for Admin */}
-                            {canImport && (
+                            {onJumpToToday && (
+                                <button
+                                    onClick={onJumpToToday}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-sm"
+                                    title="Skočit na dnešek"
+                                >
+                                    <Calendar size={13} />
+                                    <span className="hidden xl:inline">Dnes</span>
+                                </button>
+                            )}
+
+                            {canImport && isAdmin && !detailInfo && (
                                 <button
                                     onClick={() => setIsImportWizardOpen(true)}
                                     className={cn(
                                         "p-2 rounded-md transition-all active:scale-95",
-                                        isAdmin ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20" : "bg-muted/40 text-muted-foreground hover:bg-muted border border-border/40"
+                                        "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
                                     )}
                                     title="Importní Průvodce (Excel)"
                                 >
@@ -337,12 +341,12 @@ export function Navbar() {
                                 </button>
                             )}
 
-                            {onToggleDesign && (
+                            {onToggleDesign && isAdmin && !detailInfo && (
                                 <button
                                     onClick={onToggleDesign}
                                     className={cn(
                                         "p-2 rounded-md transition-all active:scale-95",
-                                        isAdmin ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20" : "bg-muted/40 text-muted-foreground hover:bg-muted border border-border/40"
+                                        "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
                                     )}
                                     title="Nastavení vzhledu"
                                 >
@@ -350,16 +354,16 @@ export function Navbar() {
                                 </button>
                             )}
 
-                            <Link href="/profile" className="no-underline">
-                                <div className="flex items-center px-4 py-1 rounded-md bg-[#0099ee] hover:bg-[#00aaff] transition-colors whitespace-nowrap">
-                                    <span className="text-white text-xs font-bold tracking-wider uppercase">
-                                        {userEmail ? userEmail.split('@')[0] : 'ContSystem'}
+                            <Link href="/profile" className="no-underline ml-2">
+                                <div className="flex items-center px-4 py-1.5 rounded-xl bg-primary text-primary-foreground hover:opacity-95 transition-all whitespace-nowrap shadow-lg shadow-primary/20">
+                                    <span className="text-white text-[10px] font-black tracking-widest uppercase">
+                                        {userEmail ? userEmail.split('@')[0] : 'Uživatel'}
                                     </span>
                                 </div>
                             </Link>
                         </div>
 
-                        <div className="flex items-center gap-2 pl-3 border-l border-border">
+                        <div className="flex items-center gap-2 pl-3 border-l border-border/50">
                             <IconButton
                                 onClick={handleLogout}
                                 title="Odhlásit se"
@@ -374,6 +378,7 @@ export function Navbar() {
         </nav>
     );
 };
+
 export default Navbar;
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

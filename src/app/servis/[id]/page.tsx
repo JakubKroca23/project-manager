@@ -89,7 +89,7 @@ export default function ServiceDetailPage() {
                 .single();
 
             if (error) {
-                console.error('Error fetching project:', error);
+
             } else {
                 setProject(data);
                 setEditedProject(data);
@@ -106,7 +106,7 @@ export default function ServiceDetailPage() {
                 .order('date', { ascending: true });
 
             if (error) {
-                console.error('Error fetching milestones:', error);
+
             } else {
                 setMilestones(data || []);
             }
@@ -144,7 +144,7 @@ export default function ServiceDetailPage() {
             setNewMilestone({ name: '', date: '', status: 'pending', icon: 'Milestone' });
             setIsAddingMilestone(false);
         } catch (err) {
-            console.error('Error adding milestone:', err);
+
             alert('Chyba při přidávání milníku.');
         }
     };
@@ -161,7 +161,7 @@ export default function ServiceDetailPage() {
 
             setMilestones(milestones.map(m => m.id === milestone.id ? { ...m, status: newStatus } : m));
         } catch (err) {
-            console.error('Error updating milestone status:', err);
+
             alert('Chyba při aktualizaci stavu milníku.');
         }
     };
@@ -178,7 +178,7 @@ export default function ServiceDetailPage() {
 
             setMilestones(milestones.filter(m => m.id !== milestoneId));
         } catch (err) {
-            console.error('Error deleting milestone:', err);
+
             alert('Chyba při mazání milníku.');
         }
     };
@@ -206,7 +206,7 @@ export default function ServiceDetailPage() {
             setProject(updates);
             setIsEditing(false);
         } catch (err) {
-            console.error('Error saving project:', err);
+
             alert('Chyba při ukládání změn.');
         } finally {
             setSaving(false);
@@ -391,7 +391,7 @@ export default function ServiceDetailPage() {
                     {/* ═══ 1. ZÁKLADNÍ INFORMACE ═══ */}
                     <Section icon={<FileText size={15} />} title="Základní informace" color="blue">
                         <FieldGrid>
-                            <Field label="Vedoucí projektu" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} />
+                            <Field label="Vedoucí zakázky" icon={<User size={13} />} value={p.manager} field="manager" isEditing={isEditing} onChange={handleChange} options={profiles.map(pr => pr.email)} />
                             <Field label="Zákazník" icon={<Building2 size={13} />} value={p.customer} field="customer" isEditing={isEditing} onChange={handleChange} />
                             <Field label="Kategorie" icon={<Tag size={13} />} value={p.category} field="category" isEditing={isEditing} onChange={handleChange} />
 
@@ -418,7 +418,7 @@ export default function ServiceDetailPage() {
                                 onChange={handleCustomFieldChange}
                             />
                             <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                            <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                            <DateField label="Zahájení" value={p.start_at} field="start_at" isEditing={isEditing} onChange={handleChange} />
                         </div>
                     </Section>
 
@@ -553,7 +553,7 @@ export default function ServiceDetailPage() {
                                                                 .update({ name: newName })
                                                                 .eq('id', m.id);
                                                         } catch (err) {
-                                                            console.error('Error updating milestone name:', err);
+
                                                         }
                                                     }}
                                                     className={`w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0 outline-none ${m.status === 'completed' ? 'text-emerald-700/70 line-through' : 'text-foreground'}`}
@@ -636,10 +636,7 @@ export default function ServiceDetailPage() {
                     </Section>
                 )}
 
-                {/* ═══ 7. HISTORIE ZMĚN ═══ */}
-                <Section icon={<ClipboardList size={15} />} title="Historie změn" color="slate" fullWidth>
-                    <ProjectHistory projectId={project.id} />
-                </Section>
+
             </div>
         </div>
     );
@@ -693,21 +690,37 @@ interface FieldProps {
     isEditing: boolean;
     onChange: (field: keyof Project, value: any) => void;
     highlight?: boolean;
+    options?: (string | { label: string; value: any })[];
 }
 
-function Field({ label, icon, value, field, isEditing, onChange, highlight }: FieldProps) {
+function Field({ label, icon, value, field, isEditing, onChange, highlight, options }: FieldProps) {
     return (
         <div className="flex items-start gap-2">
             <div className="text-muted-foreground/50 mt-0.5 shrink-0">{icon}</div>
             <div className="flex-1 min-w-0">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
                 {isEditing ? (
-                    <input
-                        type="text"
-                        value={String(value || '')}
-                        onChange={(e) => onChange(field, e.target.value)}
-                        className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
-                    />
+                    options ? (
+                        <select
+                            value={String(value || '')}
+                            onChange={(e) => onChange(field, e.target.value)}
+                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                        >
+                            <option value="">Vyberte...</option>
+                            {options.map(opt => {
+                                const label = typeof opt === 'string' ? opt : opt.label;
+                                const val = typeof opt === 'string' ? opt : opt.value;
+                                return <option key={String(val)} value={String(val)}>{label}</option>;
+                            })}
+                        </select>
+                    ) : (
+                        <input
+                            type="text"
+                            value={String(value || '')}
+                            onChange={(e) => onChange(field, e.target.value)}
+                            className="w-full bg-background/50 border border-border/50 rounded px-1.5 py-0.5 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
+                        />
+                    )
                 ) : (
                     <p className={`text-xs font-semibold truncate ${highlight ? 'text-primary' : 'text-foreground'}`} title={String(value || '')}>
                         {value || '—'}
@@ -778,57 +791,4 @@ function CustomDateField({ label, value, field, isEditing, onChange, highlight }
     );
 }
 
-function ProjectHistory({ projectId }: { projectId: string }) {
-    const [logs, setLogs] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { profiles } = useAdmin();
 
-    useEffect(() => {
-        async function fetchLogs() {
-            const { data, error } = await supabase
-                .from('project_action_logs')
-                .select('*')
-                .eq('project_id', projectId)
-                .order('performed_at', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching logs:', error);
-            } else {
-                setLogs(data || []);
-            }
-            setLoading(false);
-        }
-        fetchLogs();
-    }, [projectId]);
-
-    const resolveUser = (id: string) => {
-        if (!id) return 'Systém';
-        const profile = profiles.find((p: any) => p.id === id);
-        return profile?.email || id;
-    };
-
-    if (loading) return <div className="text-[10px] text-muted-foreground animate-pulse px-4 py-2">Načítám historii...</div>;
-    if (logs.length === 0) return <div className="text-[10px] text-muted-foreground px-4 py-2">Žádné záznamy o změnách.</div>;
-
-    return (
-        <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
-            {logs.map((log) => (
-                <div key={log.id} className="p-2.5 bg-background/40 rounded-lg border border-border/40 text-[10px] hover:bg-background/60 transition-colors">
-                    <div className="flex justify-between items-center mb-1.5">
-                        <span className="font-bold text-foreground text-[11px]">{log.action_type}</span>
-                        <span className="text-[9px] text-muted-foreground/60">{new Date(log.performed_at).toLocaleString('cs-CZ')}</span>
-                    </div>
-                    {log.details && (
-                        <div className="text-muted-foreground/80 mb-2 font-mono text-[9px] bg-muted/20 p-1.5 rounded border border-border/20">
-                            {JSON.stringify(log.details, null, 2)}
-                        </div>
-                    )}
-                    <div className="flex items-center gap-1.5 text-muted-foreground/50">
-                        <User size={10} />
-                        <span>{resolveUser(log.user_id)}</span>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}

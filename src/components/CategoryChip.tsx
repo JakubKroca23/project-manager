@@ -13,6 +13,10 @@ export const getCategoryStyle = (category: string | undefined | null) => {
     // Green: Loglift, Comet
     // Orange/Brown: Moffett
 
+    if (normalized.includes('HIAB + MULTILIFT')) {
+        return { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200' };
+    }
+
     if (normalized.includes('MULTILIFT') || normalized.includes('JINÉ')) {
         return { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-200' };
     }

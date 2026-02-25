@@ -8,6 +8,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 (async () => {
     const { data, error } = await supabase.from('profiles').select('*').limit(1);
-    console.log('Data:', JSON.stringify(data, null, 2));
-    console.log('Error:', JSON.stringify(error, null, 2));
+
+
 })();

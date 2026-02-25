@@ -13,7 +13,7 @@ export interface Project {
     deadline?: string;      // Otevřeno od
 
     // CRM Rozšířená pole
-    closed_at?: string;             // Uzavřeno
+    start_at?: string;              // Zahájení
     category?: string;              // Kategorie
     abra_order?: string;            // Abra Objednávka
     abra_project?: string;          // Abra Zakázka
@@ -23,7 +23,6 @@ export interface Project {
     production_status?: string;     // Status Výroby
     mounting_company?: string;      // Montážní společnost
     body_setup?: string;            // Nástavba nastavení
-    body_type?: string;             // Typ nástavby
     serial_number?: string;         // Výrobní číslo
     // service_duration removed
 

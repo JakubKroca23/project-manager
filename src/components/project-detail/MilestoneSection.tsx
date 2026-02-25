@@ -44,13 +44,15 @@ export function MilestoneSection({
             color="emerald"
             fullWidth
             action={
-                <button
-                    onClick={() => onAddToggle(!isAddingMilestone)}
-                    className="text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
-                >
-                    {isAddingMilestone ? <X size={12} /> : <PlusCircle size={12} />}
-                    {isAddingMilestone ? 'Zrušit' : 'Nový milník'}
-                </button>
+                canEdit ? (
+                    <button
+                        onClick={() => onAddToggle(!isAddingMilestone)}
+                        className="text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
+                    >
+                        {isAddingMilestone ? <X size={12} /> : <PlusCircle size={12} />}
+                        {isAddingMilestone ? 'Zrušit' : 'Nový milník'}
+                    </button>
+                ) : undefined
             }
         >
             <div className="space-y-4">
@@ -125,8 +127,9 @@ export function MilestoneSection({
                                 <div className="flex items-center gap-3.5 min-w-0">
                                     <div className="flex flex-col items-center gap-1.5 shrink-0">
                                         <button
-                                            onClick={() => onToggleStatus(m)}
-                                            className={`p-1.5 rounded-full transition-all active:scale-90 ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10'}`}
+                                            onClick={() => canEdit && onToggleStatus(m)}
+                                            disabled={!canEdit}
+                                            className={`p-1.5 rounded-full transition-all active:scale-90 ${m.status === 'completed' ? 'text-emerald-600 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10'} ${!canEdit ? 'cursor-default opacity-80' : ''}`}
                                         >
                                             {m.status === 'completed' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
                                         </button>
@@ -139,12 +142,15 @@ export function MilestoneSection({
                                         <input
                                             type="text"
                                             value={m.name}
+                                            readOnly={!canEdit}
                                             onChange={async (e) => {
+                                                if (!canEdit) return;
                                                 const newName = e.target.value;
                                                 const updatedMilestones = milestones.map(ms => ms.id === m.id ? { ...ms, name: newName } : ms);
                                                 onMilestoneUpdate(updatedMilestones);
                                             }}
                                             onBlur={async (e) => {
+                                                if (!canEdit) return;
                                                 const newName = e.target.value;
                                                 if (!newName) return;
                                                 try {
@@ -153,10 +159,10 @@ export function MilestoneSection({
                                                         .update({ name: newName })
                                                         .eq('id', m.id);
                                                 } catch (err) {
-                                                    console.error('Error updating milestone name:', err);
+
                                                 }
                                             }}
-                                            className={`w-full bg-transparent border-none p-0 text-[13px] font-black focus:ring-0 outline-none transition-all ${m.status === 'completed' ? 'text-emerald-700/60 line-through' : 'text-foreground'}`}
+                                            className={`w-full bg-transparent border-none p-0 text-[13px] font-black focus:ring-0 outline-none transition-all ${m.status === 'completed' ? 'text-emerald-700/60 line-through' : 'text-foreground'} ${!canEdit ? 'cursor-default' : ''}`}
                                         />
                                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground/60 transition-colors group-hover:text-muted-foreground">
                                             <Calendar size={11} />
@@ -164,12 +170,14 @@ export function MilestoneSection({
                                         </div>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => onDeleteMilestone(m.id)}
-                                    className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all shrink-0 active:scale-90"
-                                >
-                                    <Trash2 size={15} />
-                                </button>
+                                {canEdit && (
+                                    <button
+                                        onClick={() => onDeleteMilestone(m.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all shrink-0 active:scale-90"
+                                    >
+                                        <Trash2 size={15} />
+                                    </button>
+                                )}
                             </div>
                         ))
                     )}

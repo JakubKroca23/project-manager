@@ -154,3 +154,11 @@
     - **Implementation**: The outline uses an eight-way `drop-shadow` technique (including diagonals) to create a smooth, status-colored border (white/green/red) around the black icon paths. The thickness is adjustable from 0px to 5px.
 - **Timeline UI Polish (v4.1)**:
     - **UI Simplification**: Removed the "DNES" (Today) button from the Navbar to reduce visual noise. The "Jump to Today" functionality is still executed automatically on initial load to ensure the user starts at the current date.
+
+## 2026-02-24: Redesign detailu zakázky
+- **Hlavička projektu**:
+    - Implementována nová horizontální struktura `ProjectInfoCard`.
+    - **Vizuální hierarchie**: Název zakázky dominuje levé části, zatímco detailní metadata (Abra ID, Zákazník, Manažer) tvoří přehledný grid v pravé části.
+    - **Responzivita**: Na zařízeních s menším rozlišením se grid automaticky skládá pod název pro zachování čitelnosti.
+    - **TDD**: Změna byla podložena novou testovací sadou pro komponentu hlavičky.
+    - **Environment**: Do vývojového prostředí byla přidána závislost `@testing-library/dom` pro zajištění stability testů.

@@ -17,7 +17,8 @@ export function useProjectDetail() {
     const [loadingMilestones, setLoadingMilestones] = useState(true);
     const [isAddingMilestone, setIsAddingMilestone] = useState(false);
     const [newMilestone, setNewMilestone] = useState({ name: '', date: '', status: 'pending', icon: 'Milestone' });
-    const { canEdit } = usePermissions();
+    const { canEditProject } = usePermissions();
+    const canEdit = canEditProject(project);
 
     const fetchSubProjects = useCallback(async () => {
         if (!id) return;
@@ -42,7 +43,7 @@ export function useProjectDetail() {
             .single();
 
         if (error) {
-            console.error('Error fetching project:', error);
+
         } else {
             setProject(data);
             setEditedProject(data);
@@ -60,7 +61,7 @@ export function useProjectDetail() {
             .order('date', { ascending: true });
 
         if (error) {
-            console.error('Error fetching milestones:', error);
+
         } else {
             setMilestones(data || []);
         }
@@ -88,7 +89,7 @@ export function useProjectDetail() {
             if (error) throw error;
             router.push('/projekty');
         } catch (err: any) {
-            console.error('Error deleting project:', err);
+
             alert('Chyba při mazání zakázky: ' + err.message);
         }
     };
@@ -106,7 +107,7 @@ export function useProjectDetail() {
             if (error) throw error;
             fetchSubProjects();
         } catch (err: any) {
-            console.error('Error deleting sub-project:', err);
+
             alert('Chyba při mazání vozidla: ' + err.message);
         }
     };
@@ -136,7 +137,7 @@ export function useProjectDetail() {
             setNewMilestone({ name: '', date: '', status: 'pending', icon: 'Milestone' });
             setIsAddingMilestone(false);
         } catch (err) {
-            console.error('Error adding milestone:', err);
+
             alert('Chyba při přidávání milníku.');
         }
     };
@@ -153,7 +154,7 @@ export function useProjectDetail() {
 
             setMilestones(prev => prev.map(m => m.id === milestone.id ? { ...m, status: newStatus } : m));
         } catch (err) {
-            console.error('Error updating milestone status:', err);
+
             alert('Chyba při aktualizaci stavu milníku.');
         }
     };
@@ -170,7 +171,7 @@ export function useProjectDetail() {
 
             setMilestones(prev => prev.filter(m => m.id !== milestoneId));
         } catch (err) {
-            console.error('Error deleting milestone:', err);
+
             alert('Chyba při mazání milníku.');
         }
     };
@@ -179,7 +180,7 @@ export function useProjectDetail() {
         const missing = [];
         if (!proj.name) missing.push('Název zakázky');
         if (!proj.customer) missing.push('Zákazník');
-        if (!proj.manager) missing.push('Vedoucí projektu');
+        if (!proj.manager) missing.push('Vedoucí zakázky');
         if (!proj.priority) missing.push('Priorita');
         if (!proj.category) missing.push('Kategorie');
         if (!proj.abra_project) missing.push('Abra Zakázka');
@@ -219,7 +220,7 @@ export function useProjectDetail() {
             setProject(updates);
             setIsEditing(false);
         } catch (err) {
-            console.error('Error saving project:', err);
+
             alert('Chyba při ukládání změn.');
         } finally {
             setSaving(false);

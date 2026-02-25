@@ -8,7 +8,7 @@ import { useSearch } from '@/providers/SearchProvider';
 import { useActions } from '@/providers/ActionProvider';
 import TimelineGrid from './TimelineGrid';
 import TimelineBar from './TimelineBar';
-import { cn } from '@/lib/utils';
+import { cn, formatManager } from '@/lib/utils';
 import {
     Search, Calendar, ZoomIn, ZoomOut, Loader2, X, Plus, Minus,
     RotateCcw, ChevronDown, ChevronRight, ChevronUp, Clock,
@@ -144,7 +144,7 @@ const Timeline: React.FC = () => {
                 try {
                     return JSON.parse(saved);
                 } catch (e) {
-                    console.error('Failed to parse timeline_activeFilter', e);
+
                 }
             }
         }
@@ -286,7 +286,7 @@ const Timeline: React.FC = () => {
             if (error) throw error;
             alert('Nastavení uloženo pro všechny.');
         } catch (err) {
-            console.error('Error saving settings:', err);
+
             alert('Chyba při ukládání nastavení.');
         } finally {
             setIsSaving(false);
@@ -319,7 +319,7 @@ const Timeline: React.FC = () => {
                 }
             }
         } catch (err) {
-            console.error('Error fetching settings:', err);
+
         }
     }, []);
 
@@ -338,7 +338,7 @@ const Timeline: React.FC = () => {
 
             setIsAdmin(profile?.role === 'admin');
         } catch (err) {
-            console.error('Error checking admin role:', err);
+
         }
     }, []);
 
@@ -575,7 +575,7 @@ const Timeline: React.FC = () => {
             if (error) throw error;
             setProjects(data || []);
         } catch (error) {
-            console.error('Error fetching projects:', error);
+
         } finally {
             setIsLoading(false);
         }
@@ -590,7 +590,7 @@ const Timeline: React.FC = () => {
             if (error) throw error;
             setAllMilestones(data || []);
         } catch (error) {
-            console.error('Error fetching milestones:', error);
+
         }
     }, []);
 
@@ -714,7 +714,7 @@ const Timeline: React.FC = () => {
                 const searchTerms = [
                     p.name, p.customer, p.id, p.abra_project, p.abra_order,
                     p.serial_number, p.manager, p.status, p.category,
-                    p.production_status, p.mounting_company, p.body_type, p.body_setup
+                    p.production_status, p.mounting_company, p.body_setup
                 ].map(term => normalize(term || ''));
 
                 const customTerms = p.custom_fields ? Object.values(p.custom_fields)
@@ -1373,7 +1373,7 @@ const Timeline: React.FC = () => {
                                                         {/* Manager - Show if height >= 48 */}
                                                         {rowHeight >= 48 && project.manager && (
                                                             <span className="text-[9px] font-bold text-black uppercase tracking-tighter truncate italic mt-0.5">
-                                                                {project.manager}
+                                                                {formatManager(project.manager)}
                                                             </span>
                                                         )}
                                                     </div>

@@ -66,7 +66,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'id', label: 'Kód (ID)', required: true, defaultAliases: ['kód', 'code', 'id', 'předmět a číslo op', 'identifikátor'] },
     { key: 'name', label: 'Název / Předmět', required: true, defaultAliases: ['předmět', 'název', 'name', 'subject', 'titul'] },
     { key: 'customer', label: 'Klient', defaultAliases: ['klient', 'zákazník', 'customer', 'klient náz', 'odběratel'] },
-    { key: 'manager', label: 'Vedoucí projektu', defaultAliases: ['vlastník', 'manažer', 'owner', 'manager'] },
+    { key: 'manager', label: 'Vedoucí zakázky', defaultAliases: ['vlastník', 'manažer', 'owner', 'manager'] },
     { key: 'category', label: 'Kategorie', defaultAliases: ['kategorie', 'category'] },
     { key: 'abra_order', label: 'Abra Objednávka', defaultAliases: ['abra objednávka', 'objednávka', 'číslo objednávky'] },
     { key: 'abra_project', label: 'Abra Zakázka', defaultAliases: ['abra zakázka', 'zakázka', 'číslo zakázky'] },
@@ -76,8 +76,7 @@ const PROJECT_FIELDS: ProjectField[] = [
     { key: 'production_status', label: 'Status Výroby', defaultAliases: ['status výroby', 'stav výroby'] },
     { key: 'mounting_company', label: 'Montážní společnost', defaultAliases: ['montážní společnost', 'montáž', 'zhotovitel'] },
     { key: 'body_setup', label: 'Nástavba nastavení', defaultAliases: ['nástavba nastavení', 'konfigurace'] },
-    { key: 'body_type', label: 'Typ nástavby', defaultAliases: ['typ nástavby', 'body type', 'nastavba typ'] },
-    { key: 'closed_at', label: 'Uzavřeno', defaultAliases: ['uzavřeno', 'closed', 'datum uzavření', 'datum ukončení'] },
+    { key: 'start_at', label: 'Zahájení', defaultAliases: ['zahájení', 'zahajeni', 'datum zahájení', 'uzavřeno', 'closed', 'datum uzavření'] },
     { key: 'serial_number', label: 'Výrobní číslo / VIN', defaultAliases: ['výrobní číslo', 'vč', 'vin', 'výr. č.'] },
 ];
 
@@ -220,7 +219,7 @@ export default function ImportWizard() {
             });
 
             setRawData(jsonData);
-            console.log("Parsed data:", jsonData.slice(0, 3)); // Debug log
+            // Debug log
 
             // Initial mapping
             const savedMapping = localStorage.getItem(`excel_mapping_${importSource}`);
@@ -237,7 +236,7 @@ export default function ImportWizard() {
             setMapping(initialMapping);
             setStep('mapping');
         } catch (err) {
-            console.error("Error parsing header:", err);
+
             alert("Chyba při zpracování hlavičky.");
         }
     };
@@ -252,13 +251,12 @@ export default function ImportWizard() {
     };
 
     const prepareAndAnalyze = async () => {
-        console.log("Starting prepareAndAnalyze");
-        console.log("Current mapping:", mapping);
-        console.log("Raw data length:", rawData.length);
+
+
 
         const missingRequired = PROJECT_FIELDS.filter(f => f.required && !mapping[f.key] && f.key !== 'id');
         if (missingRequired.length > 0) {
-            console.log("Missing required fields:", missingRequired);
+
             alert(`Chybí mapování pro povinná pole: ${missingRequired.map(f => f.label).join(', ')}`);
             return;
         }
@@ -267,6 +265,9 @@ export default function ImportWizard() {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             const userName = user?.email?.split('@')[0] || 'Neznámý';
+
+            // Fetch profiles for manager matching
+            const { data: profiles } = await supabase.from('profiles').select('email');
 
             const rawProjects = rawData.map((item: any, index: number) => {
                 const importNotes: string[] = [];
@@ -290,19 +291,58 @@ export default function ImportWizard() {
                 // Name is required
                 const nameVal = item[mapping['name']];
                 if (!nameVal || String(nameVal).trim() === '') {
-                    console.log(`Skipping row ${index}: Missing name. Value:`, nameVal);
+
                     return null;
+                }
+
+                const categoryRaw = cleanNaN(item[mapping['category']]);
+                let normalizedCategory = categoryRaw;
+                if (typeof categoryRaw === 'string') {
+                    const upper = categoryRaw.toUpperCase();
+                    if (upper.includes('HIAB') && upper.includes('MULTILIFT')) {
+                        normalizedCategory = 'HIAB + MULTILIFT';
+                    } else if (['HIAB', 'MULTILIFT', 'LOGLIFT', 'MOFFETT', 'ZEPRO', 'CORTEX', 'JONSERED', 'COMET'].includes(upper)) {
+                        normalizedCategory = upper;
+                    }
+                }
+
+                const importedManager = item[mapping['manager']];
+                let managerEmail = importedManager || "-";
+
+                if (importedManager && importedManager !== "-" && profiles) {
+                    const normalizeForMatch = (str: string) =>
+                        str.toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[^a-z0-9]/g, "")
+                            .trim();
+
+                    const normalizedInput = normalizeForMatch(String(importedManager));
+
+                    if (normalizedInput.length > 2) { // Prevence náhodných shod u příliš krátkých jmen
+                        const match = profiles.find(p => {
+                            const emailPrefix = p.email.split('@')[0];
+                            const normalizedEmailPrefix = normalizeForMatch(emailPrefix);
+                            const normalizedFullEmail = normalizeForMatch(p.email);
+
+                            return normalizedEmailPrefix === normalizedInput ||
+                                normalizedFullEmail === normalizedInput ||
+                                (normalizedInput.length > 3 && normalizedEmailPrefix.includes(normalizedInput)) ||
+                                (normalizedEmailPrefix.length > 3 && normalizedInput.includes(normalizedEmailPrefix));
+                        });
+                        if (match) managerEmail = match.email;
+                    }
                 }
 
                 const project: any = {
                     id: projectId,
                     name: String(nameVal).trim(),
                     customer: item[mapping['customer']] || "-",
-                    manager: item[mapping['manager']] || "-",
+                    manager: managerEmail,
                     status: "Aktivní",
                     deadline: "-",
-                    closed_at: getSafeDate(item[mapping['closed_at']], "Uzavřeno"),
-                    category: cleanNaN(item[mapping['category']]),
+                    start_at: getSafeDate(item[mapping['start_at']], "Zahájení"),
+                    category: normalizedCategory,
                     abra_order: cleanNaN(item[mapping['abra_order']]),
                     abra_project: cleanNaN(item[mapping['abra_project']]),
                     body_delivery: getSafeDate(item[mapping['body_delivery']], "Dodání nástavby"),
@@ -311,7 +351,6 @@ export default function ImportWizard() {
                     production_status: cleanNaN(item[mapping['production_status']]),
                     mounting_company: cleanNaN(item[mapping['mounting_company']]),
                     body_setup: cleanNaN(item[mapping['body_setup']]),
-                    body_type: cleanNaN(item[mapping['body_type']]),
                     serial_number: cleanNaN(item[mapping['serial_number']]),
                     project_type: projectType || 'civil',
                     custom_fields: {},
@@ -328,15 +367,13 @@ export default function ImportWizard() {
                 return project;
             }).filter(p => p !== null);
 
-            console.log("Valid projects count:", rawProjects.length);
-
             if (rawProjects.length === 0) {
-                console.error("No valid projects found!");
+
                 throw new Error('Žádné platné projekty k importu. Zkontrolujte sloupec "Název".');
             }
 
             // 1. Check internal duplicates
-            console.log("Checking duplicates...");
+
             const idGroups: Record<string, any[]> = {};
             const duplicates: Record<string, any[]> = {};
             let hasDuplicates = false;
@@ -345,7 +382,6 @@ export default function ImportWizard() {
                 idGroups[p.id].push(p);
                 if (idGroups[p.id].length > 1) { duplicates[p.id] = idGroups[p.id]; hasDuplicates = true; }
             });
-            console.log("Has duplicates:", hasDuplicates);
 
             if (hasDuplicates) {
                 setDuplicateGroups(duplicates);
@@ -358,7 +394,7 @@ export default function ImportWizard() {
             }
 
             // 2. Check cross-type conflicts (Batched)
-            console.log("Checking conflicts... Project Type:", projectType);
+
             const ids = rawProjects.map(p => p.id);
             const idChunks = chunkArray(ids, 100); // 100 IDs per request
             let conflicts: any[] = [];
@@ -370,7 +406,7 @@ export default function ImportWizard() {
                     .in('id', chunk);
 
                 if (error) {
-                    console.error("Conflict check error:", error);
+
                     throw error;
                 }
                 if (existingChunk) {
@@ -379,7 +415,6 @@ export default function ImportWizard() {
                 }
             }
 
-            console.log("Conflicts found:", conflicts.length);
             if (conflicts.length > 0) {
                 setTypeConflictGroups(conflicts);
                 setPreparedProjects(rawProjects);
@@ -388,11 +423,11 @@ export default function ImportWizard() {
             }
 
             // 3. Analyze Diffs
-            console.log("Calling analyzeDiffs...");
+
             await analyzeDiffs(rawProjects);
 
         } catch (err: any) {
-            console.error(err);
+
             alert(`Chyba přípravy dat: ${err.message}`);
         } finally {
             setLoading(false);
@@ -400,7 +435,7 @@ export default function ImportWizard() {
     };
 
     const analyzeDiffs = async (projectsToAnalyze: any[]) => {
-        console.log("Inside analyzeDiffs...");
+
         setLoading(true);
         try {
             const ids = projectsToAnalyze.map(p => p.id);
@@ -410,19 +445,18 @@ export default function ImportWizard() {
 
             // Fetch existing data in chunks
             for (const chunk of idChunks) {
-                console.log("Fetching existing data chunk:", chunk);
+
                 const { data: chunkData, error } = await supabase
                     .from('projects')
                     .select('*')
                     .in('id', chunk);
 
                 if (error) {
-                    console.error("Fetch existing data error:", error);
+
                     throw error;
                 }
                 chunkData?.forEach(p => existingMap.set(p.id, p));
             }
-            console.log("Existing data fetched. Map size:", existingMap.size);
 
             const diffs: DiffItem[] = [];
             projectsToAnalyze.forEach(newP => {
@@ -459,14 +493,13 @@ export default function ImportWizard() {
                 }
             });
 
-            console.log("Diffs analyzed:", diffs.length);
             setPreparedProjects(projectsToAnalyze);
             setDiffData(diffs);
             setSelectedIds(new Set(diffs.map(d => d.id)));
-            console.log("Setting step to 'diff'");
+
             setStep('diff');
         } catch (err: any) {
-            console.error(err);
+
             alert(`Chyba analýzy změn: ${err.message}`);
         } finally {
             setLoading(false);

@@ -41,10 +41,9 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
         name: '',
         customer: '',
         manager: '',
-        status: 'Nový',
+        status: 'Nová',
         category: '',
         serial_number: '',
-        body_type: '',
         priority: 2 as 1 | 2 | 3,
     });
 
@@ -142,16 +141,15 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                 name: '',
                 customer: '',
                 manager: '',
-                status: 'Nový',
+                status: 'Nová',
                 category: '',
                 serial_number: '',
-                body_type: '',
                 priority: 2,
             });
             setClientQuery('');
 
         } catch (error: any) {
-            console.error('Error creating project:', error);
+
             alert('Nepodařilo se vytvořit záznam: ' + error.message);
         } finally {
             setIsLoading(false);
@@ -235,7 +233,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Vedoucí projektu</label>
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Vedoucí zakázky</label>
                             <div className="relative">
                                 <select
                                     required
@@ -255,12 +253,20 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Kategorie</label>
-                            <input
-                                value={formData.category}
-                                onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full bg-muted/50 border border-border/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-medium"
-                                placeholder="např. Hydropohony"
-                            />
+                            <div className="relative">
+                                <select
+                                    required
+                                    value={formData.category}
+                                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                    className="w-full bg-muted/50 border border-border/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-medium appearance-none cursor-pointer"
+                                >
+                                    <option value="" disabled>Vyberte...</option>
+                                    {['HIAB', 'MULTILIFT', 'HIAB + MULTILIFT', 'LOGLIFT', 'MOFFETT', 'ZEPRO', 'CORTEX', 'JONSERED', 'COMET', 'JINÉ'].map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" size={14} />
+                            </div>
                         </div>
                     </div>
 
@@ -273,7 +279,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                                     onChange={e => setFormData({ ...formData, status: e.target.value })}
                                     className="w-full bg-muted/50 border border-border/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-medium appearance-none cursor-pointer"
                                 >
-                                    <option value="Nový">Nový</option>
+                                    <option value="Nová">Nová</option>
                                     <option value="Rozpracováno">Rozpracováno</option>
                                     <option value="Cenová nabídka">Cenová nabídka</option>
                                     <option value="Čeká na díly">Čeká na díly</option>
@@ -292,15 +298,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, project
                         </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Typ nástavby</label>
-                        <input
-                            value={formData.body_type}
-                            onChange={e => setFormData({ ...formData, body_type: e.target.value })}
-                            className="w-full bg-muted/50 border border-border/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-medium"
-                            placeholder="např. Sklápěč, Valník..."
-                        />
-                    </div>
 
                     <div className="space-y-2">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">Priorita</label>

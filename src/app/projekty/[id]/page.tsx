@@ -32,14 +32,14 @@ import {
 } from 'lucide-react';
 
 import { useProjectDetail } from '@/hooks/useProjectDetail';
-import { PageHeader, ProjectInfoCard } from '@/components/project-detail/PageHeader';
+import { PageHeader } from '@/components/project-detail/PageHeader';
 import { Section, Field, FieldGrid, DateField, CustomDateField } from '@/components/project-detail/DetailComponents';
 import { TechSpecSection } from '@/components/project-detail/TechSpecSection';
 import { MilestoneSection } from '@/components/project-detail/MilestoneSection';
-import { ProjectHistory } from '@/components/project-detail/ProjectHistory';
 import { VehicleGenerator } from '@/components/Military/VehicleGenerator';
 import { CategoryChip } from '@/components/CategoryChip';
 import { useRouter } from 'next/navigation';
+import { useAdmin } from '@/hooks/useAdmin';
 
 const DETAIL_ICON_OPTIONS = {
     Truck: Truck,
@@ -89,6 +89,7 @@ export default function ProjectDetailPage() {
         fetchSubProjects,
         setMilestones
     } = useProjectDetail();
+    const { profiles } = useAdmin();
 
     const router = useRouter();
 
@@ -139,33 +140,28 @@ export default function ProjectDetailPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
-            <PageHeader
-                project={project}
-                editedProject={editedProject!}
-                isEditing={isEditing}
-                saving={saving}
-                canEdit={canEdit}
-                typeColor={typeColor}
-                onEdit={setIsEditing}
-                onCancel={handleCancel}
-                onSave={handleSave}
-                onDelete={handleDeleteProject}
-                onChange={handleChange}
-            />
+            <main className="max-w-[1700px] mx-auto px-4 py-8 pb-32">
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-            <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32">
-                <ProjectInfoCard
-                    project={project}
-                    editedProject={editedProject!}
-                    isEditing={isEditing}
-                    onChange={handleChange}
-                />
+                    {/* ════ LEVÁ ČÁST - HLAVNÍ OBSAH ════ */}
+                    <div className="flex-1 min-w-0 space-y-8">
+                        <PageHeader
+                            project={project}
+                            editedProject={editedProject!}
+                            isEditing={isEditing}
+                            saving={saving}
+                            canEdit={canEdit}
+                            typeColor={typeColor}
+                            onEdit={setIsEditing}
+                            onCancel={handleCancel}
+                            onSave={handleSave}
+                            onDelete={handleDeleteProject}
+                            onChange={handleChange}
+                            managers={profiles}
+                        />
 
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                    {/* Left Column - Main Details */}
-                    <div className="xl:col-span-8 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* ════ HARMONOGRAM ════ */}
+                            {/* Harmonogram */}
                             <Section icon={<CalendarDays size={18} />} title="Harmonogram Realizace" color="amber">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                                     <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
@@ -185,199 +181,169 @@ export default function ProjectDetailPage() {
                                         onChange={handleCustomFieldChange}
                                     />
                                     <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                    <DateField label="Datum uzavření" value={p.closed_at} field="closed_at" isEditing={isEditing} onChange={handleChange} />
+                                    <DateField label="Zahájení" value={p.start_at} field="start_at" isEditing={isEditing} onChange={handleChange} />
                                 </div>
                             </Section>
 
-                            {/* ════ VÝROBA ════ */}
+                            {/* Výroba */}
                             <Section icon={<Truck size={18} />} title="Výroba a Nástavba" color="emerald">
                                 <FieldGrid>
-                                    <Field
-                                        label="Stav výroby"
-                                        icon={<Factory size={14} />}
-                                        value={p.production_status}
-                                        field="production_status"
-                                        isEditing={isEditing}
-                                        onChange={handleChange}
-                                        highlight
-                                        options={['V procesu', 'Dokončeno']}
-                                    />
-                                    <Field label="Montážní firma" icon={<Wrench size={14} />} value={p.mounting_company} field="mounting_company" isEditing={isEditing} onChange={handleChange} />
-                                    <Field label="Typ nástavby" icon={<Shield size={14} />} value={p.body_type} field="body_type" isEditing={isEditing} onChange={handleChange} />
-                                    <Field label="Sériové číslo" icon={<Globe size={14} />} value={p.serial_number} field="serial_number" isEditing={isEditing} onChange={handleChange} />
+                                    <Field label="Stav výroby" icon={<FactoryIcon size={14} />} value={p.production_status} field="production_status" isEditing={isEditing} onChange={handleChange} highlight />
                                 </FieldGrid>
                             </Section>
-                        </div>
 
-                        {/* ════ TECHNICKÁ SPECIFIKACE ════ */}
-                        <TechSpecSection
-                            project={project}
-                            editedProject={editedProject!}
-                            isEditing={isEditing}
-                            handleCustomFieldChange={handleCustomFieldChange}
-                        />
-
-                        {/* ════ POPIS ZAKÁZKY ════ */}
-                        <Section icon={<ClipboardList size={18} />} title="Poznámky a Popis" color="slate" fullWidth>
-                            {isEditing ? (
-                                <textarea
-                                    value={p.note || ''}
-                                    onChange={(e) => handleChange('note', e.target.value)}
-                                    className="w-full h-32 bg-muted/20 border border-border/60 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/5 leading-relaxed resize-none transition-all placeholder:text-muted-foreground/30"
-                                    placeholder="Zde můžete připsat detailní popis zakázky, specifické požadavky zákazníka nebo interní poznámky..."
+                            {/* Milníky */}
+                            <div className="md:col-span-2">
+                                <MilestoneSection
+                                    milestones={milestones}
+                                    loadingMilestones={loadingMilestones}
+                                    isAddingMilestone={isAddingMilestone}
+                                    newMilestone={newMilestone}
+                                    canEdit={canEdit}
+                                    isEditing={isEditing}
+                                    iconOptions={DETAIL_ICON_OPTIONS}
+                                    onAddToggle={setIsAddingMilestone}
+                                    onNewMilestoneChange={setNewMilestone}
+                                    onAddMilestone={handleAddMilestone}
+                                    onToggleStatus={handleToggleMilestoneStatus}
+                                    onDeleteMilestone={handleDeleteMilestone}
+                                    onMilestoneUpdate={setMilestones}
                                 />
-                            ) : (
-                                <div className="text-sm text-foreground/70 leading-relaxed font-medium whitespace-pre-wrap min-h-[4rem] p-1">
-                                    {project.note || <span className="italic opacity-40 font-normal">Žádný doplňující popis nebyl přidán.</span>}
+                            </div>
+
+                            {/* Vozidla (Military) */}
+                            {isMilitary && !project.parent_id && (
+                                <div className="md:col-span-2">
+                                    <Section icon={<Truck size={18} />} title="Jednotlivá Vozidla" color="emerald" fullWidth>
+                                        <div className="space-y-4">
+                                            {subProjects.length > 0 ? (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                    {subProjects.map(sub => (
+                                                        <div
+                                                            key={sub.id}
+                                                            onClick={() => router.push(`/projekty/${sub.id}`)}
+                                                            className="cursor-pointer group relative p-3 rounded-2xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/30 hover:shadow-lg transition-all flex items-center justify-between"
+                                                        >
+                                                            <div className="flex flex-col gap-0.5 min-w-0">
+                                                                <span className="text-[11px] font-black text-foreground/80 group-hover:text-primary transition-colors truncate">{sub.name}</span>
+                                                                <span className="text-[9px] text-muted-foreground font-mono opacity-50">{sub.id}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 shrink-0">
+                                                                {canEdit && (
+                                                                    <button
+                                                                        onClick={(e) => handleDeleteSubProject(sub.id, e)}
+                                                                        className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 active:scale-90"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                )}
+                                                                <ArrowRightCircle size={18} className="text-muted-foreground/20 group-hover:text-primary transition-all group-hover:translate-x-0.5" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+
+                                            {subProjects.length > 0 && (
+                                                <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 text-left pt-3 border-t border-border/20">
+                                                    Evidence: {subProjects.length} {project.quantity ? `/ ${project.quantity}` : ''} Vozů
+                                                </div>
+                                            )}
+
+                                            {(!project.quantity || subProjects.length < project.quantity) && canEdit && !isEditing && (
+                                                <div className="mt-2">
+                                                    <VehicleGenerator
+                                                        project={project}
+                                                        existingCount={subProjects.length}
+                                                        onSuccess={fetchSubProjects}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Section>
                                 </div>
                             )}
-                        </Section>
 
-                        {/* ════ OSTATNÍ DATA ════ */}
-                        {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
-                            <Section
-                                icon={<Globe size={18} />}
-                                title="Ostatní Konfigurační Data"
-                                color="slate"
-                                fullWidth
-                                action={isEditing ? (
-                                    <button onClick={addCustomField} className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1.5 active:scale-95">
-                                        <PlusCircle size={12} /> Přidat pole
-                                    </button>
-                                ) : undefined}
-                            >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                    {(isEditing
-                                        ? Object.entries(p.custom_fields || {})
-                                        : Object.entries(project.custom_fields || {})
-                                    ).map(([key, val]) => {
-                                        // Skip already handled keys
-                                        if (['mounting_end_date', 'revision_end_date', 'trailerwin_done', 'drawings_done', 'body_accessories', 'chassis_accessories'].includes(key)) return null;
-                                        return (
-                                            <div key={key} className="group relative bg-background/40 hover:bg-background/80 p-3 rounded-xl border border-border/40 hover:border-border transition-all duration-200">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 group-hover:text-primary transition-colors">{key}</p>
-                                                    {isEditing && (
-                                                        <button onClick={() => removeCustomField(key)} className="text-rose-500 opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 p-1 rounded-lg transition-all active:scale-90">
-                                                            <Trash2 size={12} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        value={val as string}
-                                                        onChange={(e) => handleCustomFieldChange(key, e.target.value)}
-                                                        className="w-full bg-transparent border-none text-[11px] font-bold text-foreground focus:ring-0 p-0"
-                                                    />
-                                                ) : (
-                                                    <p className="text-[11px] font-bold text-foreground/80 truncate" title={String(val)}>{val?.toString() || '-'}</p>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </Section>
-                        )}
-                    </div>
+                            {/* Poznámky */}
+                            <div className="md:col-span-2">
+                                <Section icon={<ClipboardList size={18} />} title="Poznámky a Popis" color="slate" fullWidth>
+                                    {isEditing ? (
+                                        <textarea
+                                            value={p.note || ''}
+                                            onChange={(e) => handleChange('note', e.target.value)}
+                                            className="w-full h-32 bg-muted/20 border border-border/60 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/5 leading-relaxed resize-none transition-all placeholder:text-muted-foreground/30"
+                                            placeholder="Zde můžete připsat detailní popis zakázky..."
+                                        />
+                                    ) : (
+                                        <div className="text-sm text-foreground/70 leading-relaxed font-medium whitespace-pre-wrap min-h-[4rem] p-1">
+                                            {project.note || <span className="italic opacity-40 font-normal">Žádný doplňující popis nebyl přidán.</span>}
+                                        </div>
+                                    )}
+                                </Section>
+                            </div>
 
-                    {/* Right Column - Side Panels */}
-                    <div className="xl:col-span-4 space-y-6">
-                        {/* ════ VOZIDLA (Military) ════ */}
-                        {isMilitary && !project.parent_id && (
-                            <Section icon={<Truck size={18} />} title="Jednotlivá Vozidla" color="emerald" fullWidth>
-                                <div className="space-y-4">
-                                    {subProjects.length > 0 ? (
-                                        <div className="grid grid-cols-1 gap-2.5">
-                                            {subProjects.map(sub => (
-                                                <div
-                                                    key={sub.id}
-                                                    onClick={() => router.push(`/projekty/${sub.id}`)}
-                                                    className="cursor-pointer group relative p-3 rounded-2xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/30 hover:shadow-lg transition-all flex items-center justify-between"
-                                                >
-                                                    <div className="flex flex-col gap-0.5 min-w-0">
-                                                        <span className="text-[11px] font-black text-foreground/80 group-hover:text-primary transition-colors truncate">{sub.name}</span>
-                                                        <span className="text-[9px] text-muted-foreground font-mono opacity-50">{sub.id}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 shrink-0">
-                                                        {canEdit && (
-                                                            <button
-                                                                onClick={(e) => handleDeleteSubProject(sub.id, e)}
-                                                                className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 active:scale-90"
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </button>
+                            {/* Ostatní Konfigurace */}
+                            {((project.custom_fields && Object.keys(project.custom_fields).length > 0) || isEditing) && (
+                                <div className="md:col-span-2">
+                                    <Section
+                                        icon={<Globe size={18} />}
+                                        title="Ostatní Konfigurační Data"
+                                        color="slate"
+                                        fullWidth
+                                        action={isEditing ? (
+                                            <button onClick={addCustomField} className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1.5 active:scale-95">
+                                                <PlusCircle size={12} /> Přidat pole
+                                            </button>
+                                        ) : undefined}
+                                    >
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                            {(isEditing
+                                                ? Object.entries(p.custom_fields || {})
+                                                : Object.entries(project.custom_fields || {})
+                                            ).map(([key, val]) => {
+                                                if (['mounting_end_date', 'revision_end_date', 'trailerwin_done', 'drawings_done', 'body_accessories', 'chassis_accessories'].includes(key)) return null;
+                                                return (
+                                                    <div key={key} className="group relative bg-background/40 hover:bg-background/80 p-3 rounded-xl border border-border/40 hover:border-border transition-all duration-200">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 group-hover:text-primary transition-colors">{key}</p>
+                                                            {isEditing && (
+                                                                <button onClick={() => removeCustomField(key)} className="text-rose-500 opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 p-1 rounded-lg transition-all active:scale-90">
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        {isEditing ? (
+                                                            <input
+                                                                type="text"
+                                                                value={val as string}
+                                                                onChange={(e) => handleCustomFieldChange(key, e.target.value)}
+                                                                className="w-full bg-transparent border-none text-[11px] font-bold text-foreground focus:ring-0 p-0"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-[11px] font-bold text-foreground/80 truncate" title={String(val)}>{val?.toString() || '-'}</p>
                                                         )}
-                                                        <ArrowRightCircle size={18} className="text-muted-foreground/20 group-hover:text-primary transition-all group-hover:translate-x-0.5" />
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
-                                    ) : null}
-
-                                    {subProjects.length > 0 && (
-                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 text-center pt-3 border-t border-border/20">
-                                            Evidence: {subProjects.length} {project.quantity ? `/ ${project.quantity}` : ''} Vozů
-                                        </div>
-                                    )}
-
-                                    {/* Generátor */}
-                                    {(!project.quantity || subProjects.length < project.quantity) && canEdit && !isEditing && (
-                                        <div className="mt-2">
-                                            <VehicleGenerator
-                                                project={project}
-                                                existingCount={subProjects.length}
-                                                onSuccess={fetchSubProjects}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {subProjects.length === 0 && !canEdit && (
-                                        <div className="text-center py-6 text-[10px] font-bold text-muted-foreground/40 italic uppercase tracking-widest">Seznam vozidel je prázdný</div>
-                                    )}
+                                    </Section>
                                 </div>
-                            </Section>
-                        )}
-
-                        {/* ════ SOUČÁST ZAKÁZKY (Military Child) ════ */}
-                        {isMilitary && project.parent_id && (
-                            <Section icon={<Truck size={18} />} title="Hierarchie Zakázky" color="blue" fullWidth>
-                                <div className="p-4 rounded-2xl bg-blue-500/[0.03] border border-blue-500/10 flex items-center gap-5 group cursor-pointer hover:bg-blue-500/[0.06] transition-all" onClick={() => router.push(`/projekty/${project.parent_id}`)}>
-                                    <div className="w-12 h-12 flex items-center justify-center bg-blue-500/10 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
-                                        <Truck size={24} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Hlavní zakázka</h4>
-                                        <div className="text-sm font-black text-blue-600 truncate flex items-center gap-2">
-                                            Otevřít hlavu sady <ArrowRightCircle size={14} className="group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Section>
-                        )}
-
-                        {/* ════ MILNÍKY ════ */}
-                        <MilestoneSection
-                            milestones={milestones}
-                            loadingMilestones={loadingMilestones}
-                            isAddingMilestone={isAddingMilestone}
-                            newMilestone={newMilestone}
-                            canEdit={canEdit}
-                            isEditing={isEditing}
-                            iconOptions={DETAIL_ICON_OPTIONS}
-                            onAddToggle={setIsAddingMilestone}
-                            onNewMilestoneChange={setNewMilestone}
-                            onAddMilestone={handleAddMilestone}
-                            onToggleStatus={handleToggleMilestoneStatus}
-                            onDeleteMilestone={handleDeleteMilestone}
-                            onMilestoneUpdate={setMilestones}
-                        />
-
-                        {/* ════ HISTORIE ZMĚN ════ */}
-                        <Section icon={<ClipboardList size={18} />} title="Protokol Změn" color="slate" fullWidth>
-                            <ProjectHistory projectId={project.id} />
-                        </Section>
+                            )}
+                        </div>
                     </div>
+
+                    {/* ════ PRAVÁ ČÁST - SIDEBAR (Tech Spec) ════ */}
+                    <aside className="w-full lg:w-[450px] xl:w-[550px] shrink-0 lg:sticky lg:top-8 self-stretch">
+                        <div className="flex flex-col h-full">
+                            <TechSpecSection
+                                project={project}
+                                editedProject={editedProject!}
+                                isEditing={isEditing}
+                                handleCustomFieldChange={handleCustomFieldChange}
+                                className="h-full bg-card/40 backdrop-blur-sm border-primary/10 shadow-2xl shadow-primary/5"
+                            />
+                        </div>
+                    </aside>
                 </div>
             </main>
         </div>
