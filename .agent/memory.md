@@ -163,9 +163,17 @@
     - **TDD**: Změna byla podložena novou testovací sadou pro komponentu hlavičky.
     - **Environment**: Do vývojového prostředí byla přidána závislost `@testing-library/dom` pro zajištění stability testů.
 
-## 2026-02-25: Globální vyhledávání a Smart TechSpec
+## 2026-02-25: Globální vyhledávání, Smart TechSpec a Redesign Harmonogramu
 - **Search Architecture**: Vyhledávání v Navbaru bylo transformováno z pasivního filtru na aktivní globální navigaci. Využívá `SearchProvider` pro synchronizaci stavu a asynchronní dotazy do Supabase s debouncem 300ms. Výsledky jsou prezentovány v "glassmorphic" dropdownu s bohatými metadaty (stav, typ, klient).
 - **Smart Data Extraction**: Implementován systém inteligentní analýzy názvů zakázek. Pomocí regulárních výrazů v `extractModelDesignation` systém identifikuje typy strojů (např. ULTIMA 21Z59, X-HiPro 188, F125S).
 - **UX TechSpec**: Tato extrakce je integrována přímo do `TechSpecSection`. Pokud je pole prázdné, systém jej v editačním módu automaticky předvyplní (Smart Pre-fill). V náhledovém módu jsou tyto hodnoty zobrazeny jako "navržené" (Suggested values) s ikonou `Sparkles`. Změna dramaticky snižuje manuální práci u rutinních typů zakázek.
 - **Header Integration**: Klíčová montážní a technická data byla vytažena do hlavní hlavičky projektu pro okamžitý náhled bez nutnosti scrollovat. Přejmenováno "Nastavení nástavby" na "Typové označení".
 - **Fix TechSpec Handlers**: Opraveny handlery pro Kategorii a Typové označení. Pole, která jsou top-level v objektu `Project`, nyní správně využívají `handleChange` namísto zápisu do `custom_fields`. Vylepšena robustnost extrakce modelů pro kombinované kategorie (např. HIAB + MULTILIFT).
+- **Redesign Harmonogramu Realizace**:
+    - **Layout**: Sekce byla roztažena na celou šířku detailu projektu (grid 6 sloupců), čímž se sjednotila s horní hlavičkou a technickou specifikací.
+    - **Vysoký Kontrast**: Provedena revize barev – datumy milníků jsou nyní sytě černé (`text-black`), popisky fází tmavě břidlicové. Tím byla zajištěna perfektní čitelnost i na světlém pozadí.
+- **ProjectTimelineFlat (Nová komponenta)**: 
+    - Nahradila nestabilitu `ProjectTimelineMini`. Jedná se o vysoce efektivní, jednorozměrnou vizualizaci zakázky v čase.
+    - **Smart Spacing Logic**: Implementován algoritmus pro hlídání minimálního rozestupu (12 %) mezi milníky, který zabraňuje jejich vizuálnímu překrývání.
+    - **Zig-Zag Labeling**: Popisky se střídají nad a pod osou, což umožňuje zobrazení velkého množství milníků (včetně uživatelských) při zachování přehlednosti.
+    - **Délka realizace**: Automatický výpočet a zobrazení celkové délky zakázky ve dnech.

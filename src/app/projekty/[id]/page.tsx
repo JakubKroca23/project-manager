@@ -37,6 +37,7 @@ import { useProjectDetail } from '@/hooks/useProjectDetail';
 import { PageHeader } from '@/components/project-detail/PageHeader';
 import { Section, Field, FieldGrid, DateField, CustomDateField } from '@/components/project-detail/DetailComponents';
 import { TechSpecSection } from '@/components/project-detail/TechSpecSection';
+import { ProjectTimelineFlat } from '@/components/project-detail/ProjectTimelineFlat';
 import { MilestoneSection } from '@/components/project-detail/MilestoneSection';
 import { VehicleGenerator } from '@/components/Military/VehicleGenerator';
 import { CategoryChip } from '@/components/CategoryChip';
@@ -173,28 +174,37 @@ export default function ProjectDetailPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Harmonogram */}
-                            <Section icon={<CalendarDays size={18} />} title="Harmonogram Realizace" color="amber">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                                    <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
-                                    <CustomDateField
-                                        label="Konec montáže"
-                                        value={p.custom_fields?.mounting_end_date}
-                                        field="mounting_end_date"
-                                        isEditing={isEditing}
-                                        onChange={handleCustomFieldChange}
-                                    />
-                                    <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
-                                    <CustomDateField
-                                        label="Konec revize"
-                                        value={p.custom_fields?.revision_end_date}
-                                        field="revision_end_date"
-                                        isEditing={isEditing}
-                                        onChange={handleCustomFieldChange}
-                                    />
-                                    <DateField label="Předání zákazníkovi" value={p.customer_handover} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
-                                    <DateField label="Zahájení" value={p.start_at} field="start_at" isEditing={isEditing} onChange={handleChange} />
-                                </div>
-                            </Section>
+                            <div className="md:col-span-2">
+                                <Section icon={<CalendarDays size={18} />} title="Harmonogram Realizace" color="amber">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-6 pt-2">
+                                        <DateField label="Zahájení" value={p.start_at || p.created_at} field="start_at" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField label="Dodání podvozku" value={p.chassis_delivery} field="chassis_delivery" isEditing={isEditing} onChange={handleChange} />
+                                        <DateField label="Dodání nástavby" value={p.body_delivery} field="body_delivery" isEditing={isEditing} onChange={handleChange} />
+                                        <CustomDateField
+                                            label="Konec montáže"
+                                            value={p.custom_fields?.mounting_end_date}
+                                            field="mounting_end_date"
+                                            isEditing={isEditing}
+                                            onChange={handleCustomFieldChange}
+                                        />
+                                        <CustomDateField
+                                            label="Konec revize"
+                                            value={p.custom_fields?.revision_end_date}
+                                            field="revision_end_date"
+                                            isEditing={isEditing}
+                                            onChange={handleCustomFieldChange}
+                                        />
+                                        <DateField label="Předání zákazníkovi" value={p.customer_handover || p.deadline} field="customer_handover" isEditing={isEditing} onChange={handleChange} highlight />
+                                    </div>
+
+                                    {/* Vizualizace časové osy */}
+                                    {!isEditing && (
+                                        <div className="mt-8 pt-6 border-t border-amber-500/10 min-h-24 relative">
+                                            <ProjectTimelineFlat project={project} milestones={milestones} />
+                                        </div>
+                                    )}
+                                </Section>
+                            </div>
 
 
                             {/* Milníky */}

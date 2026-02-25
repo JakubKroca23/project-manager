@@ -125,7 +125,7 @@ export function DateField({ label, value, field, isEditing, onChange, highlight 
             ) : (
                 <p className={cn(
                     "text-xs font-black transition-colors",
-                    highlight ? 'text-amber-600' : 'text-foreground/80'
+                    highlight ? 'text-amber-800' : 'text-slate-900'
                 )}>
                     {formatDate(value)}
                 </p>
@@ -157,7 +157,7 @@ export function CustomDateField({ label, value, field, isEditing, onChange, high
             ) : (
                 <p className={cn(
                     "text-xs font-black transition-colors",
-                    highlight ? 'text-amber-600' : 'text-foreground/80'
+                    highlight ? 'text-amber-800' : 'text-slate-900'
                 )}>
                     {formatDate(value)}
                 </p>
